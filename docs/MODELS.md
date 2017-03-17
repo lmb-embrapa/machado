@@ -34,14 +34,13 @@ We strongly recommend creating a new virtualenv for your project
 
 #### django-chado
 
-1. Download the package
+Download the package
 
-        git clone https://azneto@bitbucket.org/azneto/django-chado.git
+    git clone https://azneto@bitbucket.org/azneto/django-chado.git
 
+Install the package
 
-2. Install the package
-
-        python setup.py install
+    python setup.py install
 
 
 ## Preparations ##
