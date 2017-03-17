@@ -1,0 +1,33 @@
+Metadata-Version: 1.1
+Name: django-chado
+Version: 0.1
+Summary: DjangoChado is a Django app that contains tools to interact with a Chado database.
+Home-page: https://bitbucket.org/azneto/djangochado
+Author: Adhemar
+Author-email: azneto@gmail.com
+License: BSD License
+Description: ============
+        Django Chado
+        ============
+        
+        Django Chado is a Django app that contains tools to interact with a Chado database.
+        
+        Detailed documentation can be found in the "docs" directory.
+        
+        Quick start
+        -----------
+        
+        1. Install the package
+        
+           python setup.py install
+        
+        2. Add "djangochado" to your INSTALLED_APPS setting like this:
+           INSTALLED_APPS = [
+               ...
+               'chado',
+           ]
+        
+Platform: UNKNOWN
+Classifier: Environment :: Command Line
+Classifier: Framework :: Django
+Classifier: Programming Language :: PythonProgramming Language :: Python :: 3
