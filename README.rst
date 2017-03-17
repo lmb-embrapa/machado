@@ -2,7 +2,9 @@
 
 Django Chado is a Django app that contains tools to interact with a Chado database.
 
-Detailed documentation can be found in the "docs" directory.
+Please make sure you have a Chado database up and running and your Django installation is configured to connect access it.
+Detailed documentation can be found in the **docs** directory.
+
 
 ## Quick start
 
