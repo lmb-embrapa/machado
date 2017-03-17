@@ -63,18 +63,14 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
     }
 ### Create a Django app
 
-Go to your YOURPROJECT directory and run:
-
-    python manage.py startapp YOURAPP
 
 ### Let Django know about your app
 
-In the WEBPROJECT/settings.py file, add chado and YOURAPP to INSTALLED_APPS section.
+In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
     INSTALLED_APPS = [
         ...
         'chado',
-        'YOURAPP',
     ]
 
 (Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
