@@ -32,7 +32,7 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install psycopg2
 
-### DjangoChado
+#### django-chado
 
 1. Download the package
 
