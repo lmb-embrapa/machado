@@ -18,7 +18,7 @@ Detailed documentation can be found in the **docs** directory.
         python setup.py install
 
 
-3. Add "djangochado" to your INSTALLED_APPS setting like this:
+3. Add "chado" to your INSTALLED_APPS setting like this:
 
         INSTALLED_APPS = [
             ...
