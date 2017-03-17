@@ -6,13 +6,18 @@ Detailed documentation can be found in the "docs" directory.
 
 ## Quick start
 
+1. Download the package
+
+        git clone https://azneto@bitbucket.org/azneto/django-chado.git
+
 1. Install the package
 
-    python setup.py install
+        python setup.py install
 
 2. Add "djangochado" to your INSTALLED_APPS setting like this:
 
-    INSTALLED_APPS = [
-        ...
-        'chado',
-    ]
+        INSTALLED_APPS = [
+            ...
+            'chado',
+        ]
+

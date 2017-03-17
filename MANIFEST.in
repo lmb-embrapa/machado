@@ -7,4 +7,3 @@ recursive-include bin *
 recursive-include docs *
 exclude chado/view.py
 exclude chado/tests.py
-recursive-exclude migrations *

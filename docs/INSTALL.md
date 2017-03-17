@@ -1,4 +1,4 @@
-# DjangoChado 
+# DjangoChado
 
 This repository contains information and tools to use the [Django](https://www.djangoproject.com) framework for accessing a [Chado](http://gmod.org/wiki/Chado_-_Getting_Started) database.
 
@@ -69,15 +69,19 @@ Go to your YOURPROJECT directory and run:
 
 ### Let Django know about your app
 
-In the WEBPROJECT/settings.py file, add djangochado to INSTALLED_APPS section.
+In the WEBPROJECT/settings.py file, add chado and YOURAPP to INSTALLED_APPS section.
 
     INSTALLED_APPS = [
         ...
-        'djangochado',
+        'chado',
         'YOURAPP',
     ]
 
 (Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
+
+### List django-chado commands
+
+    python manage.py
 
 ### Start you app and open the admin interface
 
