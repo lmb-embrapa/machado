@@ -10,7 +10,7 @@ You may already have a populated Chado database and, therefore, are able to skip
 
 Install PostgreSQL and create a database and user for loading the Chado schema
 
-#### Chado 3.1
+#### Chado 1.31
 
 Download [Chado](https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz), unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database
 
@@ -36,8 +36,8 @@ We strongly recommend creating a new virtualenv for your project
 
 Just grab the code using GIT and install it:
 
-    git clone https://bitbucket.org/azneto/djangochado.git src/djangochado
-    python src/djangochado/setup.py install
+    git clone https://bitbucket.org/azneto/django-chado.git src/django-chado
+    python src/django-chado/setup.py install
 
 ## Preparations ##
 
@@ -88,9 +88,3 @@ The webapp admin interface will be available at http://localhost:8000/admin
 Use the following command to create an user:
 
     django-admin createsuperuser
-
-
-
-## References
-
-* http://gmod.org/wiki/Chado_Django_HOWTO
