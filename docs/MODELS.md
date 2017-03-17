@@ -47,7 +47,7 @@ Install the package
 
 From this point on it is assumed you have read the [Django introduction and tutorial](https://docs.djangoproject.com/en/1.10/intro) on the Django project website.
 
-### Create a Django project
+#### Create a Django project
 Inside YOURPROJECT directory create a Django project with the following command:
 
     django-admin startproject WEBPROJECT
@@ -66,7 +66,7 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
         },
     }
 
-### Create the Models
+#### Create the Models
 
 Django has a command to generate a Models file:
 
