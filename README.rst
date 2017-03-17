@@ -1,20 +1,25 @@
-============
-Django Chado
-============
+# Django Chado
 
 Django Chado is a Django app that contains tools to interact with a Chado database.
 
 Detailed documentation can be found in the "docs" directory.
 
-Quick start
------------
+## Quick start
 
-1. Install the package
+1. Download the package
 
-   python setup.py install
+        git clone https://azneto@bitbucket.org/azneto/django-chado.git
 
-2. Add "djangochado" to your INSTALLED_APPS setting like this:
-   INSTALLED_APPS = [
-       ...
-       'chado',
-   ]
+
+2. Install the package
+
+        python setup.py install
+
+
+3. Add "djangochado" to your INSTALLED_APPS setting like this:
+
+        INSTALLED_APPS = [
+            ...
+            'chado',
+        ]
+
