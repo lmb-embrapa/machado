@@ -1,0 +1,9 @@
+decorator==4.0.11
+Django==1.10.6
+django-chado==0.1
+networkx==1.11
+obo==0.1.0
+pkg-resources==0.0.0
+pprint==0.1
+psycopg2==2.7.1
+six==1.10.0
