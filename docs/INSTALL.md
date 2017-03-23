@@ -92,4 +92,4 @@ The webapp admin interface will be available at http://localhost:8000/admin
 
 Use the following command to create an user:
 
-    django-admin createsuperuser
+    python manage.py createsuperuser
