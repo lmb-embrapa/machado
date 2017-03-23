@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
-        parser.add_argument("--so", help="Sequence Ontology file obo or owl. Available at https://github.com/The-Sequence-Ontology/SO-Ontologies", required = True, type=str)
+        parser.add_argument("--so", help="Sequence Ontology file obo. Available at https://github.com/The-Sequence-Ontology/SO-Ontologies", required = True, type=str)
 
 
     def _get_cv(self,name,definition):
