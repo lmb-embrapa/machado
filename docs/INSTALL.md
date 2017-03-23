@@ -32,6 +32,11 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install psycopg2
 
+#### obo
+
+    git clone https://github.com/dhimmel/obo.git
+    python setup.py install
+
 ### DjangoChado
 
 Just grab the code using GIT and install it:
