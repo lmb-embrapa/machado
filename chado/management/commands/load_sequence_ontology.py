@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelationship,Cvtermsynonym,Db,Dbxref
 from obo import read_obo
 import re
-import pprint
 
 
 class Command(BaseCommand):
@@ -162,7 +161,6 @@ class Command(BaseCommand):
             self._get_cvterm_dbxref(cvterm,dbxref,0)
 
         return
-
 
 
     def _process_synonym(self,cvterm,synonym):
