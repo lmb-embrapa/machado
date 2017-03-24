@@ -165,7 +165,7 @@ class Command(BaseCommand):
 
 
 
-    def _process_synonym(self,cvterm,synonym,cv_definition):
+    def _process_synonym(self,cvterm,synonym):
 
         '''
         Definition format:
@@ -187,7 +187,7 @@ class Command(BaseCommand):
         synonym_text,synonym_type = matches[0]
 
         # Handling the synonym_type
-        cv_type = self._get_cv('synonym_type.lower()',cv_definition)
+        cv_type = self._get_cv('synonym_type','')
         dbxref_type = self._get_dbxref('internal',synonym_type.lower(),'')
         cvterm_type = self._get_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
 
@@ -226,8 +226,8 @@ class Command(BaseCommand):
             #self.stdout.write('Cv: %s %s registered' % (name,definition))
 
             # Creating cv cvterm_property_type
-            cv_relationship = self._get_cv('cvterm_relationship',definition=cv_definition)
-            cv_property_type = self._get_cv('cvterm_property_type',definition=cv_definition)
+            cv_relationship = self._get_cv('cvterm_relationship','')
+            cv_property_type = self._get_cv('cvterm_property_type','')
 
 
             # Creating cvterm is_symmetric to be used as type_id in cvtermprop
@@ -300,13 +300,13 @@ class Command(BaseCommand):
                 # Load synonyms
                 if data.get('synonym'):
                     for synonym in data.get('synonym'):
-                        self._process_synonym(cvterm,synonym,cv_definition)
+                        self._process_synonym(cvterm,synonym)
 
 
             self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
-            cv_relationship = self._get_cv('cvterm_relationship',definition=cv_definition)
+            cv_relationship = self._get_cv('cvterm_relationship','')
             dbxref_is_a = self._get_dbxref('OBO_REL','is_a','')
             cvterm_is_a = self._get_cvterm(cv_relationship,'is_a','',dbxref_is_a,1)
 
