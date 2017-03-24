@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
         try:
             # Check if the cv is already registered
-            cv = Cv.objects.get(name=name,definition=definition)
+            cv = Cv.objects.get(name=name)
             return cv
 
         except ObjectDoesNotExist:
