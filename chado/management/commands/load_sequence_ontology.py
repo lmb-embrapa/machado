@@ -97,7 +97,7 @@ class Command(BaseCommand):
             # Save to the Dbxref model
             cvtermdbxref = CvtermDbxref.objects.create(cvterm=cvterm,
                                                        dbxref=dbxref,
-                                                       is_for_definition=1)
+                                                       is_for_definition=is_for_definition)
             cvtermdbxref.save()
             return cvtermdbxref
 
@@ -143,6 +143,28 @@ class Command(BaseCommand):
         return
 
 
+    def _process_xref(self,cvterm,xref):
+
+        text = ''
+
+        if xref:
+
+            ref_db,ref_content = xref.split(':',1)
+
+            if ref_db == 'http':
+                ref_db = 'URL'
+                ref_content = 'http:'+ref_content
+
+            # Get/Set Dbxref instance: ref_db,ref_content
+            dbxref = self._get_dbxref(ref_db,ref_content,'')
+
+            # Estabilish the cvterm and the dbxref relationship
+            self._get_cvterm_dbxref(cvterm,dbxref,0)
+
+        return
+
+
+
     def _process_synonym(self,cvterm,synonym,cv_definition):
 
         '''
@@ -165,9 +187,9 @@ class Command(BaseCommand):
         synonym_text,synonym_type = matches[0]
 
         # Handling the synonym_type
-        cv_type = self._get_cv('synonym_type',cv_definition)
-        dbxref_type = self._get_dbxref('internal',synonym_type,'')
-        cvterm_type = self._get_cvterm(cv_type,synonym_type,'',dbxref_type,0)
+        cv_type = self._get_cv('synonym_type.lower()',cv_definition)
+        dbxref_type = self._get_dbxref('internal',synonym_type.lower(),'')
+        cvterm_type = self._get_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
 
         # Storing the synonym
         cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
@@ -184,7 +206,7 @@ class Command(BaseCommand):
             G = read_obo(obo_file)
 
         cv_name = G.graph['default-namespace'][0]
-        cv_definition=G.graph['data-version']
+        cv_definition=G.graph['date']
 
         try:
             # Check if the so file is already loaded
@@ -212,6 +234,11 @@ class Command(BaseCommand):
             dbxref_is_symmetric = self._get_dbxref('internal','is_symmetric','')
             cvterm_is_symmetric = self._get_cvterm(cv_property_type,'is_symmetric','',dbxref_is_symmetric,0)
 
+            # Creating cvterm is_transitive to be used as type_id in cvtermprop
+            dbxref_is_transitive = self._get_dbxref('internal','is_transitive','')
+            cvterm_is_transitive = self._get_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
+
+
             self.stdout.write('Loading typedefs')
 
             # Load typedefs as Dbxrefs and Cvterm
@@ -225,6 +252,13 @@ class Command(BaseCommand):
                                               type_id=cvterm_is_symmetric.cvterm_id,
                                               value=1,
                                               rank=0)
+                # Load is_transitive
+                if typedef.get('is_transitive') is not None:
+                    Cvtermprop.objects.create(cvterm=cvterm_typedef,
+                                              type_id=cvterm_is_transitive.cvterm_id,
+                                              value=1,
+                                              rank=0)
+
 
             self.stdout.write('Loading terms')
 
@@ -244,6 +278,13 @@ class Command(BaseCommand):
                 # Load definition and dbxrefs
                 definition = self._process_def(cvterm,data.get('def'))
 
+                # Load alt_ids
+                if data.get('alt_id'):
+                    for alt_id in data.get('alt_id'):
+                        aux_db,aux_accession = alt_id.split(':')
+                        dbxref_alt_id = self._get_dbxref(aux_db,aux_accession,'')
+                        self._get_cvterm_dbxref(cvterm,dbxref_alt_id,0)
+
                 # Load comment
                 if data.get('comment'):
                     Cvtermprop.objects.create(cvterm=cvterm,
@@ -254,7 +295,7 @@ class Command(BaseCommand):
                 # Load xref
                 if data.get('xref'):
                     for xref in data.get('xref'):
-                        self._get_dbxref('URL',xref,'')
+                        self._process_xref(cvterm,xref)
 
                 # Load synonyms
                 if data.get('synonym'):
@@ -296,4 +337,4 @@ class Command(BaseCommand):
                                                           object_id=object_cvterm.cvterm_id)
                 cvrel.save()
 
-        self.stdout.write(self.style.SUCCESS('done'))
+        self.stdout.write(self.style.SUCCESS('Done'))
