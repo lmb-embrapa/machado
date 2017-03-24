@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from chado.models import Cv,Cvterm,CvtermDbxref,Dbxref,Db
+from django.core.exceptions import ObjectDoesNotExist
+from chado.models import Cv,Cvterm,CvtermDbxref,Dbxref
 
 class Command(BaseCommand):
     help = 'Remove Sequence Ontology (CASCADE)'
@@ -10,8 +11,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if Cv.objects.get(name=options['name'],definition=options['definition']):
+        try:
             cv = Cv.objects.get(name=options['name'],definition=options['definition'])
-            for cvterm in Cvterm.objects.filter(cv=cv):
-                Dbxref.objects.filter(dbxref_id=cvterm.dbxref_id).delete()
+
+            self.stdout.write('Deleting %s %s and every child record (CASCADE)' % (options['name'],options['definition']))
+
+            cvterm_ids = Cvterm.objects.filter(cv=cv).values_list('cvterm_id', flat=True)
+            dbxref_ids = CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).values_list('dbxref_id', flat=True)
+            Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+
+            dbxref_ids = Cvterm.objects.filter(cv=cv).values_list('dbxref_id', flat=True)
+            Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+
             cv.delete()
+
+            self.stdout.write(self.style.SUCCESS('Done'))
+        except ObjectDoesNotExist:
+            self.stdout.write(self.style.ERROR('Cannot remove %s %s (not registered)' % (options['name'],options['definition'])))
+
