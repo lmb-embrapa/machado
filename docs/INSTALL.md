@@ -32,10 +32,9 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install psycopg2
 
-#### obo
+#### obonet 0.2.1
 
-    git clone https://github.com/dhimmel/obo.git
-    python setup.py install
+    pip install obonet
 
 ### DjangoChado
 

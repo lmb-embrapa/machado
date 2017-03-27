@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelationship,Cvtermsynonym,Db,Dbxref
-from obo import read_obo
+import networkx
+import obonet
 import re
 
 
@@ -201,7 +202,7 @@ class Command(BaseCommand):
 
         # Load the ontology file
         with open(options['so']) as obo_file:
-            G = read_obo(obo_file)
+            G = obonet.read_obo(obo_file)
 
         cv_name = G.graph['default-namespace'][0]
         cv_definition=G.graph['date']
