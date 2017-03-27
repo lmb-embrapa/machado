@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv,Cvterm,CvtermDbxref,Dbxref
 
 class Command(BaseCommand):
-    help = 'Remove Sequence Ontology (CASCADE)'
+    help = 'Remove Ontology (CASCADE)'
 
     def add_arguments(self, parser):
         parser.add_argument("--name", help="cv.name", required = True, type=str)

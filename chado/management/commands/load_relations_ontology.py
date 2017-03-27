@@ -4,7 +4,6 @@ from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelation
 import networkx
 import obonet
 import re
-import pprint
 
 
 class Command(BaseCommand):
@@ -35,7 +34,7 @@ class Command(BaseCommand):
 
         try:
             # Check if the cvterm is already registered
-            cvterm = Cvterm.objects.get(cv=cv,name=name,dbxref=dbxref)
+            cvterm = Cvterm.objects.get(name=name)
             return cvterm
 
         except ObjectDoesNotExist:
@@ -50,6 +49,25 @@ class Command(BaseCommand):
             cvterm.save()
             #self.stdout.write('Cvterm: %s registered' % name)
             return cvterm
+
+
+    def _get_cvtermprop(self,cvterm,type_id,value,rank):
+
+        try:
+            # Check if the cvtermprop is already registered
+            cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,type_id=type_id,value=value,rank=rank)
+            return cvterm
+
+        except ObjectDoesNotExist:
+
+            # Save the name to the Cvtermprop model
+            cvtermprop = Cvtermprop.objects.create(cvterm=cvterm,
+                                                   type_id=type_id,
+                                                   value=value,
+                                                   rank=rank)
+            cvtermprop.save()
+            #self.stdout.write('Cvtermprop: %s registered' % name)
+            return cvtermprop
 
 
     def _get_db(self,name):
@@ -75,7 +93,7 @@ class Command(BaseCommand):
 
         try:
             # Check if the dbxref is already registered
-            dbxref = Dbxref.objects.get(db=db,accession=accession)
+            dbxref = Dbxref.objects.get(accession=accession)
             return dbxref
 
         except ObjectDoesNotExist:
@@ -213,7 +231,7 @@ class Command(BaseCommand):
 
         try:
             # Check if the so file is already loaded
-            cv = Cv.objects.get(name=cv_name,definition=cv_definition)
+            cv = Cv.objects.get(name=cv_name)
 
             if cv is not None:
                 self.stdout.write(self.style.ERROR('cv: cannot load %s %s (already registered)' % (cv_name,cv_definition)))
@@ -273,24 +291,24 @@ class Command(BaseCommand):
 
                 # Load is_anti_symmetric
                 if data.get('is_anti_symmetric') is not None:
-                    Cvtermprop.objects.create(cvterm=cvterm,
-                                              type_id=cvterm_is_anti_symmetric.cvterm_id,
-                                              value=1,
-                                              rank=0)
+                    self._get_cvtermprop(cvterm=cvterm,
+                                         type_id=cvterm_is_anti_symmetric.cvterm_id,
+                                         value=1,
+                                         rank=0)
 
                 # Load is_reflexive
                 if data.get('is_reflexive') is not None:
-                    Cvtermprop.objects.create(cvterm=cvterm,
-                                              type_id=cvterm_is_reflexive.cvterm_id,
-                                              value=1,
-                                              rank=0)
+                    self._get_cvtermprop(cvterm=cvterm,
+                                         type_id=cvterm_is_reflexive.cvterm_id,
+                                         value=1,
+                                         rank=0)
 
                 # Load is_transitive
                 if data.get('is_transitive') is not None:
-                    Cvtermprop.objects.create(cvterm=cvterm,
-                                              type_id=cvterm_is_transitive.cvterm_id,
-                                              value=1,
-                                              rank=0)
+                    self._get_cvtermprop(cvterm=cvterm,
+                                         type_id=cvterm_is_transitive.cvterm_id,
+                                         value=1,
+                                         rank=0)
 
                 # Load alt_ids
                 if data.get('alt_id'):
@@ -302,10 +320,10 @@ class Command(BaseCommand):
                 # Load comment
                 if data.get('comment'):
                     for comment in data.get('comment'):
-                        Cvtermprop.objects.create(cvterm=cvterm,
-                                                  type_id=cvterm_comment.cvterm_id,
-                                                  value=comment,
-                                                  rank=0)
+                        self._get_cvtermprop(cvterm=cvterm,
+                                             type_id=cvterm_comment.cvterm_id,
+                                             value=comment,
+                                             rank=0)
 
                 # Load xref
                 if data.get('xref'):
@@ -316,7 +334,5 @@ class Command(BaseCommand):
                 if data.get('synonym'):
                     for synonym in data.get('synonym'):
                         self._process_synonym(cvterm,synonym)
-
-
 
         self.stdout.write(self.style.SUCCESS('Done'))
