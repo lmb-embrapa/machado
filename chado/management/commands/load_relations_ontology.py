@@ -4,6 +4,7 @@ from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelation
 import networkx
 import obonet
 import re
+from chado.lib.dbxref import *
 
 
 class Command(BaseCommand):
@@ -70,7 +71,7 @@ class Command(BaseCommand):
             return cvtermprop
 
 
-    def _get_db(self,name):
+    def get_set_db(self,name):
 
         try:
             # Check if the db is already registered
@@ -86,10 +87,10 @@ class Command(BaseCommand):
             return db
 
 
-    def _get_dbxref(self,db,accession,description):
+    def get_set_dbxref(self,db,accession,description):
 
         # Get/Set Db instance: ref_db
-        db = self._get_db(db)
+        db = get_set_db(db)
 
         try:
             # Check if the dbxref is already registered
@@ -152,7 +153,7 @@ class Command(BaseCommand):
                         ref_content = 'http:'+ref_content
 
                     # Get/Set Dbxref instance: ref_db,ref_content
-                    dbxref = self._get_dbxref(ref_db,ref_content,'')
+                    dbxref = get_set_dbxref(ref_db,ref_content,'')
 
                     # Estabilish the cvterm and the dbxref relationship
                     self._get_cvterm_dbxref(cvterm,dbxref,1)
@@ -175,7 +176,7 @@ class Command(BaseCommand):
                 ref_content = 'http:'+ref_content
 
             # Get/Set Dbxref instance: ref_db,ref_content
-            dbxref = self._get_dbxref(ref_db,ref_content,'')
+            dbxref = get_set_dbxref(ref_db,ref_content,'')
 
             # Estabilish the cvterm and the dbxref relationship
             self._get_cvterm_dbxref(cvterm,dbxref,0)
@@ -206,7 +207,7 @@ class Command(BaseCommand):
 
         # Handling the synonym_type
         cv_type = self._get_cv('synonym_type','')
-        dbxref_type = self._get_dbxref('internal',synonym_type.lower(),'')
+        dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
         cvterm_type = self._get_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
 
         # Storing the synonym
@@ -250,19 +251,19 @@ class Command(BaseCommand):
             cv_property_type = self._get_cv('cvterm_property_type','')
 
             # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
-            dbxref_is_anti_symmetric = self._get_dbxref('internal','is_anti_symmetric','')
+            dbxref_is_anti_symmetric = get_set_dbxref('internal','is_anti_symmetric','')
             cvterm_is_anti_symmetric = self._get_cvterm(cv_property_type,'is_anti_symmetric','',dbxref_is_anti_symmetric,0)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
-            dbxref_is_transitive = self._get_dbxref('internal','is_transitive','')
+            dbxref_is_transitive = get_set_dbxref('internal','is_transitive','')
             cvterm_is_transitive = self._get_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
 
             # Creating cvterm is_reflexive to be used as type_id in cvtermprop
-            dbxref_is_reflexive = self._get_dbxref('internal','is_reflexive','')
+            dbxref_is_reflexive = get_set_dbxref('internal','is_reflexive','')
             cvterm_is_reflexive = self._get_cvterm(cv_property_type,'is_reflexive','',dbxref_is_reflexive,0)
 
             # Creating cvterm comment to be used as type_id in cvtermprop
-            dbxref_comment = self._get_dbxref('internal','comment','')
+            dbxref_comment = get_set_dbxref('internal','comment','')
             cvterm_comment = self._get_cvterm(cv_property_type,'comment','',dbxref_comment,0)
 
 
@@ -270,7 +271,7 @@ class Command(BaseCommand):
             cv_synonym_type = self._get_cv('synonym_type','')
 
             # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
-            dbxref_exact = self._get_dbxref('internal','exact','')
+            dbxref_exact = get_set_dbxref('internal','exact','')
             cvterm_exact = self._get_cvterm(cv_property_type,'exact','',dbxref_exact,0)
 
 
@@ -281,7 +282,7 @@ class Command(BaseCommand):
 
                 # Save the term to the Dbxref model
                 aux_db,aux_accession = data.get('id').split(':')
-                dbxref = self._get_dbxref(aux_db,aux_accession,'')
+                dbxref = get_set_dbxref(aux_db,aux_accession,'')
 
                 # Save the term to the Cvterm model
                 cvterm = self._get_cvterm(cv,data.get('name'),'',dbxref,1)
@@ -314,7 +315,7 @@ class Command(BaseCommand):
                 if data.get('alt_id'):
                     for alt_id in data.get('alt_id'):
                         aux_db,aux_accession = alt_id.split(':')
-                        dbxref_alt_id = self._get_dbxref(aux_db,aux_accession,'')
+                        dbxref_alt_id = get_set_dbxref(aux_db,aux_accession,'')
                         self._get_cvterm_dbxref(cvterm,dbxref_alt_id,0)
 
                 # Load comment
