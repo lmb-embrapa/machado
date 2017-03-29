@@ -3,8 +3,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelationship,Cvtermsynonym,Db,Dbxref
 import networkx
 import obonet
-import re
 from chado.lib.dbxref import *
+from chado.lib.cvterm import *
 
 
 class Command(BaseCommand):
@@ -13,175 +13,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--so", help="Sequence Ontology file obo. Available at https://github.com/The-Sequence-Ontology/SO-Ontologies", required = True, type=str)
-
-
-    def _get_cv(self,name,definition):
-
-        try:
-            # Check if the cv is already registered
-            cv = Cv.objects.get(name=name)
-            return cv
-
-        except ObjectDoesNotExist:
-
-            # Save the name to the Db model
-            cv = Cv.objects.create(name=name,definition=definition)
-            cv.save()
-            #self.stdout.write('Cv: %s registered' % name)
-            return cv
-
-
-    def _get_cvterm(self,cv,name,definition,dbxref,is_relationshiptype):
-
-        try:
-            # Check if the cvterm is already registered
-            cvterm = Cvterm.objects.get(name=name)
-            return cvterm
-
-        except ObjectDoesNotExist:
-
-            # Save the name to the Cvterm model
-            cvterm = Cvterm.objects.create(cv=cv,
-                                           name=name,
-                                           definition=definition,
-                                           dbxref=dbxref,
-                                           is_obsolete=0,
-                                           is_relationshiptype=is_relationshiptype)
-            cvterm.save()
-            #self.stdout.write('Cvterm: %s registered' % name)
-            return cvterm
-
-
-    def _get_cvtermprop(self,cvterm,type_id,value,rank):
-
-        try:
-            # Check if the cvtermprop is already registered
-            cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,type_id=type_id,value=value,rank=rank)
-            return cvterm
-
-        except ObjectDoesNotExist:
-
-            # Save the name to the Cvtermprop model
-            cvtermprop = Cvtermprop.objects.create(cvterm=cvterm,
-                                                   type_id=type_id,
-                                                   value=value,
-                                                   rank=rank)
-            cvtermprop.save()
-            #self.stdout.write('Cvtermprop: %s registered' % name)
-            return cvtermprop
-
-
-    def _get_cvterm_dbxref(self,cvterm,dbxref,is_for_definition):
-
-        try:
-            # Check if the dbxref is already registered
-            cvtermdbxref = CvtermDbxref.objects.get(cvterm=cvterm,dbxref=dbxref)
-            return cvtermdbxref
-
-        except ObjectDoesNotExist:
-
-            # Save to the Dbxref model
-            cvtermdbxref = CvtermDbxref.objects.create(cvterm=cvterm,
-                                                       dbxref=dbxref,
-                                                       is_for_definition=is_for_definition)
-            cvtermdbxref.save()
-            return cvtermdbxref
-
-
-    def _process_def(self,cvterm,definition):
-
-        text = ''
-
-        '''
-        Definition format:
-        "text" [refdb:refcontent, refdb:refcontent]
-
-        Definition format example:
-        "A gene encoding an mRNA that has the stop codon redefined as pyrrolysine." [SO:xp]
-        '''
-        if definition:
-
-            # Retrieve text and dbxrefs
-            text,dbxrefs = definition.split('" [')
-            text = re.sub(r'^"','',text)
-            dbxrefs = re.sub(r'\]$','',dbxrefs)
-
-            if dbxrefs:
-
-                dbxrefs = dbxrefs.split(', ')
-
-                # Save all dbxrefs
-                for dbxref in dbxrefs:
-                    ref_db,ref_content = dbxref.split(':',1)
-
-                    if ref_db == 'http':
-                        ref_db = 'URL'
-                        ref_content = 'http:'+ref_content
-
-                    # Get/Set Dbxref instance: ref_db,ref_content
-                    dbxref = get_set_dbxref(ref_db,ref_content,'')
-
-                    # Estabilish the cvterm and the dbxref relationship
-                    self._get_cvterm_dbxref(cvterm,dbxref,1)
-
-        cvterm.definition=text
-        cvterm.save()
-        return
-
-
-    def _process_xref(self,cvterm,xref):
-
-        text = ''
-
-        if xref:
-
-            ref_db,ref_content = xref.split(':',1)
-
-            if ref_db == 'http':
-                ref_db = 'URL'
-                ref_content = 'http:'+ref_content
-
-            # Get/Set Dbxref instance: ref_db,ref_content
-            dbxref = get_set_dbxref(ref_db,ref_content,'')
-
-            # Estabilish the cvterm and the dbxref relationship
-            self._get_cvterm_dbxref(cvterm,dbxref,0)
-
-        return
-
-
-    def _process_synonym(self,cvterm,synonym):
-
-        '''
-        Definition format:
-        "text" cvterm []
-
-        Definition format example:
-        "stop codon gained" EXACT []
-
-        Attention:
-        There are several cases that don't follow this format.
-        These are being ignored for now.
-        '''
-        pattern = re.compile(r'^"(.+)" (\w+) \[\]$')
-        matches = pattern.findall(synonym)
-
-        if len(matches) != 1  or len(matches[0]) != 2:
-            return
-
-        synonym_text,synonym_type = matches[0]
-
-        # Handling the synonym_type
-        cv_type = self._get_cv('synonym_type','')
-        dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
-        cvterm_type = self._get_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
-
-        # Storing the synonym
-        cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
-                                                     synonym=synonym_text,
-                                                     type_id=cvterm_type.cvterm_id)
-        cvtermsynonym.save()
-        return
 
 
     def handle(self, *args, **options):
@@ -211,17 +42,17 @@ class Command(BaseCommand):
             #self.stdout.write('Cv: %s %s registered' % (name,definition))
 
             # Creating cv cvterm_property_type
-            cv_relationship = self._get_cv('cvterm_relationship','')
-            cv_property_type = self._get_cv('cvterm_property_type','')
+            cv_relationship = get_set_cv('cvterm_relationship','')
+            cv_property_type = get_set_cv('cvterm_property_type','')
 
 
             # Creating cvterm is_symmetric to be used as type_id in cvtermprop
             dbxref_is_symmetric = get_set_dbxref('internal','is_symmetric','')
-            cvterm_is_symmetric = self._get_cvterm(cv_property_type,'is_symmetric','',dbxref_is_symmetric,0)
+            cvterm_is_symmetric = get_set_cvterm(cv_property_type,'is_symmetric','',dbxref_is_symmetric,0)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal','is_transitive','')
-            cvterm_is_transitive = self._get_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
+            cvterm_is_transitive = get_set_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
 
 
             self.stdout.write('Loading typedefs')
@@ -229,27 +60,27 @@ class Command(BaseCommand):
             # Load typedefs as Dbxrefs and Cvterm
             for typedef in G.graph['typedefs']:
                 dbxref_typedef = get_set_dbxref('_global',typedef['id'],typedef.get('def'))
-                cvterm_typedef = self._get_cvterm(cv,typedef.get('id'),typedef.get('def'),dbxref_typedef,1)
+                cvterm_typedef = get_set_cvterm(cv,typedef.get('id'),typedef.get('def'),dbxref_typedef,1)
 
                 # Load is_symmetric
                 if typedef.get('is_symmetric') is not None:
-                    self._get_cvtermprop(cvterm=cvterm_typedef,
-                                         type_id=cvterm_is_symmetric.cvterm_id,
-                                         value=1,
-                                         rank=0)
+                    get_set_cvtermprop(cvterm=cvterm_typedef,
+                                       type_id=cvterm_is_symmetric.cvterm_id,
+                                       value=1,
+                                       rank=0)
                 # Load is_transitive
                 if typedef.get('is_transitive') is not None:
-                    self._get_cvtermprop(cvterm=cvterm_typedef,
-                                         type_id=cvterm_is_transitive.cvterm_id,
-                                         value=1,
-                                         rank=0)
+                    get_set_cvtermprop(cvterm=cvterm_typedef,
+                                       type_id=cvterm_is_transitive.cvterm_id,
+                                       value=1,
+                                       rank=0)
 
 
             self.stdout.write('Loading terms')
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal','comment','')
-            cvterm_comment = self._get_cvterm(cv_property_type,'comment','',dbxref_comment,0)
+            cvterm_comment = get_set_cvterm(cv_property_type,'comment','',dbxref_comment,0)
 
             for n,data in G.nodes(data=True):
 
@@ -258,42 +89,42 @@ class Command(BaseCommand):
                 dbxref = get_set_dbxref(aux_db,aux_accession,'')
 
                 # Save the term to the Cvterm model
-                cvterm = self._get_cvterm(cv,data.get('name'),'',dbxref,0)
+                cvterm = get_set_cvterm(cv,data.get('name'),'',dbxref,0)
 
                 # Load definition and dbxrefs
-                definition = self._process_def(cvterm,data.get('def'))
+                definition = process_cvterm_def(cvterm,data.get('def'))
 
                 # Load alt_ids
                 if data.get('alt_id'):
                     for alt_id in data.get('alt_id'):
                         aux_db,aux_accession = alt_id.split(':')
                         dbxref_alt_id = get_set_dbxref(aux_db,aux_accession,'')
-                        self._get_cvterm_dbxref(cvterm,dbxref_alt_id,0)
+                        get_set_cvterm_dbxref(cvterm,dbxref_alt_id,0)
 
                 # Load comment
                 if data.get('comment'):
-                    self._get_cvtermprop(cvterm=cvterm,
-                                         type_id=cvterm_comment.cvterm_id,
-                                         value=data.get('comment'),
-                                         rank=0)
+                    get_set_cvtermprop(cvterm=cvterm,
+                                       type_id=cvterm_comment.cvterm_id,
+                                       value=data.get('comment'),
+                                       rank=0)
 
                 # Load xref
                 if data.get('xref'):
                     for xref in data.get('xref'):
-                        self._process_xref(cvterm,xref)
+                        process_cvterm_xref(cvterm,xref)
 
                 # Load synonyms
                 if data.get('synonym'):
                     for synonym in data.get('synonym'):
-                        self._process_synonym(cvterm,synonym)
+                        process_cvterm_synonym(cvterm,synonym)
 
 
             self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
-            cv_relationship = self._get_cv('cvterm_relationship','')
+            cv_relationship = get_set_cv('cvterm_relationship','')
             dbxref_is_a = get_set_dbxref('OBO_REL','is_a','')
-            cvterm_is_a = self._get_cvterm(cv_relationship,'is_a','',dbxref_is_a,1)
+            cvterm_is_a = get_set_cvterm(cv_relationship,'is_a','',dbxref_is_a,1)
 
 
             for u,v,type in G.edges(keys=True):
