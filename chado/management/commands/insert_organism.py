@@ -18,10 +18,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         species=options['species']
+        genus=options['genus']
 
         try:
-            organism = Organism.objects.get(species=species)
-            if organism is not None:
+            spp = Organism.objects.get(species=species, genus=genus)
+            
+            if (spp is not None):
                 print('Organism already registered!')
         except ObjectDoesNotExist:
             organism = Organism.objects.create(abbreviation= options['abbreviation'],
