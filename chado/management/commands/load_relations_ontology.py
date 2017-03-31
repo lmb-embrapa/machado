@@ -30,7 +30,7 @@ class Command(BaseCommand):
             cv = Cv.objects.get(name=cv_name)
 
             if cv is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s (already registered)' % (cv_name,cv_definition)))
+                self.stdout.write(self.style.ERROR('cv: cannot load %s (already registered)' % (cv_name)))
 
         except ObjectDoesNotExist:
 
