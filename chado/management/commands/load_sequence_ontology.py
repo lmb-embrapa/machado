@@ -116,7 +116,7 @@ class Command(BaseCommand):
                 # Load synonyms
                 if data.get('synonym'):
                     for synonym in data.get('synonym'):
-                        process_cvterm_synonym(cvterm,synonym)
+                        process_cvterm_so_synonym(cvterm,synonym)
 
 
             self.stdout.write('Loading relationships')

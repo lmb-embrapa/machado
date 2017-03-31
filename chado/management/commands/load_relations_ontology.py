@@ -22,10 +22,8 @@ class Command(BaseCommand):
             G = obonet.read_obo(obo_file)
 
         cv_name = G.graph['default-namespace'][0]
-        cv_definition=G.graph['data-version']
+        #cv_definition=G.graph['data-version']
 
-        #pp = pprint.PrettyPrinter()
-        #pp.pprint(G.graph)
 
         try:
             # Check if the so file is already loaded
@@ -40,7 +38,7 @@ class Command(BaseCommand):
 
             # Save the name and definition to the Cv model
             cv = Cv.objects.create(name=cv_name,
-                                   definition=cv_definition)
+                                   definition=cv_name)
             cv.save()
             #self.stdout.write('Cv: %s %s registered' % (name,definition))
 
@@ -129,8 +127,10 @@ class Command(BaseCommand):
                         process_cvterm_xref(cvterm,xref)
 
                 # Load synonyms
-                if data.get('synonym'):
-                    for synonym in data.get('synonym'):
-                        process_cvterm_synonym(cvterm,synonym)
+                for synonym_type in ('exact_synonym','related_synonym','narrow_synonym','broad_synonym'):
+                    if data.get(synonym_type):
+                        for synonym in data.get(synonym_type):
+                          process_cvterm_go_synonym(cvterm,synonym,synonym_type)
+
 
         self.stdout.write(self.style.SUCCESS('Done'))
