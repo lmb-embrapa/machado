@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelationship,Cvtermsynonym
 from chado.lib.dbxref import *
 import re
@@ -137,7 +138,7 @@ def process_cvterm_xref(cvterm,xref):
     return
 
 
-def process_cvterm_synonym(cvterm,synonym):
+def process_cvterm_so_synonym(cvterm,synonym):
 
     '''
     Definition format:
@@ -168,5 +169,39 @@ def process_cvterm_synonym(cvterm,synonym):
                                                  synonym=synonym_text,
                                                  type_id=cvterm_type.cvterm_id)
     cvtermsynonym.save()
+    return
+
+
+def process_cvterm_go_synonym(cvterm,synonym,synonym_type):
+
+    '''
+    Definition format:
+    "text" [refdb:refcontent, refdb:refcontent]
+
+    Definition format example:
+    "30S ribosomal subunit assembly" [GOC:mah]
+    '''
+
+    # Retrieve text and dbxrefs
+    text,dbxrefs = synonym.split('" [')
+    synonym_text = re.sub(r'^"','',text)
+    synonym_type = re.sub(r'_synonym','',synonym_type)
+
+    # Handling the synonym_type
+    cv_type = get_set_cv('synonym_type','')
+    dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
+    cvterm_type = get_set_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
+
+    # Storing the synonym
+    #
+    try:
+        cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
+                                                     synonym=synonym_text,
+                                                     type_id=cvterm_type.cvterm_id)
+        cvtermsynonym.save()
+    # Ignore if already created
+    except IntegrityError:
+        pass
+
     return
 
