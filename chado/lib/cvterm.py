@@ -6,7 +6,7 @@ from chado.lib.dbxref import *
 import re
 
 
-def get_set_cv(name,definition):
+def get_set_cv(name):
 
     try:
         # Check if the cv is already registered
@@ -16,16 +16,19 @@ def get_set_cv(name,definition):
     except ObjectDoesNotExist:
 
         # Save the name to the Db model
-        cv = Cv.objects.create(name=name,definition=definition)
+        cv = Cv.objects.create(name=name)
         cv.save()
         return cv
 
 
 def get_set_cvterm(cv,name,definition,dbxref,is_relationshiptype):
 
+    # Get/Set Cv instance: cv
+    cv = get_set_cv(cv)
+
     try:
         # Check if the cvterm is already registered
-        cvterm = Cvterm.objects.get(name=name)
+        cvterm = Cvterm.objects.get(cv=cv,name=name)
         return cvterm
 
     except ObjectDoesNotExist:
@@ -160,9 +163,8 @@ def process_cvterm_so_synonym(cvterm,synonym):
     synonym_text,synonym_type = matches[0]
 
     # Handling the synonym_type
-    cv_type = get_set_cv('synonym_type','')
     dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
-    cvterm_type = get_set_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
+    cvterm_type = get_set_cvterm('synonym_type',synonym_type.lower(),'',dbxref_type,0)
 
     # Storing the synonym
     cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
@@ -185,12 +187,11 @@ def process_cvterm_go_synonym(cvterm,synonym,synonym_type):
     # Retrieve text and dbxrefs
     text,dbxrefs = synonym.split('" [')
     synonym_text = re.sub(r'^"','',text)
-    synonym_type = re.sub(r'_synonym','',synonym_type)
+    synonym_type = re.sub(r'_synonym','',synonym_type).lower()
 
     # Handling the synonym_type
-    cv_type = get_set_cv('synonym_type','')
-    dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
-    cvterm_type = get_set_cvterm(cv_type,synonym_type.lower(),'',dbxref_type,0)
+    dbxref_type = get_set_dbxref('internal',synonym_type,'')
+    cvterm_type = get_set_cvterm('synonym_type',synonym_type,'',dbxref_type,0)
 
     # Storing the synonym
     #
