@@ -60,49 +60,38 @@ class Command(BaseCommand):
 
 
             # creating term is_a to be used as type_id in cvterm_relationship
-            cv_relationship = get_set_cv('relationship','')
             dbxref_is_a = get_set_dbxref('obo_rel','is_a','')
-            cvterm_is_a = get_set_cvterm(cv_relationship,'is_a','',dbxref_is_a,1)
-
-            # creating term regulates to be used as type_id in cvterm_relationship
-            dbxref_regulates = get_set_dbxref('_global','regulates','')
-            cvterm_regulates = get_set_cvterm(cv_ex,'regulates','',dbxref_regulates,1)
-
-
-            # Creating cv cvterm_property_type
-            cv_property_type = get_set_cv('cvterm_property_type','')
-
-            # Creating cv synonym_property_type
-            cv_synonym_type = get_set_cv('synonym_type','')
+            cvterm_is_a = get_set_cvterm('relationship','is_a','',dbxref_is_a,1)
 
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal','is_transitive','')
-            cvterm_is_transitive = get_set_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
+            cvterm_is_transitive = get_set_cvterm('cvterm_property_type','is_transitive','',dbxref_is_transitive,0)
 
             # Creating cvterm is_class_level to be used as type_id in cvtermprop
             dbxref_is_class_level = get_set_dbxref('internal','is_class_level','')
-            cvterm_is_class_level = get_set_cvterm(cv_property_type,'is_class_level','',dbxref_is_class_level,0)
+            cvterm_is_class_level = get_set_cvterm('cvterm_property_type','is_class_level','',dbxref_is_class_level,0)
 
             # Creating cvterm is_metadata_tag to be used as type_id in cvtermprop
             dbxref_is_metadata_tag = get_set_dbxref('internal','is_metadata_tag','')
-            cvterm_is_metadata_tag = get_set_cvterm(cv_property_type,'is_metadata_tag','',dbxref_is_metadata_tag,0)
+            cvterm_is_metadata_tag = get_set_cvterm('cvterm_property_type','is_metadata_tag','',dbxref_is_metadata_tag,0)
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal','comment','')
-            cvterm_comment = get_set_cvterm(cv_property_type,'comment','',dbxref_comment,0)
+            cvterm_comment = get_set_cvterm('cvterm_property_type','comment','',dbxref_comment,0)
 
             # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
             dbxref_exact = get_set_dbxref('internal','exact','')
-            cvterm_exact = get_set_cvterm(cv_synonym_type,'exact','',dbxref_exact,0)
+            cvterm_exact = get_set_cvterm('synonym_type','exact','',dbxref_exact,0)
 
 
             self.stdout.write('Loading typedefs')
 
             # Load typedefs as Dbxrefs and Cvterm
             for typedef in G.graph['typedefs']:
+
                 dbxref_typedef = get_set_dbxref('_global',typedef['id'],typedef.get('def'))
-                cvterm_typedef = get_set_cvterm(cv_ex,typedef.get('id'),typedef.get('def'),dbxref_typedef,1)
+                cvterm_typedef = get_set_cvterm('sequence',typedef.get('id'),typedef.get('def'),dbxref_typedef,1)
 
                 # Load xref
                 if typedef.get('xref_analog'):
@@ -134,7 +123,7 @@ class Command(BaseCommand):
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal','comment','')
-            cvterm_comment = get_set_cvterm(cv_property_type,'comment','',dbxref_comment,0)
+            cvterm_comment = get_set_cvterm('cvterm_property_type','comment','',dbxref_comment,0)
 
             for n,data in G.nodes(data=True):
 
@@ -142,14 +131,11 @@ class Command(BaseCommand):
                 aux_db,aux_accession = n.split(':')
                 dbxref = get_set_dbxref(aux_db,aux_accession,'')
 
-                # Regrieve the appropriate cv
-                cv = Cv.objects.get(name=data.get('namespace'))
-
                 # Save the term to the Cvterm model
-                cvterm = get_set_cvterm(cv,data.get('name'),'',dbxref,0)
+                cvterm = get_set_cvterm(data.get('namespace'),data.get('name'),'',dbxref,0)
 
                 # Load definition and dbxrefs
-                definition = process_cvterm_def(cvterm,data.get('def'))
+                process_cvterm_def(cvterm,data.get('def'))
 
                 # Load alt_ids
                 if data.get('alt_id'):
@@ -180,27 +166,29 @@ class Command(BaseCommand):
             self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
-            cv_relationship = get_set_cv('cvterm_relationship','')
             dbxref_is_a = get_set_dbxref('OBO_REL','is_a','')
-            cvterm_is_a = get_set_cvterm(cv_relationship,'is_a','',dbxref_is_a,1)
+            cvterm_is_a = get_set_cvterm('relationship','is_a','',dbxref_is_a,1)
 
 
             for u,v,type in G.edges(keys=True):
 
                 # Get the subject cvterm
                 subject_db_name,subject_dbxref_accession = u.split(':')
-                subject_dbxref = Dbxref.objects.get(accession=subject_dbxref_accession)
+                subject_db = get_set_db(subject_db_name)
+                subject_dbxref = Dbxref.objects.get(db=subject_db,accession=subject_dbxref_accession)
                 subject_cvterm = Cvterm.objects.get(dbxref=subject_dbxref)
 
                 # Get the object cvterm
                 object_db_name,object_dbxref_accession = v.split(':')
-                object_dbxref = Dbxref.objects.get(accession=object_dbxref_accession)
+                object_db = get_set_db(object_db_name)
+                object_dbxref = Dbxref.objects.get(db=object_db,accession=object_dbxref_accession)
                 object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
 
                 if type == 'is_a':
                     type_cvterm = cvterm_is_a
                 else:
-                    type_dbxref = Dbxref.objects.get(accession=type)
+                    type_db = get_set_db('_global')
+                    type_dbxref = Dbxref.objects.get(db=type_db,accession=type)
                     type_cvterm = Cvterm.objects.get(dbxref=type_dbxref)
 
                 cvrel = CvtermRelationship.objects.create(type_id=type_cvterm.cvterm_id,

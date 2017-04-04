@@ -37,37 +37,30 @@ class Command(BaseCommand):
             self.stdout.write('Preprocessing')
 
             # Save the name and definition to the Cv model
-            cv = Cv.objects.create(name=cv_name,
-                                   definition=cv_name)
+            cv = Cv.objects.create(name=cv_name)
             cv.save()
             #self.stdout.write('Cv: %s %s registered' % (name,definition))
 
-            # Creating cv cvterm_property_type
-            cv_property_type = get_set_cv('cvterm_property_type','')
-
             # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
             dbxref_is_anti_symmetric = get_set_dbxref('internal','is_anti_symmetric','')
-            cvterm_is_anti_symmetric = get_set_cvterm(cv_property_type,'is_anti_symmetric','',dbxref_is_anti_symmetric,0)
+            cvterm_is_anti_symmetric = get_set_cvterm('cvterm_property_type','is_anti_symmetric','',dbxref_is_anti_symmetric,0)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal','is_transitive','')
-            cvterm_is_transitive = get_set_cvterm(cv_property_type,'is_transitive','',dbxref_is_transitive,0)
+            cvterm_is_transitive = get_set_cvterm('cvterm_property_type','is_transitive','',dbxref_is_transitive,0)
 
             # Creating cvterm is_reflexive to be used as type_id in cvtermprop
             dbxref_is_reflexive = get_set_dbxref('internal','is_reflexive','')
-            cvterm_is_reflexive = get_set_cvterm(cv_property_type,'is_reflexive','',dbxref_is_reflexive,0)
+            cvterm_is_reflexive = get_set_cvterm('cvterm_property_type','is_reflexive','',dbxref_is_reflexive,0)
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal','comment','')
-            cvterm_comment = get_set_cvterm(cv_property_type,'comment','',dbxref_comment,0)
+            cvterm_comment = get_set_cvterm('cvterm_property_type','comment','',dbxref_comment,0)
 
-
-            # Creating cv synonym_type
-            cv_synonym_type = get_set_cv('synonym_type','')
 
             # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
             dbxref_exact = get_set_dbxref('internal','exact','')
-            cvterm_exact = get_set_cvterm(cv_property_type,'exact','',dbxref_exact,0)
+            cvterm_exact = get_set_cvterm('synonym_type','exact','',dbxref_exact,0)
 
 
 
@@ -80,7 +73,7 @@ class Command(BaseCommand):
                 dbxref = get_set_dbxref(aux_db,aux_accession,'')
 
                 # Save the term to the Cvterm model
-                cvterm = get_set_cvterm(cv,data.get('name'),'',dbxref,1)
+                cvterm = get_set_cvterm(cv.name,data.get('name'),'',dbxref,1)
 
                 # Load definition and dbxrefs
                 definition = process_cvterm_def(cvterm,data.get('def'))
