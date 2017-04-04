@@ -20,17 +20,16 @@ def get_set_db(name):
 
 def get_set_dbxref(db,accession,description):
 
-    # Get/Set Db instance: ref_db
+    # Get/Set Db instance: db
+    db = get_set_db(db)
 
     try:
         # Check if the dbxref is already registered
-        dbxref = Dbxref.objects.get(accession=accession)
+        dbxref = Dbxref.objects.get(db=db,accession=accession)
         return dbxref
 
     except ObjectDoesNotExist:
 
-        # Get/Set Db instance: db
-        db = get_set_db(db)
         # Save to the Dbxref model
         dbxref = Dbxref.objects.create(db=db,accession=accession,description=description)
         dbxref.save()
