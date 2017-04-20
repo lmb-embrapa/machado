@@ -3,9 +3,12 @@ from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from chado.models import Organism, Cv, Cvterm, Db, Feature
+from chado.models import Feature
 from Bio import SeqIO
 from chado.lib.dbxref import get_set_dbxref
+from chado.lib.organism import get_organism
+from chado.lib.db import set_db_file
+from chado.lib.cvterm import get_ontology_term
 
 
 class Command(BaseCommand):
@@ -28,49 +31,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # Retrieve organism object
-        try:
-            genus, species = options['organism'].split(' ')
-        except ValueError:
-            raise ValueError('The organism genus and species should be '
-                             'separated by a single space')
+        organism = get_organism(options['organism'])
 
-        try:
-            organism = Organism.objects.get(species=species, genus=genus)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('%s not registered.'
-                                     % options['organism'])
+        # Save DB file info
+        db = set_db_file(file=options['fasta'],
+                         description=options.get('description'),
+                         url=options.get('url'))
 
         # Retrieve sequence ontology object
-        try:
-            cv = Cv.objects.get(name='sequence')
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology not loaded.')
-
-        # Retrieve sequence ontology term object
-        try:
-            cvterm = Cvterm.objects.get(cv=cv, name=options['soterm'])
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology term not found.')
-
-        # Save DB info
-        try:
-            db = Db.objects.get(name=options['fasta'])
-            if db is not None:
-                raise IntegrityError('The db %s is already registered.'
-                                     % db.name)
-        except ObjectDoesNotExist:
-            Db.objects.create(name=options['fasta'],
-                              description=options.get('description'),
-                              url=options.get('url'))
+        cvterm = get_ontology_term(ontology='sequence', term=options['soterm'])
 
         # Loading the fasta file
-
-        db_name = options['fasta']
 
         fasta_sequences = SeqIO.parse(open(options['fasta']), 'fasta')
 
         for fasta in fasta_sequences:
-            dbxref = get_set_dbxref(db_name, fasta.id, '')
+            dbxref = get_set_dbxref(db.name, fasta.id, '')
 
             try:
                 feat = Feature.objects.get(uniquename=fasta.id)
@@ -80,9 +56,9 @@ class Command(BaseCommand):
             except ObjectDoesNotExist:
                 residues = fasta.seq
 
+                m = hashlib.md5(str(fasta.seq).encode()).hexdigest()
                 if options['nosequence']:
                     residues = ''
-                    m = hashlib.md5(str(fasta.seq).encode()).hexdigest()
 
                 Feature.objects.create(dbxref=dbxref,
                                        organism=organism,
@@ -100,4 +76,4 @@ class Command(BaseCommand):
                                        now(timezone.utc))
 
         self.stdout.write(self.style.SUCCESS('%s Done'
-                                             % datetime.datetime.now()))
+                                             % datetime.now()))
