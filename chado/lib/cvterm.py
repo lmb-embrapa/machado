@@ -1,8 +1,7 @@
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from chado.models import Cv,Cvprop,Cvterm,CvtermDbxref,Cvtermprop,CvtermRelationship,Cvtermsynonym
-from chado.lib.dbxref import *
+from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop, Cvtermsynonym
+from chado.lib.dbxref import get_set_dbxref
 import re
 
 
@@ -21,14 +20,14 @@ def get_set_cv(name):
         return cv
 
 
-def get_set_cvterm(cv,name,definition,dbxref,is_relationshiptype):
+def get_set_cvterm(cv, name, definition, dbxref, is_relationshiptype):
 
     # Get/Set Cv instance: cv
     cv = get_set_cv(cv)
 
     try:
         # Check if the cvterm is already registered
-        cvterm = Cvterm.objects.get(cv=cv,name=name)
+        cvterm = Cvterm.objects.get(cv=cv, name=name)
         return cvterm
 
     except ObjectDoesNotExist:
@@ -44,11 +43,14 @@ def get_set_cvterm(cv,name,definition,dbxref,is_relationshiptype):
         return cvterm
 
 
-def get_set_cvtermprop(cvterm,type_id,value,rank):
+def get_set_cvtermprop(cvterm, type_id, value, rank):
 
     try:
         # Check if the cvtermprop is already registered
-        cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,type_id=type_id,value=value,rank=rank)
+        cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,
+                                            type_id=type_id,
+                                            value=value,
+                                            rank=rank)
         return cvterm
 
     except ObjectDoesNotExist:
@@ -62,24 +64,25 @@ def get_set_cvtermprop(cvterm,type_id,value,rank):
         return cvtermprop
 
 
-def get_set_cvterm_dbxref(cvterm,dbxref,is_for_definition):
+def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
 
     try:
         # Check if the dbxref is already registered
-        cvtermdbxref = CvtermDbxref.objects.get(cvterm=cvterm,dbxref=dbxref)
+        cvtermdbxref = CvtermDbxref.objects.get(cvterm=cvterm, dbxref=dbxref)
         return cvtermdbxref
 
     except ObjectDoesNotExist:
 
         # Save to the Dbxref model
-        cvtermdbxref = CvtermDbxref.objects.create(cvterm=cvterm,
-                                                   dbxref=dbxref,
-                                                   is_for_definition=is_for_definition)
+        cvtermdbxref = CvtermDbxref.objects.create(
+            cvterm=cvterm,
+            dbxref=dbxref,
+            is_for_definition=is_for_definition)
         cvtermdbxref.save()
         return cvtermdbxref
 
 
-def process_cvterm_def(cvterm,definition):
+def process_cvterm_def(cvterm, definition):
 
     text = ''
 
@@ -88,14 +91,15 @@ def process_cvterm_def(cvterm,definition):
     "text" [refdb:refcontent, refdb:refcontent]
 
     Definition format example:
-    "A gene encoding an mRNA that has the stop codon redefined as pyrrolysine." [SO:xp]
+    "A gene encoding an mRNA that has the stop codon redefined as
+    # pyrrolysine." [SO:xp]
     '''
     if definition:
 
         # Retrieve text and dbxrefs
-        text,dbxrefs = definition.split('" [')
-        text = re.sub(r'^"','',text)
-        dbxrefs = re.sub(r'\]$','',dbxrefs)
+        text, dbxrefs = definition.split('" [')
+        text = re.sub(r'^"', '', text)
+        dbxrefs = re.sub(r'\]$', '', dbxrefs)
 
         if dbxrefs:
 
@@ -103,45 +107,43 @@ def process_cvterm_def(cvterm,definition):
 
             # Save all dbxrefs
             for dbxref in dbxrefs:
-                ref_db,ref_content = dbxref.split(':',1)
+                ref_db, ref_content = dbxref.split(':', 1)
 
                 if ref_db == 'http':
                     ref_db = 'URL'
                     ref_content = 'http:'+ref_content
 
                 # Get/Set Dbxref instance: ref_db,ref_content
-                dbxref = get_set_dbxref(ref_db,ref_content,'')
+                dbxref = get_set_dbxref(ref_db, ref_content, '')
 
                 # Estabilish the cvterm and the dbxref relationship
-                get_set_cvterm_dbxref(cvterm,dbxref,1)
+                get_set_cvterm_dbxref(cvterm, dbxref, 1)
 
-    cvterm.definition=text
+    cvterm.definition = text
     cvterm.save()
     return
 
 
-def process_cvterm_xref(cvterm,xref):
-
-    text = ''
+def process_cvterm_xref(cvterm, xref):
 
     if xref:
 
-        ref_db,ref_content = xref.split(':',1)
+        ref_db, ref_content = xref.split(':', 1)
 
         if ref_db == 'http':
             ref_db = 'URL'
             ref_content = 'http:'+ref_content
 
         # Get/Set Dbxref instance: ref_db,ref_content
-        dbxref = get_set_dbxref(ref_db,ref_content,'')
+        dbxref = get_set_dbxref(ref_db, ref_content, '')
 
         # Estabilish the cvterm and the dbxref relationship
-        get_set_cvterm_dbxref(cvterm,dbxref,0)
+        get_set_cvterm_dbxref(cvterm, dbxref, 0)
 
     return
 
 
-def process_cvterm_so_synonym(cvterm,synonym):
+def process_cvterm_so_synonym(cvterm, synonym):
 
     '''
     Definition format:
@@ -157,14 +159,20 @@ def process_cvterm_so_synonym(cvterm,synonym):
     pattern = re.compile(r'^"(.+)" (\w+) \[\]$')
     matches = pattern.findall(synonym)
 
-    if len(matches) != 1  or len(matches[0]) != 2:
+    if len(matches) != 1 or len(matches[0]) != 2:
         return
 
-    synonym_text,synonym_type = matches[0]
+    synonym_text, synonym_type = matches[0]
 
     # Handling the synonym_type
-    dbxref_type = get_set_dbxref('internal',synonym_type.lower(),'')
-    cvterm_type = get_set_cvterm('synonym_type',synonym_type.lower(),'',dbxref_type,0)
+    dbxref_type = get_set_dbxref('internal',
+                                 synonym_type.lower(),
+                                 '')
+    cvterm_type = get_set_cvterm('synonym_type',
+                                 synonym_type.lower(),
+                                 '',
+                                 dbxref_type,
+                                 0)
 
     # Storing the synonym
     cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
@@ -174,7 +182,7 @@ def process_cvterm_so_synonym(cvterm,synonym):
     return
 
 
-def process_cvterm_go_synonym(cvterm,synonym,synonym_type):
+def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
 
     '''
     Definition format:
@@ -185,20 +193,25 @@ def process_cvterm_go_synonym(cvterm,synonym,synonym_type):
     '''
 
     # Retrieve text and dbxrefs
-    text,dbxrefs = synonym.split('" [')
-    synonym_text = re.sub(r'^"','',text)
-    synonym_type = re.sub(r'_synonym','',synonym_type).lower()
+    text, dbxrefs = synonym.split('" [')
+    synonym_text = re.sub(r'^"', '', text)
+    synonym_type = re.sub(r'_synonym', '', synonym_type).lower()
 
     # Handling the synonym_type
-    dbxref_type = get_set_dbxref('internal',synonym_type,'')
-    cvterm_type = get_set_cvterm('synonym_type',synonym_type,'',dbxref_type,0)
+    dbxref_type = get_set_dbxref('internal', synonym_type, '')
+    cvterm_type = get_set_cvterm('synonym_type',
+                                 synonym_type,
+                                 '',
+                                 dbxref_type,
+                                 0)
 
     # Storing the synonym
     #
     try:
-        cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
-                                                     synonym=synonym_text,
-                                                     type_id=cvterm_type.cvterm_id)
+        cvtermsynonym = Cvtermsynonym.objects.create(
+            cvterm=cvterm,
+            synonym=synonym_text,
+            type_id=cvterm_type.cvterm_id)
         cvtermsynonym.save()
     # Ignore if already created
     except IntegrityError:
@@ -206,3 +219,17 @@ def process_cvterm_go_synonym(cvterm,synonym,synonym_type):
 
     return
 
+
+def get_ontology_term(ontology, term):
+        # Retrieve sequence ontology object
+        try:
+            cv = Cv.objects.get(name=ontology)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist('Sequence Ontology not loaded.')
+
+        # Retrieve sequence ontology term object
+        try:
+            cvterm = Cvterm.objects.get(cv=cv, name=term)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist('Sequence Ontology term not found.')
+        return cvterm
