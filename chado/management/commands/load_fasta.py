@@ -3,6 +3,7 @@ import hashlib
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from chado.models import Organism, Cv, Cvterm, Db, Dbxref, Feature
 from Bio import SeqIO
 import json
@@ -27,35 +28,30 @@ class Command(BaseCommand):
         try:
             genus, species = options['organism'].split(' ')
         except ValueError:
-            self.stdout.write(self.style.ERROR('The organism genus and species should be separated by a single space'))
-            sys.exit()
+            raise ValueError('The organism genus and species should be separated by a single space')
 
         try:
             organism = Organism.objects.get(species=species, genus=genus)
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR('%s not registered.' % options['organism']))
-            sys.exit()
+            raise ObjectDoesNotExist('%s not registered.' % options['organism'])
 
         # Retrieve sequence ontology object
         try:
             cv = Cv.objects.get(name='sequence')
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR('Sequence Ontology not loaded.'))
-            sys.exit()
+            raise ObjectDoesNotExist('Sequence Ontology not loaded.')
 
          # Retrieve sequence ontology term object
         try:
             cvterm = Cvterm.objects.get(cv=cv, name=options['soterm'])
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR('Sequence Ontology term not found.'))
-            sys.exit()
+            raise ObjectDoesNotExist('Sequence Ontology term not found.')
 
         # Save DB info
         try:
             db = Db.objects.get(name=options['fasta'])
             if db is not None:
-                self.stdout.write(self.style.ERROR('%s already registered.' % db.name))
-                sys.exit()
+                raise IntegrityError('The db %s is already registered.' % db.name)
         except ObjectDoesNotExist:
             Db.objects.create(name=options['fasta'],
                               description=options.get('description'),
@@ -71,35 +67,26 @@ class Command(BaseCommand):
             dbxref = get_set_dbxref(db_name,fasta.id,'')
 
             try:
-                feat = Feature.objects.get(name=fasta.id)
+                feat = Feature.objects.get(uniquename=fasta.id)
                 if feat is not None:
-                    self.stdout.write(self.style.ERROR('%s already registered.' % fasta.id))
-                    sys.exit()
+                    raise IntegrityError('The sequence %s is already registered.' % fasta.id)
             except ObjectDoesNotExist:
-                if options['nosequence']:
-                    Feature.objects.create(dbxref=dbxref,
-                                           organism=organism,
-                                           name=fasta.description,
-                                           uniquename=fasta.id,
-                                           seqlen=len(fasta.seq),
-                                           md5checksum=hashlib.md5(str(fasta.seq).encode()).hexdigest(),
-                                           type_id=cvterm.cvterm_id,
-                                           is_analysis=False,
-                                           is_obsolete=False,
-                                           timeaccessioned=datetime.now(timezone.utc),
-                                           timelastmodified=datetime.now(timezone.utc))
-                else:
-                    Feature.objects.create(dbxref=dbxref,
-                                           organism=organism,
-                                           name=fasta.description,
-                                           uniquename=fasta.id,
-                                           residues=fasta.seq,
-                                           seqlen=len(fasta.seq),
-                                           md5checksum=hashlib.md5(str(fasta.seq).encode()).hexdigest(),
-                                           type_id=cvterm.cvterm_id,
-                                           is_analysis=False,
-                                           is_obsolete=False,
-                                           timeaccessioned=datetime.now(timezone.utc),
-                                           timelastmodified=datetime.now(timezone.utc))
+                residues = fasta.seq
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+                if options['nosequence']:
+                    residues = ''
+
+                Feature.objects.create(dbxref=dbxref,
+                                       organism=organism,
+                                       name=fasta.description,
+                                       uniquename=fasta.id,
+                                       residues=residues,
+                                       seqlen=len(fasta.seq),
+                                       md5checksum=hashlib.md5(str(fasta.seq).encode()).hexdigest(),
+                                       type_id=cvterm.cvterm_id,
+                                       is_analysis=False,
+                                       is_obsolete=False,
+                                       timeaccessioned=datetime.now(timezone.utc),
+                                       timelastmodified=datetime.now(timezone.utc))
+
+        self.stdout.write(self.style.SUCCESS('%s Done' % datetime.datetime.now()))
