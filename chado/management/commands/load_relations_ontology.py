@@ -15,14 +15,21 @@ class Command(BaseCommand):
         parser.add_argument("--ro", help="Relations Ontology file obo. "
                             "Available at https://github.com/oborel/"
                             "obo-relations", required=True, type=str)
+        parser.add_argument("--debug", help="debug", action='store_true')
+        parser.add_argument("--silent", help="silent", action='store_true')
 
     def handle(self, *args, **options):
+
+        # Verbosity
+        verbosity = 1
+        if(options['debug']):
+            verbosity = 2
 
         # Load the ontology file
         with open(options['ro']) as obo_file:
             G = obonet.read_obo(obo_file)
 
-        cv_name = G.graph['default-namespace'][0]
+        cv_name = 'relationship'
 
         try:
             # Check if the so file is already loaded
@@ -35,7 +42,8 @@ class Command(BaseCommand):
 
         except ObjectDoesNotExist:
 
-            self.stdout.write('Preprocessing')
+            if verbosity > 0:
+                self.stdout.write('Preprocessing')
 
             # Save the name and definition to the Cv model
             cv = Cv.objects.create(name=cv_name)
@@ -77,13 +85,19 @@ class Command(BaseCommand):
             get_set_cvterm('synonym_type', 'exact', '',
                            dbxref_exact, 0)
 
-            self.stdout.write('Loading typedefs')
+            if verbosity > 0:
+                self.stdout.write('Loading typedefs')
 
             for data in G.graph['typedefs']:
 
+                if verbosity > 1:
+                    self.stdout.write('  typedef id: %s' % data.get('id'))
                 # Save the term to the Dbxref model
-                aux_db, aux_accession = data.get('id').split(':')
-                dbxref = get_set_dbxref(aux_db, aux_accession, '')
+                try:
+                    aux_db, aux_accession = data.get('id').split(':')
+                    dbxref = get_set_dbxref(aux_db, aux_accession, '')
+                except ValueError:
+                    continue
 
                 # Save the term to the Cvterm model
                 cvterm = get_set_cvterm(cv.name, data.get('name'), '',
