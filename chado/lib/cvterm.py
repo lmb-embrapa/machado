@@ -97,9 +97,13 @@ def process_cvterm_def(cvterm, definition):
     if definition:
 
         # Retrieve text and dbxrefs
-        text, dbxrefs = definition.split('" [')
-        text = re.sub(r'^"', '', text)
-        dbxrefs = re.sub(r'\]$', '', dbxrefs)
+        try:
+            text, dbxrefs = definition.split('" [')
+            text = re.sub(r'^"', '', text)
+            dbxrefs = re.sub(r'\]$', '', dbxrefs)
+        except ValueError:
+            text = definition
+            dbxrefs = ''
 
         if dbxrefs:
 
