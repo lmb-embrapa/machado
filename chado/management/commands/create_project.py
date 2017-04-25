@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Project
 from chado.lib.project import get_project
-from django.db import IntegrityError
 
 
 class Command(BaseCommand):
@@ -25,9 +24,7 @@ class Command(BaseCommand):
             project = get_project(project_name)
             if (project is not None):
                 self.stdout.write(self.style.ERROR('%s already registered!'
-                                                 % project.name))
-#                raise IntegrityError('Project %s already registered!'
-#                                     % project.name)
+                                                   % project.name))
         except ObjectDoesNotExist:
             project = Project.objects.create(name=options['name'],
                                              description=options['descri'
