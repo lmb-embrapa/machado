@@ -27,7 +27,9 @@ class Command(BaseCommand):
         parser.add_argument("--update", help="Overwrite existing sequences",
                             required=False, action='store_true')
 
-    # field example:
+    # get binomial name of the organism from the fasta description
+    # object.
+    # description field example:
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
     # 4-cyclohexadiene-1-carboxylate synthase [Grimontia marina]'''
     def parse_organism(self, first_fasta_description_field):
@@ -44,7 +46,7 @@ class Command(BaseCommand):
                 species = name_fields[1]
         return(genus + " " + species)
 
-    # get first field from multiple entries from NCBI's nr fasta file
+    # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
         fields = re.split('\x01', fasta_description)
         first = fields[0]
