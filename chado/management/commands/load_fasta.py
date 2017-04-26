@@ -9,6 +9,8 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
+from chado.lib.project import (get_project, get_set_project_dbxref,
+                               get_set_project_feature)
 
 
 class Command(BaseCommand):
@@ -22,6 +24,8 @@ class Command(BaseCommand):
         parser.add_argument("--soterm", help="SO Sequence Ontology Term (eg. "
                             "chromosome, supercontig)", required=True,
                             type=str)
+        parser.add_argument("--project", help="Project name", required=False,
+                            type=str)
         parser.add_argument("--description", help="DB Description",
                             required=False, type=str)
         parser.add_argument("--url", help="DB URL", required=False, type=str)
@@ -29,6 +33,11 @@ class Command(BaseCommand):
                             required=False, action='store_true')
 
     def handle(self, *args, **options):
+
+        # retrieve project object
+        if options['project']:
+            project_name = options['project']
+            project = get_project(project_name)
 
         # Retrieve organism object
         organism = get_organism(options['organism'])
@@ -49,8 +58,8 @@ class Command(BaseCommand):
             dbxref = get_set_dbxref(db.name, fasta.id, '')
 
             try:
-                feat = Feature.objects.get(uniquename=fasta.id)
-                if feat is not None:
+                feature = Feature.objects.get(uniquename=fasta.id)
+                if feature is not None:
                     raise IntegrityError('The sequence %s is already '
                                          'registered.' % fasta.id)
             except ObjectDoesNotExist:
@@ -60,20 +69,26 @@ class Command(BaseCommand):
                 if options['nosequence']:
                     residues = ''
 
-                Feature.objects.create(dbxref=dbxref,
-                                       organism=organism,
-                                       name=fasta.description,
-                                       uniquename=fasta.id,
-                                       residues=residues,
-                                       seqlen=len(fasta.seq),
-                                       md5checksum=m,
-                                       type_id=cvterm.cvterm_id,
-                                       is_analysis=False,
-                                       is_obsolete=False,
-                                       timeaccessioned=datetime.
-                                       now(timezone.utc),
-                                       timelastmodified=datetime.
-                                       now(timezone.utc))
+                feature = Feature.objects.create(dbxref=dbxref,
+                                                 organism=organism,
+                                                 name=fasta.description,
+                                                 uniquename=fasta.id,
+                                                 residues=residues,
+                                                 seqlen=len(fasta.seq),
+                                                 md5checksum=m,
+                                                 type_id=cvterm.cvterm_id,
+                                                 is_analysis=False,
+                                                 is_obsolete=False,
+                                                 timeaccessioned=datetime.
+                                                 now(timezone.utc),
+                                                 timelastmodified=datetime.
+                                                 now(timezone.utc))
+                # create project_dbxref and project_feature
+                if project:
+                        get_set_project_dbxref(dbxref=dbxref,
+                                               project=project)
+                        get_set_project_feature(feature=feature,
+                                                project=project)
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
