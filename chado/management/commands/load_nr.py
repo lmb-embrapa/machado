@@ -37,9 +37,9 @@ class Command(BaseCommand):
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
     # 4-cyclohexadiene-1-carboxylate synthase [Grimontia marina]'''
     def parse_organism(self, first_fasta_description_field):
-        print("# desc field: %s" % first_fasta_description_field)
+        # print("# desc field: %s" % first_fasta_description_field)
         fields = re.findall(r"\[.*?\]", first_fasta_description_field)
-        print("fields: %s" % fields[-1])
+        # print("fields: %s" % fields[-1])
         # print("fields: %s" % fields.group(0))
         name_fields = fields[-1].split(" ")
         # name_fields = fields.group(0).split(" ")
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 # print("species:%s" % species)
             else:
                 species = name_fields[1]
-        print("scientific name: %s" % (genus + " " + species))
+        # print("scientific name: %s" % (genus + " " + species))
         return(genus + " " + species)
 
     # get first field from multiple header entries from NCBI's nr fasta file
