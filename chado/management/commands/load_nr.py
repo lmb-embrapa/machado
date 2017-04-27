@@ -9,6 +9,8 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_set_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
+from chado.lib.project import (get_project, get_set_project_dbxref,
+                               get_set_project_feature)
 import re
 # import json
 
@@ -26,6 +28,8 @@ class Command(BaseCommand):
                             required=False, action='store_true')
         parser.add_argument("--update", help="Overwrite existing sequences",
                             required=False, action='store_true')
+        parser.add_argument("--project", help="Project name", required=False,
+                            type=str)
 
     # get binomial name of the organism from the fasta description
     # object.
@@ -33,27 +37,38 @@ class Command(BaseCommand):
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
     # 4-cyclohexadiene-1-carboxylate synthase [Grimontia marina]'''
     def parse_organism(self, first_fasta_description_field):
-        fields = re.search(r"\[(.*)\]$", first_fasta_description_field)
-        name_fields = fields.group().split(" ")
-        genus = re.sub(r'^\[', '', name_fields[0])
+        print("# desc field: %s" % first_fasta_description_field)
+        fields = re.findall(r"\[.*?\]", first_fasta_description_field)
+        print("fields: %s" % fields[-1])
+        # print("fields: %s" % fields.group(0))
+        name_fields = fields[-1].split(" ")
+        # name_fields = fields.group(0).split(" ")
+        genus = re.sub(r'\]|\[', '', name_fields[0])
         species = ".spp"
         # special case when there is no specific name...
         if len(name_fields) > 1:
-            if re.search(r'\]$', name_fields[1]):
-                species = re.sub(r'\]$', '', name_fields[1])
-                print("species:%s" % species)
+            if re.search(r'\]', name_fields[1]):
+                species = re.sub(r'\]', '', name_fields[1])
+                # print("species:%s" % species)
             else:
                 species = name_fields[1]
+        print("scientific name: %s" % (genus + " " + species))
         return(genus + " " + species)
 
     # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
         fields = re.split('\x01', fasta_description)
         first = fields[0]
-        print("first field is %s" % (first))
+        # print("first field is %s" % (first))
         return(first)
 
     def handle(self, *args, **options):
+        # retrieve project object
+        project = ""
+        if options['project']:
+            project_name = options['project']
+            project = get_project(project_name)
+
         # get db object
         db = set_db_file(options['fasta'])
         # get cvterm object
@@ -78,7 +93,7 @@ class Command(BaseCommand):
                 organism_name = self.parse_organism(first_fasta_description)
             except:
                 raise IntegrityError('The organism could not be obtained'
-                                     'from the description: %s'
+                                     ' from the description: %s'
                                      % first_fasta_description)
             try:
                 # get feature object
@@ -98,20 +113,26 @@ class Command(BaseCommand):
                     residues = ''
                     m = hashlib.md5(str(fasta.seq).encode()).hexdigest()
 
-                Feature.objects.create(dbxref=dbxref,
-                                       organism=organism,
-                                       name=first_fasta_description,
-                                       uniquename=fasta.id,
-                                       residues=residues,
-                                       seqlen=len(fasta.seq),
-                                       md5checksum=m,
-                                       type_id=cvterm.cvterm_id,
-                                       is_analysis=False,
-                                       is_obsolete=False,
-                                       timeaccessioned=datetime.
-                                       now(timezone.utc),
-                                       timelastmodified=datetime.
-                                       now(timezone.utc))
+                feature = Feature.objects.create(dbxref=dbxref,
+                                                 organism=organism,
+                                                 name=first_fasta_description,
+                                                 uniquename=fasta.id,
+                                                 residues=residues,
+                                                 seqlen=len(fasta.seq),
+                                                 md5checksum=m,
+                                                 type_id=cvterm.cvterm_id,
+                                                 is_analysis=False,
+                                                 is_obsolete=False,
+                                                 timeaccessioned=datetime.
+                                                 now(timezone.utc),
+                                                 timelastmodified=datetime.
+                                                 now(timezone.utc))
+                # create project_dbxref and project_feature
+                if project:
+                        get_set_project_dbxref(dbxref=dbxref,
+                                               project=project)
+                        get_set_project_feature(feature=feature,
+                                                project=project)
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
