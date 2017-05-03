@@ -25,3 +25,6 @@ Detailed documentation can be found in the **docs** directory.
             'chado',
         ]
 
+# Documentation 
+
+Full documentation can be found at the docs folder.
