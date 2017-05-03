@@ -27,4 +27,4 @@ Detailed documentation can be found in the **docs** directory.
 
 # Documentation 
 
-Full documentation can be found at the docs folder.
+Detailed documentation can be found in the **docs** directory.
