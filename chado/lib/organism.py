@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Organism
+from chado.models import Organism, OrganismDbxref
 
 
 def get_organism(organism):
@@ -18,7 +18,7 @@ def get_organism(organism):
     return organism
 
 
-def get_set_organism(organism_name):
+def get_set_organism(organism_name, infra_name=""):
     # receives an organism binomial name with "Genus species" format
     genus = ""
     species = ""
@@ -31,6 +31,19 @@ def get_set_organism(organism_name):
     try:
         organism = Organism.objects.get(species=species, genus=genus)
     except ObjectDoesNotExist:
-        organism = Organism.objects.create(genus=genus, species=species)
+        organism = Organism.objects.create(genus=genus, species=species,
+                                           infraspecific_name=infra_name)
         organism.save()
     return (organism)
+
+
+def get_set_organism_dbxref(organism, dbxref):
+    organism_dbxref = ""
+    # receives an organism binomial name with "Genus species" format
+    try:
+        organism_dbxref = OrganismDbxref.objects.get(organism=organism,
+                                                     dbxref=dbxref)
+    except ObjectDoesNotExist:
+        organism_dbxref = OrganismDbxref.objects.create(organism=organism,
+                                                        dbxref=dbxref)
+    return (organism_dbxref)
