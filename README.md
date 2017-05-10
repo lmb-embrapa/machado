@@ -25,3 +25,6 @@ Detailed documentation can be found in the **docs** directory.
             'chado',
         ]
 
+# Documentation 
+
+Detailed documentation can be found in the [docs](https://bitbucket.org/azneto/django-chado/src/6e9d07f4f246053f52f33cf5a7a84a40f2b6e96f/docs/INSTALL.md?at=master&fileviewer=file-view-default) directory.
