@@ -30,12 +30,11 @@ def get_set_organism(organism_name, infra_name=""):
                          'separated by a single space')
 
     try:
-            organism = Organism.objects.get(species=species, genus=genus,
-                                            infraspecific_name=infra_name)
+        organism = Organism.objects.get(species=species, genus=genus,
+                                        infraspecific_name=infra_name)
     except ObjectDoesNotExist:
         organism = Organism.objects.create(genus=genus, species=species,
                                            infraspecific_name=infra_name)
-        organism.save()
     return (organism)
 
 
