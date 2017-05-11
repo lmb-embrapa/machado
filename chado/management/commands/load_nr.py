@@ -57,9 +57,9 @@ class Command(BaseCommand):
                 infra = genus + " " + species + " " + " ".join(name_fields[2:])
                 infra = re.sub(r'\]$', '', infra)
 
-        print("name fields: %s" % name_fields)
-        print("scientific name: %s" % (genus + " " + species))
-        print("infra : %s" % infra)
+        # print("name fields: %s" % name_fields)
+        # print("scientific name: %s" % (genus + " " + species))
+        # print("infra : %s" % infra)
         return((genus + " " + species), infra)
 
     # get first field from multiple header entries from NCBI's nr fasta file
@@ -116,13 +116,13 @@ class Command(BaseCommand):
                                              'registered.' % fasta.id)
             except ObjectDoesNotExist:
                 residues = fasta.seq
+                # print("BEFORE organism name %s and infra %s"
+                #      % (organism_name, organism_infra_name))
                 # get organism object
-                print("BEFORE organism name %s and infra %s"
-                      % (organism_name, organism_infra_name))
                 organism = get_set_organism(organism_name, organism_infra_name)
-                print("AFTER organism name %s %s and infra %s"
-                      % (organism.genus, organism.species,
-                          organism.infraspecific_name))
+                # print("AFTER organism name %s %s and infra %s"
+                #       % (organism.genus, organism.species,
+                #          organism.infraspecific_name))
                 m = ""
                 if options['nosequence']:
                     residues = ''
