@@ -45,6 +45,7 @@ class Command(BaseCommand):
         # name_fields = fields.group(0).split(" ")
         genus = re.sub(r'\]|\[', '', name_fields[0])
         species = ".spp"
+        infra = ""
         # special case when there is no specific name...
         if len(name_fields) > 1:
             if re.search(r'\]', name_fields[1]):
@@ -52,8 +53,14 @@ class Command(BaseCommand):
                 # print("species:%s" % species)
             else:
                 species = name_fields[1]
-        # print("scientific name: %s" % (genus + " " + species))
-        return(genus + " " + species)
+            if len(name_fields) > 2:
+                infra = genus + " " + species + " " + " ".join(name_fields[2:])
+                infra = re.sub(r'\]$', '', infra)
+
+        print("name fields: %s" % name_fields)
+        print("scientific name: %s" % (genus + " " + species))
+        print("infra : %s" % infra)
+        return((genus + " " + species), infra)
 
     # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
@@ -87,10 +94,13 @@ class Command(BaseCommand):
             dbxref = get_set_dbxref(db.name, fasta.id, '')
             # set variable for organism object
             organism = ""
+            organism_name = ""
+            organism_infra_name = ""
             # parse organism genus and species names from fasta description
             # try to get or set organism
             try:
-                organism_name = self.parse_organism(first_fasta_description)
+                (organism_name, organism_infra_name) = self.parse_organism(
+                    first_fasta_description)
             except:
                 raise IntegrityError('The organism could not be obtained'
                                      ' from the description: %s'
@@ -107,7 +117,12 @@ class Command(BaseCommand):
             except ObjectDoesNotExist:
                 residues = fasta.seq
                 # get organism object
-                organism = get_set_organism(organism_name)
+                print("BEFORE organism name %s and infra %s"
+                      % (organism_name, organism_infra_name))
+                organism = get_set_organism(organism_name, organism_infra_name)
+                print("AFTER organism name %s %s and infra %s"
+                      % (organism.genus, organism.species,
+                          organism.infraspecific_name))
                 m = ""
                 if options['nosequence']:
                     residues = ''
@@ -133,6 +148,5 @@ class Command(BaseCommand):
                                                project=project)
                         get_set_project_feature(feature=feature,
                                                 project=project)
-
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
