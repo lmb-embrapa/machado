@@ -22,6 +22,7 @@ def get_set_organism(organism_name, infra_name=""):
     # receives an organism binomial name with "Genus species" format
     genus = ""
     species = ""
+    organism = ""
     try:
         genus, species = organism_name.split(' ')
     except ValueError:
@@ -29,7 +30,8 @@ def get_set_organism(organism_name, infra_name=""):
                          'separated by a single space')
 
     try:
-        organism = Organism.objects.get(species=species, genus=genus)
+            organism = Organism.objects.get(species=species, genus=genus,
+                                            infraspecific_name=infra_name)
     except ObjectDoesNotExist:
         organism = Organism.objects.create(genus=genus, species=species,
                                            infraspecific_name=infra_name)
