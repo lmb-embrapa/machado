@@ -2,25 +2,25 @@ from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbxref
 
 
-def get_set_db(name):
+def get_set_db(db_name):
 
     try:
         # Check if the db is already registered
-        db = Db.objects.get(name=name)
+        db = Db.objects.get(name=db_name)
         return db
 
     except ObjectDoesNotExist:
 
         # Save the name to the Db model
-        db = Db.objects.create(name=name)
+        db = Db.objects.create(name=db_name)
         db.save()
         return db
 
 
-def get_set_dbxref(db, accession, description):
+def get_set_dbxref(db_name, accession, description):
 
     # Get/Set Db instance: db
-    db = get_set_db(db)
+    db = get_set_db(db_name)
 
     try:
         # Check if the dbxref is already registered
