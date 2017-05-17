@@ -5,36 +5,67 @@ from chado.lib.dbxref import get_set_dbxref
 import re
 
 
-def get_set_cv(name):
+def get_set_cv(cv_name):
+    """
+    It tries to get the cv object or create it otherwise
+
+    Args:
+        cv_name: type string
+
+    Returns:
+        cv: type object
+    """
 
     try:
         # Check if the cv is already registered
-        cv = Cv.objects.get(name=name)
+        cv = Cv.objects.get(name=cv_name)
         return cv
 
     except ObjectDoesNotExist:
 
         # Save the name to the Db model
-        cv = Cv.objects.create(name=name)
+        cv = Cv.objects.create(name=cv_name)
         cv.save()
         return cv
 
 
-def get_set_cvterm(cv, name, definition, dbxref, is_relationshiptype):
+def get_set_cvterm(cv_name,
+                   cvterm_name,
+                   definition,
+                   dbxref,
+                   is_relationshiptype):
+    """
+    It tries to get the cvterm object or create it otherwise.
+
+    Note:
+        This functions invokes get_set_cv in order
+        to retrieve a cv object
+
+
+    Args:
+        cv_name: type string
+        cvterm_name: type string
+        definition: type string
+        dbxref: type object
+        is_relationshiptype: type boolean
+
+    Returns:
+        cv: type object
+    """
 
     # Get/Set Cv instance: cv
-    cv = get_set_cv(cv)
+    cv = get_set_cv(cv_name)
 
     try:
         # Check if the cvterm is already registered
-        cvterm = Cvterm.objects.get(cv=cv, name=name)
+        cvterm = Cvterm.objects.get(cv=cv, name=cvterm_name)
         return cvterm
 
     except ObjectDoesNotExist:
 
         # Save the name to the Cvterm model
-        cvterm = Cvterm.objects.create(cv=cv,
-                                       name=name,
+        cvterm = Cvterm.objects.create(cv=cv_name,
+                                       name=cvterm_name,
                                        definition=definition,
                                        dbxref=dbxref,
                                        is_obsolete=0,
