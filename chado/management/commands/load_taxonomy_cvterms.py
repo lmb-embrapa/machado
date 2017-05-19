@@ -4,13 +4,15 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.cvterm import get_set_cv, get_set_cvterm
 from chado.lib.db import set_db_file
 from chado.lib.project import (get_project, get_set_project_dbxref)
+import re
 
 
 class Command(BaseCommand):
-    help = 'Load cvterms for NCBI\'s taxonomy file. To see the terms, run the'
-    'following shell command:'
-    'awk \'BEGIN{FS="\t\|\t"}{print $3}\' taxdump/nodes.dmp | sort -u '
-
+    help = 'Load cvterms for NCBI\'s taxonomy nodes.dmp file.'
+    # ranks hardcoded into 'data' array,  for *viewing* only.
+    # Ranks will be retrieved from nodes.dmp file.
+    # ' To see the terms, run the following shell command:'
+    # ' awk \'BEGIN{FS="\t\|\t"}{print $3}\' taxdump/nodes.dmp | sort -u '
     data = ["class", "cohort", "family", "forma", "genus", "infraclass",
             "infraorder", "kingdom", "no rank", "order", "parvorder",
             "phylum", "species", "species group", "species subgroup",
@@ -21,11 +23,26 @@ class Command(BaseCommand):
     db_name = 'species_taxonomy'
     cv_name = 'taxonomy'
 
+    def get_ontologies_from_node_file(self, nodefile):
+        # will get all ontologies from nodes.dmp file
+        # dictionary
+        ontologies = {}
+        # open handle for reading nodes.dmp file
+        lines = ""
+        try:
+            lines = open(nodefile, 'r')
+        except IOError:
+            raise IOError("Error: File does not appear to exist.")
+        for line in lines:
+            fields = re.split("\s+\|\s+", line)
+            ontologies[fields[2]] = 1
+        return ontologies
+
     def add_arguments(self, parser):
         parser.add_argument("--description", help="DB Description",
                             required=True, type=str)
-        parser.add_argument("--update", help="Overwrite existing sequences",
-                            required=False, action='store_true')
+        parser.add_argument("--file", help="nodes.dmp file", required=True,
+                            type=str)
         parser.add_argument("--project", help="Project name", required=False,
                             type=str)
 
@@ -38,32 +55,33 @@ class Command(BaseCommand):
 
         # get db object
         # this should use the function get_set_db, in dbxref lib but
-        # that does not have the 'description' field to be inserted.
+        # that function does not have the 'description' field to be inserted.
         # using set_db_file instead.
         db = set_db_file(file=self.db_name,
                          description=options['description'])
         # get cv object
         cv = get_set_cv(self.cv_name)
+        ontologies = self.get_ontologies_from_node_file(options["file"])
 
-        for taxa in self.data:
-                # get dbxref object
-                accession = "taxonomy:" + taxa
-                print("inserting taxa: %s ; accession is: %s"
-                      % (taxa, accession))
+        for rank in ontologies:
+            accession = "taxonomy:" + rank
+            print("inserting rank: %s ; accession is: %s"
+                  % (rank, accession))
 
-                dbxref = get_set_dbxref(db_name=db.name,
-                                        accession=accession,
-                                        description=taxa)
+            # get dbxref object
+            dbxref = get_set_dbxref(db_name=db.name,
+                                    accession=accession,
+                                    description=rank)
 
-                # get cvterm object
-                get_set_cvterm(cv_name=cv.name,
-                               cvterm_name=taxa,
-                               definition=cv.name,
-                               dbxref=dbxref,
-                               is_relationshiptype=0)
+            # set cvterm object
+            get_set_cvterm(cv_name=cv.name,
+                           cvterm_name=rank,
+                           definition=cv.name,
+                           dbxref=dbxref,
+                           is_relationshiptype=0)
 
-                if project:
-                        get_set_project_dbxref(dbxref=dbxref, project=project)
+            if project:
+                get_set_project_dbxref(dbxref=dbxref, project=project)
 
         self.stdout.write(self.style.SUCCESS('%s Done. '
                                              % (datetime.now())))
