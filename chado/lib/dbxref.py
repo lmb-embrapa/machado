@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbxref
+from chado.lib.project import get_set_project_dbxref
 
 
 def get_set_db(db_name):
@@ -17,14 +18,20 @@ def get_set_db(db_name):
         return db
 
 
-def get_set_dbxref(db_name, accession, description):
+def get_set_dbxref(db_name, accession, **kargs):
 
     # Get/Set Db instance: db
     db = get_set_db(db_name)
 
+    description = kargs['description']
+    project = kargs['project']
+
     try:
         # Check if the dbxref is already registered
         dbxref = Dbxref.objects.get(db=db, accession=accession)
+        if project:
+            get_set_project_dbxref(dbxref=dbxref,
+                                   project=project)
         return dbxref
 
     except ObjectDoesNotExist:
@@ -34,4 +41,7 @@ def get_set_dbxref(db_name, accession, description):
                                        accession=accession,
                                        description=description)
         dbxref.save()
+        if project:
+            get_set_project_dbxref(dbxref=dbxref,
+                                   project=project)
         return dbxref
