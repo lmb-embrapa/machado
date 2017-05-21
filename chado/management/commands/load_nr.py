@@ -64,9 +64,13 @@ class Command(BaseCommand):
     # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
         fields = re.split('\x01', fasta_description)
+        first = fields[0]
+        # trying to return the first description that contains [
         for field in fields:
             if re.search(r'\]', field):
                 return field
+        # returning the first one since none have [
+        return first
 
     def handle(self, *args, **options):
         # retrieve project object
@@ -106,9 +110,9 @@ class Command(BaseCommand):
                 (organism_name, organism_infra_name) = self.parse_organism(
                     first_fasta_description)
             except:
-                raise IntegrityError('The organism could not be obtained'
-                                     ' from the description: %s'
-                                     % first_fasta_description)
+                organism_name = 'Unspecified organism'
+                organism_infra_name = 'Unspecified organism'
+
             try:
                 # get feature object
                 feat = Feature.objects.get(uniquename=fasta.id)
