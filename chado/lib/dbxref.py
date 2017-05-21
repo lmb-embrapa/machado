@@ -23,8 +23,8 @@ def get_set_dbxref(db_name, accession, **kargs):
     # Get/Set Db instance: db
     db = get_set_db(db_name)
 
-    description = kargs['description']
-    project = kargs['project']
+    description = kargs.get('description')
+    project = kargs.get('project')
 
     try:
         # Check if the dbxref is already registered
