@@ -9,8 +9,7 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_set_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.project import (get_project, get_set_project_dbxref,
-                               get_set_project_feature)
+from chado.lib.project import get_project, get_set_project_feature
 import re
 # import json
 
@@ -22,8 +21,8 @@ class Command(BaseCommand):
         parser.add_argument("--fasta", help="FASTA File", required=True,
                             type=str)
         parser.add_argument("--description", help="DB Description",
-                            required=True, type=str)
-        parser.add_argument("--url", help="DB URL", required=True, type=str)
+                            required=False, type=str)
+        parser.add_argument("--url", help="DB URL", required=False, type=str)
         parser.add_argument("--nosequence", help="Don't load the sequence",
                             required=False, action='store_true')
         parser.add_argument("--update", help="Overwrite existing sequences",
@@ -65,19 +64,22 @@ class Command(BaseCommand):
     # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
         fields = re.split('\x01', fasta_description)
-        first = fields[0]
-        # print("first field is %s" % (first))
-        return(first)
+        for field in fields:
+            if re.search(r'\]', field):
+                return field
 
     def handle(self, *args, **options):
         # retrieve project object
-        project = ""
+        project = ''
         if options['project']:
             project_name = options['project']
             project = get_project(project_name)
 
         # get db object
-        db = set_db_file(options['fasta'])
+        db = set_db_file(file=options['fasta'],
+                         description=options.get('description'),
+                         url=options.get('url'))
+
         # get cvterm object
         cvterm = get_ontology_term(ontology='sequence',
                                    term='protein_coding')
@@ -91,7 +93,9 @@ class Command(BaseCommand):
             # print("fasta description: %s" % fasta.description)
             # print("first fasta description: %s" % first_fasta_description)
             # get dbxref object
-            dbxref = get_set_dbxref(db.name, fasta.id, '')
+            dbxref = get_set_dbxref(db_name=db.name,
+                                    accession=fasta.id,
+                                    project=project)
             # set variable for organism object
             organism = ""
             organism_name = ""
@@ -144,8 +148,6 @@ class Command(BaseCommand):
                                                  now(timezone.utc))
                 # create project_dbxref and project_feature
                 if project:
-                        get_set_project_dbxref(dbxref=dbxref,
-                                               project=project)
                         get_set_project_feature(feature=feature,
                                                 project=project)
         self.stdout.write(self.style.SUCCESS('%s Done'
