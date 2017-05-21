@@ -85,10 +85,17 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
 ### Start you app and open the admin interface
 
+You have to run the following command to create django admin tables:
+
+    python manage.py migrate
+
+And the following command to create an admin user:
+
+    python manage.py createsuperuser
+
+Now, just run the DJango server to access the admin interface:
+
     python manage.py runserver
 
 The webapp admin interface will be available at http://localhost:8000/admin
 
-Use the following command to create an user:
-
-    python manage.py createsuperuser
