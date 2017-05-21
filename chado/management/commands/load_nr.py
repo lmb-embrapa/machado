@@ -127,10 +127,9 @@ class Command(BaseCommand):
                 # print("AFTER organism name %s %s and infra %s"
                 #       % (organism.genus, organism.species,
                 #          organism.infraspecific_name))
-                m = ""
+                m = hashlib.md5(str(fasta.seq).encode()).hexdigest()
                 if options['nosequence']:
                     residues = ''
-                    m = hashlib.md5(str(fasta.seq).encode()).hexdigest()
 
                 feature = Feature.objects.create(dbxref=dbxref,
                                                  organism=organism,
