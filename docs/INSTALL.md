@@ -32,6 +32,10 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install psycopg2
 
+#### biopython 1.69
+
+    pip install biopython
+
 #### obonet 0.2.1
 
     pip install obonet
