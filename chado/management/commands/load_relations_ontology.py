@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from chado.models import Cv
 import obonet
 from chado.lib.dbxref import get_set_dbxref
