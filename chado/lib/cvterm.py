@@ -64,7 +64,7 @@ def get_set_cvterm(cv_name,
     except ObjectDoesNotExist:
 
         # Save the name to the Cvterm model
-        cvterm = Cvterm.objects.create(cv=cv_name,
+        cvterm = Cvterm.objects.create(cv=cv,
                                        name=cvterm_name,
                                        definition=definition,
                                        dbxref=dbxref,
