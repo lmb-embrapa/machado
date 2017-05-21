@@ -9,8 +9,7 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.project import (get_project, get_set_project_dbxref,
-                               get_set_project_feature)
+from chado.lib.project import get_project, get_set_project_feature
 
 
 class Command(BaseCommand):
@@ -34,6 +33,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        project = ''
         # retrieve project object
         if options['project']:
             project_name = options['project']
@@ -55,7 +55,10 @@ class Command(BaseCommand):
         fasta_sequences = SeqIO.parse(open(options['fasta']), 'fasta')
 
         for fasta in fasta_sequences:
-            dbxref = get_set_dbxref(db.name, fasta.id, '')
+            dbxref = get_set_dbxref(db_name=db.name,
+                                    accession=fasta.id,
+                                    description='',
+                                    project=project)
 
             try:
                 feature = Feature.objects.get(uniquename=fasta.id)
@@ -85,8 +88,6 @@ class Command(BaseCommand):
                                                  now(timezone.utc))
                 # create project_dbxref and project_feature
                 if project:
-                        get_set_project_dbxref(dbxref=dbxref,
-                                               project=project)
                         get_set_project_feature(feature=feature,
                                                 project=project)
 
