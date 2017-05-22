@@ -46,16 +46,14 @@ class Command(BaseCommand):
 
             # Creating cvterm is_symmetric to be used as type_id in cvtermprop
             dbxref_is_symmetric = get_set_dbxref('internal',
-                                                 'is_symmetric',
-                                                 '')
+                                                 'is_symmetric')
             cvterm_is_symmetric = get_set_cvterm('cvterm_property_type',
                                                  'is_symmetric', '',
                                                  dbxref_is_symmetric, 0)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal',
-                                                  'is_transitive',
-                                                  '')
+                                                  'is_transitive')
             cvterm_is_transitive = get_set_cvterm('cvterm_property_type',
                                                   'is_transitive',
                                                   '',
@@ -66,9 +64,9 @@ class Command(BaseCommand):
 
             # Load typedefs as Dbxrefs and Cvterm
             for typedef in G.graph['typedefs']:
-                dbxref_typedef = get_set_dbxref('_global',
-                                                typedef['id'],
-                                                typedef.get('def'))
+                dbxref_typedef = get_set_dbxref(db_name='_global',
+                                                accession=typedef['id'],
+                                                description=typedef.get('def'))
                 cvterm_typedef = get_set_cvterm(cv.name,
                                                 typedef.get('id'),
                                                 typedef.get('def'),
@@ -91,7 +89,7 @@ class Command(BaseCommand):
             self.stdout.write('Loading terms')
 
             # Creating cvterm comment to be used as type_id in cvtermprop
-            dbxref_comment = get_set_dbxref('internal', 'comment', '')
+            dbxref_comment = get_set_dbxref('internal', 'comment')
             cvterm_comment = get_set_cvterm('cvterm_property_type',
                                             'comment',
                                             '',
@@ -102,7 +100,7 @@ class Command(BaseCommand):
 
                 # Save the term to the Dbxref model
                 aux_db, aux_accession = n.split(':')
-                dbxref = get_set_dbxref(aux_db, aux_accession, '')
+                dbxref = get_set_dbxref(aux_db, aux_accession)
 
                 # Save the term to the Cvterm model
                 cvterm = get_set_cvterm(cv.name,
@@ -119,8 +117,7 @@ class Command(BaseCommand):
                     for alt_id in data.get('alt_id'):
                         aux_db, aux_accession = alt_id.split(':')
                         dbxref_alt_id = get_set_dbxref(aux_db,
-                                                       aux_accession,
-                                                       '')
+                                                       aux_accession)
                         get_set_cvterm_dbxref(cvterm,
                                               dbxref_alt_id,
                                               0)
@@ -145,7 +142,7 @@ class Command(BaseCommand):
             self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
-            dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a', '')
+            dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
             cvterm_is_a = get_set_cvterm('relationship',
                                          'is_a',
                                          '',

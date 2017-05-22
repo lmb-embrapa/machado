@@ -31,15 +31,9 @@ class Command(BaseCommand):
         organism = get_organism(options['organism'])
 
         # Save DB info
-        try:
-            db = Db.objects.get(name=options['gf'])
-            if db is not None:
-                raise IntegrityError('The db %s is already registered.'
-                                     % db.name)
-        except ObjectDoesNotExist:
-            Db.objects.create(name=options['gff'],
-                              description=options.get('description'),
-                              url=options.get('url'))
+        db = set_db_file(file=options['fasta'],
+                         description=options.get('description'),
+                         url=options.get('url'))
 
         # Load the GFF3 file
         with open(options['in']) as tbx_file:

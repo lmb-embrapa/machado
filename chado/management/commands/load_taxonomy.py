@@ -4,7 +4,6 @@ from django.db import IntegrityError
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.db import set_db_file
 from chado.lib.organism import get_set_organism, get_set_organism_dbxref
-from chado.lib.project import (get_project, get_set_project_dbxref)
 import re
 import sys
 
@@ -23,8 +22,6 @@ class Command(BaseCommand):
         parser.add_argument("--url", help="DB URL", required=True, type=str)
         parser.add_argument("--update", help="Overwrite existing sequences",
                             required=False, action='store_true')
-        parser.add_argument("--project", help="Project name", required=False,
-                            type=str)
 
     # description field example:
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
@@ -48,11 +45,6 @@ class Command(BaseCommand):
         return((genus + " " + species), infra)
 
     def handle(self, *args, **options):
-        # retrieve project object
-        project = ""
-        if options['project']:
-            project_name = options['project']
-            project = get_project(project_name)
 
         # get db object
         db = set_db_file(file=options['names'],
@@ -82,7 +74,9 @@ class Command(BaseCommand):
                 # print("scientific name %s" % scname)
                 # sys.exit()
                 # get dbxref object
-                dbxref = get_set_dbxref(db.name, taxid, scname)
+                dbxref = get_set_dbxref(db_name=db.name,
+                                        accession=taxid,
+                                        description=scname)
                 # set variable for organism object
                 organism_name = ""
                 # parse organism genus and species names from fasta description
@@ -101,9 +95,6 @@ class Command(BaseCommand):
                 sys.stdout.write('Scientific names inserted: %s\r' % counter)
                 sys.stdout.flush()
 
-                # create project_dbxref and project_feature
-                if project:
-                        get_set_project_dbxref(dbxref=dbxref, project=project)
             # else:
                 # print("field %s is not scientific name" % fields[3])
 

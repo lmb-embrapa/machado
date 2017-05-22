@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
 from chado.models import Cv
 import obonet
 from chado.lib.dbxref import get_set_dbxref
@@ -53,8 +52,7 @@ class Command(BaseCommand):
             # Creating cvterm is_anti_symmetric to be used as type_id in
             # cvtermprop
             dbxref_is_anti_symmetric = get_set_dbxref('internal',
-                                                      'is_anti_symmetric',
-                                                      '')
+                                                      'is_anti_symmetric')
             cvterm_is_anti_symmetric = get_set_cvterm('cvterm_property_type',
                                                       'is_anti_symmetric', '',
                                                       dbxref_is_anti_symmetric,
@@ -63,26 +61,26 @@ class Command(BaseCommand):
             # Creating cvterm is_transitive to be used as type_id in
             # cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal',
-                                                  'is_transitive', '')
+                                                  'is_transitive')
             cvterm_is_transitive = get_set_cvterm('cvterm_property_type',
                                                   'is_transitive', '',
                                                   dbxref_is_transitive, 0)
 
             # Creating cvterm is_reflexive to be used as type_id in cvtermprop
             dbxref_is_reflexive = get_set_dbxref('internal',
-                                                 'is_reflexive', '')
+                                                 'is_reflexive')
             cvterm_is_reflexive = get_set_cvterm('cvterm_property_type',
                                                  'is_reflexive', '',
                                                  dbxref_is_reflexive, 0)
 
             # Creating cvterm comment to be used as type_id in cvtermprop
-            dbxref_comment = get_set_dbxref('internal', 'comment', '')
+            dbxref_comment = get_set_dbxref('internal', 'comment')
             cvterm_comment = get_set_cvterm('cvterm_property_type',
                                             'comment', '', dbxref_comment, 0)
 
             # Creating cvterm is_anti_symmetric to be used as type_id in
             # cvtermprop
-            dbxref_exact = get_set_dbxref('internal', 'exact', '')
+            dbxref_exact = get_set_dbxref('internal', 'exact')
             get_set_cvterm('synonym_type', 'exact', '',
                            dbxref_exact, 0)
 
@@ -96,7 +94,7 @@ class Command(BaseCommand):
                 # Save the term to the Dbxref model
                 try:
                     aux_db, aux_accession = data.get('id').split(':')
-                    dbxref = get_set_dbxref(aux_db, aux_accession, '')
+                    dbxref = get_set_dbxref(aux_db, aux_accession)
                 except ValueError:
                     continue
 
@@ -134,8 +132,7 @@ class Command(BaseCommand):
                     for alt_id in data.get('alt_id'):
                         aux_db, aux_accession = alt_id.split(':')
                         dbxref_alt_id = get_set_dbxref(aux_db,
-                                                       aux_accession,
-                                                       '')
+                                                       aux_accession)
                         get_set_cvterm_dbxref(cvterm, dbxref_alt_id, 0)
 
                 # Load comment

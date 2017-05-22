@@ -9,7 +9,6 @@ from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_set_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.project import get_project, get_set_project_feature
 import re
 # import json
 
@@ -27,8 +26,6 @@ class Command(BaseCommand):
                             required=False, action='store_true')
         parser.add_argument("--update", help="Overwrite existing sequences",
                             required=False, action='store_true')
-        parser.add_argument("--project", help="Project name", required=False,
-                            type=str)
 
     # get binomial name of the organism from the fasta description
     # object.
@@ -73,11 +70,6 @@ class Command(BaseCommand):
         return first
 
     def handle(self, *args, **options):
-        # retrieve project object
-        project = ''
-        if options['project']:
-            project_name = options['project']
-            project = get_project(project_name)
 
         # get db object
         db = set_db_file(file=options['fasta'],
@@ -98,8 +90,7 @@ class Command(BaseCommand):
             # print("first fasta description: %s" % first_fasta_description)
             # get dbxref object
             dbxref = get_set_dbxref(db_name=db.name,
-                                    accession=fasta.id,
-                                    project=project)
+                                    accession=fasta.id)
             # set variable for organism object
             organism = ""
             organism_name = ""
@@ -135,23 +126,19 @@ class Command(BaseCommand):
                 if options['nosequence']:
                     residues = ''
 
-                feature = Feature.objects.create(dbxref=dbxref,
-                                                 organism=organism,
-                                                 name=first_fasta_description,
-                                                 uniquename=fasta.id,
-                                                 residues=residues,
-                                                 seqlen=len(fasta.seq),
-                                                 md5checksum=m,
-                                                 type_id=cvterm.cvterm_id,
-                                                 is_analysis=False,
-                                                 is_obsolete=False,
-                                                 timeaccessioned=datetime.
-                                                 now(timezone.utc),
-                                                 timelastmodified=datetime.
-                                                 now(timezone.utc))
-                # create project_dbxref and project_feature
-                if project:
-                        get_set_project_feature(feature=feature,
-                                                project=project)
+                Feature.objects.create(dbxref=dbxref,
+                                       organism=organism,
+                                       name=first_fasta_description,
+                                       uniquename=fasta.id,
+                                       residues=residues,
+                                       seqlen=len(fasta.seq),
+                                       md5checksum=m,
+                                       type_id=cvterm.cvterm_id,
+                                       is_analysis=False,
+                                       is_obsolete=False,
+                                       timeaccessioned=datetime.
+                                       now(timezone.utc),
+                                       timelastmodified=datetime.
+                                       now(timezone.utc))
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
