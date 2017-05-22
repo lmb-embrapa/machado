@@ -149,7 +149,7 @@ def process_cvterm_def(cvterm, definition):
                     ref_content = 'http:'+ref_content
 
                 # Get/Set Dbxref instance: ref_db,ref_content
-                dbxref = get_set_dbxref(ref_db, ref_content, '')
+                dbxref = get_set_dbxref(ref_db, ref_content)
 
                 # Estabilish the cvterm and the dbxref relationship
                 get_set_cvterm_dbxref(cvterm, dbxref, 1)
@@ -170,7 +170,7 @@ def process_cvterm_xref(cvterm, xref):
             ref_content = 'http:'+ref_content
 
         # Get/Set Dbxref instance: ref_db,ref_content
-        dbxref = get_set_dbxref(ref_db, ref_content, '')
+        dbxref = get_set_dbxref(ref_db, ref_content)
 
         # Estabilish the cvterm and the dbxref relationship
         get_set_cvterm_dbxref(cvterm, dbxref, 0)
@@ -201,8 +201,7 @@ def process_cvterm_so_synonym(cvterm, synonym):
 
     # Handling the synonym_type
     dbxref_type = get_set_dbxref('internal',
-                                 synonym_type.lower(),
-                                 '')
+                                 synonym_type.lower())
     cvterm_type = get_set_cvterm('synonym_type',
                                  synonym_type.lower(),
                                  '',
@@ -233,7 +232,7 @@ def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
     synonym_type = re.sub(r'_synonym', '', synonym_type).lower()
 
     # Handling the synonym_type
-    dbxref_type = get_set_dbxref('internal', synonym_type, '')
+    dbxref_type = get_set_dbxref('internal', synonym_type)
     cvterm_type = get_set_cvterm('synonym_type',
                                  synonym_type,
                                  '',
