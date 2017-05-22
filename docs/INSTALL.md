@@ -36,6 +36,10 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install biopython
 
+#### pysam 0.11.2.1
+
+    pip install pysam
+
 #### obonet 0.2.1
 
     pip install obonet
