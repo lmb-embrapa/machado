@@ -31,8 +31,6 @@ class Command(BaseCommand):
         parser.add_argument("--description", help="DB Description",
                             required=False, type=str)
         parser.add_argument("--url", help="DB URL", required=False, type=str)
-        parser.add_argument("--pub", help="Publication ID", required=False,
-                            type=str)
         parser.add_argument("--project", help="Project name", required=False,
                             type=str)
 
@@ -54,28 +52,23 @@ class Command(BaseCommand):
             project_name = options['project']
             project = get_project(project_name)
 
-        # trying to retrieve the publications
-        # pub = null if None found
+        # getting the pub named 'null' in order to create
+        # feature_cvterm entries
+        # Unneeded if feature_cvterm.pub_id was nullable
         try:
-            pub = Pub.objects.get(pub_id=options.get('pub'))
+            pub = Pub.objects.get(uniquename='null')
         except ObjectDoesNotExist:
-            self.stdout.write(
-                'Publication not found or not provided.'
-            )
-            try:
-                pub = Pub.objects.get(uniquename='null')
-            except ObjectDoesNotExist:
-                null_dbxref = get_set_dbxref(db_name='null', accession='null')
-                null_cvterm = get_set_cvterm('null',
-                                             'null',
-                                             '',
-                                             null_dbxref,
-                                             0)
-                pub = Pub.objects.create(miniref='null',
-                                         uniquename='null',
-                                         type_id=null_cvterm.cvterm_id,
-                                         is_obsolete=False
-                                         )
+            null_dbxref = get_set_dbxref(db_name='null', accession='null')
+            null_cvterm = get_set_cvterm('null',
+                                         'null',
+                                         '',
+                                         null_dbxref,
+                                         0)
+            pub = Pub.objects.create(miniref='null',
+                                     uniquename='null',
+                                     type_id=null_cvterm.cvterm_id,
+                                     is_obsolete=False
+                                     )
 
         # Retrieve organism object
         organism = get_organism(options['organism'])
