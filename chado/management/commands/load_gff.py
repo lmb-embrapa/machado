@@ -5,9 +5,8 @@ import pysam
 from urllib.parse import unquote
 from datetime import datetime, timezone
 
-from chado.models import Feature, FeatureCvterm, FeatureDbxref
+from chado.models import Feature, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
-from chado.models import Pub
 from chado.lib.cvterm import get_ontology_term, get_set_cvterm
 from chado.lib.db import set_db_file
 from chado.lib.dbxref import get_set_dbxref
@@ -51,24 +50,6 @@ class Command(BaseCommand):
         if options.get('project') is not None:
             project_name = options['project']
             project = get_project(project_name)
-
-        # getting the pub named 'null' in order to create
-        # feature_cvterm entries
-        # Unneeded if feature_cvterm.pub_id was nullable
-        try:
-            pub = Pub.objects.get(uniquename='null')
-        except ObjectDoesNotExist:
-            null_dbxref = get_set_dbxref(db_name='null', accession='null')
-            null_cvterm = get_set_cvterm('null',
-                                         'null',
-                                         '',
-                                         null_dbxref,
-                                         0)
-            pub = Pub.objects.create(miniref='null',
-                                     uniquename='null',
-                                     type_id=null_cvterm.cvterm_id,
-                                     is_obsolete=False
-                                     )
 
         # Retrieve organism object
         organism = get_organism(options['organism'])
@@ -135,13 +116,6 @@ class Command(BaseCommand):
                         timelastmodified=datetime.
                         now(timezone.utc)
                     )
-
-                    # creating cvterm_feature
-                    FeatureCvterm.objects.create(feature=feature,
-                                                 cvterm=cvterm,
-                                                 pub=pub,
-                                                 is_not=False,
-                                                 rank=0)
 
                     # storing the feature location
                     srcfeature = Feature.objects.get(uniquename=row.contig)
