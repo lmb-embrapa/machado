@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 from chado.models import Feature, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
-from chado.lib.cvterm import get_ontology_term, get_set_cvterm
+from chado.lib.cvterm import get_ontology_term
 from chado.lib.db import set_db_file
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_organism
