@@ -259,11 +259,13 @@ def get_ontology_term(ontology, term):
         try:
             cv = Cv.objects.get(name=ontology)
         except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology not loaded.')
+            raise ObjectDoesNotExist('Sequence Ontology not loaded (%s).'
+                                     % (ontology))
 
         # Retrieve sequence ontology term object
         try:
             cvterm = Cvterm.objects.get(cv=cv, name=term)
         except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology term not found.')
+            raise ObjectDoesNotExist('Sequence Ontology term not found (%s).'
+                                     % (term))
         return cvterm
