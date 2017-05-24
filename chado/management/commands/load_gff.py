@@ -216,8 +216,12 @@ class Command(BaseCommand):
                     )
 
                     # storing the feature location
-                    srcfeature = Feature.objects.get(uniquename=row.contig,
-                                                     organism=organism)
+                    try:
+                        srcfeature = Feature.objects.get(uniquename=row.contig,
+                                                         organism=organism)
+                    except ObjectDoesNotExist:
+                        raise ObjectDoesNotExist("Parent not found: %s"
+                                                 % (row.contig))
                     if row.strand == '+':
                         strand = +1
                     elif row.strand == '-':
