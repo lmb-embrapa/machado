@@ -178,8 +178,8 @@ class Command(BaseCommand):
                 cvterm = get_ontology_term(ontology='sequence',
                                            term=row.feature)
 
-                # set ID = auto#
-                if not attrs.get('ID'):
+                # set id = auto#
+                if not attrs.get('id'):
                     attrs['id'] = 'auto%s' % (auto)
                     auto += 1
 
