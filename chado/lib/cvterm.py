@@ -255,17 +255,17 @@ def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
 
 
 def get_ontology_term(ontology, term):
-        # Retrieve sequence ontology object
-        try:
-            cv = Cv.objects.get(name=ontology)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology not loaded (%s).'
-                                     % (ontology))
+    # Retrieve sequence ontology object
+    try:
+        cv = Cv.objects.get(name=ontology)
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist('Sequence Ontology not loaded (%s).'
+                                 % (ontology))
 
-        # Retrieve sequence ontology term object
-        try:
-            cvterm = Cvterm.objects.get(cv=cv, name=term)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist('Sequence Ontology term not found (%s).'
-                                     % (term))
-        return cvterm
+    # Retrieve sequence ontology term object
+    try:
+        cvterm = Cvterm.objects.get(cv=cv, name=term)
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist('Sequence Ontology term not found (%s).'
+                                 % (term))
+    return cvterm

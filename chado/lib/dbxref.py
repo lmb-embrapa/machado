@@ -45,3 +45,16 @@ def get_set_dbxref(db_name, accession, **kargs):
             get_set_project_dbxref(dbxref=dbxref,
                                    project=project)
         return dbxref
+
+
+def get_dbxref(db_name, accession):
+
+    # Get/Set Db instance: db
+    db = Db.objects.get(name=db_name)
+
+    try:
+        # Check if the dbxref is already registered
+        dbxref = Dbxref.objects.get(db=db, accession=accession)
+        return dbxref
+    except ObjectDoesNotExist:
+        return None

@@ -5,11 +5,13 @@ import pysam
 from urllib.parse import unquote
 from datetime import datetime, timezone
 
-from chado.models import Feature, FeatureDbxref
-from chado.models import Featureloc, FeatureRelationship
-from chado.lib.cvterm import get_ontology_term
+from chado.models import Cvterm
+from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
+from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
+from chado.models import Pub, Synonym
+from chado.lib.cvterm import get_ontology_term, get_set_cvterm
 from chado.lib.db import set_db_file
-from chado.lib.dbxref import get_set_dbxref
+from chado.lib.dbxref import get_set_dbxref, get_dbxref
 from chado.lib.organism import get_organism
 from chado.lib.project import get_project, get_set_project_feature
 
@@ -40,8 +42,100 @@ class Command(BaseCommand):
         fields = attributes.split(";")
         for field in fields:
             key, value = field.split("=")
-            result[key] = unquote(value)
+            result[key.lower()] = unquote(value)
         return result
+
+    def process_attributes(self, project, feature, attrs):
+        """
+        It handles the following attributes:
+
+        dbxref, note, display, parent, alias, ontology_term, gene, id,
+        orf_classification, name
+
+        Args:
+            project: type string
+            feature: type object
+            attrs: type dict
+        """
+
+        # retrieving the cvterm 'exact'
+        cvterm_exact = get_ontology_term('synonym_type', 'exact')
+
+        # retrieving the pub 'null'
+        try:
+            pub = Pub.objects.get(uniquename='null')
+        except ObjectDoesNotExist:
+            null_dbxref = get_set_dbxref(db_name='null', accession='null')
+            null_cvterm = get_set_cvterm('null',
+                                         'null',
+                                         '',
+                                         null_dbxref,
+                                         0)
+            pub = Pub.objects.create(miniref='null',
+                                     uniquename='null',
+                                     type_id=null_cvterm.cvterm_id,
+                                     is_obsolete=False)
+
+        for key in attrs:
+            if key in ['id', 'name', 'parent']:
+                continue
+            elif key in ['note', 'display', 'gene', 'orf_classification']:
+                note_dbxref = get_set_dbxref(db_name='null', accession=key)
+                note_cvterm = get_set_cvterm('feature_property',
+                                             key,
+                                             '',
+                                             note_dbxref,
+                                             0)
+                Featureprop.objects.create(feature=feature,
+                                           type_id=note_cvterm.cvterm_id,
+                                           value=attrs.get(key),
+                                           rank=0)
+            elif key in ['ontology_term']:
+                terms = attrs.get(key).split(',')
+                for term in terms:
+                    term_db, term_id = term.split(':')
+                    dbxref = get_dbxref(db_name=term_db, accession=term_id)
+                    try:
+                        cvterm = Cvterm.objects.get(dbxref=dbxref)
+                        FeatureCvterm.objects.create(feature=feature,
+                                                     cvterm=cvterm,
+                                                     pub=pub,
+                                                     is_not=False,
+                                                     rank=0)
+                    except ObjectDoesNotExist:
+                        self.stdout.write(
+                            self.style.WARNING('GO term not registered: %s'
+                                               % (term)))
+            elif key in ['dbxref']:
+                dbxrefs = attrs[key].split(',')
+                for dbxref in dbxrefs:
+                    # It expects just one dbxref formated as XX:012345
+                    aux_db, aux_dbxref = dbxref.split(':')
+                    # create a dbxref for the column source
+                    dbxref = get_set_dbxref(db_name=aux_db,
+                                            accession=aux_dbxref,
+                                            project=project)
+
+                    # associate feature with source
+                    FeatureDbxref.objects.create(feature=feature,
+                                                 dbxref=dbxref,
+                                                 is_current=1)
+
+            elif key in ['alias']:
+                try:
+                    synonym = Synonym.objects.get(name=attrs.get(key))
+                except ObjectDoesNotExist:
+                    synonym = Synonym.objects.create(
+                        name=attrs.get(key),
+                        type_id=cvterm_exact.cvterm_id,
+                        synonym_sgml=attrs.get(key)
+                    )
+                FeatureSynonym.objects.create(synonym=synonym,
+                                              feature=feature,
+                                              pub=pub,
+                                              is_current=False,
+                                              is_internal=False)
+        return
 
     def handle(self, *args, **options):
 
@@ -66,6 +160,7 @@ class Command(BaseCommand):
         # Load the GFF3 file
         auto = 1
         parents = list()
+        all_keys = set()
         with open(options['gff']) as tbx_file:
             # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
@@ -75,6 +170,8 @@ class Command(BaseCommand):
             for row in tbx.fetch(parser=pysam.asGTF()):
                 # populate tables related to GFF
                 attrs = self.get_attributes(row.attributes)
+                for key in attrs:
+                    all_keys.add(key)
                 # print(attrs)
 
                 # Retrieve sequence ontology object
@@ -118,7 +215,8 @@ class Command(BaseCommand):
                     )
 
                     # storing the feature location
-                    srcfeature = Feature.objects.get(uniquename=row.contig)
+                    srcfeature = Feature.objects.get(uniquename=row.contig,
+                                                     organism=organism)
                     if row.strand == '+':
                         strand = +1
                     elif row.strand == '-':
@@ -149,14 +247,9 @@ class Command(BaseCommand):
                             get_set_project_feature(feature=feature,
                                                     project=project)
 
-                    # create a dbxref for the column source
-                    dbxref = get_set_dbxref(db_name=db.name,
-                                            accession=row.source,
-                                            project=project)
-                    # associate feature with source
-                    FeatureDbxref.objects.create(feature=feature,
-                                                 dbxref=dbxref,
-                                                 is_current=1)
+                    # adding attributes to featureprop
+                    self.process_attributes(project, feature, attrs)
+
                     # storing the feature and parent ids
                     if attrs.get('Parent') is not None:
                         parents.append((attrs['Parent'], attrs['ID']))
@@ -173,6 +266,8 @@ class Command(BaseCommand):
                 object_id=object.feature_id,
                 type_id=part_of.cvterm_id,
                 rank=0))
+
+        # print(all_keys)
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
