@@ -220,8 +220,10 @@ class Command(BaseCommand):
                         srcfeature = Feature.objects.get(uniquename=row.contig,
                                                          organism=organism)
                     except ObjectDoesNotExist:
-                        raise ObjectDoesNotExist("Parent not found: %s"
-                                                 % (row.contig))
+                        raise ObjectDoesNotExist(
+                            "Parent not found: %s. It's recommended to load "
+                            "a reference FASTA file before loading features."
+                            % (row.contig))
                     if row.strand == '+':
                         strand = +1
                     elif row.strand == '-':
