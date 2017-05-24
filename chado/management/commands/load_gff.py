@@ -180,31 +180,32 @@ class Command(BaseCommand):
 
                 # set ID = auto#
                 if not attrs.get('ID'):
-                    attrs['ID'] = 'auto%s' % (auto)
+                    attrs['id'] = 'auto%s' % (auto)
                     auto += 1
 
                 try:
-                    feature = Feature.objects.get(uniquename=attrs['ID'],
+                    feature = Feature.objects.get(uniquename=attrs['id'],
                                                   organism=organism,
                                                   type_id=cvterm.cvterm_id)
                     if feature is not None:
                         self.stdout.write(
-                            self.style.WARNING('The feature %s %s is already '
-                                               'registered.'
-                                               % (attrs['ID'], attrs['Name'])))
+                            self.style.WARNING(
+                                'The feature %s %s is already '
+                                'registered.'
+                                % (attrs['id'], attrs.get('name'))))
                 except ObjectDoesNotExist:
 
                     # creating a dbxref for the feature
                     dbxref = get_set_dbxref(db_name=db.name,
-                                            accession=attrs['ID'],
+                                            accession=attrs['id'],
                                             project=project)
 
                     # creating a new feature
                     feature = Feature.objects.create(
                         dbxref=dbxref,
                         organism=organism,
-                        name=attrs.get('Name'),
-                        uniquename=attrs.get('ID'),
+                        name=attrs.get('name'),
+                        uniquename=attrs.get('id'),
                         type_id=cvterm.cvterm_id,
                         is_analysis=False,
                         is_obsolete=False,
@@ -252,7 +253,7 @@ class Command(BaseCommand):
 
                     # storing the feature and parent ids
                     if attrs.get('Parent') is not None:
-                        parents.append((attrs['Parent'], attrs['ID']))
+                        parents.append((attrs['parent'], attrs['id']))
 
         # creating the feature relationships
         parent_objects = list()
