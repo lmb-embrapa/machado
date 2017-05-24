@@ -45,7 +45,7 @@ class Command(BaseCommand):
             result[key.lower()] = unquote(value)
         return result
 
-    def process_attributes(self, project, feature, attrs):
+    def process_attributes(self, project, feature, attrs, pub):
         """
         It handles the following attributes:
 
@@ -60,21 +60,6 @@ class Command(BaseCommand):
 
         # retrieving the cvterm 'exact'
         cvterm_exact = get_ontology_term('synonym_type', 'exact')
-
-        # retrieving the pub 'null'
-        try:
-            pub = Pub.objects.get(uniquename='null')
-        except ObjectDoesNotExist:
-            null_dbxref = get_set_dbxref(db_name='null', accession='null')
-            null_cvterm = get_set_cvterm('null',
-                                         'null',
-                                         '',
-                                         null_dbxref,
-                                         0)
-            pub = Pub.objects.create(miniref='null',
-                                     uniquename='null',
-                                     type_id=null_cvterm.cvterm_id,
-                                     is_obsolete=False)
 
         for key in attrs:
             if key in ['id', 'name', 'parent']:
@@ -120,7 +105,6 @@ class Command(BaseCommand):
                     FeatureDbxref.objects.create(feature=feature,
                                                  dbxref=dbxref,
                                                  is_current=1)
-
             elif key in ['alias']:
                 try:
                     synonym = Synonym.objects.get(name=attrs.get(key))
@@ -156,6 +140,21 @@ class Command(BaseCommand):
         db = set_db_file(file=options['gff'],
                          description=options.get('description'),
                          url=options.get('url'))
+
+        # retrieving the pub 'null'
+        try:
+            pub = Pub.objects.get(uniquename='null')
+        except ObjectDoesNotExist:
+            null_dbxref = get_set_dbxref(db_name='null', accession='null')
+            null_cvterm = get_set_cvterm('null',
+                                         'null',
+                                         '',
+                                         null_dbxref,
+                                         0)
+            pub = Pub.objects.create(miniref='null',
+                                     uniquename='null',
+                                     type_id=null_cvterm.cvterm_id,
+                                     is_obsolete=False)
 
         # Load the GFF3 file
         auto = 1
@@ -257,7 +256,7 @@ class Command(BaseCommand):
                                                     project=project)
 
                     # adding attributes to featureprop
-                    self.process_attributes(project, feature, attrs)
+                    self.process_attributes(project, feature, attrs, pub)
 
                     # storing the feature and parent ids
                     if attrs.get('Parent') is not None:
