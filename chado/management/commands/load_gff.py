@@ -233,6 +233,8 @@ class Command(BaseCommand):
 
                     try:
                         phase = row.frame
+                        if row.frame == '.':
+                            phase = None
                     except ValueError:
                         phase = None
 
