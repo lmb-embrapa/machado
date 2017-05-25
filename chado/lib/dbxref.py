@@ -22,7 +22,8 @@ def get_set_dbxref(db_name, accession, **kargs):
         return dbxref
 
     except ObjectDoesNotExist:
-
+        if (not version):
+            version = ""
         # Save to the Dbxref model
         dbxref = Dbxref.objects.create(db=db,
                                        accession=accession,
