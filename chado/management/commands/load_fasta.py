@@ -54,7 +54,15 @@ class Command(BaseCommand):
 
         fasta_sequences = SeqIO.parse(open(options['fasta']), 'fasta')
 
+        counter = 0
         for fasta in fasta_sequences:
+
+            # simple counter status
+            counter += 1
+            if not counter % 1000:
+                self.stdout.write('%s - %s lines processed.'
+                                  % (datetime.now(), counter))
+
             dbxref = get_set_dbxref(db_name=db.name,
                                     accession=fasta.id,
                                     description='',
