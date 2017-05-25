@@ -2,7 +2,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.cvterm import get_set_cv, get_set_cvterm
-from chado.lib.db import set_db_file
+from chado.lib.db import get_set_db
 from chado.lib.project import (get_project, get_set_project_dbxref)
 import re
 
@@ -54,11 +54,8 @@ class Command(BaseCommand):
             project = get_project(project_name)
 
         # get db object
-        # this should use the function get_set_db, in dbxref lib but
-        # that function does not have the 'description' field to be inserted.
-        # using set_db_file instead.
-        db = set_db_file(file=self.db_name,
-                         description=options['description'])
+        db = get_set_db(db_name=self.db_name,
+                        description=options['description'])
         # get cv object
         cv = get_set_cv(self.cv_name)
         ontologies = self.get_ontologies_from_node_file(options["file"])
