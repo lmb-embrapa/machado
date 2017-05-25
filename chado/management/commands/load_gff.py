@@ -223,7 +223,7 @@ class Command(BaseCommand):
                         now(timezone.utc)
                     )
 
-                    # storing the feature location
+                    # retrieving the source feature
                     try:
                         srcfeature = Feature.objects.get(uniquename=row.contig,
                                                          organism=organism)
@@ -250,6 +250,7 @@ class Command(BaseCommand):
                     except ValueError:
                         phase = None
 
+                    # storing the feature location
                     Featureloc.objects.create(
                         feature=feature,
                         srcfeature_id=srcfeature.feature_id,
