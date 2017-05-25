@@ -119,6 +119,8 @@ class Command(BaseCommand):
                                               pub=pub,
                                               is_current=False,
                                               is_internal=False)
+            else:
+                self.stdout.write('Ignoring: %s' % (key))
         return
 
     def handle(self, *args, **options):
