@@ -15,6 +15,9 @@ from chado.lib.dbxref import get_set_dbxref, get_dbxref
 from chado.lib.organism import get_organism
 from chado.lib.project import get_project, get_set_project_feature
 
+VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
+               'gene', 'id', 'name', 'orf_classification']
+
 
 class Command(BaseCommand):
     help = 'Load GFF3 file indexed with tabix.'
@@ -47,10 +50,7 @@ class Command(BaseCommand):
 
     def process_attributes(self, project, feature, attrs, pub):
         """
-        It handles the following attributes:
-
-        dbxref, note, display, parent, alias, ontology_term, gene, id,
-        orf_classification, name
+        It handles the VALID_ATTRS attributes
 
         Args:
             project: type string
@@ -61,6 +61,7 @@ class Command(BaseCommand):
         # retrieving the cvterm 'exact'
         cvterm_exact = get_ontology_term('synonym_type', 'exact')
 
+        # Don't forget to add the attribute to the constant VALID_ATTRS
         for key in attrs:
             if key in ['id', 'name', 'parent']:
                 continue
@@ -119,8 +120,6 @@ class Command(BaseCommand):
                                               pub=pub,
                                               is_current=False,
                                               is_internal=False)
-            else:
-                self.stdout.write('Ignoring: %s' % (key))
         return
 
     def handle(self, *args, **options):
@@ -160,8 +159,9 @@ class Command(BaseCommand):
 
         # Load the GFF3 file
         auto = 1
+        counter = 0
         parents = list()
-        all_keys = set()
+        ignored_attrs = set()
         with open(options['gff']) as tbx_file:
             # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
@@ -169,18 +169,25 @@ class Command(BaseCommand):
             # check GFF for anomalies
             # for row in tbx.fetch("chrI", 1, 2000, parser=pysam.asGTF()):
             for row in tbx.fetch(parser=pysam.asGTF()):
+
+                # simple counter status
+                counter += 1
+                if not counter % 1000:
+                    self.stdout.write('%s - %s lines processed.'
+                                      % (datetime.now(), counter))
+
                 # populate tables related to GFF
                 attrs = self.get_attributes(row.attributes)
                 for key in attrs:
-                    all_keys.add(key)
-                # print(attrs)
+                    if key not in VALID_ATTRS:
+                        ignored_attrs.add(key)
 
                 # Retrieve sequence ontology object
                 cvterm = get_ontology_term(ontology='sequence',
                                            term=row.feature)
 
                 # set id = auto#
-                if not attrs.get('id'):
+                if attrs.get('id') is None:
                     attrs['id'] = 'auto%s' % (auto)
                     auto += 1
 
@@ -191,7 +198,7 @@ class Command(BaseCommand):
                     if feature is not None:
                         self.stdout.write(
                             self.style.WARNING(
-                                'The feature %s %s is already '
+                                'Skiping: the feature %s %s is already '
                                 'registered.'
                                 % (attrs['id'], attrs.get('name'))))
                 except ObjectDoesNotExist:
@@ -225,6 +232,8 @@ class Command(BaseCommand):
                             "Parent not found: %s. It's recommended to load "
                             "a reference FASTA file before loading features."
                             % (row.contig))
+
+                    # the database requires -1, 0, and +1 for strand
                     if row.strand == '+':
                         strand = +1
                     elif row.strand == '-':
@@ -232,6 +241,8 @@ class Command(BaseCommand):
                     else:
                         strand = 0
 
+                    # if row.frame is . phase = None
+                    # some versions of pysam throws ValueError
                     try:
                         phase = row.frame
                         if row.frame == '.':
@@ -277,7 +288,9 @@ class Command(BaseCommand):
                 type_id=part_of.cvterm_id,
                 rank=0))
 
-        # print(all_keys)
+        self.stdout.write(
+            self.style.WARNING('Ignored attrs: %s'
+                               % (ignored_attrs)))
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
