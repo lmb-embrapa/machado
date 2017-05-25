@@ -12,8 +12,8 @@ class Command(BaseCommand):
     help = 'Load NCBI\'s taxonomy file'
 
     def add_arguments(self, parser):
-        parser.add_argument("--names", help="names file", required=True,
-                            type=str)
+        parser.add_argument("--names", help="names file <e.g.: names.dmp>",
+                            required=True, type=str)
         parser.add_argument("--nodes", help="node file <NOT IMPLEMENTED YET",
                             required=False,
                             type=str)
