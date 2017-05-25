@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv, Cvterm, CvtermRelationship, Dbxref
 import obonet
-from chado.lib.dbxref import get_set_db, get_set_dbxref
+from chado.lib.dbxref import get_set_dbxref
+from chado.lib.db import get_set_db
 from chado.lib.cvterm import get_set_cvterm, get_set_cvtermprop
 from chado.lib.cvterm import get_set_cvterm_dbxref, process_cvterm_xref
 from chado.lib.cvterm import process_cvterm_so_synonym, process_cvterm_def
