@@ -289,9 +289,10 @@ class Command(BaseCommand):
                 type_id=part_of.cvterm_id,
                 rank=0))
 
-        self.stdout.write(
-            self.style.WARNING('Ignored attrs: %s'
-                               % (ignored_attrs)))
+        if ignored_attrs is not None:
+            self.stdout.write(
+                self.style.WARNING('Ignored attrs: %s'
+                                   % (ignored_attrs)))
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
