@@ -53,36 +53,50 @@ class Command(BaseCommand):
             # cvtermprop
             dbxref_is_anti_symmetric = get_set_dbxref('internal',
                                                       'is_anti_symmetric')
-            cvterm_is_anti_symmetric = get_set_cvterm('cvterm_property_type',
-                                                      'is_anti_symmetric', '',
-                                                      dbxref_is_anti_symmetric,
-                                                      0)
+            cvterm_is_anti_symmetric = get_set_cvterm(
+                    cv_name='cvterm_property_type',
+                    cvterm_name='is_anti_symmetric',
+                    definition='',
+                    dbxref=dbxref_is_anti_symmetric,
+                    is_relationshiptype=0)
 
             # Creating cvterm is_transitive to be used as type_id in
             # cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal',
                                                   'is_transitive')
-            cvterm_is_transitive = get_set_cvterm('cvterm_property_type',
-                                                  'is_transitive', '',
-                                                  dbxref_is_transitive, 0)
+            cvterm_is_transitive = get_set_cvterm(
+                    cv_name='cvterm_property_type',
+                    cvterm_name='is_transitive',
+                    definition='',
+                    dbxref=dbxref_is_transitive,
+                    is_relationshiptype=0)
 
             # Creating cvterm is_reflexive to be used as type_id in cvtermprop
             dbxref_is_reflexive = get_set_dbxref('internal',
                                                  'is_reflexive')
-            cvterm_is_reflexive = get_set_cvterm('cvterm_property_type',
-                                                 'is_reflexive', '',
-                                                 dbxref_is_reflexive, 0)
+            cvterm_is_reflexive = get_set_cvterm(
+                    cv_name='cvterm_property_type',
+                    cvterm_name='is_reflexive',
+                    definition='',
+                    dbxref=dbxref_is_reflexive,
+                    is_relationshiptype=0)
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal', 'comment')
-            cvterm_comment = get_set_cvterm('cvterm_property_type',
-                                            'comment', '', dbxref_comment, 0)
+            cvterm_comment = get_set_cvterm(cv_name='cvterm_property_type',
+                                            cvterm_name='comment',
+                                            definition='',
+                                            dbxref=dbxref_comment,
+                                            is_relationshiptype=0)
 
             # Creating cvterm is_anti_symmetric to be used as type_id in
             # cvtermprop
             dbxref_exact = get_set_dbxref('internal', 'exact')
-            get_set_cvterm('synonym_type', 'exact', '',
-                           dbxref_exact, 0)
+            get_set_cvterm(cv_name='synonym_type',
+                           cvterm_name='exact',
+                           definition='',
+                           dbxref=dbxref_exact,
+                           is_relationshiptype=0)
 
             if verbosity > 0:
                 self.stdout.write('Loading typedefs')
@@ -99,8 +113,11 @@ class Command(BaseCommand):
                     continue
 
                 # Save the term to the Cvterm model
-                cvterm = get_set_cvterm(cv.name, data.get('name'), '',
-                                        dbxref, 1)
+                cvterm = get_set_cvterm(cv_name=cv.name,
+                                        cvterm_name=data.get('name'),
+                                        definition='',
+                                        dbxref=dbxref,
+                                        is_relationshiptype=1)
 
                 # Load definition and dbxrefs
                 process_cvterm_def(cvterm, data.get('def'))
