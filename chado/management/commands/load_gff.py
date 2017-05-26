@@ -67,11 +67,11 @@ class Command(BaseCommand):
                 continue
             elif key in ['note', 'display', 'gene', 'orf_classification']:
                 note_dbxref = get_set_dbxref(db_name='null', accession=key)
-                note_cvterm = get_set_cvterm('feature_property',
-                                             key,
-                                             '',
-                                             note_dbxref,
-                                             0)
+                note_cvterm = get_set_cvterm(cv_name='feature_property',
+                                             cvterm_name=key,
+                                             definition='',
+                                             dbxref=note_dbxref,
+                                             is_relationshiptype=0)
                 Featureprop.objects.create(feature=feature,
                                            type_id=note_cvterm.cvterm_id,
                                            value=attrs.get(key),
@@ -147,11 +147,11 @@ class Command(BaseCommand):
             pub = Pub.objects.get(uniquename='null')
         except ObjectDoesNotExist:
             null_dbxref = get_set_dbxref(db_name='null', accession='null')
-            null_cvterm = get_set_cvterm('null',
-                                         'null',
-                                         '',
-                                         null_dbxref,
-                                         0)
+            null_cvterm = get_set_cvterm(cv_name='null',
+                                         cvterm_name='null',
+                                         definition='',
+                                         dbxref=null_dbxref,
+                                         is_relationshiptype=0)
             pub = Pub.objects.create(miniref='null',
                                      uniquename='null',
                                      type_id=null_cvterm.cvterm_id,
