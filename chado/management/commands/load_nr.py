@@ -167,10 +167,13 @@ class Command(BaseCommand):
                     timelastmodified=datetime.
                     now(timezone.utc))
 
-                # associate feature with dbxrefs
-                for dbxref in dbxrefs:
+                # Associate feature with the first 2 dbxrefs
+                # The sequence description may contain the | separator,
+                # causing the parser to retrieve parts of the thescription
+                # as dbxrefs
+                for i in range(2):
                     FeatureDbxref.objects.create(feature=feature,
-                                                 dbxref=dbxref,
+                                                 dbxref=dbxrefs[i],
                                                  is_current=1)
 
         self.stdout.write(self.style.SUCCESS('%s Done'
