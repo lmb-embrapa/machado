@@ -59,20 +59,21 @@ class Command(BaseCommand):
 
         # trying to return the first description that contains [
         first_id_string = None
+        first_desc = None
         for field in fields:
+            m = re.match(r'^(\S+)\s(.+)$', fields[0])
+            id_string, desc = m.group(1), m.group(2)
+
+            # storing the first fasta_description
+            if first_id_string is None:
+                first_id_string, first_desc = id_string, desc
+
+            # warning if string is too long
+            if len(desc) > 255:
+                self.stdout.writer(self.style.WARNING(
+                    'Truncating long string: %s %s' % (id_string, desc)))
+
             if re.search(r'\]', field):
-                m = re.match(r'^(\S+)\s(.+)$', fields[0])
-                id_string, desc = m.group(1), m.group(2)
-
-                # storing the first fasta_description
-                if first_id_string is None:
-                    first_id_string, first_desc = m.group(1), m.group(2)
-
-                # warning if string is too long
-                if len(desc) >= 255:
-                    self.stdout.writer(self.style.WARNING(
-                        'Truncating long string: %s %s' % (id_string, desc)))
-
                 return id_string, desc[:255]
 
         # returning the first one since none have [
