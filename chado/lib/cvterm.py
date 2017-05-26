@@ -5,7 +5,7 @@ from chado.lib.dbxref import get_set_dbxref
 import re
 
 
-def get_set_cv(cv_name):
+def get_set_cv(cv_name, **args):
     """
     It tries to get the cv object or create it otherwise
 
@@ -24,16 +24,16 @@ def get_set_cv(cv_name):
     except ObjectDoesNotExist:
 
         # Save the name to the Db model
-        cv = Cv.objects.create(name=cv_name)
+        cv = Cv.objects.create(name=cv_name,
+                               definition=args.get('definition'))
         cv.save()
         return cv
 
 
-def get_set_cvterm(cv_name,
-                   cvterm_name,
-                   definition,
-                   dbxref,
-                   is_relationshiptype):
+def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
+
+    definition = kargs.get('definition')
+    is_relationshiptype = kargs.get('is_relationshiptype')
     """
     It tries to get the cvterm object or create it otherwise.
 
@@ -45,8 +45,10 @@ def get_set_cvterm(cv_name,
     Args:
         cv_name: type string
         cvterm_name: type string
-        definition: type string
         dbxref: type object
+
+    kargs (optional):
+        definition: type string
         is_relationshiptype: type boolean
 
     Returns:
@@ -62,6 +64,8 @@ def get_set_cvterm(cv_name,
         return cvterm
 
     except ObjectDoesNotExist:
+        if (not is_relationshiptype):
+            is_relationshiptype = 0
 
         # Save the name to the Cvterm model
         cvterm = Cvterm.objects.create(cv=cv,
@@ -202,11 +206,11 @@ def process_cvterm_so_synonym(cvterm, synonym):
     # Handling the synonym_type
     dbxref_type = get_set_dbxref('internal',
                                  synonym_type.lower())
-    cvterm_type = get_set_cvterm('synonym_type',
-                                 synonym_type.lower(),
-                                 '',
-                                 dbxref_type,
-                                 0)
+    cvterm_type = get_set_cvterm(cv_name='synonym_type',
+                                 cvterm_name=synonym_type.lower(),
+                                 definition='',
+                                 dbxref=dbxref_type,
+                                 is_relationshiptype=0)
 
     # Storing the synonym
     cvtermsynonym = Cvtermsynonym.objects.create(cvterm=cvterm,
@@ -233,11 +237,11 @@ def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
 
     # Handling the synonym_type
     dbxref_type = get_set_dbxref('internal', synonym_type)
-    cvterm_type = get_set_cvterm('synonym_type',
-                                 synonym_type,
-                                 '',
-                                 dbxref_type,
-                                 0)
+    cvterm_type = get_set_cvterm(cv_name='synonym_type',
+                                 cvterm_name=synonym_type,
+                                 definition='',
+                                 dbxref=dbxref_type,
+                                 is_relationshiptype=0)
 
     # Storing the synonym
     #
