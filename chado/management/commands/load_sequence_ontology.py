@@ -48,18 +48,22 @@ class Command(BaseCommand):
             # Creating cvterm is_symmetric to be used as type_id in cvtermprop
             dbxref_is_symmetric = get_set_dbxref('internal',
                                                  'is_symmetric')
-            cvterm_is_symmetric = get_set_cvterm('cvterm_property_type',
-                                                 'is_symmetric', '',
-                                                 dbxref_is_symmetric, 0)
+            cvterm_is_symmetric = get_set_cvterm(
+                    cv_name='cvterm_property_type',
+                    cvterm_name='is_symmetric',
+                    definition='',
+                    dbxref=dbxref_is_symmetric,
+                    is_relationshipontology=0)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref('internal',
                                                   'is_transitive')
-            cvterm_is_transitive = get_set_cvterm('cvterm_property_type',
-                                                  'is_transitive',
-                                                  '',
-                                                  dbxref_is_transitive,
-                                                  0)
+            cvterm_is_transitive = get_set_cvterm(
+                    cv_name='cvterm_property_type',
+                    cvterm_name='is_transitive',
+                    definition='',
+                    dbxref=dbxref_is_transitive,
+                    is_relationshipontology=0)
 
             self.stdout.write('Loading typedefs')
 
@@ -68,11 +72,11 @@ class Command(BaseCommand):
                 dbxref_typedef = get_set_dbxref(db_name='_global',
                                                 accession=typedef['id'],
                                                 description=typedef.get('def'))
-                cvterm_typedef = get_set_cvterm(cv.name,
-                                                typedef.get('id'),
-                                                typedef.get('def'),
-                                                dbxref_typedef,
-                                                1)
+                cvterm_typedef = get_set_cvterm(cv_name=cv.name,
+                                                cvterm_name=typedef.get('id'),
+                                                definition=typedef.get('def'),
+                                                dbxref=dbxref_typedef,
+                                                is_relationshipontology=1)
 
                 # Load is_symmetric
                 if typedef.get('is_symmetric') is not None:
@@ -91,11 +95,11 @@ class Command(BaseCommand):
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal', 'comment')
-            cvterm_comment = get_set_cvterm('cvterm_property_type',
-                                            'comment',
-                                            '',
-                                            dbxref_comment,
-                                            0)
+            cvterm_comment = get_set_cvterm(cv_name='cvterm_property_type',
+                                            cvterm_name='comment',
+                                            definition='',
+                                            dbxref=dbxref_comment,
+                                            is_relationshipontology=0)
 
             for n, data in G.nodes(data=True):
 
@@ -104,11 +108,11 @@ class Command(BaseCommand):
                 dbxref = get_set_dbxref(aux_db, aux_accession)
 
                 # Save the term to the Cvterm model
-                cvterm = get_set_cvterm(cv.name,
-                                        data.get('name'),
-                                        '',
-                                        dbxref,
-                                        0)
+                cvterm = get_set_cvterm(cv_name=cv.name,
+                                        cvterm_name=data.get('name'),
+                                        definition='',
+                                        dbxref=dbxref,
+                                        is_relationshipontology=0)
 
                 # Load definition and dbxrefs
                 process_cvterm_def(cvterm, data.get('def'))
@@ -144,11 +148,11 @@ class Command(BaseCommand):
 
             # Creating term is_a to be used as type_id in cvterm_relationship
             dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
-            cvterm_is_a = get_set_cvterm('relationship',
-                                         'is_a',
-                                         '',
-                                         dbxref_is_a,
-                                         1)
+            cvterm_is_a = get_set_cvterm(cv_name='relationship',
+                                         cvterm_name='is_a',
+                                         definition='',
+                                         dbxref=dbxref_is_a,
+                                         is_relationshipontology=1)
 
             for u, v, type in G.edges(keys=True):
 
