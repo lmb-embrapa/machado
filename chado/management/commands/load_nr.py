@@ -70,8 +70,7 @@ class Command(BaseCommand):
 
             # warning if string is too long
             if len(desc) > 255:
-                self.stdout.writer(self.style.WARNING(
-                    'Truncating long string: %s %s' % (id_string, desc)))
+                print('Truncating long string: %s %s' % (id_string, desc))
 
             if re.search(r'\]', field):
                 return id_string, desc[:255]
