@@ -3,13 +3,13 @@ from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from chado.models import Feature
+from chado.models import Feature, ProjectFeature
 from Bio import SeqIO
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.organism import get_organism
 from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.project import get_project, get_set_project_feature
+from chado.lib.project import get_project
 
 
 class Command(BaseCommand):
@@ -55,6 +55,7 @@ class Command(BaseCommand):
         fasta_sequences = SeqIO.parse(open(options['fasta']), 'fasta')
 
         counter = 0
+        feature_list = list()
         for fasta in fasta_sequences:
 
             # simple counter status
@@ -80,24 +81,34 @@ class Command(BaseCommand):
                 if options['nosequence']:
                     residues = ''
 
-                feature = Feature.objects.create(dbxref=dbxref,
-                                                 organism=organism,
-                                                 name=fasta.description,
-                                                 uniquename=fasta.id,
-                                                 residues=residues,
-                                                 seqlen=len(fasta.seq),
-                                                 md5checksum=m,
-                                                 type_id=cvterm.cvterm_id,
-                                                 is_analysis=False,
-                                                 is_obsolete=False,
-                                                 timeaccessioned=datetime.
-                                                 now(timezone.utc),
-                                                 timelastmodified=datetime.
-                                                 now(timezone.utc))
-                # create project_dbxref and project_feature
-                if project:
-                        get_set_project_feature(feature=feature,
-                                                project=project)
+                # storing feature
+                feature_list.append(Feature(dbxref=dbxref,
+                                            organism=organism,
+                                            name=fasta.description,
+                                            uniquename=fasta.id,
+                                            residues=residues,
+                                            seqlen=len(fasta.seq),
+                                            md5checksum=m,
+                                            type_id=cvterm.cvterm_id,
+                                            is_analysis=False,
+                                            is_obsolete=False,
+                                            timeaccessioned=datetime.
+                                            now(timezone.utc),
+                                            timelastmodified=datetime.
+                                            now(timezone.utc)))
+
+        # bulk_create features
+        loaded_features = Feature.objects.bulk_create(feature_list)
+
+        # bulk_create project_feature
+        if project:
+            project_feature_list = list()
+            for feature in loaded_features:
+                project_feature_list.append(
+                    ProjectFeature(
+                        feature=feature,
+                        project=project))
+            ProjectFeature.objects.bulk_create(project_feature_list)
 
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
