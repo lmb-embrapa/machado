@@ -120,9 +120,14 @@ class Command(BaseCommand):
                                                     # e.g. "RSPOS"
                                                     cvterm_name=tup[1],
                                                     # e.g. "INFO"
-                                                    definition=x.type,
+                                                    definition=tup[0],
                                                     dbxref=dbxref,
                                                     is_relationshiptype=0)
+                            get_set_cvtermprop(cvterm=cvterm,
+                                               type_id=cvterm.cvterm_id,
+                                               # e.g. "1"
+                                               value=x.type,
+                                               rank=0)
                         else:
                             # create dbxref and cvterm objects for the
                             # property information of the ID terms
