@@ -8,6 +8,7 @@ from chado.lib.organism import get_set_organism
 from chado.lib.project import (get_project)
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Feature, Featureprop, Featureloc, Db, Dbxref
+from chado.models import ProjectFeature
 from pysam import VariantFile
 
 
@@ -187,14 +188,14 @@ class Command(BaseCommand):
                                            # e.g. "position"
                                            description=tuples[1])
 
-            cvterm_header = get_set_cvterm(
-                           cv_name=cv.name,
-                           cvterm_name=tuples[0],
-                           definition=tuples[1],
-                           dbxref=dbxref_header,
-                           is_relationshiptype=0)
+            cvterm_header = get_set_cvterm(cv_name=cv.name,
+                                           cvterm_name=tuples[0],
+                                           definition=tuples[1],
+                                           dbxref=dbxref_header,
+                                           is_relationshiptype=0)
             # set dictionary of cvterm objects
             dict_header_cvterms[tuples[0]] = cvterm_header
+
         counter = 0
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
@@ -205,6 +206,9 @@ class Command(BaseCommand):
         # start iterating through record data fields to store features
         self.stdout.write('%s Processing records...' % datetime.now())
         for rec in vcf_in.fetch():
+
+            # will create a list of objects for bulk creating later on
+            feature_prop_list = list()
 
             # simple counter status
             counter += 1
@@ -241,6 +245,9 @@ class Command(BaseCommand):
                                                  timelastmodified=datetime.
                                                  now(timezone.utc)
                                                  )
+            if project:
+                ProjectFeature.objects.create(feature=feature_rec,
+                                              project=project)
             # set position of the SNP
             Featureloc.objects.create(
                                       feature=feature_rec,
@@ -253,34 +260,38 @@ class Command(BaseCommand):
                                       phase=0,
                                       locgroup=0,
                                       rank=0)
-            # set SNP REF property
-            Featureprop.objects.create(
+            feature_prop_list.append(
+                    Featureprop(
                           feature=feature_rec,
                           type_id=dict_header_cvterms['REF'].cvterm_id,
                           value=fields[3],
                           rank=0
-                          )
-            # set SNP ALT property
-            Featureprop.objects.create(
+                    )
+            )
+            feature_prop_list.append(
+                    Featureprop(
                           feature=feature_rec,
                           type_id=dict_header_cvterms['ALT'].cvterm_id,
                           value=fields[4],
                           rank=0
-                          )
-            # set SNP QUAL property
-            Featureprop.objects.create(
+                    )
+            )
+            feature_prop_list.append(
+                    Featureprop(
                           feature=feature_rec,
                           type_id=dict_header_cvterms['QUAL'].cvterm_id,
                           value=fields[5],
                           rank=0
-                          )
-            # set SNP FILTER property
-            Featureprop.objects.create(
+                    )
+            )
+            feature_prop_list.append(
+                    Featureprop(
                           feature=feature_rec,
                           type_id=dict_header_cvterms['FILTER'].cvterm_id,
                           value=fields[6],
                           rank=0
-                          )
+                    )
+            )
             # start parsing INFO field
             info_fields = fields[7].split(";")
             # print(info_fields)
@@ -289,11 +300,17 @@ class Command(BaseCommand):
                 key_value = field.split("=")
                 if len(key_value) == 1:
                     key_value.append("0")
-                Featureprop.objects.create(
+                feature_prop_list.append(
+                        Featureprop(
                              feature=feature_rec,
                              type_id=dict_cvterms_info[key_value[0]].cvterm_id,
                              value=key_value[1],
                              rank=0
                              )
+                        )
+
+            # bulk_create features...will try inside loop first
+            Featureprop.objects.bulk_create(feature_prop_list)
+
         self.stdout.write(self.style.SUCCESS('%s Done'
                                              % datetime.now()))
