@@ -7,6 +7,7 @@ from chado.lib.db import get_set_db
 from chado.lib.cvterm import get_set_cvterm, get_set_cvtermprop
 from chado.lib.cvterm import get_set_cvterm_dbxref, process_cvterm_xref
 from chado.lib.cvterm import process_cvterm_go_synonym, process_cvterm_def
+from tqdm import tqdm
 
 
 class Command(BaseCommand):
@@ -29,35 +30,44 @@ class Command(BaseCommand):
             # Check if the so file is already loaded
             cv_bp = Cv.objects.get(name='biological_process')
             if cv_bp is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s '
-                                                   '(already registered)'
-                                                   % ('biological_process',
-                                                      cv_definition)))
+                if options.get('verbosity') > 0:
+                    self.stdout.write(
+                        self.style.ERROR('cv: cannot load %s %s '
+                                         '(already registered)'
+                                         % ('biological_process',
+                                            cv_definition)))
 
             cv_mf = Cv.objects.get(name='molecular_function')
             if cv_mf is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s '
-                                                   '(already registered)'
-                                                   % ('molecular_function',
-                                                      cv_definition)))
+                if options.get('verbosity') > 0:
+                    self.stdout.write(
+                        self.style.ERROR('cv: cannot load %s %s '
+                                         '(already registered)'
+                                         % ('molecular_function',
+                                            cv_definition)))
 
             cv_cc = Cv.objects.get(name='cellular_component')
             if cv_cc is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s '
-                                                   '(already registered)'
-                                                   % ('cellular_component',
-                                                      cv_definition)))
+                if options.get('verbosity') > 0:
+                    self.stdout.write(
+                        self.style.ERROR('cv: cannot load %s %s '
+                                         '(already registered)'
+                                         % ('cellular_component',
+                                            cv_definition)))
 
             cv_ex = Cv.objects.get(name='external')
             if cv_ex is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s '
-                                                   '(already registered)'
-                                                   % ('external',
-                                                      cv_definition)))
+                if options.get('verbosity') > 0:
+                    self.stdout.write(
+                        self.style.ERROR('cv: cannot load %s %s '
+                                         '(already registered)'
+                                         % ('external',
+                                            cv_definition)))
 
         except ObjectDoesNotExist:
 
-            self.stdout.write('Preprocessing')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Preprocessing')
 
             # Save biological_process, molecular_function, and
             # cellular_component to the Cv model
@@ -141,10 +151,11 @@ class Command(BaseCommand):
                            dbxref=dbxref_exact,
                            is_relationshiptype=0)
 
-            self.stdout.write('Loading typedefs')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading typedefs')
 
             # Load typedefs as Dbxrefs and Cvterm
-            for typedef in G.graph['typedefs']:
+            for typedef in tqdm(G.graph['typedefs']):
 
                 dbxref_typedef = get_set_dbxref(db_name='_global',
                                                 accession=typedef['id'],
@@ -182,7 +193,8 @@ class Command(BaseCommand):
                                        value=1,
                                        rank=0)
 
-            self.stdout.write('Loading terms')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading terms')
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal', 'comment')
@@ -192,7 +204,7 @@ class Command(BaseCommand):
                                             dbxref=dbxref_comment,
                                             is_relationshiptype=0)
 
-            for n, data in G.nodes(data=True):
+            for n, data in tqdm(G.nodes(data=True)):
 
                 # Save the term to the Dbxref model
                 aux_db, aux_accession = n.split(':')
@@ -235,7 +247,8 @@ class Command(BaseCommand):
                             process_cvterm_go_synonym(cvterm, synonym,
                                                       synonym_type)
 
-            self.stdout.write('Loading relationships')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
             dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
@@ -275,4 +288,5 @@ class Command(BaseCommand):
                     object_id=object_cvterm.cvterm_id)
                 cvrel.save()
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if options.get('verbosity') > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))
