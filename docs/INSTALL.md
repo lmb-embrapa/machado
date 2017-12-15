@@ -1,20 +1,26 @@
-# DjangoChado
+# Django Chado
 
 This repository contains information and tools to use the [Django](https://www.djangoproject.com) framework for accessing a [Chado](http://gmod.org/wiki/Chado_-_Getting_Started) database.
 
 ## Prerequisites
 
-You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the DjangoChado development.
+You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the Django Chado development.
 
 #### PostgreSQL 9.5
 
-Install PostgreSQL and create a database and user for loading the Chado schema
+Install PostgreSQL and create a database and user for loading the Chado schema.
+As postgres user run:
+
+    psql
+    create user username with encrypted password 'password';
+    create database yourdatabase with owner username;
+    grant all privileges on database yourdatabase to username;
 
 #### Chado 1.31
 
 Download [Chado](https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz), unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database
 
-    psql YOURDATABASE < chado-1.31/schemas/1.31/default_schema.sql
+    psql -h localhost -U username -W -d yourdatabase < chado-1.31/schemas/1.31/default_schema.sql
 
 #### Python 3.5.2
 
@@ -55,7 +61,7 @@ Just grab the code using GIT and install it:
 
 From this point on it is assumed you have read the [Django introduction and tutorial](https://docs.djangoproject.com/en/1.10/intro) on the Django project website.
 
-### Create a Django project
+#### Create a Django project
 Inside YOURPROJECT directory create a Django project with the following command:
 
     django-admin startproject WEBPROJECT
@@ -66,17 +72,15 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',    # Set the DB driver
-            'NAME': 'YOURDATABASE',                                # Set the DB name
-            'USER': 'USERNAME',                                    # Set the DB user
-            'PASSWORD': 'PASSWORD',                                # Set the DB password
+            'NAME': 'yourdatabase',                                # Set the DB name
+            'USER': 'username',                                    # Set the DB user
+            'password': 'password',                                # Set the DB password
             'HOST': 'localhost',                                   # Set the DB host
             'PORT': '',                                            # Set the DB port
         },
     }
-### Create a Django app
 
-
-### Let Django know about your app
+### Let Django know about your django-chado
 
 In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 

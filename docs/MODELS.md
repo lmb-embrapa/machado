@@ -8,13 +8,19 @@ You may already have a populated Chado database and, therefore, are able to skip
 
 #### PostgreSQL 9.5
 
-Install PostgreSQL and create a database and user for loading the Chado schema
+Install PostgreSQL and create a database and user for loading the Chado schema.
+As postgres user run:
 
-#### Chado 3.1
+    psql
+    create user username with encrypted password 'password';
+    create database yourdatabase with owner username;
+    grant all privileges on database yourdatabase to username;
+
+#### Chado 1.31
 
 Download [Chado](https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz), unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database
 
-    psql YOURDATABASE < chado-1.31/schemas/1.31/default_schema.sql
+    psql -h localhost -U username -W -d yourdatabase < chado-1.31/schemas/1.31/default_schema.sql
 
 #### Python 3.5.2
 
@@ -36,16 +42,12 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install obonet
 
-#### django-chado
+### DjangoChado
 
-Download the package
+Just grab the code using GIT and install it:
 
-    git clone https://azneto@bitbucket.org/azneto/django-chado.git
-
-Install the package
-
-    python setup.py install
-
+    git clone https://bitbucket.org/azneto/django-chado.git src/django-chado
+    python src/django-chado/setup.py install
 
 ## Preparations ##
 
@@ -62,9 +64,9 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',    # Set the DB driver
-            'NAME': 'YOURDATABASE',                                # Set the DB name
-            'USER': 'USERNAME',                                    # Set the DB user
-            'PASSWORD': 'PASSWORD',                                # Set the DB password
+            'NAME': 'yourdatabase',                                # Set the DB name
+            'USER': 'username',                                    # Set the DB user
+            'password': 'password',                                # Set the DB password
             'HOST': 'localhost',                                   # Set the DB host
             'PORT': '',                                            # Set the DB port
         },
