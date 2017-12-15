@@ -17,12 +17,6 @@ from .models import Assay
 from .models import AssayBiomaterial
 from .models import AssayProject
 from .models import Assayprop
-from .models import AuthGroup
-from .models import AuthGroupPermissions
-from .models import AuthPermission
-from .models import AuthUser
-from .models import AuthUserGroups
-from .models import AuthUserUserPermissions
 from .models import Biomaterial
 from .models import BiomaterialDbxref
 from .models import BiomaterialRelationship
@@ -57,10 +51,6 @@ from .models import Db
 from .models import Dbprop
 from .models import Dbxref
 from .models import Dbxrefprop
-from .models import DjangoAdminLog
-from .models import DjangoContentType
-from .models import DjangoMigrations
-from .models import DjangoSession
 from .models import Eimage
 from .models import Element
 from .models import ElementRelationship
@@ -236,12 +226,6 @@ admin.site.register(Assay)
 admin.site.register(AssayBiomaterial)
 admin.site.register(AssayProject)
 admin.site.register(Assayprop)
-admin.site.register(AuthGroup)
-admin.site.register(AuthGroupPermissions)
-admin.site.register(AuthPermission)
-admin.site.register(AuthUser)
-admin.site.register(AuthUserGroups)
-admin.site.register(AuthUserUserPermissions)
 admin.site.register(Biomaterial)
 admin.site.register(BiomaterialDbxref)
 admin.site.register(BiomaterialRelationship)
@@ -276,10 +260,6 @@ admin.site.register(Db)
 admin.site.register(Dbprop)
 admin.site.register(Dbxref)
 admin.site.register(Dbxrefprop)
-admin.site.register(DjangoAdminLog)
-admin.site.register(DjangoContentType)
-admin.site.register(DjangoMigrations)
-admin.site.register(DjangoSession)
 admin.site.register(Eimage)
 admin.site.register(Element)
 admin.site.register(ElementRelationship)
