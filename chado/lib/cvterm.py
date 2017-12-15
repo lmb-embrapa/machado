@@ -41,7 +41,6 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
         This functions invokes get_set_cv in order
         to retrieve a cv object
 
-
     Args:
         cv_name: type string
         cvterm_name: type string
@@ -52,7 +51,7 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
         is_relationshiptype: type boolean
 
     Returns:
-        cv: type object
+        cvterm: type object
     """
 
     # Get/Set Cv instance: cv

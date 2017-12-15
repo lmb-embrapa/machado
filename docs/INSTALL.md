@@ -25,7 +25,7 @@ Download [Chado](https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/
 
 We strongly recommend creating a new virtualenv for your project
 
-    python3 -m venv YOURPROJECT
+    virtualenv -p /usr/bin/python3 YOURPROJECT
     cd YOURPROJECT
     source bin/activate
 
@@ -45,7 +45,7 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install pysam
 
-#### obonet 0.2.1
+#### obonet 0.2.2
 
     pip install obonet
 

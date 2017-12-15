@@ -32,13 +32,16 @@ class Command(BaseCommand):
             cv = Cv.objects.get(name=cv_name)
 
             if cv is not None:
-                self.stdout.write(self.style.ERROR('cv: cannot load %s %s'
-                                                   '(already registered)'
-                                                   % (cv_name, cv_definition)))
+                if options.get('verbosity') > 0:
+                    self.stdout.write(
+                        self.style.ERROR('cv: cannot load %s %s'
+                                         '(already registered)'
+                                         % (cv_name, cv_definition)))
 
         except ObjectDoesNotExist:
 
-            self.stdout.write('Preprocessing')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Preprocessing')
 
             # Save the name and definition to the Cv model
             cv = Cv.objects.create(name=cv_name,
@@ -65,7 +68,8 @@ class Command(BaseCommand):
                     dbxref=dbxref_is_transitive,
                     is_relationshipontology=0)
 
-            self.stdout.write('Loading typedefs')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading typedefs')
 
             # Load typedefs as Dbxrefs and Cvterm
             for typedef in G.graph['typedefs']:
@@ -91,7 +95,8 @@ class Command(BaseCommand):
                                        value=1,
                                        rank=0)
 
-            self.stdout.write('Loading terms')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading terms')
 
             # Creating cvterm comment to be used as type_id in cvtermprop
             dbxref_comment = get_set_dbxref('internal', 'comment')
@@ -106,6 +111,9 @@ class Command(BaseCommand):
                 # Save the term to the Dbxref model
                 aux_db, aux_accession = n.split(':')
                 dbxref = get_set_dbxref(aux_db, aux_accession)
+
+                if options.get('verbosity') > 1:
+                    self.stdout.write('%s %s' % (n, data))
 
                 # Save the term to the Cvterm model
                 cvterm = get_set_cvterm(cv_name=cv.name,
@@ -144,7 +152,8 @@ class Command(BaseCommand):
                     for synonym in data.get('synonym'):
                         process_cvterm_so_synonym(cvterm, synonym)
 
-            self.stdout.write('Loading relationships')
+            if options.get('verbosity') > 0:
+                self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
             dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
@@ -186,4 +195,5 @@ class Command(BaseCommand):
                     object_id=object_cvterm.cvterm_id)
                 cvrel.save()
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if options.get('verbosity') > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))
