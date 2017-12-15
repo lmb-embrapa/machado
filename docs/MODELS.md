@@ -14,7 +14,6 @@ As postgres user run:
     psql
     create user username with encrypted password 'password';
     create database yourdatabase with owner username;
-    grant all privileges on database yourdatabase to username;
 
 #### Chado 1.31
 
@@ -38,10 +37,6 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install psycopg2
 
-#### obonet 0.2.1
-
-    pip install obonet
-
 ### DjangoChado
 
 Just grab the code using GIT and install it:
@@ -49,11 +44,7 @@ Just grab the code using GIT and install it:
     git clone https://bitbucket.org/azneto/django-chado.git src/django-chado
     python src/django-chado/setup.py install
 
-## Preparations ##
-
-From this point on it is assumed you have read the [Django introduction and tutorial](https://docs.djangoproject.com/en/1.10/intro) on the Django project website.
-
-#### Create a Django project
+### Create a Django project
 Inside YOURPROJECT directory create a Django project with the following command:
 
     django-admin startproject WEBPROJECT
@@ -66,13 +57,13 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
             'ENGINE': 'django.db.backends.postgresql_psycopg2',    # Set the DB driver
             'NAME': 'yourdatabase',                                # Set the DB name
             'USER': 'username',                                    # Set the DB user
-            'password': 'password',                                # Set the DB password
+            'PASSWORD': 'password',                                # Set the DB password
             'HOST': 'localhost',                                   # Set the DB host
             'PORT': '',                                            # Set the DB port
         },
     }
 
-#### Create the Models
+### Create the Models
 
 Django has a command to generate a Models file:
 
