@@ -155,7 +155,7 @@ class Command(BaseCommand):
                 self.stdout.write('Loading typedefs')
 
             # Load typedefs as Dbxrefs and Cvterm
-            for typedef in tqdm(G.graph['typedefs']):
+            for typedef in G.graph['typedefs']:
 
                 dbxref_typedef = get_set_dbxref(db_name='_global',
                                                 accession=typedef['id'],
@@ -210,12 +210,27 @@ class Command(BaseCommand):
                 aux_db, aux_accession = n.split(':')
                 dbxref = get_set_dbxref(aux_db, aux_accession)
 
+                if options.get('verbosity') > 1:
+                    print('%s %s' % (n, data))
+
                 # Save the term to the Cvterm model
-                cvterm = get_set_cvterm(cv_name=data.get('namespace'),
-                                        cvterm_name=data.get('name'),
-                                        definition='',
-                                        dbxref=dbxref,
-                                        is_relationshiptype=0)
+                # Not using get_set_cvterm to improve performance
+                cv = Cv.objects.get(name=data.get('namespace'))
+                cvterm = Cvterm.objects.create(
+                    cv=cv,
+                    name=data.get('name'),
+                    definition='',
+                    dbxref=dbxref,
+                    is_obsolete=0,
+                    is_relationshiptype=0)
+
+                cvterm.save()
+
+#               cvterm = get_set_cvterm(cv_name=data.get('namespace'),
+#                                        cvterm_name=data.get('name'),
+#                                        definition='',
+#                                        dbxref=dbxref,
+#                                        is_relationshiptype=0)
 
                 # Load definition and dbxrefs
                 process_cvterm_def(cvterm, data.get('def'))
@@ -258,7 +273,7 @@ class Command(BaseCommand):
                                          dbxref=dbxref_is_a,
                                          is_relationshiptype=1)
 
-            for u, v, type in G.edges(keys=True):
+            for u, v, type in tqdm(G.edges(keys=True)):
 
                 # Get the subject cvterm
                 subject_db_name, subject_dbxref_accession = u.split(':')
