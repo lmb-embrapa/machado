@@ -17,6 +17,88 @@ class Command(BaseCommand):
         parser.add_argument("--go", help="Gene Ontology file obo. Available "
                             "at http://www.geneontology.org/ontology/gene_ont"
                             "ology.obo", required=True, type=str)
+        parser.add_argument("--cpu",
+                            help="Number of threads",
+                            default=1,
+                            type=int)
+
+    def store_term(self, n, data):
+
+        # Save the term to the Dbxref model
+        aux_db, aux_accession = n.split(':')
+        dbxref = get_set_dbxref(aux_db, aux_accession)
+
+        # Save the term to the Cvterm model
+        # Not using get_set_cvterm to improve performance
+        cv = Cv.objects.get(name=data.get('namespace'))
+        cvterm = Cvterm.objects.create(
+            cv=cv,
+            name=data.get('name'),
+            definition='',
+            dbxref=dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
+
+        cvterm.save()
+
+        # Load definition and dbxrefs
+        process_cvterm_def(cvterm, data.get('def'))
+
+        # Load alt_ids
+        if data.get('alt_id'):
+            for alt_id in data.get('alt_id'):
+                aux_db, aux_accession = alt_id.split(':')
+                dbxref_alt_id = get_set_dbxref(aux_db, aux_accession)
+                get_set_cvterm_dbxref(cvterm, dbxref_alt_id, 0)
+
+        # Load comment
+        if data.get('comment'):
+            get_set_cvtermprop(cvterm=cvterm,
+                               type_id=self.cvterm_comment.cvterm_id,
+                               value=data.get('comment'),
+                               rank=0)
+
+        # Load xref
+        if data.get('xref_analog'):
+            for xref in data.get('xref_analog'):
+                process_cvterm_xref(cvterm, xref)
+
+        # Load synonyms
+        for synonym_type in ('exact_synonym', 'related_synonym',
+                             'narrow_synonym', 'broad_synonym'):
+            if data.get(synonym_type):
+                for synonym in data.get(synonym_type):
+                    process_cvterm_go_synonym(cvterm, synonym,
+                                              synonym_type)
+
+    def store_relationship(self, u, v, type):
+        # Get the subject cvterm
+        subject_db_name, subject_dbxref_accession = u.split(':')
+        subject_db = get_set_db(subject_db_name)
+        subject_dbxref = Dbxref.objects.get(
+            db=subject_db, accession=subject_dbxref_accession)
+        subject_cvterm = Cvterm.objects.get(dbxref=subject_dbxref)
+
+        # Get the object cvterm
+        object_db_name, object_dbxref_accession = v.split(':')
+        object_db = get_set_db(object_db_name)
+        object_dbxref = Dbxref.objects.get(
+            db=object_db, accession=object_dbxref_accession)
+        object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
+
+        if type == 'is_a':
+            type_cvterm = self.cvterm_is_a
+        else:
+            type_db = get_set_db('_global')
+            type_dbxref = Dbxref.objects.get(db=type_db,
+                                             accession=type)
+            type_cvterm = Cvterm.objects.get(dbxref=type_dbxref)
+
+        cvrel = CvtermRelationship.objects.create(
+            type_id=type_cvterm.cvterm_id,
+            subject_id=subject_cvterm.cvterm_id,
+            object_id=object_cvterm.cvterm_id)
+        cvrel.save()
 
     def handle(self, *args, **options):
 
@@ -88,11 +170,11 @@ class Command(BaseCommand):
             dbxref_is_a = get_set_dbxref(db_name='obo_rel',
                                          accession='is_a')
 
-            cvterm_is_a = get_set_cvterm(cv_name='relationship',
-                                         cvterm_name='is_a',
-                                         definition='',
-                                         dbxref=dbxref_is_a,
-                                         is_relationshiptype=1)
+            self.cvterm_is_a = get_set_cvterm(cv_name='relationship',
+                                              cvterm_name='is_a',
+                                              definition='',
+                                              dbxref=dbxref_is_a,
+                                              is_relationshiptype=1)
 
             # Creating cvterm is_transitive to be used as type_id in cvtermprop
             dbxref_is_transitive = get_set_dbxref(db_name='internal',
@@ -134,11 +216,12 @@ class Command(BaseCommand):
             dbxref_comment = get_set_dbxref(db_name='internal',
                                             accession='comment')
 
-            cvterm_comment = get_set_cvterm(cv_name='cvterm_property_type',
-                                            cvterm_name='comment',
-                                            definition='',
-                                            dbxref=dbxref_comment,
-                                            is_relationshiptype=0)
+            self.cvterm_comment = get_set_cvterm(
+                cv_name='cvterm_property_type',
+                cvterm_name='comment',
+                definition='',
+                dbxref=dbxref_comment,
+                is_relationshiptype=0)
 
             # Creating cvterm is_anti_symmetric to be used as type_id in
             # cvtermprop
@@ -186,6 +269,7 @@ class Command(BaseCommand):
                         type_id=cvterm_is_metadata_tag.cvterm_id,
                         value=1,
                         rank=0)
+
                 # Load is_transitive
                 if typedef.get('is_transitive') is not None:
                     get_set_cvtermprop(cvterm=cvterm_typedef,
@@ -194,114 +278,27 @@ class Command(BaseCommand):
                                        rank=0)
 
             if options.get('verbosity') > 0:
-                self.stdout.write('Loading terms')
+                self.stdout.write('Loading terms (%s threads)'
+                                  % options.get('cpu'))
 
-            # Creating cvterm comment to be used as type_id in cvtermprop
-            dbxref_comment = get_set_dbxref('internal', 'comment')
-            cvterm_comment = get_set_cvterm(cv_name='cvterm_property_type',
-                                            cvterm_name='comment',
-                                            definition='',
-                                            dbxref=dbxref_comment,
-                                            is_relationshiptype=0)
-
+            # Load the cvterms
             for n, data in tqdm(G.nodes(data=True)):
-
-                # Save the term to the Dbxref model
-                aux_db, aux_accession = n.split(':')
-                dbxref = get_set_dbxref(aux_db, aux_accession)
-
-                if options.get('verbosity') > 1:
-                    print('%s %s' % (n, data))
-
-                # Save the term to the Cvterm model
-                # Not using get_set_cvterm to improve performance
-                cv = Cv.objects.get(name=data.get('namespace'))
-                cvterm = Cvterm.objects.create(
-                    cv=cv,
-                    name=data.get('name'),
-                    definition='',
-                    dbxref=dbxref,
-                    is_obsolete=0,
-                    is_relationshiptype=0)
-
-                cvterm.save()
-
-#               cvterm = get_set_cvterm(cv_name=data.get('namespace'),
-#                                        cvterm_name=data.get('name'),
-#                                        definition='',
-#                                        dbxref=dbxref,
-#                                        is_relationshiptype=0)
-
-                # Load definition and dbxrefs
-                process_cvterm_def(cvterm, data.get('def'))
-
-                # Load alt_ids
-                if data.get('alt_id'):
-                    for alt_id in data.get('alt_id'):
-                        aux_db, aux_accession = alt_id.split(':')
-                        dbxref_alt_id = get_set_dbxref(aux_db, aux_accession)
-                        get_set_cvterm_dbxref(cvterm, dbxref_alt_id, 0)
-
-                # Load comment
-                if data.get('comment'):
-                    get_set_cvtermprop(cvterm=cvterm,
-                                       type_id=cvterm_comment.cvterm_id,
-                                       value=data.get('comment'),
-                                       rank=0)
-
-                # Load xref
-                if data.get('xref_analog'):
-                    for xref in data.get('xref_analog'):
-                        process_cvterm_xref(cvterm, xref)
-
-                # Load synonyms
-                for synonym_type in ('exact_synonym', 'related_synonym',
-                                     'narrow_synonym', 'broad_synonym'):
-                    if data.get(synonym_type):
-                        for synonym in data.get(synonym_type):
-                            process_cvterm_go_synonym(cvterm, synonym,
-                                                      synonym_type)
+                self.store_term(n, data)
 
             if options.get('verbosity') > 0:
                 self.stdout.write('Loading relationships')
 
             # Creating term is_a to be used as type_id in cvterm_relationship
             dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
-            cvterm_is_a = get_set_cvterm(cv_name='relationship',
-                                         cvterm_name='is_a',
-                                         definition='',
-                                         dbxref=dbxref_is_a,
-                                         is_relationshiptype=1)
+            self.cvterm_is_a = get_set_cvterm(cv_name='relationship',
+                                              cvterm_name='is_a',
+                                              definition='',
+                                              dbxref=dbxref_is_a,
+                                              is_relationshiptype=1)
 
+            # Load the relationship between cvterms
             for u, v, type in tqdm(G.edges(keys=True)):
-
-                # Get the subject cvterm
-                subject_db_name, subject_dbxref_accession = u.split(':')
-                subject_db = get_set_db(subject_db_name)
-                subject_dbxref = Dbxref.objects.get(
-                    db=subject_db, accession=subject_dbxref_accession)
-                subject_cvterm = Cvterm.objects.get(dbxref=subject_dbxref)
-
-                # Get the object cvterm
-                object_db_name, object_dbxref_accession = v.split(':')
-                object_db = get_set_db(object_db_name)
-                object_dbxref = Dbxref.objects.get(
-                    db=object_db, accession=object_dbxref_accession)
-                object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
-
-                if type == 'is_a':
-                    type_cvterm = cvterm_is_a
-                else:
-                    type_db = get_set_db('_global')
-                    type_dbxref = Dbxref.objects.get(db=type_db,
-                                                     accession=type)
-                    type_cvterm = Cvterm.objects.get(dbxref=type_dbxref)
-
-                cvrel = CvtermRelationship.objects.create(
-                    type_id=type_cvterm.cvterm_id,
-                    subject_id=subject_cvterm.cvterm_id,
-                    object_id=object_cvterm.cvterm_id)
-                cvrel.save()
+                self.store_relationship(u, v, type)
 
         if options.get('verbosity') > 0:
             self.stdout.write(self.style.SUCCESS('Done'))
