@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from chado.models import Cv, Cvterm, CvtermRelationship, Dbxref
 import obonet
 from chado.lib.dbxref import get_set_dbxref
@@ -22,7 +23,94 @@ class Command(BaseCommand):
                             default=1,
                             type=int)
 
+    def store_type_def(self, typedef):
+
+        # Creating cvterm is_transitive to be used as type_id in cvtermprop
+        dbxref_is_transitive = get_set_dbxref(db_name='internal',
+                                              accession='is_transitive')
+
+        cvterm_is_transitive = get_set_cvterm(
+                cv_name='cvterm_property_type',
+                cvterm_name='is_transitive',
+                definition='',
+                dbxref=dbxref_is_transitive,
+                is_relationshiptype=0)
+
+        # Creating cvterm is_class_level to be used as type_id in cvtermprop
+        dbxref_is_class_level = get_set_dbxref(db_name='internal',
+                                               accession='is_class_level')
+
+        cvterm_is_class_level = get_set_cvterm(
+                cv_name='cvterm_property_type',
+                cvterm_name='is_class_level',
+                definition='',
+                dbxref=dbxref_is_class_level,
+                is_relationshiptype=0)
+
+        # Creating cvterm is_metadata_tag to be used as type_id in cvtermprop
+        dbxref_is_metadata_tag = get_set_dbxref(
+                db_name='internal',
+                accession='is_metadata_tag')
+
+        cvterm_is_metadata_tag = get_set_cvterm(
+                cv_name='cvterm_property_type',
+                cvterm_name='is_metadata_tag',
+                definition='',
+                dbxref=dbxref_is_metadata_tag,
+                is_relationshiptype=0)
+
+        # Save the typedef to the Dbxref model
+        dbxref_typedef = get_set_dbxref(db_name='_global',
+                                        accession=typedef['id'],
+                                        description=typedef.get('def'))
+
+        # Save the typedef to the Cvterm model
+        cvterm_typedef = get_set_cvterm(cv_name='sequence',
+                                        cvterm_name=typedef.get('id'),
+                                        definition=typedef.get('def'),
+                                        dbxref=dbxref_typedef,
+                                        is_relationshiptype=1)
+
+        # Load xref
+        if typedef.get('xref_analog'):
+            for xref in typedef.get('xref_analog'):
+                process_cvterm_xref(cvterm_typedef, xref)
+
+        # Load is_class_level
+        if typedef.get('is_class_level') is not None:
+            get_set_cvtermprop(
+                    cvterm=cvterm_typedef,
+                    type_id=cvterm_is_class_level.cvterm_id,
+                    value=1,
+                    rank=0)
+
+        # Load is_metadata_tag
+        if typedef.get('is_metadata_tag') is not None:
+            get_set_cvtermprop(
+                cvterm=cvterm_typedef,
+                type_id=cvterm_is_metadata_tag.cvterm_id,
+                value=1,
+                rank=0)
+
+        # Load is_transitive
+        if typedef.get('is_transitive') is not None:
+            get_set_cvtermprop(cvterm=cvterm_typedef,
+                               type_id=cvterm_is_transitive.cvterm_id,
+                               value=1,
+                               rank=0)
+
     def store_term(self, n, data):
+
+        # Creating cvterm comment to be used as type_id in cvtermprop
+        dbxref_comment = get_set_dbxref(db_name='internal',
+                                        accession='comment')
+
+        cvterm_comment = get_set_cvterm(
+            cv_name='cvterm_property_type',
+            cvterm_name='comment',
+            definition='',
+            dbxref=dbxref_comment,
+            is_relationshiptype=0)
 
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
@@ -54,7 +142,7 @@ class Command(BaseCommand):
         # Load comment
         if data.get('comment'):
             get_set_cvtermprop(cvterm=cvterm,
-                               type_id=self.cvterm_comment.cvterm_id,
+                               type_id=cvterm_comment.cvterm_id,
                                value=data.get('comment'),
                                rank=0)
 
@@ -72,6 +160,16 @@ class Command(BaseCommand):
                                               synonym_type)
 
     def store_relationship(self, u, v, type):
+        # creating term is_a to be used as type_id in cvterm_relationship
+        dbxref_is_a = get_set_dbxref(db_name='obo_rel',
+                                     accession='is_a')
+
+        cvterm_is_a = get_set_cvterm(cv_name='relationship',
+                                     cvterm_name='is_a',
+                                     definition='',
+                                     dbxref=dbxref_is_a,
+                                     is_relationshiptype=1)
+
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
         subject_db = get_set_db(subject_db_name)
@@ -86,14 +184,16 @@ class Command(BaseCommand):
             db=object_db, accession=object_dbxref_accession)
         object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
 
+        # Get the relationship type
         if type == 'is_a':
-            type_cvterm = self.cvterm_is_a
+            type_cvterm = cvterm_is_a
         else:
             type_db = get_set_db('_global')
             type_dbxref = Dbxref.objects.get(db=type_db,
                                              accession=type)
             type_cvterm = Cvterm.objects.get(dbxref=type_dbxref)
 
+        # Save the relationship to the CvtermRelationship model
         cvrel = CvtermRelationship.objects.create(
             type_id=type_cvterm.cvterm_id,
             subject_id=subject_cvterm.cvterm_id,
@@ -108,197 +208,65 @@ class Command(BaseCommand):
 
         cv_definition = G.graph['date']
 
-        try:
-            # Check if the so file is already loaded
-            cv_bp = Cv.objects.get(name='biological_process')
-            if cv_bp is not None:
-                if options.get('verbosity') > 0:
-                    self.stdout.write(
-                        self.style.ERROR('cv: cannot load %s %s '
-                                         '(already registered)'
-                                         % ('biological_process',
-                                            cv_definition)))
+        if options.get('verbosity') > 0:
+            self.stdout.write('Preprocessing')
 
-            cv_mf = Cv.objects.get(name='molecular_function')
-            if cv_mf is not None:
-                if options.get('verbosity') > 0:
-                    self.stdout.write(
-                        self.style.ERROR('cv: cannot load %s %s '
-                                         '(already registered)'
-                                         % ('molecular_function',
-                                            cv_definition)))
+        ontologies = [
+                'biological_process',
+                'molecular_function',
+                'cellular_component',
+                'external']
 
-            cv_cc = Cv.objects.get(name='cellular_component')
-            if cv_cc is not None:
-                if options.get('verbosity') > 0:
-                    self.stdout.write(
-                        self.style.ERROR('cv: cannot load %s %s '
-                                         '(already registered)'
-                                         % ('cellular_component',
-                                            cv_definition)))
+        # Check if the ontologies are already loaded
+        for ontology in ontologies:
 
-            cv_ex = Cv.objects.get(name='external')
-            if cv_ex is not None:
-                if options.get('verbosity') > 0:
-                    self.stdout.write(
-                        self.style.ERROR('cv: cannot load %s %s '
-                                         '(already registered)'
-                                         % ('external',
-                                            cv_definition)))
+            try:
+                cv = Cv.objects.get(name=ontology)
+                if cv is not None:
+                    if options.get('verbosity') > 0:
+                        raise IntegrityError(
+                                self.style.ERROR('cv: cannot load %s %s '
+                                                 '(already registered)'
+                                                 % (ontology,
+                                                    cv_definition)))
+            except ObjectDoesNotExist:
 
-        except ObjectDoesNotExist:
+                # Save ontology to the Cv model
+                cv = Cv.objects.create(name=ontology,
+                                       definition=cv_definition)
+                cv.save()
 
-            if options.get('verbosity') > 0:
-                self.stdout.write('Preprocessing')
+        # Creating cvterm is_anti_symmetric to be used as type_id in cvtermprop
+        dbxref_exact = get_set_dbxref(db_name='internal',
+                                      accession='exact')
 
-            # Save biological_process, molecular_function, and
-            # cellular_component to the Cv model
-            cv_bp = Cv.objects.create(name='biological_process',
-                                      definition=cv_definition)
-            cv_bp.save()
-            cv_mf = Cv.objects.create(name='molecular_function',
-                                      definition=cv_definition)
-            cv_mf.save()
-            cv_cc = Cv.objects.create(name='cellular_component',
-                                      definition=cv_definition)
-            cv_cc.save()
-            cv_ex = Cv.objects.create(name='external',
-                                      definition=cv_definition)
-            cv_ex.save()
+        get_set_cvterm(cv_name='synonym_type',
+                       cvterm_name='exact',
+                       definition='',
+                       dbxref=dbxref_exact,
+                       is_relationshiptype=0)
 
-            # creating term is_a to be used as type_id in cvterm_relationship
-            dbxref_is_a = get_set_dbxref(db_name='obo_rel',
-                                         accession='is_a')
+        # Load typedefs as Dbxrefs and Cvterm
+        if options.get('verbosity') > 0:
+            self.stdout.write('Loading typedefs')
 
-            self.cvterm_is_a = get_set_cvterm(cv_name='relationship',
-                                              cvterm_name='is_a',
-                                              definition='',
-                                              dbxref=dbxref_is_a,
-                                              is_relationshiptype=1)
+        for typedef in G.graph['typedefs']:
+            self.store_type_def(typedef)
 
-            # Creating cvterm is_transitive to be used as type_id in cvtermprop
-            dbxref_is_transitive = get_set_dbxref(db_name='internal',
-                                                  accession='is_transitive')
+        # Load the cvterms
+        if options.get('verbosity') > 0:
+            self.stdout.write('Loading terms')
 
-            cvterm_is_transitive = get_set_cvterm(
-                    cv_name='cvterm_property_type',
-                    cvterm_name='is_transitive',
-                    definition='',
-                    dbxref=dbxref_is_transitive,
-                    is_relationshiptype=0)
+        for n, data in tqdm(G.nodes(data=True)):
+            self.store_term(n, data)
 
-            # Creating cvterm is_class_level to be used as type_id in
-            # cvtermprop
-            dbxref_is_class_level = get_set_dbxref(db_name='internal',
-                                                   accession='is_class_level')
+        # Load the relationship between cvterms
+        if options.get('verbosity') > 0:
+            self.stdout.write('Loading relationships')
 
-            cvterm_is_class_level = get_set_cvterm(
-                    cv_name='cvterm_property_type',
-                    cvterm_name='is_class_level',
-                    definition='',
-                    dbxref=dbxref_is_class_level,
-                    is_relationshiptype=0)
+        for u, v, type in tqdm(G.edges(keys=True)):
+            self.store_relationship(u, v, type)
 
-            # Creating cvterm is_metadata_tag to be used as type_id in
-            # cvtermprop
-            dbxref_is_metadata_tag = get_set_dbxref(
-                    db_name='internal',
-                    accession='is_metadata_tag')
-
-            cvterm_is_metadata_tag = get_set_cvterm(
-                    cv_name='cvterm_property_type',
-                    cvterm_name='is_metadata_tag',
-                    definition='',
-                    dbxref=dbxref_is_metadata_tag,
-                    is_relationshiptype=0)
-
-            # Creating cvterm comment to be used as type_id in cvtermprop
-            dbxref_comment = get_set_dbxref(db_name='internal',
-                                            accession='comment')
-
-            self.cvterm_comment = get_set_cvterm(
-                cv_name='cvterm_property_type',
-                cvterm_name='comment',
-                definition='',
-                dbxref=dbxref_comment,
-                is_relationshiptype=0)
-
-            # Creating cvterm is_anti_symmetric to be used as type_id in
-            # cvtermprop
-            dbxref_exact = get_set_dbxref(db_name='internal',
-                                          accession='exact')
-
-            get_set_cvterm(cv_name='synonym_type',
-                           cvterm_name='exact',
-                           definition='',
-                           dbxref=dbxref_exact,
-                           is_relationshiptype=0)
-
-            if options.get('verbosity') > 0:
-                self.stdout.write('Loading typedefs')
-
-            # Load typedefs as Dbxrefs and Cvterm
-            for typedef in G.graph['typedefs']:
-
-                dbxref_typedef = get_set_dbxref(db_name='_global',
-                                                accession=typedef['id'],
-                                                description=typedef.get('def'))
-
-                cvterm_typedef = get_set_cvterm(cv_name='sequence',
-                                                cvterm_name=typedef.get('id'),
-                                                definition=typedef.get('def'),
-                                                dbxref=dbxref_typedef,
-                                                is_relationshiptype=1)
-
-                # Load xref
-                if typedef.get('xref_analog'):
-                    for xref in typedef.get('xref_analog'):
-                        process_cvterm_xref(cvterm_typedef, xref)
-
-                # Load is_class_level
-                if typedef.get('is_class_level') is not None:
-                    get_set_cvtermprop(cvterm=cvterm_typedef,
-                                       type_id=cvterm_is_class_level.cvterm_id,
-                                       value=1,
-                                       rank=0)
-
-                # Load is_metadata_tag
-                if typedef.get('is_metadata_tag') is not None:
-                    get_set_cvtermprop(
-                        cvterm=cvterm_typedef,
-                        type_id=cvterm_is_metadata_tag.cvterm_id,
-                        value=1,
-                        rank=0)
-
-                # Load is_transitive
-                if typedef.get('is_transitive') is not None:
-                    get_set_cvtermprop(cvterm=cvterm_typedef,
-                                       type_id=cvterm_is_transitive.cvterm_id,
-                                       value=1,
-                                       rank=0)
-
-            if options.get('verbosity') > 0:
-                self.stdout.write('Loading terms (%s threads)'
-                                  % options.get('cpu'))
-
-            # Load the cvterms
-            for n, data in tqdm(G.nodes(data=True)):
-                self.store_term(n, data)
-
-            if options.get('verbosity') > 0:
-                self.stdout.write('Loading relationships')
-
-            # Creating term is_a to be used as type_id in cvterm_relationship
-            dbxref_is_a = get_set_dbxref('OBO_REL', 'is_a')
-            self.cvterm_is_a = get_set_cvterm(cv_name='relationship',
-                                              cvterm_name='is_a',
-                                              definition='',
-                                              dbxref=dbxref_is_a,
-                                              is_relationshiptype=1)
-
-            # Load the relationship between cvterms
-            for u, v, type in tqdm(G.edges(keys=True)):
-                self.store_relationship(u, v, type)
-
+        # DONE
         if options.get('verbosity') > 0:
             self.stdout.write(self.style.SUCCESS('Done'))
