@@ -8,7 +8,7 @@ from chado.lib.db import get_set_db
 from chado.lib.cvterm import get_set_cvterm, get_set_cvtermprop
 from chado.lib.cvterm import get_set_cvterm_dbxref, process_cvterm_xref
 from chado.lib.cvterm import process_cvterm_go_synonym, process_cvterm_def
-from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
 
 
 def store_type_def(typedef):
@@ -438,31 +438,22 @@ class Command(BaseCommand):
         if options.get('verbosity') > 0:
             self.stdout.write('Loading typedefs')
 
-        pool = ThreadPoolExecutor(max_workers=10)
-        for typedef in G.graph['typedefs']:
-            future = pool.submit(store_type_def, typedef)
-            if future.result():
-                raise(future.result())
+        for typedef in tqdm(G.graph['typedefs']):
+            store_type_def(typedef)
 
         # Load the cvterms
         if options.get('verbosity') > 0:
             self.stdout.write('Loading terms')
 
-        pool = ThreadPoolExecutor(max_workers=10)
-        for n, data in G.nodes(data=True):
-            future = pool.submit(store_term, n, data)
-            if future.result():
-                raise(future.result())
+        for n, data in tqdm(G.nodes(data=True)):
+            store_term(n, data)
 
         # Load the relationship between cvterms
         if options.get('verbosity') > 0:
             self.stdout.write('Loading relationships')
 
-        pool = ThreadPoolExecutor(max_workers=10)
-        for u, v, type in G.edges(keys=True):
-            future = pool.submit(store_relationship, u, v, type)
-            if future.result():
-                raise(future.result())
+        for u, v, type in tqdm(G.edges(keys=True)):
+            store_relationship(u, v, type)
 
         # DONE
         if options.get('verbosity') > 0:
