@@ -279,3 +279,17 @@ def get_ontology_term(ontology, term):
         raise ObjectDoesNotExist('Sequence Ontology term not found (%s).'
                                  % (term))
     return cvterm
+
+
+@cached(cache={})
+def get_cvterm(cv_name, cvterm_name, **kargs):
+    """Retrieve cvterm object."""
+    # Get/Set Cv instance: cv
+    cv = get_set_cv(cv_name)
+
+    try:
+        # Check if the cvterm is already registered
+        cvterm = Cvterm.objects.get(cv=cv, name=cvterm_name)
+        return cvterm
+    except ObjectDoesNotExist:
+        return None
