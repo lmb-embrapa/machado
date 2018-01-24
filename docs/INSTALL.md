@@ -26,28 +26,31 @@ We strongly recommend creating a new virtualenv for your project
 
 #### Django 2.0.1
 
-    pip install django
+    pip install django==2.0.1
 
 #### psycopg2 2.7.3.2
 
-    pip install psycopg2
+    pip install psycopg2==2.7.3.2
 
 #### biopython 1.70
 
-    pip install biopython
+    pip install biopython==1.70
 
 #### pysam 0.13
 
-    pip install pysam
+    pip install pysam==0.13
 
 #### obonet 0.2.2
 
-    pip install obonet
-
+    pip install obonet==0.2.2
 
 #### tqdm 4.19.5
 
-    pip install tqdm
+    pip install tqdm==4.19.5
+
+#### cachetools 2.0.1
+
+    pip install cachetools==2.0.1
 
 ### DjangoChado
 
