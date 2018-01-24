@@ -1,6 +1,6 @@
 """Load Gene Ontology."""
 
-from chado.lib.cvterm import get_set_cvterm, get_set_cvtermprop
+from chado.lib.cvterm import get_cvterm, get_set_cvterm, get_set_cvtermprop
 from chado.lib.cvterm import get_set_cvterm_dbxref, process_cvterm_xref
 from chado.lib.cvterm import process_cvterm_go_synonym, process_cvterm_def
 from chado.lib.dbxref import get_set_dbxref
@@ -108,33 +108,20 @@ class Command(BaseCommand):
 
     def store_term(self, n, data, lock):
         """Store the ontology terms."""
-        # Creating cvterm comment to be used as type_id in cvtermprop
-        dbxref_comment = get_set_dbxref(db_name='internal',
-                                        accession='comment')
-
-        cvterm_comment = get_set_cvterm(
-            cv_name='cvterm_property_type',
-            cvterm_name='comment',
-            definition='',
-            dbxref=dbxref_comment,
-            is_relationshiptype=0)
+        # Retrieving cvterm comment to be used as type_id in cvtermprop
+        cvterm_comment = get_cvterm(cv_name='cvterm_property_type',
+                                    cvterm_name='comment')
 
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
         dbxref = get_set_dbxref(aux_db, aux_accession)
 
         # Save the term to the Cvterm model
-        # Not using get_set_cvterm to improve performance
-        cv = Cv.objects.get(name=data.get('namespace'))
-        cvterm = Cvterm.objects.create(
-            cv=cv,
-            name=data.get('name'),
-            definition='',
-            dbxref=dbxref,
-            is_obsolete=0,
-            is_relationshiptype=0)
-
-        cvterm.save()
+        cvterm = get_set_cvterm(cv_name=data.get('namespace'),
+                                cvterm_name=data.get('name'),
+                                definition='',
+                                dbxref=dbxref,
+                                is_relationshiptype=0)
 
         # Definitions usually contain recurrent dbxrefs and get_set_dbxref
         # will sometimes break since they're running concurrently with
@@ -172,15 +159,9 @@ class Command(BaseCommand):
 
     def store_relationship(self, u, v, type):
         """Store the relationship between ontology terms."""
-        # creating term is_a to be used as type_id in cvterm_relationship
-        dbxref_is_a = get_set_dbxref(db_name='obo_rel',
-                                     accession='is_a')
-
-        cvterm_is_a = get_set_cvterm(cv_name='relationship',
-                                     cvterm_name='is_a',
-                                     definition='',
-                                     dbxref=dbxref_is_a,
-                                     is_relationshiptype=1)
+        # retrieving term is_a to be used as type_id in cvterm_relationship
+        cvterm_is_a = get_cvterm(cv_name='relationship',
+                                 cvterm_name='is_a')
 
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
@@ -276,6 +257,16 @@ class Command(BaseCommand):
             self.stdout.write(
                 'Loading terms ({} threads)'.format(options.get('cpu')))
 
+        # Creating cvterm comment to be used as type_id in cvtermprop
+        dbxref_comment = get_set_dbxref(db_name='internal',
+                                        accession='comment')
+
+        get_set_cvterm(cv_name='cvterm_property_type',
+                       cvterm_name='comment',
+                       definition='',
+                       dbxref=dbxref_comment,
+                       is_relationshiptype=0)
+
         lock = Lock()
         tasks = list()
         for n, data in G.nodes(data=True):
@@ -290,9 +281,20 @@ class Command(BaseCommand):
                 'Loading relationships ({} threads)'.format(
                     options.get('cpu')))
 
+        # creating term is_a to be used as type_id in cvterm_relationship
+        dbxref_is_a = get_set_dbxref(db_name='obo_rel',
+                                     accession='is_a')
+
+        get_set_cvterm(cv_name='relationship',
+                       cvterm_name='is_a',
+                       definition='',
+                       dbxref=dbxref_is_a,
+                       is_relationshiptype=1)
+
         tasks = list()
         for u, v, type in G.edges(keys=True):
-            tasks.append(pool.submit(self.store_relationship, u, v, type))
+            tasks.append(pool.submit(
+                self.store_relationship, u, v, type))
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
