@@ -14,12 +14,7 @@ As postgres user run:
     psql
     create user username with encrypted password 'password';
     create database yourdatabase with owner username;
-
-#### Chado 1.31
-
-Download [Chado](https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz), unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database
-
-    psql -h localhost -U username -W -d yourdatabase < chado-1.31/schemas/1.31/default_schema.sql
+    alter user username createdb;
 
 #### Python 3.5.2
 
@@ -29,25 +24,30 @@ We strongly recommend creating a new virtualenv for your project
     cd YOURPROJECT
     source bin/activate
 
-#### Django 1.10.6
+#### Django 2.0.1
 
     pip install django
 
-#### psycopg2 2.7.1
+#### psycopg2 2.7.3.2
 
     pip install psycopg2
 
-#### biopython 1.69
+#### biopython 1.70
 
     pip install biopython
 
-#### pysam 0.11.2.1
+#### pysam 0.13
 
     pip install pysam
 
 #### obonet 0.2.2
 
     pip install obonet
+
+
+#### tqdm 4.19.5
+
+    pip install tqdm
 
 ### DjangoChado
 
@@ -98,6 +98,7 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
 You have to run the following command to create django admin tables:
 
+    python manage.py makemigrations chado
     python manage.py migrate
 
 And the following command to create an admin user:
