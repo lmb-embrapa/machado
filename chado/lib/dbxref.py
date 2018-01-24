@@ -1,11 +1,14 @@
-from django.core.exceptions import ObjectDoesNotExist
+"""dbxref library."""
+from cachetools import cached
 from chado.models import Db, Dbxref
 from chado.lib.project import get_set_project_dbxref
 from chado.lib.db import get_set_db
+from django.core.exceptions import ObjectDoesNotExist
 
 
+@cached(cache={})
 def get_set_dbxref(db_name, accession, **kargs):
-
+    """Create/Retrieve dbxref object."""
     # Get/Set Db instance: db
     db = get_set_db(db_name)
 
@@ -37,8 +40,9 @@ def get_set_dbxref(db_name, accession, **kargs):
         return dbxref
 
 
+@cached(cache={})
 def get_dbxref(db_name, accession):
-
+    """Retrieve dbxref object."""
     # Get/Set Db instance: db
     db = Db.objects.get(name=db_name)
 

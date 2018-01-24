@@ -1,21 +1,25 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+"""cvterm library."""
+from cachetools import cached
 from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop, Cvtermsynonym
 from chado.lib.dbxref import get_set_dbxref
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 import re
 
 
+@cached(cache={})
 def get_set_cv(cv_name, **args):
-    """
-    It tries to get the cv object or create it otherwise
+    """Create/Retrieve cv object.
+
+    It tries to get the cv object or create it otherwise.
 
     Args:
         cv_name: type string
 
     Returns:
         cv: type object
-    """
 
+    """
     try:
         # Check if the cv is already registered
         cv = Cv.objects.get(name=cv_name)
@@ -30,8 +34,9 @@ def get_set_cv(cv_name, **args):
         return cv
 
 
+@cached(cache={})
 def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
-
+    """Create/Retrieve cvterm object."""
     definition = kargs.get('definition')
     is_relationshiptype = kargs.get('is_relationshiptype')
     """
@@ -77,8 +82,9 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
         return cvterm
 
 
+@cached(cache={})
 def get_set_cvtermprop(cvterm, type_id, value, rank):
-
+    """Create/Retrieve cvtermprop object."""
     try:
         # Check if the cvtermprop is already registered
         cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,
@@ -98,8 +104,9 @@ def get_set_cvtermprop(cvterm, type_id, value, rank):
         return cvtermprop
 
 
+@cached(cache={})
 def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
-
+    """Create/Retrieve cvterm_dbxref object."""
     try:
         # Check if the dbxref is already registered
         cvtermdbxref = CvtermDbxref.objects.get(cvterm=cvterm, dbxref=dbxref)
@@ -117,7 +124,7 @@ def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
 
 
 def process_cvterm_def(cvterm, definition):
-
+    """Process defition to obtain cvterms."""
     text = ''
 
     '''
@@ -163,7 +170,7 @@ def process_cvterm_def(cvterm, definition):
 
 
 def process_cvterm_xref(cvterm, xref):
-
+    """Process cvterm_xref."""
     if xref:
 
         ref_db, ref_content = xref.split(':', 1)
@@ -177,13 +184,12 @@ def process_cvterm_xref(cvterm, xref):
 
         # Estabilish the cvterm and the dbxref relationship
         get_set_cvterm_dbxref(cvterm, dbxref, 0)
-
     return
 
 
 def process_cvterm_so_synonym(cvterm, synonym):
+    """Process cvterm_so_synonym.
 
-    '''
     Definition format:
     "text" cvterm []
 
@@ -193,7 +199,7 @@ def process_cvterm_so_synonym(cvterm, synonym):
     Attention:
     There are several cases that don't follow this format.
     These are being ignored for now.
-    '''
+    """
     pattern = re.compile(r'^"(.+)" (\w+) \[\]$')
     matches = pattern.findall(synonym)
 
@@ -220,15 +226,14 @@ def process_cvterm_so_synonym(cvterm, synonym):
 
 
 def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
+    """Process cvterm_go_synonym.
 
-    '''
     Definition format:
     "text" [refdb:refcontent, refdb:refcontent]
 
     Definition format example:
     "30S ribosomal subunit assembly" [GOC:mah]
-    '''
-
+    """
     # Retrieve text and dbxrefs
     text, dbxrefs = synonym.split('" [')
     synonym_text = re.sub(r'^"', '', text)
@@ -257,7 +262,9 @@ def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
     return
 
 
+@cached(cache={})
 def get_ontology_term(ontology, term):
+    """Retrieve ontology term."""
     # Retrieve sequence ontology object
     try:
         cv = Cv.objects.get(name=ontology)

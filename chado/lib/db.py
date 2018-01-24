@@ -1,10 +1,14 @@
-import os
+"""db library."""
+from cachetools import cached
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
 from chado.models import Db, Dbprop
+from django.db import IntegrityError
+import os
 
 
+@cached(cache={})
 def get_set_db(db_name, **kargs):
+    """Create/Retrieve db object."""
     description = kargs.get('description')
     urlprefix = kargs.get('urlprefix')
     url = kargs.get('url')
@@ -25,7 +29,9 @@ def get_set_db(db_name, **kargs):
         return db
 
 
+@cached(cache={})
 def set_db_file(file, **args):
+    """Create db object using the filename as name."""
     try:
         file = os.path.basename(file)
         db = Db.objects.get(name=file)
@@ -39,8 +45,9 @@ def set_db_file(file, **args):
     return db
 
 
+@cached(cache={})
 def get_set_dbprop(db, cvterm_id, value, rank=0):
-
+    """Create/Retrieve dbprop object."""
     dbprop = ""
 
     try:
