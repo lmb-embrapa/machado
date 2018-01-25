@@ -129,7 +129,7 @@ def process_cvterm_def(cvterm, definition):
 
     Definition format example:
     "A gene encoding an mRNA that has the stop codon redefined as
-    # pyrrolysine." [SO:xp]
+     pyrrolysine." [SO:xp]
     '''
     if definition:
 

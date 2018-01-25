@@ -3,6 +3,7 @@
 from chado.lib.cvterm import get_cvterm, get_set_cv, get_set_cvterm
 from chado.lib.cvterm import get_set_cvterm_dbxref, get_set_cvtermprop
 from chado.lib.cvterm import get_ontology_term
+from chado.lib.cvterm import process_cvterm_def, process_cvterm_xref
 from chado.lib.db import get_set_db, get_set_dbprop, set_db_file
 from chado.lib.dbxref import get_set_dbxref, get_dbxref
 from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop
@@ -347,3 +348,49 @@ class CvtermLibTest(TestCase):
                                       term='test_ontology_term_cvterm')
 
         self.assertEqual('test_ontology_term_cvterm', test_term.name)
+
+    def test_process_cvterm_def(self):
+        """Tests - process_cvterm_def."""
+        definition = '"A gene encoding ..." [SO:xp]'
+
+        test_dbxref = get_set_dbxref(
+            db_name='test_def_db',
+            accession='test_def_accession')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_def_cv',
+            cvterm_name='test_def_cvterm',
+            dbxref=test_dbxref)
+
+        process_cvterm_def(test_cvterm, definition)
+
+        test_processed_dbxref = get_dbxref(db_name='SO',
+                                           accession='xp')
+
+        test_processed_cvterm_dbxref = CvtermDbxref.objects.get(
+            cvterm=test_cvterm,
+            dbxref=test_processed_dbxref)
+
+        self.assertEqual(1, test_processed_cvterm_dbxref.is_for_definition)
+
+    def test_process_cvterm_xref(self):
+        """Tests - process_cvterm_xref."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_xref_db',
+            accession='test_xref_accession')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_xref_cv',
+            cvterm_name='test_xref_cvterm',
+            dbxref=test_dbxref)
+
+        process_cvterm_xref(test_cvterm, 'SP:xq')
+
+        test_processed_dbxref = get_dbxref(db_name='SP',
+                                           accession='xq')
+
+        test_processed_cvterm_dbxref = CvtermDbxref.objects.get(
+            cvterm=test_cvterm,
+            dbxref=test_processed_dbxref)
+
+        self.assertEqual(0, test_processed_cvterm_dbxref.is_for_definition)
