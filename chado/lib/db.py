@@ -32,31 +32,30 @@ def get_set_db(db_name, **kargs):
 @cached(cache={})
 def set_db_file(file, **args):
     """Create db object using the filename as name."""
+    filename = os.path.basename(file)
     try:
-        file = os.path.basename(file)
-        db = Db.objects.get(name=file)
-        if db is not None:
-            raise IntegrityError('The db %s is already registered.'
-                                 % db.name)
-    except ObjectDoesNotExist:
-        db = Db.objects.create(name=file,
+        db = Db.objects.create(name=filename,
                                description=args.get('description'),
                                url=args.get('url'))
-    return db
+        return db
+    except IntegrityError:
+        raise('The db %s is already registered.' % db.name)
 
 
 @cached(cache={})
-def get_set_dbprop(db, cvterm_id, value, rank=0):
+def get_set_dbprop(db, **kwargs):
     """Create/Retrieve dbprop object."""
-    dbprop = ""
-
+    rank = kwargs.get('rank')
+    value = kwargs.get('value')
+    cvterm_id = kwargs.get('cvterm_id')
     try:
-        # Check if the dbxref is already registered
-        dbprop = Dbprop.objects.get(db=db, type_id=cvterm_id)
+        # Check if the dbprop is already registered
+        dbprop = Dbprop.objects.get(db=db)
 
     except ObjectDoesNotExist:
-
-        # Save to the Dbxref model
+        if not rank:
+            rank = 0
+        # Save to the Dbprop model
         dbprop = Dbprop.objects.create(db=db,
                                        type_id=cvterm_id,
                                        value=value,

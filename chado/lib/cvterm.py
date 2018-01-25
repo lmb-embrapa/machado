@@ -35,10 +35,10 @@ def get_set_cv(cv_name, **args):
 
 
 @cached(cache={})
-def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
+def get_set_cvterm(cv_name, cvterm_name, dbxref, **kwargs):
     """Create/Retrieve cvterm object."""
-    definition = kargs.get('definition')
-    is_relationshiptype = kargs.get('is_relationshiptype')
+    definition = kwargs.get('definition')
+    is_relationshiptype = kwargs.get('is_relationshiptype')
     """
     It tries to get the cvterm object or create it otherwise.
 
@@ -51,7 +51,7 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
         cvterm_name: type string
         dbxref: type object
 
-    kargs (optional):
+    kwargs (optional):
         definition: type string
         is_relationshiptype: type boolean
 
@@ -68,7 +68,7 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kargs):
         return cvterm
 
     except ObjectDoesNotExist:
-        if (not is_relationshiptype):
+        if not is_relationshiptype:
             is_relationshiptype = 0
 
         # Save the name to the Cvterm model
@@ -282,7 +282,7 @@ def get_ontology_term(ontology, term):
 
 
 @cached(cache={})
-def get_cvterm(cv_name, cvterm_name, **kargs):
+def get_cvterm(cv_name, cvterm_name, **kwargs):
     """Retrieve cvterm object."""
     # Get/Set Cv instance: cv
     cv = get_set_cv(cv_name)
