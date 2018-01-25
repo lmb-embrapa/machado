@@ -104,6 +104,10 @@ You have to run the following command to create django admin tables:
     python manage.py makemigrations chado
     python manage.py migrate
 
+Run tests to check the instalation:
+
+    python manage.py test chado.tests
+
 And the following command to create an admin user:
 
     python manage.py createsuperuser

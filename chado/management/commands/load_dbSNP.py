@@ -114,7 +114,7 @@ class Command(BaseCommand):
                                              is_relationshiptype=0)
 
                 get_set_dbprop(db=db_file,
-                               cvterm_id=cvterm_file.cvterm_id,
+                               type_id=cvterm_file.cvterm_id,
                                value=x.type,
                                rank=0)
             # FILTER, INFO, FORMAT, etc., are global cvterms for the

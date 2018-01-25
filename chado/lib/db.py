@@ -2,7 +2,6 @@
 from cachetools import cached
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbprop
-from django.db import IntegrityError
 import os
 
 
@@ -38,26 +37,26 @@ def set_db_file(file, **args):
                                description=args.get('description'),
                                url=args.get('url'))
         return db
-    except IntegrityError:
-        raise('The db %s is already registered.' % db.name)
+    except ObjectDoesNotExist:
+        return None
 
 
 @cached(cache={})
-def get_set_dbprop(db, **kwargs):
+def get_set_dbprop(db, type_id, **kwargs):
     """Create/Retrieve dbprop object."""
     rank = kwargs.get('rank')
     value = kwargs.get('value')
-    cvterm_id = kwargs.get('cvterm_id')
     try:
         # Check if the dbprop is already registered
-        dbprop = Dbprop.objects.get(db=db)
+        dbprop = Dbprop.objects.get(db=db,
+                                    type_id=type_id)
 
     except ObjectDoesNotExist:
         if not rank:
             rank = 0
         # Save to the Dbprop model
         dbprop = Dbprop.objects.create(db=db,
-                                       type_id=cvterm_id,
+                                       type_id=type_id,
                                        value=value,
                                        rank=rank)
         dbprop.save()

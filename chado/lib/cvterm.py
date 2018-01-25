@@ -23,7 +23,6 @@ def get_set_cv(cv_name, **args):
     try:
         # Check if the cv is already registered
         cv = Cv.objects.get(name=cv_name)
-        return cv
 
     except ObjectDoesNotExist:
 
@@ -31,7 +30,7 @@ def get_set_cv(cv_name, **args):
         cv = Cv.objects.create(name=cv_name,
                                definition=args.get('definition'))
         cv.save()
-        return cv
+    return cv
 
 
 @cached(cache={})
@@ -65,7 +64,6 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kwargs):
     try:
         # Check if the cvterm is already registered
         cvterm = Cvterm.objects.get(cv=cv, name=cvterm_name)
-        return cvterm
 
     except ObjectDoesNotExist:
         if not is_relationshiptype:
@@ -79,20 +77,19 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kwargs):
                                        is_obsolete=0,
                                        is_relationshiptype=is_relationshiptype)
         cvterm.save()
-        return cvterm
+    return cvterm
 
 
 @cached(cache={})
-def get_set_cvtermprop(cvterm, type_id, value, rank):
+def get_set_cvtermprop(cvterm, type_id, **kwargs):
     """Create/Retrieve cvtermprop object."""
+    value = kwargs.get('value')
+    rank = kwargs.get('rank')
+
     try:
         # Check if the cvtermprop is already registered
         cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,
-                                            type_id=type_id,
-                                            value=value,
-                                            rank=rank)
-        return cvterm
-
+                                            type_id=type_id)
     except ObjectDoesNotExist:
 
         # Save the name to the Cvtermprop model
@@ -101,7 +98,7 @@ def get_set_cvtermprop(cvterm, type_id, value, rank):
                                                value=value,
                                                rank=rank)
         cvtermprop.save()
-        return cvtermprop
+    return cvtermprop
 
 
 @cached(cache={})
@@ -110,7 +107,6 @@ def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
     try:
         # Check if the dbxref is already registered
         cvtermdbxref = CvtermDbxref.objects.get(cvterm=cvterm, dbxref=dbxref)
-        return cvtermdbxref
 
     except ObjectDoesNotExist:
 
@@ -120,7 +116,7 @@ def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
             dbxref=dbxref,
             is_for_definition=is_for_definition)
         cvtermdbxref.save()
-        return cvtermdbxref
+    return cvtermdbxref
 
 
 def process_cvterm_def(cvterm, definition):

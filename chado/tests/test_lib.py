@@ -1,9 +1,11 @@
 """Tests Libraries."""
 
-from chado.lib.cvterm import get_set_cv, get_set_cvterm, get_set_cvterm_dbxref
+from chado.lib.cvterm import get_cvterm, get_set_cv, get_set_cvterm
+from chado.lib.cvterm import get_set_cvterm_dbxref, get_set_cvtermprop
+from chado.lib.cvterm import get_ontology_term
 from chado.lib.db import get_set_db, get_set_dbprop, set_db_file
 from chado.lib.dbxref import get_set_dbxref, get_dbxref
-from chado.models import Cv, Cvterm, CvtermDbxref
+from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop
 from chado.models import Db, Dbprop, Dbxref
 from django.test import TestCase
 
@@ -57,7 +59,7 @@ class DbLibTest(TestCase):
                                      is_relationshiptype=1)
 
         test_dbprop = get_set_dbprop(db=test_db,
-                                     cvterm_id=test_cvterm.cvterm_id,
+                                     type_id=test_cvterm.cvterm_id,
                                      value='test_db_value_new',
                                      rank=1)
 
@@ -85,9 +87,7 @@ class DbLibTest(TestCase):
                               rank=1)
 
         test_dbprop = get_set_dbprop(db=test_db,
-                                     cvterm_id=test_cvterm.cvterm_id,
-                                     value='test_db_value_existing',
-                                     rank=1)
+                                     type_id=test_cvterm.cvterm_id)
 
         self.assertEqual('test_db_value_existing', test_dbprop.value)
         self.assertEqual(1, test_dbprop.rank)
@@ -165,6 +165,28 @@ class CvtermLibTest(TestCase):
         self.assertEqual('test_cvterm_name_existing', test_cv.name)
         self.assertEqual('test_cvterm_definition', test_cv.definition)
 
+    def test_get_cvterm(self):
+        """Tests - get_cvterm."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_cvterm_name',
+            accession='test_cvterm_accession',
+            description='test_cvterm_description',
+            version='test_cvterm_version')
+
+        get_set_cvterm(cv_name='test_cvterm_name',
+                       cvterm_name='test_cvterm_name',
+                       dbxref=test_dbxref,
+                       definition='test_cvterm_definition',
+                       is_relationshiptype=1)
+
+        test_cvterm = get_cvterm(cv_name='test_cvterm_name',
+                                 cvterm_name='test_cvterm_name')
+
+        self.assertEqual('test_cvterm_name', test_cvterm.name)
+        self.assertEqual('test_cvterm_definition', test_cvterm.definition)
+        self.assertEqual(0, test_cvterm.is_obsolete)
+        self.assertEqual(1, test_cvterm.is_relationshiptype)
+
     def test_get_set_cvterm_new(self):
         """Tests - get_set_cvterm - new."""
         test_dbxref = get_set_dbxref(
@@ -214,13 +236,13 @@ class CvtermLibTest(TestCase):
         """Tests - get_set_cvterm_dbxref - new."""
         test_dbxref = get_set_dbxref(
             db_name='test_cvterm_dbxref_name_new',
-            accession='test_cvterm_dbxref_naccession',
-            description='test_cvterm_dbxref_ndescription',
-            version='test_cvterm_dbxref_nversion')
+            accession='test_cvterm_dbxref_accession',
+            description='test_cvterm_dbxref_description',
+            version='test_cvterm_dbxref_version')
 
         test_cvterm = get_set_cvterm(
-            cv_name='test_cvterm_dbxref_nname_new',
-            cvterm_name='test_cvterm_dbxref_nname_new',
+            cv_name='test_cvterm_dbxref_name_new',
+            cvterm_name='test_cvterm_dbxref_name_new',
             dbxref=test_dbxref)
 
         test_cvterm_dbxref = get_set_cvterm_dbxref(cvterm=test_cvterm,
@@ -232,14 +254,14 @@ class CvtermLibTest(TestCase):
     def test_get_set_cvterm_dbxref_existing(self):
         """Tests - get_set_cvterm_dbxref - existing."""
         test_dbxref = get_set_dbxref(
-            db_name='test_cvterm_dbxref_nname_existing',
-            accession='test_cvterm_dbxref_naccession',
-            description='test_cvterm_dbxref_ndescription',
-            version='test_cvterm_dbxref_nersion')
+            db_name='test_cvterm_dbxref_name_existing',
+            accession='test_cvterm_dbxref_accession',
+            description='test_cvterm_dbxref_description',
+            version='test_cvterm_dbxref_version')
 
         test_cvterm = get_set_cvterm(
-            cv_name='test_cvterm_dbxref_nname_existing',
-            cvterm_name='test_cvterm_dbxref_nname_existing',
+            cv_name='test_cvterm_dbxref_name_existing',
+            cvterm_name='test_cvterm_dbxref_name_existing',
             dbxref=test_dbxref)
 
         CvtermDbxref.objects.create(cvterm=test_cvterm,
@@ -251,3 +273,77 @@ class CvtermLibTest(TestCase):
                                                    is_for_definition=1)
 
         self.assertEqual(1, test_cvterm_dbxref.is_for_definition)
+
+    def test_get_set_cvtermprop_new(self):
+        """Tests - get_set_cvprop - new."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_cvtermprop_name_new',
+            accession='test_cvtermprop_accession',
+            description='test_cvtermprop_description',
+            version='test_cvtermprop_version')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_cvtermprop_name_new',
+            cvterm_name='test_cvtermprop_name_new',
+            dbxref=test_dbxref)
+
+        test_cvterm_type = get_set_cvterm(
+            cv_name='test_cvtermprop_name_type_new',
+            cvterm_name='test_cvtermprop_name_type_new',
+            dbxref=test_dbxref)
+
+        test_cvtermprop = get_set_cvtermprop(
+            cvterm=test_cvterm,
+            type_id=test_cvterm_type.cvterm_id,
+            value='test_cvterm_value_new',
+            rank=1)
+
+        self.assertEqual('test_cvterm_value_new', test_cvtermprop.value)
+        self.assertEqual(1, test_cvtermprop.rank)
+
+    def test_get_set_cvtermprop_existing(self):
+        """Tests - get_set_cvprop - existing."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_cvtermprop_name_existing',
+            accession='test_cvtermprop_accession',
+            description='test_cvtermprop_description',
+            version='test_cvtermprop_version')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_cvtermprop_name_existing',
+            cvterm_name='test_cvtermprop_name_existing',
+            dbxref=test_dbxref)
+
+        test_cvterm_type = get_set_cvterm(
+            cv_name='test_cvtermprop_name_type_existing',
+            cvterm_name='test_cvtermprop_name_type_existing',
+            dbxref=test_dbxref)
+
+        Cvtermprop.objects.create(cvterm=test_cvterm,
+                                  type_id=test_cvterm_type.cvterm_id,
+                                  value='test_cvterm_value_existing',
+                                  rank=2)
+
+        test_cvtermprop = get_set_cvtermprop(
+            cvterm=test_cvterm,
+            type_id=test_cvterm_type.cvterm_id)
+
+        self.assertEqual('test_cvterm_value_existing', test_cvtermprop.value)
+        self.assertEqual(2, test_cvtermprop.rank)
+
+    def test_get_ontology_term(self):
+        """Tests - get_ontology_term."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_ontology_term_db',
+            accession='test_ontology_term_accession',
+            description='test_ontology_term_description',
+            version='test_ontology_term_version')
+
+        get_set_cvterm(cv_name='test_ontology_term_cv',
+                       cvterm_name='test_ontology_term_cvterm',
+                       dbxref=test_dbxref)
+
+        test_term = get_ontology_term(ontology='test_ontology_term_cv',
+                                      term='test_ontology_term_cvterm')
+
+        self.assertEqual('test_ontology_term_cvterm', test_term.name)
