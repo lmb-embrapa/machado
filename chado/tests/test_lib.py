@@ -4,11 +4,52 @@ from chado.lib.cvterm import get_cvterm, get_set_cv, get_set_cvterm
 from chado.lib.cvterm import get_set_cvterm_dbxref, get_set_cvtermprop
 from chado.lib.cvterm import get_ontology_term
 from chado.lib.cvterm import process_cvterm_def, process_cvterm_xref
+from chado.lib.cvterm import process_cvterm_so_synonym
+from chado.lib.cvterm import process_cvterm_go_synonym
 from chado.lib.db import get_set_db, get_set_dbprop, set_db_file
 from chado.lib.dbxref import get_set_dbxref, get_dbxref
-from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop
+from chado.lib.organism import get_organism, get_set_organism
+from chado.lib.project import get_project
+from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop, Cvtermsynonym
 from chado.models import Db, Dbprop, Dbxref
+from chado.models import Organism, Project
 from django.test import TestCase
+
+
+class ProjectLibTest(TestCase):
+    """Tests Libraries - Project."""
+
+    def test_get_project(self):
+        """Tests Libraries - get_project."""
+        Project.objects.create(name="new_project")
+        test_project = get_project("new_project")
+        self.assertEqual('new_project', test_project.name)
+
+
+class OrganismLibTest(TestCase):
+    """Tests Libraries - Organism."""
+
+    def test_get_organism(self):
+        """Tests Libraries - get_organism."""
+        Organism.objects.create(genus="Mus", species="musculus")
+
+        test_organism = get_organism("Mus musculus")
+
+        self.assertEqual('Mus', test_organism.genus)
+        self.assertEqual('musculus', test_organism.species)
+
+    def test_get_set_organism_new(self):
+        """Tests - get_set_organism - new."""
+        test_organism = get_set_organism("Homo sapiens")
+        self.assertEqual('Homo', test_organism.genus)
+        self.assertEqual('sapiens', test_organism.species)
+
+    def test_get_set_organism_existing(self):
+        """Tests - get_set_organism - existing."""
+        Organism.objects.create(genus="Bos", species="indicus")
+        test_organism = get_set_organism("Bos indicus")
+        self.assertEqual('Bos', test_organism.genus)
+        self.assertEqual('indicus', test_organism.species)
 
 
 class DbLibTest(TestCase):
@@ -394,3 +435,44 @@ class CvtermLibTest(TestCase):
             dbxref=test_processed_dbxref)
 
         self.assertEqual(0, test_processed_cvterm_dbxref.is_for_definition)
+
+    def test_process_cvterm_so_synonym(self):
+        """Tests - process_cvterm_so_synonym."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_so_synonym_db',
+            accession='test_so_synonym_accession')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_so_synonym_cv',
+            cvterm_name='test_so_synonym_cvterm',
+            dbxref=test_dbxref)
+
+        process_cvterm_so_synonym(cvterm=test_cvterm,
+                                  synonym='"stop codon gained" EXACT []')
+
+        test_so_synonym = Cvtermsynonym.objects.get(
+            cvterm=test_cvterm,
+            synonym='stop codon gained')
+
+        self.assertEqual('stop codon gained', test_so_synonym.synonym)
+
+    def test_process_cvterm_go_synonym(self):
+        """Tests - process_cvterm_go_synonym."""
+        test_dbxref = get_set_dbxref(
+            db_name='test_go_synonym_db',
+            accession='test_go_synonym_accession')
+
+        test_cvterm = get_set_cvterm(
+            cv_name='test_go_synonym_cv',
+            cvterm_name='test_go_synonym_cvterm',
+            dbxref=test_dbxref)
+
+        process_cvterm_go_synonym(cvterm=test_cvterm,
+                                  synonym='"30S ribosomal subunit" [GOC:mah]',
+                                  synonym_type='related_synonym')
+
+        test_go_synonym = Cvtermsynonym.objects.get(
+            cvterm=test_cvterm,
+            synonym='30S ribosomal subunit')
+
+        self.assertEqual('30S ribosomal subunit', test_go_synonym.synonym)
