@@ -1,14 +1,15 @@
+"""organism library."""
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Organism, OrganismDbxref
+from chado.models import Organism
 
 
 def get_organism(organism):
-
+    """Retrieve organism object."""
     try:
         aux = organism.split(' ')
         genus = aux[0]
         species = 'spp.'
-        infraspecific = ''
+        infraspecific = None
         if len(aux) == 2:
             species = aux[1]
         elif len(aux) > 2:
@@ -30,6 +31,7 @@ def get_organism(organism):
 
 
 def get_set_organism(organism_name, infra_name=""):
+    """Create/Retrieve organism object."""
     # receives an organism binomial name with "Genus species" format
     genus = ""
     species = ""
@@ -46,16 +48,4 @@ def get_set_organism(organism_name, infra_name=""):
     except ObjectDoesNotExist:
         organism = Organism.objects.create(genus=genus, species=species,
                                            infraspecific_name=infra_name)
-    return (organism)
-
-
-def get_set_organism_dbxref(organism, dbxref):
-    organism_dbxref = ""
-    # receives an organism binomial name with "Genus species" format
-    try:
-        organism_dbxref = OrganismDbxref.objects.get(organism=organism,
-                                                     dbxref=dbxref)
-    except ObjectDoesNotExist:
-        organism_dbxref = OrganismDbxref.objects.create(organism=organism,
-                                                        dbxref=dbxref)
-    return (organism_dbxref)
+    return organism
