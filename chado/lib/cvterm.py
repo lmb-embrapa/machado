@@ -1,13 +1,11 @@
 """cvterm library."""
-from cachetools import cached
 from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermprop, Cvtermsynonym
 from chado.lib.dbxref import get_set_dbxref
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from django.db.utils import IntegrityError
 import re
 
 
-@cached(cache={})
 def get_set_cv(cv_name, **args):
     """Create/Retrieve cv object.
 
@@ -33,7 +31,6 @@ def get_set_cv(cv_name, **args):
     return cv
 
 
-@cached(cache={})
 def get_set_cvterm(cv_name, cvterm_name, dbxref, **kwargs):
     """Create/Retrieve cvterm object."""
     definition = kwargs.get('definition')
@@ -80,7 +77,6 @@ def get_set_cvterm(cv_name, cvterm_name, dbxref, **kwargs):
     return cvterm
 
 
-@cached(cache={})
 def get_set_cvtermprop(cvterm, type_id, **kwargs):
     """Create/Retrieve cvtermprop object."""
     value = kwargs.get('value')
@@ -101,7 +97,6 @@ def get_set_cvtermprop(cvterm, type_id, **kwargs):
     return cvtermprop
 
 
-@cached(cache={})
 def get_set_cvterm_dbxref(cvterm, dbxref, is_for_definition):
     """Create/Retrieve cvterm_dbxref object."""
     try:
@@ -194,7 +189,7 @@ def process_cvterm_so_synonym(cvterm, synonym):
 
     Attention:
     There are several cases that don't follow this format.
-    These are being ignored for now.
+    Those are being ignored for now.
     """
     pattern = re.compile(r'^"(.+)" (\w+) \[\]$')
     matches = pattern.findall(synonym)
@@ -258,7 +253,6 @@ def process_cvterm_go_synonym(cvterm, synonym, synonym_type):
     return
 
 
-@cached(cache={})
 def get_ontology_term(ontology, term):
     """Retrieve ontology term."""
     # Retrieve sequence ontology object
@@ -277,7 +271,6 @@ def get_ontology_term(ontology, term):
     return cvterm
 
 
-@cached(cache={})
 def get_cvterm(cv_name, cvterm_name, **kwargs):
     """Retrieve cvterm object."""
     # Get/Set Cv instance: cv
