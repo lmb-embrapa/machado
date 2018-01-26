@@ -3,7 +3,8 @@ from django.core.management.base import BaseCommand
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.cvterm import get_set_cv, get_set_cvterm
 from chado.lib.db import get_set_db
-from chado.lib.project import (get_project, get_set_project_dbxref)
+from chado.lib.project import get_project
+from chado.models import ProjectDbxref
 import re
 
 
@@ -78,7 +79,7 @@ class Command(BaseCommand):
                            is_relationshiptype=0)
 
             if project:
-                get_set_project_dbxref(dbxref=dbxref, project=project)
+                ProjectDbxref.objects.create(dbxref=dbxref, project=project)
 
         self.stdout.write(self.style.SUCCESS('%s Done. '
                                              % (datetime.now())))

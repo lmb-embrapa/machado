@@ -1,11 +1,9 @@
 """db library."""
-from cachetools import cached
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbprop
 import os
 
 
-@cached(cache={})
 def get_set_db(db_name, **kargs):
     """Create/Retrieve db object."""
     description = kargs.get('description')
@@ -28,7 +26,6 @@ def get_set_db(db_name, **kargs):
         return db
 
 
-@cached(cache={})
 def set_db_file(file, **args):
     """Create db object using the filename as name."""
     filename = os.path.basename(file)
@@ -41,7 +38,6 @@ def set_db_file(file, **args):
         return None
 
 
-@cached(cache={})
 def get_set_dbprop(db, type_id, **kwargs):
     """Create/Retrieve dbprop object."""
     rank = kwargs.get('rank')

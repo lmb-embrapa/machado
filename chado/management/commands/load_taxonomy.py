@@ -1,17 +1,22 @@
+"""Load taxonomy."""
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from chado.lib.dbxref import get_set_dbxref
 from chado.lib.db import set_db_file
-from chado.lib.organism import get_set_organism, get_set_organism_dbxref
+from chado.lib.organism import get_set_organism
+from chado.models import OrganismDbxref
 import re
 import sys
 
 
 class Command(BaseCommand):
+    """Load NCBI's taxonomy file."""
+
     help = 'Load NCBI\'s taxonomy file'
 
     def add_arguments(self, parser):
+        """Define the arguments."""
         parser.add_argument("--names", help="names file <e.g.: names.dmp>",
                             required=True, type=str)
         parser.add_argument("--nodes", help="node file <NOT IMPLEMENTED YET",
@@ -27,6 +32,7 @@ class Command(BaseCommand):
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
     # 4-cyclohexadiene-1-carboxylate synthase [Grimontia marina]'''
     def parse_scientific_name(self, scname):
+        """Parse scientific name."""
         # print("# desc field: %s" % first_fasta_description_field)
         fields = scname.split(" ")
         # print("1st field: %s" % fields[0])
@@ -45,7 +51,7 @@ class Command(BaseCommand):
         return((genus + " " + species), infra)
 
     def handle(self, *args, **options):
-
+        """Execute the main function."""
         # get db object
         db = set_db_file(file=options['names'],
                          description=options['description'],
@@ -83,14 +89,14 @@ class Command(BaseCommand):
                 # try to get or set organism
                 try:
                     organism_name, infra = self.parse_scientific_name(scname)
-                except:
+                except IntegrityError:
                     raise IntegrityError('The organism name could not be '
                                          'obtained from the scname: %s'
                                          % scname)
 
                 # create objects
                 organism = get_set_organism(organism_name, infra)
-                get_set_organism_dbxref(organism, dbxref)
+                OrganismDbxref.objects.create(organism, dbxref)
                 counter += 1
                 sys.stdout.write('Scientific names inserted: %s\r' % counter)
                 sys.stdout.flush()

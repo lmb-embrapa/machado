@@ -8,12 +8,12 @@ from datetime import datetime, timezone
 from chado.models import Cvterm
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
-from chado.models import Pub, Synonym
+from chado.models import ProjectFeature, Pub, Synonym
 from chado.lib.cvterm import get_ontology_term, get_set_cvterm
 from chado.lib.db import set_db_file
 from chado.lib.dbxref import get_set_dbxref, get_dbxref
 from chado.lib.organism import get_organism
-from chado.lib.project import get_project, get_set_project_feature
+from chado.lib.project import get_project
 
 VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
                'gene', 'id', 'name', 'orf_classification']
@@ -266,8 +266,8 @@ class Command(BaseCommand):
 
                     # create project_feature
                     if project:
-                            get_set_project_feature(feature=feature,
-                                                    project=project)
+                            ProjectFeature.objects.create(feature=feature,
+                                                          project=project)
 
                     # adding attributes to featureprop
                     self.process_attributes(project, feature, attrs, pub)
