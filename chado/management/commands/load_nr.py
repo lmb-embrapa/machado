@@ -1,22 +1,24 @@
+"""Load NR file."""
 import hashlib
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from chado.models import Feature, FeatureDbxref
+from chado.models import Db, Dbxref, Feature, FeatureDbxref, Organism
 from Bio import SeqIO
-from chado.lib.dbxref import get_set_dbxref
-from chado.lib.organism import get_set_organism
-from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
+import os
 import re
 # import json
 
 
 class Command(BaseCommand):
+    """Load NR file."""
+
     help = 'Load NCBI\'s NR FASTA file'
 
     def add_arguments(self, parser):
+        """Define the arguments."""
         parser.add_argument("--fasta", help="FASTA File", required=True,
                             type=str)
         parser.add_argument("--description", help="DB Description",
@@ -31,7 +33,7 @@ class Command(BaseCommand):
     # 'description='gi|1003052167|emb|CZF77396.1| 2-succinyl-6-hydroxy-2,
     # 4-cyclohexadiene-1-carboxylate synthase [Grimontia marina]'''
     def parse_organism(self, description_field):
-
+        """Parse organism name."""
         if not re.search(r'\]', description_field):
             return 'Unspecified organism', 'Unspecified organism'
 
@@ -51,10 +53,11 @@ class Command(BaseCommand):
                 infra = genus + " " + species + " " + " ".join(name_fields[2:])
                 infra = re.sub(r'\]$', '', infra)
 
-        return((genus + " " + species), infra)
+        return(genus, species, infra)
 
     # get first field from multiple header entries from NCBI's nr fasta file
     def parse_header(self, fasta_description):
+        """Parse fasta description."""
         fields = re.split('\x01', fasta_description)
 
         # trying to return the first description that contains [
@@ -79,7 +82,8 @@ class Command(BaseCommand):
         return first_id_string, first_desc[:255]
 
     def process_id_string(self, db, id_string):
-        # get_set_dbxref for each ID separated by | and use the
+        """Process id from string."""
+        # get or create dbxref for each ID separated by | and use the
         # first ID as uniquename and db,dbxref
         aux_list = id_string.split('|')
         aux_dbxrefs = zip(aux_list[::2], aux_list[1::2])
@@ -95,20 +99,24 @@ class Command(BaseCommand):
             # store the first unique_name and dbxref
             if uniquename is None:
                 uniquename = aux_id
-                dbxref = get_set_dbxref(db_name=db.name,
-                                        accession=aux_id)
+                db, created = Db.objects.get_or_create(name=db.name)
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=db, accession=aux_id)
             # store dbxrefs for create featuredbxrefs later
-            dbxrefs.append(get_set_dbxref(db_name=aux_db,
-                                          accession=aux_id))
+            db, created = Db.objects.get_or_create(name=db.name)
+            dbxref, created = Dbxref.objects.get_or_create(
+                db=db, accession=aux_id)
+            dbxrefs.append(dbxref)
 
         return uniquename, dbxref, dbxrefs
 
     def handle(self, *args, **options):
-
+        """Execute the main function."""
         # get db object
-        db = set_db_file(file=options['fasta'],
-                         description=options.get('description'),
-                         url=options.get('url'))
+        filename = os.path.basename(options['fasta'])
+        db = Db.objects.create(name=filename,
+                               description=options.get('description'),
+                               url=options.get('url'))
 
         # get cvterm object
         cvterm = get_ontology_term(ontology='sequence',
@@ -140,11 +148,14 @@ class Command(BaseCommand):
             except ObjectDoesNotExist:
 
                 # parse organism genus and species names from fasta description
-                (organism_name, organism_infra_name) = self.parse_organism(
+                (genus, species, infra_name) = self.parse_organism(
                     description)
 
-                # get_set_organism object
-                organism = get_set_organism(organism_name, organism_infra_name)
+                # get or create organism object
+                organism, created = Organism.objects.get_or_create(
+                    genus=genus,
+                    species=species,
+                    infraspecific_name=infra_name)
 
                 residues = fasta.seq
                 m = hashlib.md5(str(fasta.seq).encode()).hexdigest()

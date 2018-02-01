@@ -1,10 +1,6 @@
 from datetime import datetime
 from django.core.management.base import BaseCommand
-from chado.lib.dbxref import get_set_dbxref
-from chado.lib.cvterm import get_set_cv, get_set_cvterm
-from chado.lib.db import get_set_db
-from chado.lib.project import get_project
-from chado.models import ProjectDbxref
+from chado.models import Cv, Cvterm, Db, Dbxref, Project, ProjectDbxref
 import re
 
 
@@ -52,13 +48,14 @@ class Command(BaseCommand):
         project = ""
         if options['project']:
             project_name = options['project']
-            project = get_project(project_name)
+            project = Project.objects.get(name=project_name)
 
         # get db object
-        db = get_set_db(db_name=self.db_name,
-                        description=options['description'])
+        db, created = Db.objects.get_or_create(
+            name=self.db_name,
+            description=options['description'])
         # get cv object
-        cv = get_set_cv(self.cv_name)
+        cv, created = Cv.objects.get_or_create(name=self.cv_name)
         ontologies = self.get_ontologies_from_node_file(options["file"])
 
         for rank in ontologies:
@@ -67,16 +64,18 @@ class Command(BaseCommand):
                   % (rank, accession))
 
             # get dbxref object
-            dbxref = get_set_dbxref(db_name=db.name,
-                                    accession=accession,
-                                    description=rank)
+            db, created = Db.objects.get_or_create(db=db.name)
+            dbxref, created = Dbxref.objects.get_or_create(
+                db=db, accession=accession, description=rank)
 
             # set cvterm object
-            get_set_cvterm(cv_name=cv.name,
-                           cvterm_name=rank,
-                           definition=cv.name,
-                           dbxref=dbxref,
-                           is_relationshiptype=0)
+            cv, created = Cv.objects.get_or_create(name=cv.name)
+            Cvterm.objects.get_or_create(cv=cv,
+                                         name=rank,
+                                         definition=cv.name,
+                                         dbxref=dbxref,
+                                         is_obsolete=0,
+                                         is_relationshiptype=0)
 
             if project:
                 ProjectDbxref.objects.create(dbxref=dbxref, project=project)

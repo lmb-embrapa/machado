@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Project
-from chado.lib.project import get_project
 
 
 class Command(BaseCommand):
@@ -21,7 +20,7 @@ class Command(BaseCommand):
         project_name = options['name']
 
         try:
-            project = get_project(project_name)
+            project = Project.objects.get(name=project_name)
             if (project is not None):
                 self.stdout.write(self.style.ERROR('%s already registered!'
                                                    % project.name))

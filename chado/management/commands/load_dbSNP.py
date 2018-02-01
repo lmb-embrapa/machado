@@ -1,14 +1,11 @@
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
-from chado.lib.dbxref import get_set_dbxref
-from chado.lib.db import set_db_file, get_set_db, get_set_dbprop
-from chado.lib.cvterm import get_set_cv, get_set_cvterm, get_set_cvtermprop
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.organism import get_set_organism
-from chado.lib.project import (get_project)
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Feature, Featureprop, Featureloc, Db, Dbxref
-from chado.models import ProjectFeature
+from chado.models import Feature, Featureprop, Featureloc
+from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Dbprop
+from chado.models import Organism, Project, ProjectFeature
+import os
 from pysam import VariantFile
 
 
@@ -43,25 +40,53 @@ class Command(BaseCommand):
         parser.add_argument("--project", help="Project name", required=False,
                             type=str)
 
+    def get_organism(organism):
+        """Retrieve organism object."""
+        try:
+            aux = organism.split(' ')
+            genus = aux[0]
+            species = 'spp.'
+            infraspecific = None
+            if len(aux) == 2:
+                species = aux[1]
+            elif len(aux) > 2:
+                species = aux[1]
+                infraspecific = ' '.join(aux[2:])
+
+        except ValueError:
+            raise ValueError('The organism genus and species should be '
+                             'separated by a single space')
+
+        try:
+            organism = Organism.objects.get(species=species,
+                                            genus=genus,
+                                            infraspecific_name=infraspecific)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist('%s not registered.'
+                                     % organism)
+        return organism
+
     def handle(self, *args, **options):
 
         # retrieve project object
         project = ""
         if options['project']:
             project_name = options['project']
-            project = get_project(project_name)
+            project = Project.objects.get(name=project_name)
 
         # create cv object
-        cv = get_set_cv(cv_name=self.cv_name)
-        db_cv = get_set_db(db_name=self.db_name,
-                           description=self.db_description)
+        cv, created = Cv.objects.get_or_create(name=self.cv_name)
+        db_cv, created = Db.objects.get_or_create(
+            name=self.db_name,
+            description=self.db_description)
 
         # get organism object
-        organism = get_set_organism(options['organism'])
+        organism = self.get_organism(options['organism'])
 
         # get db object
-        db_file = set_db_file(file=options['vcf'],
-                              description=options.get('description'))
+        filename = os.path.basename(options['vcf'])
+        db_file = Db.objects.create(name=filename,
+                                    description=options.get('description'))
 
         # REFERENCE FEATURE FOR FEATURE PROP ASSIGNING...
         # try to get reference feature (fasta file)
@@ -99,24 +124,28 @@ class Command(BaseCommand):
         for x in vcf_in.header.records:
             # GENERIC are cvterms for the DB file
             if (x.type in ["GENERIC"]):
-                dbxref_file = get_set_dbxref(db_name=db_file.name,
-                                             # e.g. "RSPOS"
-                                             accession=x.value,
-                                             # e.g. "GENERIC"
-                                             version=x.type,
-                                             # e.g. "dbSNP_BUILD_ID"
-                                             description=x.key)
+                db, created = Db.objects.get_or_create(db=db_file.name)
+                dbxref_file, created = Dbxref.objects.get_or_create(
+                    db=db,
+                    # e.g. "RSPOS"
+                    accession=x.value,
+                    # e.g. "GENERIC"
+                    version=x.type,
+                    # e.g. "dbSNP_BUILD_ID"
+                    description=x.key)
 
-                cvterm_file = get_set_cvterm(cv_name=cv.name,
-                                             cvterm_name=x.key,
-                                             definition=x.value,
-                                             dbxref=dbxref_file,
-                                             is_relationshiptype=0)
+                cv, created = Cv.objects.get_or_create(name=cv.name)
+                cvterm_file, created = Cvterm.objets.get_or_create(
+                    cv=cv,
+                    name=x.key,
+                    definition=x.value,
+                    dbxref=dbxref_file,
+                    is_relationshiptype=0)
 
-                get_set_dbprop(db=db_file,
-                               type_id=cvterm_file.cvterm_id,
-                               value=x.type,
-                               rank=0)
+                Dbprop.objects.get_or_create(db=db_file,
+                                             type_id=cvterm_file.cvterm_id,
+                                             value=x.type,
+                                             rank=0)
             # FILTER, INFO, FORMAT, etc., are global cvterms for the
             # VCF format
             else:
@@ -130,49 +159,63 @@ class Command(BaseCommand):
                         # ID terms found in FILTER, INFO and FORMAT
                         # e.g. RSPOS, RV, VP...
                         if(tup[0] == "ID"):
-                            dbxref = get_set_dbxref(db_name=db_cv.name,
-                                                    # x["ID"] or "RSPOS"
-                                                    accession=tup[1],
-                                                    # e.g. "FORMAT"
-                                                    version=x.type,
-                                                    # e.g. "ID"
-                                                    description=tup[0])
-                            cvterm = get_set_cvterm(cv_name=cv.name,
-                                                    # e.g. "RSPOS"
-                                                    cvterm_name=tup[1],
-                                                    # e.g. "INFO"
-                                                    definition=tup[0],
-                                                    dbxref=dbxref,
-                                                    is_relationshiptype=0)
-                            get_set_cvtermprop(cvterm=cvterm,
-                                               type_id=cvterm.cvterm_id,
-                                               # e.g. "1"
-                                               value=x.type,
-                                               rank=0)
+                            db, created = Db.objects.get_or_create(db_cv.name)
+                            dbxref, created = Dbxref.objects.get_or_create(
+                                db=db,
+                                # x["ID"] or "RSPOS"
+                                accession=tup[1],
+                                # e.g. "FORMAT"
+                                version=x.type,
+                                # e.g. "ID"
+                                description=tup[0])
+                            cv, created = Cv.objects.get_or_create(
+                                name=self.cv_name)
+                            cvterm = Cvterm.objects.get_or_create(
+                                cv=cv,
+                                # e.g. "RSPOS"
+                                name=tup[1],
+                                # e.g. "INFO"
+                                definition=tup[0],
+                                dbxref=dbxref,
+                                is_obsolete=0,
+                                is_relationshiptype=0)
+                            Cvtermprop.objects.get_or_create(
+                                cvterm=cvterm,
+                                type_id=cvterm.cvterm_id,
+                                # e.g. "1"
+                                value=x.type,
+                                rank=0)
                             # store cvterm for further use
                             dict_cvterms_info[tup[1]] = cvterm
                         else:
                             # create dbxref and cvterm objects for the
                             # property information of the ID terms
                             # e.g. Number, Type...
-                            dbxref_sub = get_set_dbxref(db_name=db_cv.name,
-                                                        # e.g. "Number"
-                                                        accession=tup[0],
-                                                        # "INFO"
-                                                        version=x.type,
-                                                        description=tup[0])
-                            cvterm_sub = get_set_cvterm(cv_name=cv.name,
-                                                        # e.g. "Number"
-                                                        cvterm_name=tup[0],
-                                                        # e.g. "RSPOS"
-                                                        definition=cvterm.name,
-                                                        dbxref=dbxref_sub,
-                                                        is_relationshiptype=0)
-                            get_set_cvtermprop(cvterm=cvterm,
-                                               type_id=cvterm_sub.cvterm_id,
-                                               # e.g. "1"
-                                               value=tup[1],
-                                               rank=0)
+                            db, created = Db.objects.get_or_create(db_cv.name)
+                            dbxref_sub, created = Dbxref.objects.get_or_create(
+                                db=db,
+                                # e.g. "Number"
+                                accession=tup[0],
+                                # "INFO"
+                                version=x.type,
+                                description=tup[0])
+                            cv_sub, created = Cv.objects.get_or_create(
+                                name=cv.name)
+                            cvterm_sub, created = Cvterm.objects.get_or_create(
+                                cv=cv_sub,
+                                # e.g. "Number"
+                                name=tup[0],
+                                # e.g. "RSPOS"
+                                definition=cvterm.name,
+                                dbxref=dbxref_sub,
+                                is_obsolete=0,
+                                is_relationshiptype=0)
+                            Cvtermprop.objects.get_or_create(
+                                cvterm=cvterm,
+                                type_id=cvterm_sub.cvterm_id,
+                                # e.g. "1"
+                                value=tup[1],
+                                rank=0)
         # start storing data from the record field
         # first, get/set the cvterms for the mandatory 8 fields of the header
         # create dictionary of header objects for further reuse
@@ -180,19 +223,25 @@ class Command(BaseCommand):
         for tuples in self.header_fields:
             # print(tuples)
             # print(VCF_version.value)
-            dbxref_header = get_set_dbxref(db_name=db_cv.name,
-                                           # e.g. "POS"
-                                           accession=tuples[0],
-                                           # e.g. "VCF4.0"
-                                           version=VCF_version.value,
-                                           # e.g. "position"
-                                           description=tuples[1])
+            db, created = Db.objects.get_or_create(db_cv.name)
+            dbxref_header, created = Dbxref.objects.get_or_create(
+                db=db,
+                # e.g. "POS"
+                accession=tuples[0],
+                # e.g. "VCF4.0"
+                version=VCF_version.value,
+                # e.g. "position"
+                description=tuples[1])
 
-            cvterm_header = get_set_cvterm(cv_name=cv.name,
-                                           cvterm_name=tuples[0],
-                                           definition=tuples[1],
-                                           dbxref=dbxref_header,
-                                           is_relationshiptype=0)
+            cv_header, created = Cv.objects.get_or_create(
+                name=cv.name)
+            cvterm_header, created = Cvterm.objects.get_or_create(
+                cv=cv_header,
+                name=tuples[0],
+                definition=tuples[1],
+                dbxref=dbxref_header,
+                is_obsolete=0,
+                is_relationshiptype=0)
             # set dictionary of cvterm objects
             dict_header_cvterms[tuples[0]] = cvterm_header
 
@@ -229,9 +278,9 @@ class Command(BaseCommand):
                                                   uniquename=fields[0])
 
             # get/set dbxref for SNP ID
-            dbxref_rec = get_set_dbxref(db_name=db_file.name,
-                                        accession=fields[2],
-                                        project=project)
+            db, created = Db.objects.get_or_create(db=db_file.name)
+            dbxref_rec, created = Dbxref.objects.get_or_create(
+                db=db, accession=fields[2], project=project)
             # creating a new SNP ID feature
             feature_rec = Feature.objects.create(dbxref=dbxref_rec,
                                                  organism=organism,

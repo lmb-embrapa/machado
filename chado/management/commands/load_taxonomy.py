@@ -2,10 +2,8 @@
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
-from chado.lib.dbxref import get_set_dbxref
-from chado.lib.db import set_db_file
-from chado.lib.organism import get_set_organism
-from chado.models import OrganismDbxref
+from chado.models import Db, Dbxref, Organism, OrganismDbxref
+import os
 import re
 import sys
 
@@ -48,14 +46,15 @@ class Command(BaseCommand):
             if len(fields) > 2:
                 infra = scname
         # print("scientific name: %s" % (genus + " " + species))
-        return((genus + " " + species), infra)
+        return(genus, species, infra)
 
     def handle(self, *args, **options):
         """Execute the main function."""
         # get db object
-        db = set_db_file(file=options['names'],
-                         description=options['description'],
-                         url=options['url'])
+        filename = os.path.basename(options['names'])
+        db = Db.objects.create(name=filename,
+                               description=options.get('description'),
+                               url=options.get('url'))
 
         # open handle for reading names.dmp file
         names_lines = ""
@@ -80,22 +79,23 @@ class Command(BaseCommand):
                 # print("scientific name %s" % scname)
                 # sys.exit()
                 # get dbxref object
-                dbxref = get_set_dbxref(db_name=db.name,
-                                        accession=taxid,
-                                        description=scname)
-                # set variable for organism object
-                organism_name = ""
+                db, created = Db.objets.get_or_create(name=db.name)
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=db, accession=taxid, description=scname)
                 # parse organism genus and species names from fasta description
                 # try to get or set organism
                 try:
-                    organism_name, infra = self.parse_scientific_name(scname)
+                    genus, species, infra = self.parse_scientific_name(scname)
                 except IntegrityError:
                     raise IntegrityError('The organism name could not be '
                                          'obtained from the scname: %s'
                                          % scname)
 
                 # create objects
-                organism = get_set_organism(organism_name, infra)
+                organism, created = Organism.objects.get_or_create(
+                    genus=genus,
+                    species=species,
+                    infraspecific_name=infra)
                 OrganismDbxref.objects.create(organism, dbxref)
                 counter += 1
                 sys.stdout.write('Scientific names inserted: %s\r' % counter)

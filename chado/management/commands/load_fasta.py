@@ -1,15 +1,12 @@
 import hashlib
+import os
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from chado.models import Feature, ProjectFeature
+from chado.models import Db, Dbxref, Feature, Organism, Project, ProjectFeature
 from Bio import SeqIO
-from chado.lib.dbxref import get_set_dbxref
-from chado.lib.organism import get_organism
-from chado.lib.db import set_db_file
 from chado.lib.cvterm import get_ontology_term
-from chado.lib.project import get_project
 
 
 class Command(BaseCommand):
@@ -31,21 +28,48 @@ class Command(BaseCommand):
         parser.add_argument("--nosequence", help="Don't load the sequence",
                             required=False, action='store_true')
 
+    def get_organism(organism):
+        """Retrieve organism object."""
+        try:
+            aux = organism.split(' ')
+            genus = aux[0]
+            species = 'spp.'
+            infraspecific = None
+            if len(aux) == 2:
+                species = aux[1]
+            elif len(aux) > 2:
+                species = aux[1]
+                infraspecific = ' '.join(aux[2:])
+
+        except ValueError:
+            raise ValueError('The organism genus and species should be '
+                             'separated by a single space')
+
+        try:
+            organism = Organism.objects.get(species=species,
+                                            genus=genus,
+                                            infraspecific_name=infraspecific)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist('%s not registered.'
+                                     % organism)
+        return organism
+
     def handle(self, *args, **options):
 
         project = ''
         # retrieve project object
         if options['project']:
             project_name = options['project']
-            project = get_project(project_name)
+            project = Project.objects.get(name=project_name)
 
         # Retrieve organism object
-        organism = get_organism(options['organism'])
+        organism = self.get_organism(options['organism'])
 
         # Save DB file info
-        db = set_db_file(file=options['fasta'],
-                         description=options.get('description'),
-                         url=options.get('url'))
+        filename = os.path.basename(options['fasta'])
+        db = Db.objects.create(name=filename,
+                               description=options.get('description'),
+                               url=options.get('url'))
 
         # Retrieve sequence ontology object
         cvterm = get_ontology_term(ontology='sequence', term=options['soterm'])
@@ -64,10 +88,9 @@ class Command(BaseCommand):
                 self.stdout.write('%s - %s lines processed.'
                                   % (datetime.now(), counter))
 
-            dbxref = get_set_dbxref(db_name=db.name,
-                                    accession=fasta.id,
-                                    description='',
-                                    project=project)
+            db, created = Db.objects.get_or_create(name=db.name)
+            dbxref, created = Dbxref.objects.get_or_create(
+                db=db, accession=fasta.id, description='', project=project)
 
             try:
                 feature = Feature.objects.get(uniquename=fasta.id)

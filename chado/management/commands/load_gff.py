@@ -1,28 +1,29 @@
+"""Load GFF file."""
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 
+import os
 import pysam
 from urllib.parse import unquote
 from datetime import datetime, timezone
 
-from chado.models import Cvterm
+from chado.models import Cv, Db, Cvterm, Dbxref
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
-from chado.models import ProjectFeature, Pub, Synonym
-from chado.lib.cvterm import get_ontology_term, get_set_cvterm
-from chado.lib.db import set_db_file
-from chado.lib.dbxref import get_set_dbxref, get_dbxref
-from chado.lib.organism import get_organism
-from chado.lib.project import get_project
+from chado.models import Organism, Project, ProjectFeature, Pub, Synonym
+from chado.lib.cvterm import get_ontology_term
 
 VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
                'gene', 'id', 'name', 'orf_classification']
 
 
 class Command(BaseCommand):
+    """Load GFF file."""
+
     help = 'Load GFF3 file indexed with tabix.'
 
     def add_arguments(self, parser):
+        """Define the arguments."""
         parser.add_argument("--gff",
                             help="GFF3 genome file indexed with tabix"
                             "(see http://www.htslib.org/doc/tabix.html)",
@@ -38,7 +39,34 @@ class Command(BaseCommand):
         parser.add_argument("--project", help="Project name", required=False,
                             type=str)
 
+    def get_organism(organism):
+        """Retrieve organism object."""
+        try:
+            aux = organism.split(' ')
+            genus = aux[0]
+            species = 'spp.'
+            infraspecific = None
+            if len(aux) == 2:
+                species = aux[1]
+            elif len(aux) > 2:
+                species = aux[1]
+                infraspecific = ' '.join(aux[2:])
+
+        except ValueError:
+            raise ValueError('The organism genus and species should be '
+                             'separated by a single space')
+
+        try:
+            organism = Organism.objects.get(species=species,
+                                            genus=genus,
+                                            infraspecific_name=infraspecific)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist('%s not registered.'
+                                     % organism)
+        return organism
+
     def get_attributes(self, attributes):
+        """Get attributes."""
         # receive a line from tbx.fetch and retreive one of the attribute
         # fields (name)
         result = dict()
@@ -49,15 +77,13 @@ class Command(BaseCommand):
         return result
 
     def process_attributes(self, project, feature, attrs, pub):
-        """
-        It handles the VALID_ATTRS attributes
+        """Process the VALID_ATTRS attributes.
 
         Args:
             project: type string
             feature: type object
             attrs: type dict
         """
-
         # retrieving the cvterm 'exact'
         cvterm_exact = get_ontology_term('synonym_type', 'exact')
 
@@ -66,12 +92,17 @@ class Command(BaseCommand):
             if key in ['id', 'name', 'parent']:
                 continue
             elif key in ['note', 'display', 'gene', 'orf_classification']:
-                note_dbxref = get_set_dbxref(db_name='null', accession=key)
-                note_cvterm = get_set_cvterm(cv_name='feature_property',
-                                             cvterm_name=key,
-                                             definition='',
-                                             dbxref=note_dbxref,
-                                             is_relationshiptype=0)
+                db_null, created = Db.objects.get_or_create(name='null')
+                note_dbxref, created = Dbxref.objects.get_or_create(
+                    db=db_null, accession=key)
+                cv_feature_property, created = Cv.objects.get_or_create(
+                    name='feature_property')
+                note_cvterm, created = Cvterm.objects.get_or_create(
+                    cv=cv_feature_property,
+                    name=key,
+                    definition='',
+                    dbxref=note_dbxref,
+                    is_relationshiptype=0)
                 Featureprop.objects.create(feature=feature,
                                            type_id=note_cvterm.cvterm_id,
                                            value=attrs.get(key),
@@ -80,7 +111,8 @@ class Command(BaseCommand):
                 terms = attrs.get(key).split(',')
                 for term in terms:
                     term_db, term_id = term.split(':')
-                    dbxref = get_dbxref(db_name=term_db, accession=term_id)
+                    dbxref = Dbxref.objects.get(db=term_db,
+                                                accession=term_id)
                     try:
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
                         FeatureCvterm.objects.create(feature=feature,
@@ -98,9 +130,9 @@ class Command(BaseCommand):
                     # It expects just one dbxref formated as XX:012345
                     aux_db, aux_dbxref = dbxref.split(':')
                     # create a dbxref for the column source
-                    dbxref = get_set_dbxref(db_name=aux_db,
-                                            accession=aux_dbxref,
-                                            project=project)
+                    db, created = Db.objects.get_or_create(name=aux_db)
+                    dbxref, created = Dbxref.objects.get_or_create(
+                        db=db, accession=aux_dbxref, project=project)
 
                     # associate feature with source
                     FeatureDbxref.objects.create(feature=feature,
@@ -123,35 +155,39 @@ class Command(BaseCommand):
         return
 
     def handle(self, *args, **options):
-
+        """Execute the main function."""
         project = ''
         # retrieve project object
         if options.get('project') is not None:
             project_name = options['project']
-            project = get_project(project_name)
+            project = Project.objects.get(name=project_name)
 
         # Retrieve organism object
-        organism = get_organism(options['organism'])
+        organism = self.get_organism(options['organism'])
 
         # Retrieve the part_of relations ontology term
         part_of = get_ontology_term(ontology='relationship',
                                     term='part_of')
 
         # Save DB info
-        db = set_db_file(file=options['gff'],
-                         description=options.get('description'),
-                         url=options.get('url'))
+        filename = os.path.basename(options['gff'])
+        db = Db.objects.create(name=filename,
+                               description=options.get('description'),
+                               url=options.get('url'))
 
         # retrieving the pub 'null'
         try:
             pub = Pub.objects.get(uniquename='null')
         except ObjectDoesNotExist:
-            null_dbxref = get_set_dbxref(db_name='null', accession='null')
-            null_cvterm = get_set_cvterm(cv_name='null',
-                                         cvterm_name='null',
-                                         definition='',
-                                         dbxref=null_dbxref,
-                                         is_relationshiptype=0)
+            db_null, created = Db.objects.get_or_create(name='null')
+            null_dbxref, created = Dbxref(db=db_null, accession='null')
+            null_cv, created = Cv.objects.get_or_create(name='null')
+            null_cvterm, created = Cvterm.objects.get_or_create(
+                cv=null_cv,
+                name='null',
+                definition='',
+                dbxref=null_dbxref,
+                is_relationshiptype=0)
             pub = Pub.objects.create(miniref='null',
                                      uniquename='null',
                                      type_id=null_cvterm.cvterm_id,
@@ -204,9 +240,9 @@ class Command(BaseCommand):
                 except ObjectDoesNotExist:
 
                     # creating a dbxref for the feature
-                    dbxref = get_set_dbxref(db_name=db.name,
-                                            accession=attrs['id'],
-                                            project=project)
+                    db, created = Db.objects.get_or_create(name=db.name)
+                    dbxref, created = Dbxref.objects.get_or_create(
+                        db=db, accession=attrs['id'], project=project)
 
                     # creating a new feature
                     feature = Feature.objects.create(
