@@ -4,6 +4,7 @@ include chado/models.py
 include chado/admin.py
 recursive-include chado/management *
 recursive-include chado/lib *
+recursive-include chado/loaders *
 recursive-include bin *
 recursive-include lib *
 recursive-include docs *
