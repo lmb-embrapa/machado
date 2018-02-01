@@ -76,8 +76,8 @@ class SequenceOntologyLoader(object):
 
             if cv is not None:
                 raise ImportingError(
-                    'Cv -> cannot load %s %s (already registered)'
-                    % (cv_name, cv_definition))
+                    'Cv -> cannot load {} {} (already registered)'.format(
+                        cv_name, cv_definition))
 
         except ObjectDoesNotExist:
 
@@ -179,7 +179,7 @@ class SequenceOntologyLoader(object):
                     db=db, accession=aux_accession)
 
                 if self.verbosity > 1:
-                    self.stdout.write('%s %s' % (n, data))
+                    self.stdout.write('{} {}'.format(n, data))
 
                 # Save the term to the Cvterm model
                 cv, created = Cv.objects.get_or_create(name=cv.name)

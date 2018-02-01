@@ -1,4 +1,5 @@
 """Load relations ontology."""
+
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Cv, Cvterm, Cvtermprop, CvtermDbxref, Db, Dbxref
 import obonet
@@ -33,8 +34,8 @@ class RelationOntologyLoader(object):
 
             if cv is not None:
                 raise ImportingError(
-                    'Cv -> cannot load %s (already registered)'
-                    % (cv_name))
+                    'Cv -> cannot load {} (already registered)'.format(
+                        cv_name))
 
         except ObjectDoesNotExist:
 
@@ -120,7 +121,8 @@ class RelationOntologyLoader(object):
             for data in tqdm(G.graph['typedefs']):
 
                 if self.verbosity > 1:
-                    self.stdout.write('  typedef id: %s' % data.get('id'))
+                    self.stdout.write('  typedef id: {}'.format(
+                        data.get('id')))
                 # Save the term to the Dbxref model
                 try:
                     aux_db, aux_accession = data.get('id').split(':')

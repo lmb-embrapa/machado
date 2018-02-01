@@ -20,12 +20,12 @@ class Validator(object):
     def _exists(self, file_path):
         """Check whether a file exists."""
         if not os.path.exists(file_path):
-            raise ImportingError("%s does not exist" % (file_path))
+            raise ImportingError("{} does not exist".format(file_path))
 
     def _is_file(self, file_path):
         """Check whether file is actually a file type."""
         if not os.path.isfile(file_path):
-            raise ImportingError("%s is not a file" % (file_path))
+            raise ImportingError("{} is not a file".format(file_path))
 
     def _is_readable(self, file_path):
         """Check file is readable."""
@@ -33,7 +33,7 @@ class Validator(object):
             f = open(file_path, 'r')
             f.close()
         except IOError:
-            raise ImportingError("%s is not readable" % (file_path))
+            raise ImportingError("{} is not readable".format(file_path))
 
 
 def process_cvterm_def(cvterm, definition):
@@ -156,13 +156,13 @@ def get_ontology_term(ontology, term):
     try:
         cv = Cv.objects.get(name=ontology)
     except ObjectDoesNotExist:
-        raise ObjectDoesNotExist('Sequence Ontology not loaded (%s).'
-                                 % (ontology))
+        raise ObjectDoesNotExist(
+            'Sequence Ontology not loaded ({}).'.format(ontology))
 
     # Retrieve sequence ontology term object
     try:
         cvterm = Cvterm.objects.get(cv=cv, name=term)
     except ObjectDoesNotExist:
-        raise ObjectDoesNotExist('Sequence Ontology term not found (%s).'
-                                 % (term))
+        raise ObjectDoesNotExist(
+            'Sequence Ontology term not found ({}).'.format(term))
     return cvterm
