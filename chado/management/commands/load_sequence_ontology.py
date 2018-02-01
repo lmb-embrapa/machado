@@ -1,7 +1,7 @@
 """Load Sequence Ontology."""
 
 from chado.loaders.exceptions import ImportingError
-from chado.loaders.ontologySequence import SequenceOntologyLoader
+from chado.loaders.sequenceontology import SequenceOntologyLoader
 from django.core.management.base import BaseCommand, CommandError
 
 

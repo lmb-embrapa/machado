@@ -48,10 +48,6 @@ We strongly recommend creating a new virtualenv for your project
 
     pip install tqdm==4.19.5
 
-#### cachetools 2.0.1
-
-    pip install cachetools==2.0.1
-
 ### DjangoChado
 
 Just grab the code using GIT and install it:

@@ -1,10 +1,12 @@
 """Remove ontology."""
-from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
+
 from chado.models import Cv, Cvterm
 from chado.models import CvtermDbxref, Cvtermprop
 from chado.models import Cvtermsynonym, CvtermRelationship
 from chado.models import Dbxref
+from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 
 
 class Command(BaseCommand):
@@ -45,6 +47,13 @@ class Command(BaseCommand):
             cv.delete()
 
             self.stdout.write(self.style.SUCCESS('Done'))
+        except IntegrityError as e:
+            self.stdout.write(self.style.ERROR(
+                'It\'s not possible to delete every record. You must delete '
+                'ontologies loaded after \'{}\' that might depend on it'
+                .format(options['name'])))
+            raise CommandError(str(e))
         except ObjectDoesNotExist:
             self.stdout.write(self.style.ERROR(
-                'Cannot remove %s (not registered)' % (options['name'])))
+                'Cannot remove \'{}\' (not registered)'
+                .format(options['name'])))

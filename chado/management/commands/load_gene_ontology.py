@@ -1,7 +1,7 @@
 """Load Gene Ontology."""
 
 from chado.loaders.exceptions import ImportingError
-from chado.loaders.ontologyGene import GeneOntologyLoader
+from chado.loaders.geneontology import GeneOntologyLoader
 from django.core.management.base import BaseCommand, CommandError
 
 

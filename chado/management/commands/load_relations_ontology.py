@@ -1,7 +1,7 @@
 """Load relations ontology."""
 
 from chado.loaders.exceptions import ImportingError
-from chado.loaders.ontologyRelation import RelationOntologyLoader
+from chado.loaders.relationontology import RelationOntologyLoader
 from django.core.management.base import BaseCommand, CommandError
 
 
