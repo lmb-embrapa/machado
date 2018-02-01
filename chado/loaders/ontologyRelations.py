@@ -35,7 +35,7 @@ class RelationsOntologyImporter(object):
 
             if cv is not None:
                 raise ImportingError(
-                    'cv: cannot load %s (already registered)' % (cv_name))
+                    'Cv -> cannot load %s (already registered)' % (cv_name))
 
         except ObjectDoesNotExist:
 
