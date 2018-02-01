@@ -1,14 +1,14 @@
-"""Tests Libraries."""
+"""Tests loaders functions."""
 
-from chado.lib.cvterm import process_cvterm_def, process_cvterm_xref
-from chado.lib.cvterm import process_cvterm_go_synonym
+from chado.loaders.common import process_cvterm_def, process_cvterm_xref
+from chado.loaders.common import process_cvterm_go_synonym
 from chado.models import CvtermDbxref, Cvtermsynonym
 from chado.models import Cv, Cvterm, Db, Dbxref
 from django.test import TestCase
 
 
-class CvtermLibTest(TestCase):
-    """Tests Libraries - Cvterm."""
+class CommonTest(TestCase):
+    """Tests Loaders - Common."""
 
     def test_process_cvterm_def(self):
         """Tests - process_cvterm_def."""

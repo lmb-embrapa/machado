@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
-from chado.lib.cvterm import get_ontology_term
+from chado.loaders.common import get_ontology_term
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Feature, Featureprop, Featureloc
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Dbprop

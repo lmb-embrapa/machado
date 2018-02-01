@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from chado.models import Db, Dbxref, Feature, Organism, Project, ProjectFeature
 from Bio import SeqIO
-from chado.lib.cvterm import get_ontology_term
+from chado.loaders.common import get_ontology_term
 
 
 class Command(BaseCommand):

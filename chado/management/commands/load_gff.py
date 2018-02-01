@@ -11,7 +11,7 @@ from chado.models import Cv, Db, Cvterm, Dbxref
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
 from chado.models import Organism, Project, ProjectFeature, Pub, Synonym
-from chado.lib.cvterm import get_ontology_term
+from chado.loaders.common import get_ontology_term
 
 VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
                'gene', 'id', 'name', 'orf_classification']
