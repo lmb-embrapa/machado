@@ -3,7 +3,10 @@ include README.rst
 include chado/models.py
 include chado/admin.py
 recursive-include chado/management *
+recursive-include chado/lib *
 recursive-include bin *
+recursive-include lib *
 recursive-include docs *
+recursive-include chado/tests *
 exclude chado/view.py
 exclude chado/tests.py
