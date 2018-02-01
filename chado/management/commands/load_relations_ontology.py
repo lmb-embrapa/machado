@@ -1,7 +1,7 @@
 """Load relations ontology."""
 
 from chado.loaders.exceptions import ImportingError
-from chado.loaders.ontologyRelation import RelationsOntologyImporter
+from chado.loaders.ontologyRelation import RelationOntologyLoader
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -24,7 +24,7 @@ class Command(BaseCommand):
             verbosity = options.get('verbosity')
 
         try:
-            importer = RelationsOntologyImporter(verbosity, self.stdout)
+            importer = RelationOntologyLoader(verbosity, self.stdout)
             importer.handle(file)
         except ImportingError as e:
             raise CommandError(str(e))

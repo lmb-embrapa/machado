@@ -9,10 +9,8 @@ from chado.loaders.common import process_cvterm_def, process_cvterm_go_synonym
 from tqdm import tqdm
 
 
-class RelationsOntologyImporter(object):
+class RelationOntologyLoader(object):
     """Load relations ontology."""
-
-    help = 'Load Relations Ontology'
 
     def __init__(self, verbosity, stdout):
         """Initialization."""
@@ -35,7 +33,8 @@ class RelationsOntologyImporter(object):
 
             if cv is not None:
                 raise ImportingError(
-                    'Cv -> cannot load %s (already registered)' % (cv_name))
+                    'Cv -> cannot load %s (already registered)'
+                    % (cv_name))
 
         except ObjectDoesNotExist:
 
