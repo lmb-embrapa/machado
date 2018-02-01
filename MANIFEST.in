@@ -1,11 +1,11 @@
 include LICENSE
 include README.rst
-include chado/models.py
 include chado/admin.py
+include chado/models.py
+recursive-include bin *
+recursive-include chado/loaders *
 recursive-include chado/management *
 recursive-include chado/loaders *
-recursive-include bin *
 recursive-include docs *
-recursive-include chado/tests *
 exclude chado/view.py
 exclude chado/tests.py
