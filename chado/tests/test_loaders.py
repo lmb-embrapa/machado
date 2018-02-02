@@ -2,6 +2,7 @@
 
 from chado.loaders.common import process_cvterm_def, process_cvterm_xref
 from chado.loaders.common import insert_organism, process_cvterm_go_synonym
+from chado.loaders.geneontology import GeneOntologyLoader
 from chado.models import CvtermDbxref, Cvtermsynonym
 from chado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
@@ -126,3 +127,81 @@ class CommonTest(TestCase):
         self.assertEqual('hs', test_organism_2.abbreviation)
         self.assertEqual('human', test_organism_2.common_name)
         self.assertEqual('no comments', test_organism_2.comment)
+
+
+class GeneontologyTest(TestCase):
+    """Tests Loaders - Geneontology."""
+
+    def test_preprocessing(self):
+        """Tests - preprocessing."""
+        stdout = ''
+        loader = GeneOntologyLoader(1, stdout)
+        loader.preprocessing('test_ontology',
+                             'test_cv_definition')
+        test_ontology = Cv.objects.get(name='test_ontology')
+        self.assertEqual('test_ontology', test_ontology.name)
+        self.assertEqual('test_cv_definition', test_ontology.definition)
+
+        # Testing db_internal
+        test_db_internal = Db.objects.get(name='internal')
+        self.assertEqual('internal', test_db_internal.name)
+
+        # Testing db_obo_rel
+        test_db_obo_rel = Db.objects.get(name='obo_rel')
+        self.assertEqual('obo_rel', test_db_obo_rel.name)
+
+        # Testing cv_cvterm_property_type
+        test_cv_cvterm_property_type = Cv.objects.get(
+            name='cvterm_property_type')
+        self.assertEqual('cvterm_property_type',
+                         test_cv_cvterm_property_type.name)
+
+        # Testing cv_relationship
+        test_cv_relationship = Cv.objects.get(name='relationship')
+        self.assertEqual('relationship', test_cv_relationship.name)
+
+        # Testing cvterm comment
+        test_dbxref_comment = Dbxref.objects.get(accession='comment',
+                                                 db=test_db_internal)
+        test_cvterm_comment = Cvterm.objects.get(
+            name='comment', cv=test_cv_cvterm_property_type)
+        self.assertEqual('comment', test_dbxref_comment.accession)
+        self.assertEqual('comment', test_cvterm_comment.name)
+
+        # Testing cvterm is_a
+        test_dbxref_is_a = Dbxref.objects.get(accession='is_a',
+                                              db=test_db_obo_rel)
+        test_cvterm_is_a = Cvterm.objects.get(
+            name='is_a', cv=test_cv_relationship)
+        self.assertEqual('is_a', test_dbxref_is_a.accession)
+        self.assertEqual('is_a', test_cvterm_is_a.name)
+
+        # Testing cvterm is_transitive
+        test_dbxref_is_transitive = Dbxref.objects.get(
+            accession='is_transitive', db=test_db_internal)
+        test_cvterm_is_transitive = Cvterm.objects.get(
+            name='is_transitive', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_transitive',
+                         test_dbxref_is_transitive.accession)
+        self.assertEqual('is_transitive',
+                         test_cvterm_is_transitive.name)
+
+        # Testing cvterm is_class_level
+        test_dbxref_is_class_level = Dbxref.objects.get(
+            accession='is_class_level', db=test_db_internal)
+        test_cvterm_is_class_level = Cvterm.objects.get(
+            name='is_class_level', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_class_level',
+                         test_dbxref_is_class_level.accession)
+        self.assertEqual('is_class_level',
+                         test_cvterm_is_class_level.name)
+
+        # Testing cvterm is_metadata_tag
+        test_dbxref_is_metadata_tag = Dbxref.objects.get(
+            accession='is_metadata_tag', db=test_db_internal)
+        test_cvterm_is_metadata_tag = Cvterm.objects.get(
+            name='is_metadata_tag', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_metadata_tag',
+                         test_dbxref_is_metadata_tag.accession)
+        self.assertEqual('is_metadata_tag',
+                         test_cvterm_is_metadata_tag.name)

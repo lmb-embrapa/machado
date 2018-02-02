@@ -64,10 +64,6 @@ class GeneOntologyLoader(object):
         dbxref_is_transitive, created = Dbxref.objects.get_or_create(
             db=db_internal, accession='is_transitive')
 
-        # Creating cv cvterm_property_type to be used for creating cvterms
-        cv_cvterm_property_type, created = Cv.objects.get_or_create(
-            name='cvterm_property_type')
-
         # Creating cvterm is_transitive to be used as type_id in cvtermprop
         self.cvterm_is_transitive, created = Cvterm.objects.get_or_create(
                 cv=cv_cvterm_property_type,
