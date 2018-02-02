@@ -1,9 +1,9 @@
 """Tests loaders functions."""
 
 from chado.loaders.common import process_cvterm_def, process_cvterm_xref
-from chado.loaders.common import process_cvterm_go_synonym
+from chado.loaders.common import insert_organism, process_cvterm_go_synonym
 from chado.models import CvtermDbxref, Cvtermsynonym
-from chado.models import Cv, Cvterm, Db, Dbxref
+from chado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
 
 
@@ -92,3 +92,37 @@ class CommonTest(TestCase):
             synonym='30S ribosomal subunit')
 
         self.assertEqual('30S ribosomal subunit', test_go_synonym.synonym)
+
+    def test_insert_organism_1(self):
+        """Tests - insert_organism 1."""
+        insert_organism('Mus', 'musculus')
+        test_organism_1 = Organism.objects.get(genus='Mus',
+                                               species='musculus')
+        self.assertEqual('Mus', test_organism_1.genus)
+        self.assertEqual('musculus', test_organism_1.species)
+
+    def test_insert_organism_2(self):
+        """Tests - insert_organism 2."""
+        test_db = Db.objects.create(name='test_db')
+        test_dbxref = Dbxref.objects.create(accession='test_dbxref',
+                                            db=test_db)
+
+        test_cv = Cv.objects.create(name='test_cv')
+        test_cvterm = Cvterm.objects.create(name='test_cvterm',
+                                            cv=test_cv,
+                                            dbxref=test_dbxref,
+                                            is_obsolete=0,
+                                            is_relationshiptype=0)
+        insert_organism(genus='Homo',
+                        species='sapiens',
+                        abbreviation='hs',
+                        common_name='human',
+                        comment='no comments',
+                        type_id=test_cvterm.cvterm_id)
+        test_organism_2 = Organism.objects.get(genus='Homo',
+                                               species='sapiens')
+        self.assertEqual('Homo', test_organism_2.genus)
+        self.assertEqual('sapiens', test_organism_2.species)
+        self.assertEqual('hs', test_organism_2.abbreviation)
+        self.assertEqual('human', test_organism_2.common_name)
+        self.assertEqual('no comments', test_organism_2.comment)

@@ -1,13 +1,17 @@
-from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Organism
-from django.db import IntegrityError
+"""Insert organism."""
+
+from django.core.management.base import BaseCommand, CommandError
+from chado.loaders.common import insert_organism
+from chado.loaders.exceptions import ImportingError
 
 
 class Command(BaseCommand):
+    """Insert organism."""
+
     help = 'Insert organism'
 
     def add_arguments(self, parser):
+        """Define the arguments."""
         parser.add_argument("--abbreviation",
                             help="abbreviation",
                             required=False,
@@ -38,23 +42,16 @@ class Command(BaseCommand):
                             type=str)
 
     def handle(self, *args, **options):
+        """Execute the main function."""
         species = options['species']
         genus = options['genus']
 
         try:
-            spp = Organism.objects.get(species=species, genus=genus)
-            if (spp is not None):
-                raise IntegrityError('Organism already registered!' % spp)
-        except ObjectDoesNotExist:
-            organism = Organism.objects.create(abbreviation=options['abbrevi'
-                                               'ation'],
-                                               genus=options['genus'],
-                                               species=options['species'],
-                                               common_name=options['common'
-                                               '_name'],
-                                               infraspecific_name=options[
-                                               'infraspecific_name'],
-                                               type=options['type'],
-                                               comment=options['comment'])
-            organism.save()
-            self.stdout.write(self.style.SUCCESS('%s registered' % species))
+            insert_organism(genus, species, options)
+        except ImportingError as e:
+            raise CommandError(e)
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                '{} {} registered'
+                .format(options['genus'], options['species'])))

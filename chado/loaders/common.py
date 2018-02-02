@@ -1,7 +1,7 @@
-"""cvterm library."""
+"""loaders common library."""
 from chado.loaders.exceptions import ImportingError
 from chado.models import Cv, Cvterm, CvtermDbxref, Cvtermsynonym
-from chado.models import Db, Dbxref
+from chado.models import Db, Dbxref, Organism
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 import os
@@ -166,3 +166,34 @@ def get_ontology_term(ontology, term):
         raise ObjectDoesNotExist(
             'Sequence Ontology term not found ({}).'.format(term))
     return cvterm
+
+
+def insert_organism(genus, species, *args, **options):
+    """Insert organism."""
+    if species is None or genus is None:
+        raise ImportingError('species and genus are required!')
+
+    type_id = ''
+    if options.get('type') is not None:
+        try:
+            cvterm = Cvterm.objects.get(name=options.get('type'))
+            type_id = cvterm.cvterm_id
+        except ObjectDoesNotExist:
+            raise ImportingError(
+                'The type must be previously registered in Cvterm')
+
+    try:
+        spp = Organism.objects.get(genus=genus, species=species)
+        if (spp is not None):
+            raise ImportingError('Organism already registered ({} {})!'
+                                 .format(genus, species))
+    except ObjectDoesNotExist:
+        organism = Organism.objects.create(
+            abbreviation=options.get('abbreviation'),
+            genus=genus,
+            species=species,
+            common_name=options.get('common_name'),
+            infraspecific_name=options.get('infraspecific_name'),
+            type_id=type_id,
+            comment=options.get('comment'))
+        organism.save()
