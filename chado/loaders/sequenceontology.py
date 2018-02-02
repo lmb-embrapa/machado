@@ -1,10 +1,8 @@
 """Load Sequence Ontology."""
-from chado.loaders.exceptions import ImportingError
-from chado.loaders.common import Validator
+from chado.loaders.common import Validator, Ontology
 from chado.loaders.common import process_cvterm_xref, process_cvterm_def
 from chado.models import Cv, Cvterm, Cvtermprop, CvtermRelationship
 from chado.models import CvtermDbxref, Cvtermsynonym, Db, Dbxref
-from django.core.exceptions import ObjectDoesNotExist
 from tqdm import tqdm
 import obonet
 import re
@@ -18,73 +16,7 @@ class SequenceOntologyLoader(object):
         self.verbosity = verbosity
         self.stdout = stdout
 
-    def preprocessing(self, cv_name, cv_definition):
-        """Create cv and cvterms."""
-        # Save the name and definition to the Cv model
-        # Save the name and definition to the Cv model
-        self.cv = Cv.objects.create(name=cv_name,
-                                    definition=cv_definition)
-        self.cv.save()
-
-        self.db_global, created = Db.objects.get_or_create(name='_global')
-
-        # Creating db internal to be used for creating dbxref objects
-        self.db_internal, created = Db.objects.get_or_create(name='internal')
-
-        # Creating dbxref is_symmetric to be used for creating cvterms
-        dbxref_is_symmetric, created = Dbxref.objects.get_or_create(
-            db=self.db_internal, accession='is_symmetric')
-
-        # Creating cv cvterm_property_type to be used for creating cvterms
-        cv_cvterm_property_type, created = Cv.objects.get_or_create(
-            name='cvterm_property_type')
-
-        # Creating cvterm is_symmetric to be used as type_id in cvtermprop
-        self.cvterm_is_symmetric, created = Cvterm.objects.get_or_create(
-                cv=cv_cvterm_property_type,
-                name='is_symmetric',
-                definition='',
-                dbxref=dbxref_is_symmetric,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-        # Creating cvterm is_transitive to be used as type_id in cvtermprop
-        dbxref_is_transitive, created = Dbxref.objects.get_or_create(
-            db=self.db_internal, accession='is_transitive')
-        self.cvterm_is_transitive, created = Cvterm.objects.get_or_create(
-                cv=cv_cvterm_property_type,
-                name='is_transitive',
-                definition='',
-                dbxref=dbxref_is_transitive,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-        # Creating cvterm comment to be used as type_id in cvtermprop
-        dbxref_comment, created = Dbxref.objects.get_or_create(
-            db=self.db_internal, accession='comment')
-        self.cvterm_comment, created = Cvterm.objects.get_or_create(
-            cv=cv_cvterm_property_type,
-            name='comment',
-            definition='',
-            dbxref=dbxref_comment,
-            is_obsolete=0,
-            is_relationshiptype=0)
-
-        # Creating term is_a to be used as type_id in cvterm_relationship
-        db_obo_rel, created = Db.objects.get_or_create(name='obo_rel')
-        dbxref_is_a, created = Dbxref.objects.get_or_create(
-            db=db_obo_rel, accession='is_a')
-        cv_relationship, created = Cv.objects.get_or_create(
-            name='relationship')
-        self.cvterm_is_a, created = Cvterm.objects.get_or_create(
-            cv=cv_relationship,
-            name='is_a',
-            definition='',
-            dbxref=dbxref_is_a,
-            is_obsolete=0,
-            is_relationshiptype=1)
-
-    def process_cvterm_so_synonym(self, cvterm, synonym):
+    def process_cvterm_so_synonym(self, ontology, cvterm, synonym):
         """Process cvterm_so_synonym.
 
         Definition format:
@@ -106,13 +38,10 @@ class SequenceOntologyLoader(object):
         synonym_text, synonym_type = matches[0]
 
         # Handling the synonym_type
-        db_type, created = Db.objects.get_or_create(name='internal')
         dbxref_type, created = Dbxref.objects.get_or_create(
-            db=db_type, accession=synonym_type.lower())
-        cv_synonym_type, created = Cv.objects.get_or_create(
-            name='synonym_type')
+            db=ontology.db_internal, accession=synonym_type.lower())
         cvterm_type, created = Cvterm.objects.get_or_create(
-            cv=cv_synonym_type,
+            cv=ontology.cv_synonym_type,
             name=synonym_type.lower(),
             definition='',
             dbxref=dbxref_type,
@@ -125,13 +54,13 @@ class SequenceOntologyLoader(object):
         cvtermsynonym.save()
         return
 
-    def store_type_def(self, typedef):
+    def store_type_def(self, ontology, typedef):
         """Store the type_def."""
         dbxref_typedef, created = Dbxref.objects.get_or_create(
-            db=self.db_global,
+            db=ontology.db_global,
             accession=typedef['id'],
             description=typedef.get('def'))
-        cv_typedef, created = Cv.objects.get_or_create(name=self.cv.name)
+        cv_typedef, created = Cv.objects.get_or_create(name=ontology.cv.name)
         cvterm_typedef, created = Cvterm.objects.get_or_create(
             cv=cv_typedef,
             name=typedef.get('id'),
@@ -144,18 +73,18 @@ class SequenceOntologyLoader(object):
         if typedef.get('is_symmetric') is not None:
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_symmetric.cvterm_id,
+                type_id=ontology.cvterm_is_symmetric.cvterm_id,
                 value=1,
                 rank=0)
         # Load is_transitive
         if typedef.get('is_transitive') is not None:
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_transitive.cvterm_id,
+                type_id=ontology.cvterm_is_transitive.cvterm_id,
                 value=1,
                 rank=0)
 
-    def store_term(self, n, data):
+    def store_term(self, ontology, n, data):
         """Store the ontology terms."""
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
@@ -169,7 +98,7 @@ class SequenceOntologyLoader(object):
 
         # Save the term to the Cvterm model
         cvterm, created = Cvterm.objects.get_or_create(
-            cv=self.cv,
+            cv=ontology.cv,
             name=data.get('name'),
             definition='',
             dbxref=dbxref,
@@ -197,7 +126,7 @@ class SequenceOntologyLoader(object):
         if data.get('comment'):
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm,
-                type_id=self.cvterm_comment.cvterm_id,
+                type_id=ontology.cvterm_comment.cvterm_id,
                 value=data.get('comment'),
                 rank=0)
 
@@ -207,11 +136,11 @@ class SequenceOntologyLoader(object):
                 process_cvterm_xref(cvterm, xref, 1)
 
         # Load synonyms
-        if data.get('synonym'):
+        if data.get('synonym') is not None:
             for synonym in data.get('synonym'):
-                self.process_cvterm_so_synonym(cvterm, synonym)
+                self.process_cvterm_so_synonym(ontology, cvterm, synonym)
 
-    def store_relationship(self, u, v, type):
+    def store_relationship(self, ontology, u, v, type):
         """Store the relationship between ontology terms."""
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
@@ -232,7 +161,7 @@ class SequenceOntologyLoader(object):
         object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
 
         if type == 'is_a':
-            type_cvterm = self.cvterm_is_a
+            type_cvterm = ontology.cvterm_is_a
         else:
             type_db, created = Db.objects.get_or_create(name='_global')
             type_dbxref = Dbxref.objects.get(db=type_db,
@@ -259,33 +188,24 @@ class SequenceOntologyLoader(object):
         cv_name = G.graph['default-namespace'][0]
         cv_definition = G.graph['data-version']
 
-        try:
-            # Check if the so file is already loaded
-            cv = Cv.objects.get(name=cv_name)
-
-            if cv is not None:
-                raise ImportingError(
-                    'Cv -> cannot load {} {} (already registered)'.format(
-                        cv_name, cv_definition))
-
-        except ObjectDoesNotExist:
-            self.preprocessing(cv_name, cv_definition)
+        # Initializing ontology
+        ontology = Ontology(cv_name, cv_definition)
 
         if self.verbosity > 0:
             self.stdout.write('Loading typedefs')
 
         # Load typedefs as Dbxrefs and Cvterm
         for typedef in tqdm(G.graph['typedefs']):
-            self.store_type_def(typedef)
+            self.store_type_def(ontology, typedef)
 
         if self.verbosity > 0:
             self.stdout.write('Loading terms')
 
         for n, data in tqdm(G.nodes(data=True)):
-            self.store_term(n, data)
+            self.store_term(ontology, n, data)
 
         if self.verbosity > 0:
             self.stdout.write('Loading relationships')
 
         for u, v, type in tqdm(G.edges(keys=True)):
-            self.store_relationship(u, v, type)
+            self.store_relationship(ontology, u, v, type)

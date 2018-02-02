@@ -3,7 +3,7 @@
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.common import process_cvterm_xref
 from chado.loaders.common import process_cvterm_go_synonym, process_cvterm_def
-from chado.loaders.common import Validator
+from chado.loaders.common import Validator, Ontology
 from chado.models import Cv, Cvterm, Cvtermprop, CvtermRelationship
 from chado.models import CvtermDbxref, Db, Dbxref
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,96 +21,18 @@ class GeneOntologyLoader(object):
         self.verbosity = verbosity
         self.stdout = stdout
 
-    def preprocessing(self, ontology, cv_definition):
-        """Create cv and cvterms."""
-        # Save ontology to the Cv model
-        cv = Cv.objects.create(name=ontology,
-                               definition=cv_definition)
-        cv.save()
-
-        # Creating db internal to be used for creating dbxref objects
-        db_internal, created = Db.objects.get_or_create(name='internal')
-
-        # Creating cvterm comment to be used as type_id in cvtermprop
-        self.dbxref_comment, created = Dbxref.objects.get_or_create(
-            db=db_internal, accession='comment')
-
-        cv_cvterm_property_type, created = Cv.objects.get_or_create(
-            name='cvterm_property_type')
-        self.cvterm_comment, created = Cvterm.objects.get_or_create(
-            cv=cv_cvterm_property_type,
-            name='comment',
-            definition='',
-            dbxref=self.dbxref_comment,
-            is_obsolete=0,
-            is_relationshiptype=0)
-
-        # creating term is_a to be used as type_id in cvterm_relationship
-        db_obo_rel, created = Db.objects.get_or_create(name='obo_rel')
-        dbxref_is_a, created = Dbxref.objects.get_or_create(
-            db=db_obo_rel, accession='is_a')
-
-        cv_relationship, created = Cv.objects.get_or_create(
-            name='relationship')
-        self.cvterm_is_a, created = Cvterm.objects.get_or_create(
-            cv=cv_relationship,
-            name='is_a',
-            definition='',
-            dbxref=dbxref_is_a,
-            is_obsolete=0,
-            is_relationshiptype=1)
-
-        # Creating dbxref is_transitive to be used for creating cvterms
-        dbxref_is_transitive, created = Dbxref.objects.get_or_create(
-            db=db_internal, accession='is_transitive')
-
-        # Creating cvterm is_transitive to be used as type_id in cvtermprop
-        self.cvterm_is_transitive, created = Cvterm.objects.get_or_create(
-                cv=cv_cvterm_property_type,
-                name='is_transitive',
-                definition='',
-                dbxref=dbxref_is_transitive,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-        # Creating cvterm is_class_level to be used as type_id in cvtermprop
-        dbxref_is_class_level, created = Dbxref.objects.get_or_create(
-            db=db_internal, accession='is_class_level')
-
-        self.cvterm_is_class_level, created = Cvterm.objects.get_or_create(
-                cv=cv_cvterm_property_type,
-                name='is_class_level',
-                definition='',
-                dbxref=dbxref_is_class_level,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-        # Creating cvterm is_metadata_tag to be used as type_id in cvtermprop
-        dbxref_is_metadata_tag, created = Dbxref.objects.get_or_create(
-                db=db_internal, accession='is_metadata_tag')
-
-        self.cvterm_is_metadata_tag, created = Cvterm.objects.get_or_create(
-                cv=cv_cvterm_property_type,
-                name='is_metadata_tag',
-                definition='',
-                dbxref=dbxref_is_metadata_tag,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-    def store_type_def(self, typedef):
+    def store_type_def(self, ontology, typedef):
         """Store the type_def."""
         # Save the typedef to the Dbxref model
-        db_global, created = Db.objects.get_or_create(name='_global')
         dbxref_typedef, created = Dbxref.objects.get_or_create(
-            db=db_global,
+            db=ontology.db_global,
             accession=typedef['id'],
             defaults={'description': typedef.get('def'),
                       'version': ''})
 
         # Save the typedef to the Cvterm model
-        cv_sequence, created = Cv.objects.get_or_create(name='sequence')
         cvterm_typedef, created = Cvterm.objects.get_or_create(
-            cv=cv_sequence,
+            cv=ontology.cv_sequence,
             name=typedef.get('id'),
             is_obsolete=0,
             dbxref=dbxref_typedef,
@@ -126,7 +48,7 @@ class GeneOntologyLoader(object):
         if typedef.get('is_class_level') is not None:
             Cvtermprop.objects.get_or_create(
                     cvterm=cvterm_typedef,
-                    type_id=self.cvterm_is_class_level.cvterm_id,
+                    type_id=ontology.cvterm_is_class_level.cvterm_id,
                     value=1,
                     rank=0)
 
@@ -134,7 +56,7 @@ class GeneOntologyLoader(object):
         if typedef.get('is_metadata_tag') is not None:
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_metadata_tag.cvterm_id,
+                type_id=ontology.cvterm_is_metadata_tag.cvterm_id,
                 value=1,
                 rank=0)
 
@@ -142,11 +64,11 @@ class GeneOntologyLoader(object):
         if typedef.get('is_transitive') is not None:
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_transitive.cvterm_id,
+                type_id=ontology.cvterm_is_transitive.cvterm_id,
                 value=1,
                 rank=0)
 
-    def store_term(self, n, data, lock):
+    def store_term(self, ontology, n, data, lock):
         """Store the ontology terms."""
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
@@ -186,7 +108,7 @@ class GeneOntologyLoader(object):
         if data.get('comment'):
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm,
-                type_id=self.cvterm_comment.cvterm_id,
+                type_id=ontology.cvterm_comment.cvterm_id,
                 value=data.get('comment'),
                 rank=0)
 
@@ -203,7 +125,7 @@ class GeneOntologyLoader(object):
                     process_cvterm_go_synonym(cvterm, synonym,
                                               synonym_type)
 
-    def store_relationship(self, u, v, type):
+    def store_relationship(self, ontology, u, v, type):
         """Store the relationship between ontology terms."""
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
@@ -221,10 +143,9 @@ class GeneOntologyLoader(object):
 
         # Get the relationship type
         if type == 'is_a':
-            type_cvterm = self.cvterm_is_a
+            type_cvterm = ontology.cvterm_is_a
         else:
-            type_db = Db.objects.get(name='_global')
-            type_dbxref = Dbxref.objects.get(db=type_db,
+            type_dbxref = Dbxref.objects.get(db=ontology.db_global,
                                              accession=type)
             type_cvterm = Cvterm.objects.get(dbxref=type_dbxref)
 
@@ -251,8 +172,7 @@ class GeneOntologyLoader(object):
         ontologies = [
                 'biological_process',
                 'molecular_function',
-                'cellular_component',
-                'external']
+                'cellular_component']
 
         # Check if the ontologies are already loaded
         for ontology in ontologies:
@@ -265,7 +185,13 @@ class GeneOntologyLoader(object):
                             ontology, cv_definition))
 
             except ObjectDoesNotExist:
-                self.preprocessing(ontology, cv_definition)
+                cv = Cv.objects.create(name=ontology,
+                                       definition=cv_definition)
+                cv.save()
+
+        # Instantiating Ontology in order to have access to secondary cv, db,
+        # cvterm, and dbxref, even though the main cv will not be used.
+        ontology = Ontology('external', cv_definition)
 
         # Load typedefs as Dbxrefs and Cvterm
         if self.verbosity > 0:
@@ -275,7 +201,7 @@ class GeneOntologyLoader(object):
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for typedef in G.graph['typedefs']:
-            tasks.append(pool.submit(self.store_type_def, typedef))
+            tasks.append(pool.submit(self.store_type_def, ontology, typedef))
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
@@ -288,7 +214,7 @@ class GeneOntologyLoader(object):
         lock = Lock()
         tasks = list()
         for n, data in G.nodes(data=True):
-            tasks.append(pool.submit(self.store_term, n, data, lock))
+            tasks.append(pool.submit(self.store_term, ontology, n, data, lock))
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
@@ -301,7 +227,7 @@ class GeneOntologyLoader(object):
         tasks = list()
         for u, v, type in G.edges(keys=True):
             tasks.append(pool.submit(
-                self.store_relationship, u, v, type))
+                self.store_relationship, ontology, u, v, type))
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())

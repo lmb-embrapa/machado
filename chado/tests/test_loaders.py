@@ -2,7 +2,7 @@
 
 from chado.loaders.common import process_cvterm_def, process_cvterm_xref
 from chado.loaders.common import insert_organism, process_cvterm_go_synonym
-from chado.loaders.geneontology import GeneOntologyLoader
+from chado.loaders.common import Ontology
 from chado.models import CvtermDbxref, Cvtermsynonym
 from chado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
@@ -128,16 +128,10 @@ class CommonTest(TestCase):
         self.assertEqual('human', test_organism_2.common_name)
         self.assertEqual('no comments', test_organism_2.comment)
 
-
-class GeneontologyTest(TestCase):
-    """Tests Loaders - Geneontology."""
-
-    def test_preprocessing(self):
+    def test_ontology(self):
         """Tests - preprocessing."""
-        stdout = ''
-        loader = GeneOntologyLoader(1, stdout)
-        loader.preprocessing('test_ontology',
-                             'test_cv_definition')
+        Ontology('test_ontology',
+                 'test_cv_definition')
         test_ontology = Cv.objects.get(name='test_ontology')
         self.assertEqual('test_ontology', test_ontology.name)
         self.assertEqual('test_cv_definition', test_ontology.definition)
@@ -145,20 +139,45 @@ class GeneontologyTest(TestCase):
         # Testing db_internal
         test_db_internal = Db.objects.get(name='internal')
         self.assertEqual('internal', test_db_internal.name)
-
         # Testing db_obo_rel
         test_db_obo_rel = Db.objects.get(name='obo_rel')
         self.assertEqual('obo_rel', test_db_obo_rel.name)
+        # Testing db__global
+        test_db__global = Db.objects.get(name='_global')
+        self.assertEqual('_global', test_db__global.name)
 
+        # Testing cv_sequence
+        test_cv_sequence = Cv.objects.get(name='sequence')
+        self.assertEqual('sequence', test_cv_sequence.name)
+        # Testing cv_synonym_type
+        test_cv_synonym_type = Cv.objects.get(name='synonym_type')
+        self.assertEqual('synonym_type', test_cv_synonym_type.name)
+        # Testing cv_relationship
+        test_cv_relationship = Cv.objects.get(name='relationship')
+        self.assertEqual('relationship', test_cv_relationship.name)
         # Testing cv_cvterm_property_type
         test_cv_cvterm_property_type = Cv.objects.get(
             name='cvterm_property_type')
         self.assertEqual('cvterm_property_type',
                          test_cv_cvterm_property_type.name)
 
-        # Testing cv_relationship
-        test_cv_relationship = Cv.objects.get(name='relationship')
-        self.assertEqual('relationship', test_cv_relationship.name)
+        # Testing cvterm is_symmetric
+        test_dbxref_is_symmetric = Dbxref.objects.get(accession='is_symmetric',
+                                                      db=test_db_internal)
+        test_cvterm_is_symmetric = Cvterm.objects.get(
+            name='is_symmetric', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_symmetric', test_dbxref_is_symmetric.accession)
+        self.assertEqual('is_symmetric', test_cvterm_is_symmetric.name)
+
+        # Testing cvterm is_anti_symmetric
+        test_dbxref_is_anti_symmetric = Dbxref.objects.get(
+            accession='is_anti_symmetric', db=test_db_internal)
+        test_cvterm_is_anti_symmetric = Cvterm.objects.get(
+            name='is_anti_symmetric', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_anti_symmetric',
+                         test_dbxref_is_anti_symmetric.accession)
+        self.assertEqual('is_anti_symmetric',
+                         test_cvterm_is_anti_symmetric.name)
 
         # Testing cvterm comment
         test_dbxref_comment = Dbxref.objects.get(accession='comment',
@@ -185,6 +204,16 @@ class GeneontologyTest(TestCase):
                          test_dbxref_is_transitive.accession)
         self.assertEqual('is_transitive',
                          test_cvterm_is_transitive.name)
+
+        # Testing cvterm is_reflexive
+        test_dbxref_is_reflexive = Dbxref.objects.get(
+            accession='is_reflexive', db=test_db_internal)
+        test_cvterm_is_reflexive = Cvterm.objects.get(
+            name='is_reflexive', cv=test_cv_cvterm_property_type)
+        self.assertEqual('is_reflexive',
+                         test_dbxref_is_reflexive.accession)
+        self.assertEqual('is_reflexive',
+                         test_cvterm_is_reflexive.name)
 
         # Testing cvterm is_class_level
         test_dbxref_is_class_level = Dbxref.objects.get(

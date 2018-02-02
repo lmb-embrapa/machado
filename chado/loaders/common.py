@@ -36,6 +36,135 @@ class Validator(object):
             raise ImportingError("{} is not readable".format(file_path))
 
 
+class Ontology(object):
+    """Ontology preprocessing."""
+
+    def __init__(self, cv_name, cv_definition=''):
+        """Invoke all validations."""
+        # Save the name and definition to the Cv model
+        try:
+            # Check if the so file is already loaded
+            cv = Cv.objects.get(name=cv_name)
+
+            if cv is not None:
+                raise ImportingError(
+                    'Cv -> cannot load {} (already registered)'.format(
+                        cv_name))
+
+        except ObjectDoesNotExist:
+            self.cv = Cv.objects.create(name=cv_name,
+                                        definition=cv_definition)
+            self.cv.save()
+
+        # Creating db _global
+        self.db_global, created = Db.objects.get_or_create(name='_global')
+        # Creating db internal
+        self.db_internal, created = Db.objects.get_or_create(name='internal')
+        # Creating db obo_rel
+        self.db_obo_rel, created = Db.objects.get_or_create(name='obo_rel')
+
+        # Creating cv cvterm_property_type
+        self.cv_cvterm_property_type, created = Cv.objects.get_or_create(
+            name='cvterm_property_type')
+        # Creating cv relationshipo
+        self.cv_relationship, created = Cv.objects.get_or_create(
+            name='relationship')
+        # Creating cv relationship
+        self.cv_synonym_type, created = Cv.objects.get_or_create(
+            name='synonym_type')
+        # Creating cv sequence
+        self.cv_sequence, created = Cv.objects.get_or_create(
+            name='sequence')
+
+        # Creating dbxref and cvterm is_symmetric
+        self.dbxref_is_symmetric, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_symmetric')
+        self.cvterm_is_symmetric, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_symmetric',
+                definition='',
+                dbxref=self.dbxref_is_symmetric,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_anti_symmetric
+        self.dbxref_is_anti_symmetric, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_anti_symmetric')
+        self.cvterm_is_anti_symmetric, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_anti_symmetric',
+                definition='',
+                dbxref=self.dbxref_is_anti_symmetric,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_transitive
+        dbxref_is_transitive, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_transitive')
+        self.cvterm_is_transitive, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_transitive',
+                definition='',
+                dbxref=dbxref_is_transitive,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_reflexive
+        dbxref_is_reflexive, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_reflexive')
+        self.cvterm_is_reflexive, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_reflexive',
+                definition='',
+                dbxref=dbxref_is_reflexive,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_class_level
+        dbxref_is_class_level, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_class_level')
+        self.cvterm_is_class_level, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_class_level',
+                definition='',
+                dbxref=dbxref_is_class_level,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_metadata_tag
+        dbxref_is_metadata_tag, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='is_metadata_tag')
+        self.cvterm_is_metadata_tag, created = Cvterm.objects.get_or_create(
+                cv=self.cv_cvterm_property_type,
+                name='is_metadata_tag',
+                definition='',
+                dbxref=dbxref_is_metadata_tag,
+                is_obsolete=0,
+                is_relationshiptype=0)
+
+        # Creating dbxref and cvterm comment
+        dbxref_comment, created = Dbxref.objects.get_or_create(
+            db=self.db_internal, accession='comment')
+        self.cvterm_comment, created = Cvterm.objects.get_or_create(
+            cv=self.cv_cvterm_property_type,
+            name='comment',
+            definition='',
+            dbxref=dbxref_comment,
+            is_obsolete=0,
+            is_relationshiptype=0)
+
+        # Creating dbxref and cvterm is_a
+        dbxref_is_a, created = Dbxref.objects.get_or_create(
+            db=self.db_obo_rel, accession='is_a')
+        self.cvterm_is_a, created = Cvterm.objects.get_or_create(
+            cv=self.cv_relationship,
+            name='is_a',
+            definition='',
+            dbxref=dbxref_is_a,
+            is_obsolete=0,
+            is_relationshiptype=1)
+
+
 def process_cvterm_def(cvterm, definition):
     """Process defition to obtain cvterms."""
     text = ''
