@@ -143,7 +143,7 @@ class OntologyTest(TestCase):
             cvterm=test_cvterm,
             dbxref=test_processed_dbxref)
 
-        self.assertEqual(1, test_processed_cvterm_dbxref.is_for_definition)
+        self.assertEqual(0, test_processed_cvterm_dbxref.is_for_definition)
 
     def test_process_cvterm_xref(self):
         """Tests - process_cvterm_xref."""
