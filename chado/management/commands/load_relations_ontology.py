@@ -1,8 +1,10 @@
 """Load relations ontology."""
 
-from chado.loaders.exceptions import ImportingError
-from chado.loaders.relationontology import RelationOntologyLoader
-from django.core.management.base import BaseCommand, CommandError
+from chado.loaders.common import Validator
+from chado.loaders.ontology import OntologyLoader
+from django.core.management.base import BaseCommand
+from tqdm import tqdm
+import obonet
 
 
 class Command(BaseCommand):
@@ -23,10 +25,25 @@ class Command(BaseCommand):
         if options.get('verbosity'):
             verbosity = options.get('verbosity')
 
-        try:
-            importer = RelationOntologyLoader(verbosity, self.stdout)
-            importer.handle(file)
-        except ImportingError as e:
-            raise CommandError(str(e))
+        Validator().validate(file)
+
+        # Load the ontology file
+        with open(file) as obo_file:
+            G = obonet.read_obo(obo_file)
+
+        if verbosity > 0:
+            self.stdout.write('Preprocessing')
+
+        cv_name = 'relationship'
+
+        # Initializing ontology
+        ontology = OntologyLoader(cv_name)
+
+        # Load typedefs as Dbxrefs and Cvterm
+        if verbosity > 0:
+            self.stdout.write('Loading typedefs')
+
+        for data in tqdm(G.graph['typedefs']):
+            ontology.store_type_def(data)
 
         self.stdout.write(self.style.SUCCESS('Done'))

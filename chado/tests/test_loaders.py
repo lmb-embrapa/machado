@@ -1,7 +1,7 @@
 """Tests loaders functions."""
 
 from chado.loaders.common import insert_organism
-from chado.loaders.ontology import Ontology
+from chado.loaders.ontology import OntologyLoader
 from chado.models import CvtermDbxref, Cvtermsynonym
 from chado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
@@ -12,8 +12,7 @@ class OntologyTest(TestCase):
 
     def test_ontology(self):
         """Tests - preprocessing."""
-        Ontology('test_ontology',
-                 'test_cv_definition')
+        OntologyLoader('test_ontology', 'test_cv_definition')
         test_ontology = Cv.objects.get(name='test_ontology')
         self.assertEqual('test_ontology', test_ontology.name)
         self.assertEqual('test_cv_definition', test_ontology.definition)
@@ -118,7 +117,7 @@ class OntologyTest(TestCase):
         """Tests - process_cvterm_def."""
         definition = '"A gene encoding ..." [SO:xp]'
 
-        ontology = Ontology('test_ontology', 'test_cv_definition')
+        ontology = OntologyLoader('test_ontology', 'test_cv_definition')
 
         test_db, created = Db.objects.get_or_create(name='test_def_db')
         test_dbxref, created = Dbxref.objects.get_or_create(
@@ -147,7 +146,7 @@ class OntologyTest(TestCase):
 
     def test_process_cvterm_xref(self):
         """Tests - process_cvterm_xref."""
-        ontology = Ontology('test_ontology', 'test_cv_definition')
+        ontology = OntologyLoader('test_ontology', 'test_cv_definition')
 
         test_db, created = Db.objects.get_or_create(name='test_xref_db')
         test_dbxref, created = Dbxref.objects.get_or_create(
@@ -177,7 +176,7 @@ class OntologyTest(TestCase):
 
     def test_process_cvterm_go_synonym(self):
         """Tests - process_cvterm_go_synonym."""
-        ontology = Ontology('test_ontology', 'test_cv_definition')
+        ontology = OntologyLoader('test_ontology', 'test_cv_definition')
 
         test_db, created = Db.objects.get_or_create(name='test_go_synonym_db')
         test_dbxref, created = Dbxref.objects.get_or_create(
