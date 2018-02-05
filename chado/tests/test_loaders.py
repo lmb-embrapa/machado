@@ -3,15 +3,17 @@
 from chado.loaders.common import insert_organism
 from chado.loaders.ontology import OntologyLoader
 from chado.models import CvtermDbxref, Cvtermsynonym
-from chado.models import Cv, Cvterm, Db, Dbxref, Organism
+from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from django.test import TestCase
+import obonet
+import os
 
 
 class OntologyTest(TestCase):
     """Tests Loaders - Common."""
 
     def test_ontology(self):
-        """Tests - preprocessing."""
+        """Tests - __init__."""
         OntologyLoader('test_ontology', 'test_cv_definition')
         test_ontology = Cv.objects.get(name='test_ontology')
         self.assertEqual('test_ontology', test_ontology.name)
@@ -20,9 +22,9 @@ class OntologyTest(TestCase):
         # Testing db_internal
         test_db_internal = Db.objects.get(name='internal')
         self.assertEqual('internal', test_db_internal.name)
-        # Testing db_obo_rel
-        test_db_obo_rel = Db.objects.get(name='obo_rel')
-        self.assertEqual('obo_rel', test_db_obo_rel.name)
+        # Testing db_OBO_REL
+        test_db_obo_rel = Db.objects.get(name='OBO_REL')
+        self.assertEqual('OBO_REL', test_db_obo_rel.name)
         # Testing db__global
         test_db__global = Db.objects.get(name='_global')
         self.assertEqual('_global', test_db__global.name)
@@ -46,16 +48,6 @@ class OntologyTest(TestCase):
             name='is_symmetric', cv=test_cv_cvterm_property_type)
         self.assertEqual('is_symmetric', test_dbxref_is_symmetric.accession)
         self.assertEqual('is_symmetric', test_cvterm_is_symmetric.name)
-
-        # Testing cvterm is_anti_symmetric
-        test_dbxref_is_anti_symmetric = Dbxref.objects.get(
-            accession='is_anti_symmetric', db=test_db_internal)
-        test_cvterm_is_anti_symmetric = Cvterm.objects.get(
-            name='is_anti_symmetric', cv=test_cv_cvterm_property_type)
-        self.assertEqual('is_anti_symmetric',
-                         test_dbxref_is_anti_symmetric.accession)
-        self.assertEqual('is_anti_symmetric',
-                         test_cvterm_is_anti_symmetric.name)
 
         # Testing cvterm comment
         test_dbxref_comment = Dbxref.objects.get(accession='comment',
@@ -83,16 +75,6 @@ class OntologyTest(TestCase):
         self.assertEqual('is_transitive',
                          test_cvterm_is_transitive.name)
 
-        # Testing cvterm is_reflexive
-        test_dbxref_is_reflexive = Dbxref.objects.get(
-            accession='is_reflexive', db=test_db_internal)
-        test_cvterm_is_reflexive = Cvterm.objects.get(
-            name='is_reflexive', cv=test_cv_cvterm_property_type)
-        self.assertEqual('is_reflexive',
-                         test_dbxref_is_reflexive.accession)
-        self.assertEqual('is_reflexive',
-                         test_cvterm_is_reflexive.name)
-
         # Testing cvterm is_class_level
         test_dbxref_is_class_level = Dbxref.objects.get(
             accession='is_class_level', db=test_db_internal)
@@ -112,6 +94,9 @@ class OntologyTest(TestCase):
                          test_dbxref_is_metadata_tag.accession)
         self.assertEqual('is_metadata_tag',
                          test_cvterm_is_metadata_tag.name)
+
+    def test_store_type_def(self):
+        """Tests - store_type_def."""
 
     def test_process_cvterm_def(self):
         """Tests - process_cvterm_def."""
@@ -142,7 +127,7 @@ class OntologyTest(TestCase):
             cvterm=test_cvterm,
             dbxref=test_processed_dbxref)
 
-        self.assertEqual(0, test_processed_cvterm_dbxref.is_for_definition)
+        self.assertEqual(1, test_processed_cvterm_dbxref.is_for_definition)
 
     def test_process_cvterm_xref(self):
         """Tests - process_cvterm_xref."""
@@ -161,7 +146,7 @@ class OntologyTest(TestCase):
             is_relationshiptype=0,
             is_obsolete=0)
 
-        ontology.process_cvterm_xref(test_cvterm, 'SP:xq', 0)
+        ontology.process_cvterm_xref(test_cvterm, 'SP:xq')
 
         test_processed_db = Db.objects.get(name='SP')
         test_processed_dbxref = Dbxref.objects.get(
@@ -202,6 +187,64 @@ class OntologyTest(TestCase):
             synonym='30S ribosomal subunit')
 
         self.assertEqual('30S ribosomal subunit', test_go_synonym.synonym)
+
+    def test_loading_ontology_from_obo(self):
+        """Tests - loading ontology from obo file."""
+        directory = os.path.dirname(os.path.abspath(__file__))
+        file = os.path.join(directory, 'data', 'so_trunc.obo')
+
+        with open(file) as obo_file:
+            G = obonet.read_obo(obo_file)
+
+        cv_name = G.graph['default-namespace'][0]
+        cv_definition = G.graph['data-version']
+        # Initializing ontology
+        ontology = OntologyLoader(cv_name, cv_definition)
+        for typedef in G.graph['typedefs']:
+            ontology.store_type_def(typedef)
+        for n, data in G.nodes(data=True):
+            ontology.store_term(n, data)
+        for u, v, type in G.edges(keys=True):
+            ontology.store_relationship(u, v, type)
+
+        # Testing cv
+        test_cv = Cv.objects.get(name='sequence')
+        self.assertEqual('sequence', test_cv.name)
+        self.assertEqual('so.obo(fake)', test_cv.definition)
+
+        # Testing store_type_def
+        test_db = Db.objects.get(name='_global')
+        self.assertEqual('_global', test_db.name)
+        test_dbxref = Dbxref.objects.get(db=test_db, accession='derives_from')
+        self.assertEqual('derives_from', test_dbxref.accession)
+        test_cvterm = Cvterm.objects.get(dbxref=test_dbxref)
+        self.assertEqual('derives_from', test_cvterm.name)
+        self.assertEqual('"testing def loading." [PMID:999090909]',
+                         test_cvterm.definition)
+        test_type = Cvterm.objects.get(name='comment')
+        test_comment = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                              type_id=test_type.cvterm_id)
+        self.assertEqual('Fake data.', test_comment.value)
+        test_type = Cvterm.objects.get(name='is_class_level')
+        test_prop = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                           type_id=test_type.cvterm_id)
+        self.assertEqual('1', test_prop.value)
+        test_type = Cvterm.objects.get(name='is_metadata_tag')
+        test_prop = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                           type_id=test_type.cvterm_id)
+        self.assertEqual('1', test_prop.value)
+        test_type = Cvterm.objects.get(name='is_symmetric')
+        test_prop = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                           type_id=test_type.cvterm_id)
+        self.assertEqual('1', test_prop.value)
+        test_type = Cvterm.objects.get(name='is_transitive')
+        test_prop = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                           type_id=test_type.cvterm_id)
+        self.assertEqual('1', test_prop.value)
+        test_dbxref = Dbxref.objects.get(accession='0123')
+        test_cvterm_dbxref = CvtermDbxref.objects.get(
+            cvterm=test_cvterm, dbxref=test_dbxref)
+        self.assertEqual(0, test_cvterm_dbxref.is_for_definition)
 
 
 class CommonTest(TestCase):

@@ -5,7 +5,7 @@ include chado/models.py
 recursive-include bin *
 recursive-include chado/loaders *
 recursive-include chado/management *
-recursive-include chado/loaders *
+recursive-include chado/tests *
 recursive-include docs *
 exclude chado/view.py
 exclude chado/tests.py

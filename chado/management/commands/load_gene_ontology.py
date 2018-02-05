@@ -45,10 +45,13 @@ class Command(BaseCommand):
 
         # Instantiating Ontology in order to have access to secondary cv, db,
         # cvterm, and dbxref, even though the main cv will not be used.
+        # There will be a ontology for each namespace, plus one called
+        # gene_ontology for storing type_defs
         ontology = OntologyLoader('biological_process', cv_definition)
         ontology = OntologyLoader('molecular_function', cv_definition)
         ontology = OntologyLoader('cellular_component', cv_definition)
         ontology = OntologyLoader('external', cv_definition)
+        ontology = OntologyLoader('gene_ontology', cv_definition)
 
         # Load typedefs as Dbxrefs and Cvterm
         if verbosity > 0:

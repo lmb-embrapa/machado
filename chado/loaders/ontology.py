@@ -56,17 +56,6 @@ class OntologyLoader(object):
                 is_obsolete=0,
                 is_relationshiptype=0)
 
-        # Creating dbxref and cvterm is_anti_symmetric
-        self.dbxref_is_anti_symmetric, created = Dbxref.objects.get_or_create(
-            db=self.db_internal, accession='is_anti_symmetric')
-        self.cvterm_is_anti_symmetric, created = Cvterm.objects.get_or_create(
-                cv=self.cv_cvterm_property_type,
-                name='is_anti_symmetric',
-                definition='',
-                dbxref=self.dbxref_is_anti_symmetric,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
         # Creating dbxref and cvterm is_transitive
         dbxref_is_transitive, created = Dbxref.objects.get_or_create(
             db=self.db_internal, accession='is_transitive')
@@ -141,10 +130,6 @@ class OntologyLoader(object):
             defaults={'description': typedef.get('def'),
                       'version': ''})
 
-        # gene ontology typedefs will be the same as sequence ontology typedefs
-        if self.cv.name == 'external':
-            self.cv, created = Cv.objects.get_or_create(name='sequence')
-
         # Save the typedef to the Cvterm model
         cvterm_typedef, created = Cvterm.objects.get_or_create(
             cv=self.cv,
@@ -154,19 +139,6 @@ class OntologyLoader(object):
             defaults={'definition': typedef.get('def'),
                       'is_relationshiptype': 1})
 
-        # Load alt_ids
-        if typedef.get('alt_id'):
-            for alt_id in typedef.get('alt_id'):
-                aux_db, aux_accession = alt_id.split(':')
-                db_alt_id, created = Db.objects.get_or_create(
-                    name=aux_db)
-                dbxref_alt_id, created = Dbxref.objects.get_or_create(
-                    db=db_alt_id, accession=aux_accession)
-                CvtermDbxref.objects.get_or_create(
-                    cvterm=cvterm_typedef,
-                    dbxref=dbxref_alt_id,
-                    defaults={'is_for_definition': 0})
-
         # Load comment
         if typedef.get('comment'):
             for comment in typedef.get('comment'):
@@ -175,14 +147,6 @@ class OntologyLoader(object):
                     type_id=self.cvterm_comment.cvterm_id,
                     value=comment,
                     rank=0)
-
-        # Load is_anti_symmetric
-        if typedef.get('is_anti_symmetric') is not None:
-            Cvtermprop.objects.get_or_create(
-                cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_anti_symmetric.cvterm_id,
-                value=1,
-                rank=0)
 
         # Load is_class_level
         if typedef.get('is_class_level') is not None:
@@ -215,15 +179,6 @@ class OntologyLoader(object):
                 type_id=self.cvterm_is_transitive.cvterm_id,
                 value=1,
                 rank=0)
-
-        # Load synonyms
-        for synonym_type in ('exact_synonym', 'related_synonym',
-                             'narrow_synonym', 'broad_synonym'):
-            if typedef.get(synonym_type):
-                for synonym in typedef.get(synonym_type):
-                    self.process_cvterm_go_synonym(cvterm_typedef,
-                                                   synonym,
-                                                   synonym_type)
 
         if typedef.get('xref'):
             for xref in typedef.get('xref'):
