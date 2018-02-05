@@ -38,7 +38,7 @@ class OntologyLoader(object):
         # Creating cv cvterm_property_type
         self.cv_cvterm_property_type, created = Cv.objects.get_or_create(
             name='cvterm_property_type')
-        # Creating cv relationshipo
+        # Creating cv relationship
         self.cv_relationship, created = Cv.objects.get_or_create(
             name='relationship')
         # Creating cv relationship
@@ -128,9 +128,11 @@ class OntologyLoader(object):
         if ':' in typedef.get('id'):
             aux_db, typedef_accession = typedef.get('id').split(':')
             typedef_db, created = Db.objects.get_or_create(name=aux_db)
+            typedef_name = typedef.get('name')
         else:
             typedef_db = self.db_global
             typedef_accession = typedef.get('id')
+            typedef_name = typedef.get('id')
 
         # Save the typedef to the Dbxref model
         dbxref_typedef, created = Dbxref.objects.get_or_create(
@@ -146,7 +148,7 @@ class OntologyLoader(object):
         # Save the typedef to the Cvterm model
         cvterm_typedef, created = Cvterm.objects.get_or_create(
             cv=self.cv,
-            name=typedef.get('name'),
+            name=typedef_name,
             is_obsolete=0,
             dbxref=dbxref_typedef,
             defaults={'definition': typedef.get('def'),
@@ -226,7 +228,7 @@ class OntologyLoader(object):
         if typedef.get('xref'):
             for xref in typedef.get('xref'):
                 self.process_cvterm_xref(
-                        cvterm_typedef, xref, 0)
+                        cvterm_typedef, xref)
 
     def store_term(self, n, data, lock=None):
         """Store the ontology terms."""
@@ -256,9 +258,9 @@ class OntologyLoader(object):
             with lock:
                 # Load definition and dbxrefs
                 self.process_cvterm_def(
-                        cvterm, data.get('def'), 1)
+                        cvterm, data.get('def'))
         else:
-            self.process_cvterm_def(cvterm, data.get('def'), 1)
+            self.process_cvterm_def(cvterm, data.get('def'))
 
         # Load alt_ids
         if data.get('alt_id'):
@@ -283,7 +285,7 @@ class OntologyLoader(object):
         # Load xref
         if data.get('xref'):
             for xref in data.get('xref'):
-                self.process_cvterm_xref(cvterm, xref, 0)
+                self.process_cvterm_xref(cvterm, xref)
 
         # Load synonyms
         if data.get('synonym') is not None:
@@ -364,7 +366,7 @@ class OntologyLoader(object):
                     CvtermDbxref.objects.get_or_create(
                             cvterm=cvterm,
                             dbxref=dbxref,
-                            is_for_definition=is_for_definition)
+                            defaults={'is_for_definition': is_for_definition})
 
         cvterm.definition = text
         cvterm.save()
@@ -389,7 +391,7 @@ class OntologyLoader(object):
             CvtermDbxref.objects.get_or_create(
                     cvterm=cvterm,
                     dbxref=dbxref,
-                    is_for_definition=is_for_definition)
+                    defaults={'is_for_definition': is_for_definition})
         return
 
     def process_cvterm_go_synonym(self, cvterm, synonym, synonym_type):
