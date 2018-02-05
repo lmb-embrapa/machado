@@ -163,7 +163,7 @@ class OntologyLoader(object):
                 CvtermDbxref.objects.get_or_create(
                     cvterm=cvterm_typedef,
                     dbxref=dbxref_alt_id,
-                    is_for_definition=0)
+                    defaults={'is_for_definition': 0})
 
         # Load comment
         if typedef.get('comment'):
@@ -226,7 +226,7 @@ class OntologyLoader(object):
         if typedef.get('xref'):
             for xref in typedef.get('xref'):
                 self.process_cvterm_xref(
-                        cvterm_typedef, xref, 1)
+                        cvterm_typedef, xref, 0)
 
     def store_term(self, n, data, lock=None):
         """Store the ontology terms."""
@@ -270,7 +270,7 @@ class OntologyLoader(object):
                 CvtermDbxref.objects.get_or_create(
                     cvterm=cvterm,
                     dbxref=dbxref_alt_id,
-                    is_for_definition=0)
+                    defaults={'is_for_definition': 0})
 
         # Load comment
         if data.get('comment'):
@@ -283,7 +283,7 @@ class OntologyLoader(object):
         # Load xref
         if data.get('xref'):
             for xref in data.get('xref'):
-                self.process_cvterm_xref(cvterm, xref, 1)
+                self.process_cvterm_xref(cvterm, xref, 0)
 
         # Load synonyms
         if data.get('synonym') is not None:
@@ -320,7 +320,7 @@ class OntologyLoader(object):
             object_id=object_cvterm.cvterm_id)
         cvrel.save()
 
-    def process_cvterm_def(self, cvterm, definition, is_for_definition=0):
+    def process_cvterm_def(self, cvterm, definition, is_for_definition=1):
         """Process defition to obtain cvterms."""
         text = ''
 
