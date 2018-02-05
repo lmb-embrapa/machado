@@ -32,8 +32,8 @@ class OntologyLoader(object):
         self.db_global, created = Db.objects.get_or_create(name='_global')
         # Creating db internal
         self.db_internal, created = Db.objects.get_or_create(name='internal')
-        # Creating db obo_rel
-        self.db_obo_rel, created = Db.objects.get_or_create(name='obo_rel')
+        # Creating db OBO_REL
+        self.db_obo_rel, created = Db.objects.get_or_create(name='OBO_REL')
 
         # Creating cv cvterm_property_type
         self.cv_cvterm_property_type, created = Cv.objects.get_or_create(
@@ -75,17 +75,6 @@ class OntologyLoader(object):
                 name='is_transitive',
                 definition='',
                 dbxref=dbxref_is_transitive,
-                is_obsolete=0,
-                is_relationshiptype=0)
-
-        # Creating dbxref and cvterm is_reflexive
-        dbxref_is_reflexive, created = Dbxref.objects.get_or_create(
-            db=self.db_internal, accession='is_reflexive')
-        self.cvterm_is_reflexive, created = Cvterm.objects.get_or_create(
-                cv=self.cv_cvterm_property_type,
-                name='is_reflexive',
-                definition='',
-                dbxref=dbxref_is_reflexive,
                 is_obsolete=0,
                 is_relationshiptype=0)
 
@@ -157,7 +146,7 @@ class OntologyLoader(object):
         # Save the typedef to the Cvterm model
         cvterm_typedef, created = Cvterm.objects.get_or_create(
             cv=self.cv,
-            name=typedef_accession,
+            name=typedef.get('name'),
             is_obsolete=0,
             dbxref=dbxref_typedef,
             defaults={'definition': typedef.get('def'),
@@ -209,14 +198,6 @@ class OntologyLoader(object):
                 value=1,
                 rank=0)
 
-        # Load is_reflexive
-        if typedef.get('is_reflexive') is not None:
-            Cvtermprop.objects.get_or_create(
-                cvterm=cvterm_typedef,
-                type_id=self.cvterm_is_reflexive.cvterm_id,
-                value=1,
-                rank=0)
-
         # Load is_symmetric
         if typedef.get('is_symmetric') is not None:
             Cvtermprop.objects.get_or_create(
@@ -242,15 +223,10 @@ class OntologyLoader(object):
                                                    synonym,
                                                    synonym_type)
 
-        # Load xref relations
-        is_for_definition = 0
-        if self.cv.name == 'relationship':
-            is_for_definition = 1
-
         if typedef.get('xref'):
             for xref in typedef.get('xref'):
                 self.process_cvterm_xref(
-                        cvterm_typedef, xref, is_for_definition)
+                        cvterm_typedef, xref, 1)
 
     def store_term(self, n, data, lock=None):
         """Store the ontology terms."""
@@ -294,7 +270,7 @@ class OntologyLoader(object):
                 CvtermDbxref.objects.get_or_create(
                     cvterm=cvterm,
                     dbxref=dbxref_alt_id,
-                    is_for_definition=1)
+                    is_for_definition=0)
 
         # Load comment
         if data.get('comment'):
