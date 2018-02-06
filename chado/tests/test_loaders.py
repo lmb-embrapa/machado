@@ -2,7 +2,7 @@
 
 from chado.loaders.common import insert_organism
 from chado.loaders.ontology import OntologyLoader
-from chado.models import CvtermDbxref, Cvtermsynonym
+from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from django.test import TestCase
 import obonet
@@ -95,9 +95,6 @@ class OntologyTest(TestCase):
         self.assertEqual('is_metadata_tag',
                          test_cvterm_is_metadata_tag.name)
 
-    def test_store_type_def(self):
-        """Tests - store_type_def."""
-
     def test_process_cvterm_def(self):
         """Tests - process_cvterm_def."""
         definition = '"A gene encoding ..." [SO:xp]'
@@ -188,8 +185,37 @@ class OntologyTest(TestCase):
 
         self.assertEqual('30S ribosomal subunit', test_go_synonym.synonym)
 
-    def test_loading_ontology_from_obo(self):
-        """Tests - loading ontology from obo file."""
+    def test_process_cvterm_so_synonym(self):
+        """Tests - process_cvterm_so_synonym."""
+        ontology = OntologyLoader('test_ontology', 'test_cv_definition')
+
+        test_db, created = Db.objects.get_or_create(name='test_go_synonym_db')
+        test_dbxref, created = Dbxref.objects.get_or_create(
+            db=test_db,
+            accession='test_so_synonym_accession')
+
+        test_cv, created = Cv.objects.get_or_create(
+            name='test_so_synonym_cv')
+        test_cvterm, created = Cvterm.objects.get_or_create(
+            cv=test_cv,
+            name='test_go_synonym_cvterm',
+            dbxref=test_dbxref,
+            is_relationshiptype=0,
+            is_obsolete=0)
+
+        ontology.process_cvterm_so_synonym(
+                cvterm=test_cvterm,
+                synonym='"stop codon gained" EXACT []')
+
+        test_go_synonym = Cvtermsynonym.objects.get(
+            cvterm=test_cvterm)
+        test_go_type = Cvterm.objects.get(cvterm_id=test_go_synonym.type_id)
+
+        self.assertEqual('stop codon gained', test_go_synonym.synonym)
+        self.assertEqual('exact', test_go_type.name)
+
+    def test_store_type_def(self):
+        """Tests - store type_def."""
         directory = os.path.dirname(os.path.abspath(__file__))
         file = os.path.join(directory, 'data', 'so_trunc.obo')
 
@@ -202,10 +228,6 @@ class OntologyTest(TestCase):
         ontology = OntologyLoader(cv_name, cv_definition)
         for typedef in G.graph['typedefs']:
             ontology.store_type_def(typedef)
-        for n, data in G.nodes(data=True):
-            ontology.store_term(n, data)
-        for u, v, type in G.edges(keys=True):
-            ontology.store_relationship(u, v, type)
 
         # Testing cv
         test_cv = Cv.objects.get(name='sequence')
@@ -224,7 +246,7 @@ class OntologyTest(TestCase):
         test_type = Cvterm.objects.get(name='comment')
         test_comment = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
                                               type_id=test_type.cvterm_id)
-        self.assertEqual('Fake data.', test_comment.value)
+        self.assertEqual('Fake typedef data.', test_comment.value)
         test_type = Cvterm.objects.get(name='is_class_level')
         test_prop = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
                                            type_id=test_type.cvterm_id)
@@ -245,6 +267,78 @@ class OntologyTest(TestCase):
         test_cvterm_dbxref = CvtermDbxref.objects.get(
             cvterm=test_cvterm, dbxref=test_dbxref)
         self.assertEqual(0, test_cvterm_dbxref.is_for_definition)
+
+    def test_store_term(self):
+        """Tests - store term."""
+        directory = os.path.dirname(os.path.abspath(__file__))
+        file = os.path.join(directory, 'data', 'so_trunc.obo')
+
+        with open(file) as obo_file:
+            G = obonet.read_obo(obo_file)
+
+        cv_name = G.graph['default-namespace'][0]
+        cv_definition = G.graph['data-version']
+        # Initializing ontology
+        ontology = OntologyLoader(cv_name, cv_definition)
+        for typedef in G.graph['typedefs']:
+            ontology.store_type_def(typedef)
+        for n, data in G.nodes(data=True):
+            ontology.store_term(n, data)
+
+        # Testing store_term
+        test_dbxref = Dbxref.objects.get(accession='0000013')
+        test_cvterm = Cvterm.objects.get(dbxref=test_dbxref)
+        self.assertEqual('scRNA', test_cvterm.name)
+        test_def = Dbxref.objects.get(accession='ke')
+        test_cvterm_dbxref = CvtermDbxref.objects.get(cvterm=test_cvterm,
+                                                      dbxref=test_def)
+        self.assertEqual(1, test_cvterm_dbxref.is_for_definition)
+        test_alt_id_dbxref = Dbxref.objects.get(accession='0000012')
+        test_alt_id = CvtermDbxref.objects.get(dbxref=test_alt_id_dbxref)
+        test_alt_id_cvterm = Cvterm.objects.get(
+            cvterm_id=test_alt_id.cvterm_id)
+        self.assertEqual('scRNA', test_alt_id_cvterm.name)
+        test_type = Cvterm.objects.get(name='comment')
+        test_comment = Cvtermprop.objects.get(cvterm_id=test_cvterm.cvterm_id,
+                                              type_id=test_type.cvterm_id)
+        self.assertEqual('Fake term data.', test_comment.value)
+        test_dbxref = Dbxref.objects.get(
+            accession='http://web.site/FakeData "wiki"')
+        test_cvterm_dbxref = CvtermDbxref.objects.get(
+            cvterm=test_cvterm, dbxref=test_dbxref)
+        self.assertEqual(0, test_cvterm_dbxref.is_for_definition)
+
+    def test_store_relationship(self):
+        """Tests - store relationship."""
+        directory = os.path.dirname(os.path.abspath(__file__))
+        file = os.path.join(directory, 'data', 'so_trunc.obo')
+
+        with open(file) as obo_file:
+            G = obonet.read_obo(obo_file)
+
+        cv_name = G.graph['default-namespace'][0]
+        cv_definition = G.graph['data-version']
+        # Initializing ontology
+        ontology = OntologyLoader(cv_name, cv_definition)
+        for typedef in G.graph['typedefs']:
+            ontology.store_type_def(typedef)
+        for n, data in G.nodes(data=True):
+            ontology.store_term(n, data)
+        for u, v, type in G.edges(keys=True):
+            ontology.store_relationship(u, v, type)
+
+        # Testing store_term
+        test_subject_dbxref = Dbxref.objects.get(accession='0000013')
+        test_subject_cvterm = Cvterm.objects.get(dbxref=test_subject_dbxref)
+        self.assertEqual('scRNA', test_subject_cvterm.name)
+        test_object_dbxref = Dbxref.objects.get(accession='0000012')
+        test_object_cvterm = Cvterm.objects.get(dbxref=test_object_dbxref)
+        self.assertEqual('scRNA_primary_transcript', test_object_cvterm.name)
+
+        test_type = CvtermRelationship.objects.get(
+            subject=test_subject_cvterm, object=test_object_cvterm)
+        test_type_cvterm = Cvterm.objects.get(cvterm_id=test_type.type_id)
+        self.assertEqual('derives_from', test_type_cvterm.name)
 
 
 class CommonTest(TestCase):
