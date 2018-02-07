@@ -52,10 +52,10 @@ def get_ontology_term(ontology, term):
     return cvterm
 
 
-def insert_organism(genus, species, *args, **options):
+def insert_organism(genus, species='spp.', *args, **options):
     """Insert organism."""
-    if species is None or genus is None:
-        raise ImportingError('species and genus are required!')
+    if genus is None:
+        raise ImportingError('genus is required!')
 
     type_id = ''
     if options.get('type') is not None:
@@ -67,7 +67,9 @@ def insert_organism(genus, species, *args, **options):
                 'The type must be previously registered in Cvterm')
 
     try:
-        spp = Organism.objects.get(genus=genus, species=species)
+        spp = Organism.objects.get(
+            genus=genus, species=species,
+            infraspecific_name=options.get('infraspecific_name'))
         if (spp is not None):
             raise ImportingError('Organism already registered ({} {})!'
                                  .format(genus, species))
@@ -81,3 +83,30 @@ def insert_organism(genus, species, *args, **options):
             type_id=type_id,
             comment=options.get('comment'))
         organism.save()
+
+
+def retrieve_organism(organism):
+    """Retrieve organism object."""
+    try:
+        aux = organism.split(' ')
+        genus = aux[0]
+        species = 'spp.'
+        infraspecific = None
+        if len(aux) == 2:
+            species = aux[1]
+        elif len(aux) > 2:
+            species = aux[1]
+            infraspecific = ' '.join(aux[2:])
+
+    except ValueError:
+        raise ValueError('The organism genus and species should be '
+                         'separated by a single space')
+
+    try:
+        organism = Organism.objects.get(species=species,
+                                        genus=genus,
+                                        infraspecific_name=infraspecific)
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist('%s not registered.'
+                                 % organism)
+    return organism
