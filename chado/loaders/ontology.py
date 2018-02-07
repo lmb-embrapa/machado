@@ -132,12 +132,12 @@ class OntologyLoader(object):
 
         # Save the typedef to the Cvterm model
         cvterm_typedef, created = Cvterm.objects.get_or_create(
-            cv=self.cv,
             name=typedef_name,
             is_obsolete=0,
             dbxref=dbxref_typedef,
             defaults={'definition': typedef.get('def'),
-                      'is_relationshiptype': 1})
+                      'is_relationshiptype': 1,
+                      'cv': self.cv})
 
         # Load comment
         if typedef.get('comment'):
