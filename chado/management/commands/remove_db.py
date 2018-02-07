@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Db
+from chado.models import Db, Dbxref, Feature
 
 
 class Command(BaseCommand):
@@ -12,11 +12,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            db = Db.objects.get(name=options['name'])
-
             self.stdout.write('Deleting %s and every child record (CASCADE)'
                               % (options['name']))
 
+            db = Db.objects.get(name=options['name'])
+            dbxref_ids = Dbxref.objects.filter(
+                db=db).values_list('dbxref_id', flat=True)
+            Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
+            Dbxref.objects.filter(db=db).delete()
             db.delete()
 
             self.stdout.write(self.style.SUCCESS('Done'))
