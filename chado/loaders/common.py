@@ -34,21 +34,21 @@ class Validator(object):
             raise ImportingError("{} is not readable".format(file_path))
 
 
-def get_ontology_term(ontology, term):
+def retrieve_ontology_term(ontology, term):
     """Retrieve ontology term."""
     # Retrieve sequence ontology object
     try:
         cv = Cv.objects.get(name=ontology)
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist(
-            'Sequence Ontology not loaded ({}).'.format(ontology))
+            'Ontology not loaded ({}).'.format(ontology))
 
     # Retrieve sequence ontology term object
     try:
         cvterm = Cvterm.objects.get(cv=cv, name=term)
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist(
-            'Sequence Ontology term not found ({}).'.format(term))
+            'Ontology term not found ({}).'.format(term))
     return cvterm
 
 
