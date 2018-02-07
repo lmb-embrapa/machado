@@ -1,6 +1,6 @@
 """Tests loaders functions."""
 
-from chado.loaders.common import insert_organism
+from chado.loaders.common import insert_organism, retrieve_organism
 from chado.loaders.ontology import OntologyLoader
 from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
@@ -377,3 +377,16 @@ class CommonTest(TestCase):
         self.assertEqual('hs', test_organism_2.abbreviation)
         self.assertEqual('human', test_organism_2.common_name)
         self.assertEqual('no comments', test_organism_2.comment)
+
+    def test_retrieve_organism(self):
+        """Tests - retrieve organism."""
+        insert_organism(genus="Bos")
+        insert_organism(genus="Bos", species="taurus")
+        insert_organism(genus="Bos", species="taurus",
+                        infraspecific_name="indicus")
+        test_organism = retrieve_organism("Bos")
+        self.assertEqual('Bos', test_organism.genus)
+        test_organism = retrieve_organism("Bos taurus")
+        self.assertEqual('taurus', test_organism.species)
+        test_organism = retrieve_organism("Bos taurus indicus")
+        self.assertEqual('indicus', test_organism.infraspecific_name)
