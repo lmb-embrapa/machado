@@ -6,7 +6,6 @@ from chado.models import Db, Dbxref, Feature
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from hashlib import md5
-import os
 
 
 class SequenceLoader(object):
@@ -21,8 +20,7 @@ class SequenceLoader(object):
             raise ImportingError(e)
 
         # Save DB file info
-        filename = os.path.basename(file)
-        self.db = Db.objects.create(name=filename,
+        self.db = Db.objects.create(name=file,
                                     description=kwargs.get('description'),
                                     url=kwargs.get('url'))
 

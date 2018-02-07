@@ -6,6 +6,7 @@ from chado.loaders.sequence import SequenceLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
+import os
 
 
 class Command(BaseCommand):
@@ -38,8 +39,10 @@ class Command(BaseCommand):
 
         Validator().validate(options.get('fasta'))
 
+        # retrieve only the file name
+        filename = os.path.basename(options.get('fasta'))
         sequence_file = SequenceLoader(
-            file=options.get('fasta'),
+            file=filename,
             organism=options.get('organism'),
             soterm=options.get('soterm'),
             url=options.get('url'),
