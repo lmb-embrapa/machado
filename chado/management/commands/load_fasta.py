@@ -3,6 +3,7 @@
 from Bio import SeqIO
 from chado.loaders.common import Validator
 from chado.loaders.sequence import SequenceLoader
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
@@ -26,9 +27,15 @@ class Command(BaseCommand):
         parser.add_argument("--url", help="DB URL", required=False, type=str)
         parser.add_argument("--nosequence", help="Don't load the sequence",
                             required=False, action='store_true')
+        parser.add_argument("--cpu", help="Number of threads", default=1,
+                            type=int)
 
     def handle(self, *args, **options):
         """Execute the main function."""
+        verbosity = 1
+        if options.get('verbosity'):
+            verbosity = options.get('verbosity')
+
         Validator().validate(options.get('fasta'))
 
         sequence_file = SequenceLoader(
@@ -40,7 +47,19 @@ class Command(BaseCommand):
 
         fasta_sequences = SeqIO.parse(open(options.get('fasta')), 'fasta')
 
-        for fasta in tqdm(fasta_sequences, unit=' sequences'):
-            sequence_file.store_sequence(fasta, options.get('nosequence'))
+        cpu = options.get('cpu')
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        tasks = list()
+        if verbosity > 0:
+            self.stdout.write('Preprocessing')
+        for fasta in fasta_sequences:
+            tasks.append(pool.submit(sequence_file.store_sequence,
+                                     fasta,
+                                     options.get('nosequence')))
+        if verbosity > 0:
+            self.stdout.write('Loading')
+        for task in tqdm(as_completed(tasks), total=len(tasks)):
+            if task.result():
+                raise(task.result())
 
         self.stdout.write(self.style.SUCCESS('Done'))
