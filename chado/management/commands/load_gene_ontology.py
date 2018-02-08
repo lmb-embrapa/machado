@@ -1,9 +1,10 @@
 """Load Gene Ontology."""
 
 from chado.loaders.common import Validator
+from chado.loaders.exceptions import ImportingError
 from chado.loaders.ontology import OntologyLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from multiprocessing import Lock
 from obonet import read_obo
 from tqdm import tqdm
@@ -47,11 +48,14 @@ class Command(BaseCommand):
         # cvterm, and dbxref, even though the main cv will not be used.
         # There will be a ontology for each namespace, plus one called
         # gene_ontology for storing type_defs
-        ontology = OntologyLoader('biological_process', cv_definition)
-        ontology = OntologyLoader('molecular_function', cv_definition)
-        ontology = OntologyLoader('cellular_component', cv_definition)
-        ontology = OntologyLoader('external', cv_definition)
-        ontology = OntologyLoader('gene_ontology', cv_definition)
+        try:
+            ontology = OntologyLoader('biological_process', cv_definition)
+            ontology = OntologyLoader('molecular_function', cv_definition)
+            ontology = OntologyLoader('cellular_component', cv_definition)
+            ontology = OntologyLoader('external', cv_definition)
+            ontology = OntologyLoader('gene_ontology', cv_definition)
+        except ImportingError as e:
+            raise CommandError(e)
 
         # Load typedefs as Dbxrefs and Cvterm
         if verbosity > 0:

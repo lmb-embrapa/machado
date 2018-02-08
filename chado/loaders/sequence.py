@@ -5,6 +5,7 @@ from chado.loaders.exceptions import ImportingError
 from chado.models import Db, Dbxref, Feature
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 from hashlib import md5
 
 
@@ -20,9 +21,12 @@ class SequenceLoader(object):
             raise ImportingError(e)
 
         # Save DB file info
-        self.db = Db.objects.create(name=file,
-                                    description=kwargs.get('description'),
-                                    url=kwargs.get('url'))
+        try:
+            self.db = Db.objects.create(name=file,
+                                        description=kwargs.get('description'),
+                                        url=kwargs.get('url'))
+        except IntegrityError as e:
+            raise ImportingError(e)
 
         # Retrieve sequence ontology object
         self.soterm = retrieve_ontology_term(ontology='sequence',

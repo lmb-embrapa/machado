@@ -2,9 +2,10 @@
 
 from Bio import SeqIO
 from chado.loaders.common import Validator
+from chado.loaders.exceptions import ImportingError
 from chado.loaders.sequence import SequenceLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import os
 
@@ -41,12 +42,15 @@ class Command(BaseCommand):
 
         # retrieve only the file name
         filename = os.path.basename(options.get('fasta'))
-        sequence_file = SequenceLoader(
-            file=filename,
-            organism=options.get('organism'),
-            soterm=options.get('soterm'),
-            url=options.get('url'),
-            description=options.get('description'))
+        try:
+            sequence_file = SequenceLoader(
+                file=filename,
+                organism=options.get('organism'),
+                soterm=options.get('soterm'),
+                url=options.get('url'),
+                description=options.get('description'))
+        except ImportingError as e:
+            raise CommandError(e)
 
         fasta_sequences = SeqIO.parse(open(options.get('fasta')), 'fasta')
 
