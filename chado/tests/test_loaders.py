@@ -1,13 +1,42 @@
 """Tests loaders functions."""
 
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from chado.loaders.common import insert_organism, retrieve_organism
 from chado.loaders.common import retrieve_ontology_term
 from chado.loaders.ontology import OntologyLoader
+from chado.loaders.sequence import SequenceLoader
 from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
-from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
+from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism, Feature
 from django.test import TestCase
 import obonet
 import os
+
+
+class SequenceTest(TestCase):
+    """Tests Loaders - Common."""
+
+    def test_store_sequence(self):
+        """Tests - __init__."""
+        Organism.objects.create(genus='Mus', species='musculus')
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
+                              is_obsolete=0, is_relationshiptype=0)
+        test_seq_file = SequenceLoader(file='sequence.fasta',
+                                       organism='Mus musculus',
+                                       soterm='assembly',
+                                       url='http://teste.url',
+                                       description='test sequence file')
+        test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                                 id='chr1',
+                                 description='chromosome 1')
+        test_seq_file.store_sequence(test_seq_obj)
+        test_feature = Feature.objects.get(uniquename='chr1')
+        self.assertEqual('chromosome 1', test_feature.name)
+        self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
+                         test_feature.residues)
 
 
 class OntologyTest(TestCase):
