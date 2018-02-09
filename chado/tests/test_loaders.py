@@ -4,17 +4,21 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from chado.loaders.common import insert_organism, retrieve_organism
 from chado.loaders.common import retrieve_ontology_term
+from chado.loaders.feature import FeatureLoader
 from chado.loaders.ontology import OntologyLoader
 from chado.loaders.sequence import SequenceLoader
 from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
-from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism, Feature
+from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
+from chado.models import Feature, Featureprop, FeatureSynonym
+from chado.models import FeatureCvterm, FeatureDbxref
 from django.test import TestCase
+from datetime import datetime, timezone
 import obonet
 import os
 
 
 class SequenceTest(TestCase):
-    """Tests Loaders - Common."""
+    """Tests Loaders - SequenceLoader."""
 
     def test_store_biopython_seq_record(self):
         """Tests - __init__."""
@@ -24,7 +28,7 @@ class SequenceTest(TestCase):
         test_cv = Cv.objects.create(name='sequence')
         Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
                               is_obsolete=0, is_relationshiptype=0)
-        test_seq_file = SequenceLoader(file='sequence.fasta',
+        test_seq_file = SequenceLoader(filename='sequence.fasta',
                                        organism='Mus musculus',
                                        soterm='assembly',
                                        url='http://teste.url',
@@ -37,6 +41,106 @@ class SequenceTest(TestCase):
         self.assertEqual('chromosome 1', test_feature.name)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
+
+
+class FeatureTest(TestCase):
+    """Tests Loaders - FeatureLoader."""
+
+    def test_get_attributes(self):
+        """Tests - get attributes."""
+        Organism.objects.create(genus='Mus', species='musculus')
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism='Mus musculus')
+        test_attrs = test_feature_file.get_attributes('ID=1;name=feat1')
+        self.assertEqual('1', test_attrs.get('id'))
+        self.assertEqual('feat1', test_attrs.get('name'))
+
+    def test_process_attributes(self):
+        """Tests - get attributes."""
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+        # creating test GO term
+        test_db = Db.objects.create(name='GO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='biological_process')
+        Cvterm.objects.create(
+            name='go test term', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # creating test SO term
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        test_so_term = Cvterm.objects.create(
+            name='gene', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # creating test feature
+        test_feature = Feature.objects.create(
+            organism=test_organism, uniquename='feat1', is_analysis=False,
+            type_id=test_so_term.cvterm_id, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        # creating exact term
+        test_db_global = Db.objects.create(name='_global')
+        test_dbxref = Dbxref.objects.create(accession='exact',
+                                            db=test_db_global)
+        test_cv = Cv.objects.create(name='synonym_type')
+        test_so_term = Cvterm.objects.create(
+            name='exact', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # new FeatureLoader
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism='Mus musculus')
+        # running get_attributes
+        test_attrs = test_feature_file.get_attributes(
+            'ID=1;name=feat1;note=Test feature;display=feat1;gene=gene1;'
+            'orf_classification=1;ontology_term=GO:12345,GO:54321;parent=2;'
+            'alias=Feature1;dbxref=GI:12345,NC:12345;noecziste=True')
+        # running process_attributes
+        test_feature_file.process_attributes(feature=test_feature,
+                                             attrs=test_attrs)
+        # creating feature_property cvterm
+        cv_feature_property = Cv.objects.get(name='feature_property')
+        # asserting note
+        test_prop_cvterm = Cvterm.objects.get(
+            name='note', cv=cv_feature_property)
+        test_prop = Featureprop.objects.get(
+            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
+        self.assertEqual('Test feature', test_prop.value)
+        # asserting display
+        test_prop_cvterm = Cvterm.objects.get(
+            name='display', cv=cv_feature_property)
+        test_prop = Featureprop.objects.get(
+            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
+        self.assertEqual('feat1', test_prop.value)
+        # asserting gene
+        test_prop_cvterm = Cvterm.objects.get(
+            name='gene', cv=cv_feature_property)
+        test_prop = Featureprop.objects.get(
+            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
+        self.assertEqual('gene1', test_prop.value)
+        # asserting orf_classification
+        test_prop_cvterm = Cvterm.objects.get(
+            name='orf_classification', cv=cv_feature_property)
+        test_prop = Featureprop.objects.get(
+            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
+        self.assertEqual('1', test_prop.value)
+        # asserting ontology_term
+        test_feat_cvterm = FeatureCvterm.objects.get(feature=test_feature)
+        test_cvterm = Cvterm.objects.get(cvterm_id=test_feat_cvterm.cvterm_id)
+        self.assertEqual('go test term', test_cvterm.name)
+        # asserting dbxref
+        test_dbxref_ids = FeatureDbxref.objects.filter(
+            feature=test_feature).values_list('dbxref_id', flat=True)
+        test_db = Db.objects.get(name='GI')
+        test_dbxref = Dbxref.objects.get(
+            dbxref_id__in=test_dbxref_ids, db=test_db)
+        self.assertEqual('12345', test_dbxref.accession)
+        # asserting alias
+        test_synonym = FeatureSynonym.objects.select_related(
+            'synonym').get(feature=test_feature)
+        self.assertEqual('Feature1', test_synonym.synonym.name)
+        # asserting ignored goterms
+        self.assertEqual('GO:54321', test_feature_file.ignored_goterms.pop())
 
 
 class OntologyTest(TestCase):

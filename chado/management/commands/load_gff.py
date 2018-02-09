@@ -76,6 +76,7 @@ class Command(BaseCommand):
         finally:
             if verbosity > 0:
                 self.stdout.write('Loading relationships')
+
             feature_file.store_relationships()
 
             if feature_file.ignored_attrs is not None:

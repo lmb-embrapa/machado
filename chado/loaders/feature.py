@@ -49,12 +49,14 @@ class FeatureLoader(object):
             dbxref=null_dbxref,
             is_obsolete=0,
             is_relationshiptype=0)
-        self.pub = Pub.objects.get_or_create(
+        self.pub, created = Pub.objects.get_or_create(
             miniref='null',
             uniquename='null',
             type_id=null_cvterm.cvterm_id,
             is_obsolete=False)
 
+        # initialization of lists/sets to store ignored attributes,
+        # ignored goterms, and relationships
         self.ignored_attrs = set()
         self.ignored_goterms = set()
         self.relationships = list()
@@ -62,7 +64,7 @@ class FeatureLoader(object):
     def get_attributes(self, attributes):
         """Get attributes."""
         # receive a line from tbx.fetch and retreive one of the attribute
-        # fields (name)
+        # fields
         result = dict()
         fields = attributes.split(";")
         for field in fields:
@@ -85,6 +87,7 @@ class FeatureLoader(object):
             if key in ['id', 'name', 'parent']:
                 continue
             elif key in ['note', 'display', 'gene', 'orf_classification']:
+                # Store in featureprop
                 note_dbxref, created = Dbxref.objects.get_or_create(
                     db=self.db_null, accession=key)
                 cv_feature_property, created = Cv.objects.get_or_create(
@@ -103,10 +106,11 @@ class FeatureLoader(object):
             elif key in ['ontology_term']:
                 terms = attrs.get(key).split(',')
                 for term in terms:
-                    term_db, term_id = term.split(':')
-                    dbxref = Dbxref.objects.get(db=term_db,
-                                                accession=term_id)
                     try:
+                        aux_db, aux_term = term.split(':')
+                        term_db = Db.objects.get(name=aux_db)
+                        dbxref = Dbxref.objects.get(db=term_db,
+                                                    accession=aux_term)
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
                         FeatureCvterm.objects.create(feature=feature,
                                                      cvterm=cvterm,
@@ -115,7 +119,6 @@ class FeatureLoader(object):
                                                      rank=0)
                     except ObjectDoesNotExist:
                         self.ignored_goterms.add(term)
-
             elif key in ['dbxref']:
                 dbxrefs = attrs[key].split(',')
                 for dbxref in dbxrefs:
@@ -131,7 +134,7 @@ class FeatureLoader(object):
                                                  dbxref=dbxref,
                                                  is_current=1)
             elif key in ['alias']:
-                synonym = Synonym.objects.get_or_create(
+                synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
                     defaults={'type_id': cvterm_exact.cvterm_id,
                               'synonym_sgml': attrs.get(key)})
@@ -202,7 +205,7 @@ class FeatureLoader(object):
             phase = None
 
         # storing the feature location
-        Featureloc.objects.create(
+        Featureloc.objects.get_or_create(
             feature=feature,
             srcfeature_id=srcfeature.feature_id,
             fmin=tabix_feature.start,
@@ -220,7 +223,7 @@ class FeatureLoader(object):
 
         # storing the feature and parent ids
         if attrs.get('parent') is not None:
-            self.relationships.append((attrs['parent'], attrs['id']))
+            self.relationships.append((attrs['id'], attrs['parent']))
 
     def store_relationships(self):
         """Store the relationships."""
@@ -230,13 +233,18 @@ class FeatureLoader(object):
         # creating the feature relationships
         relationships = list()
         for item in self.relationships:
-            subject = Feature.objects.get(uniquename=item[0],
-                                          organism=self.organism)
-            object = Feature.objects.get(uniquename=item[1],
-                                         organism=self.organism)
-            relationships.append(FeatureRelationship(
-                subject_id=subject.feature_id,
-                object_id=object.feature_id,
-                type_id=part_of.cvterm_id,
-                rank=0))
+            try:
+                subject = Feature.objects.get(uniquename=item[0],
+                                              organism=self.organism)
+                object = Feature.objects.get(uniquename=item[1],
+                                             organism=self.organism)
+                relationships.append(FeatureRelationship(
+                    subject_id=subject.feature_id,
+                    object_id=object.feature_id,
+                    type_id=part_of.cvterm_id,
+                    rank=0))
+            except ObjectDoesNotExist as e:
+                print('Parent/Feature ({}/{}) not registered.'.format(item[0],
+                                                                      item[1]))
+
         FeatureRelationship.objects.bulk_create(relationships)

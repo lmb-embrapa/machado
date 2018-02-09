@@ -47,7 +47,7 @@ class Command(BaseCommand):
         filename = os.path.basename(options.get('fasta'))
         try:
             sequence_file = SequenceLoader(
-                file=filename,
+                filename=filename,
                 organism=options.get('organism'),
                 soterm=options.get('soterm'),
                 url=options.get('url'),
