@@ -16,7 +16,7 @@ import os
 class SequenceTest(TestCase):
     """Tests Loaders - Common."""
 
-    def test_store_sequence(self):
+    def test_store_biopython_seq_record(self):
         """Tests - __init__."""
         Organism.objects.create(genus='Mus', species='musculus')
         test_db = Db.objects.create(name='SO')
@@ -32,7 +32,7 @@ class SequenceTest(TestCase):
         test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
                                  id='chr1',
                                  description='chromosome 1')
-        test_seq_file.store_sequence(test_seq_obj)
+        test_seq_file.store_biopython_seq_record(test_seq_obj)
         test_feature = Feature.objects.get(uniquename='chr1')
         self.assertEqual('chromosome 1', test_feature.name)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
