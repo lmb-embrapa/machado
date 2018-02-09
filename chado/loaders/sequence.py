@@ -12,7 +12,7 @@ from hashlib import md5
 class SequenceLoader(object):
     """Sequence."""
 
-    def __init__(self, file, organism, soterm, *args, **kwargs):
+    def __init__(self, filename, organism, soterm, *args, **kwargs):
         """Invoke all validations."""
         # Retrieve organism object
         try:
@@ -22,7 +22,7 @@ class SequenceLoader(object):
 
         # Save DB file info
         try:
-            self.db = Db.objects.create(name=file,
+            self.db = Db.objects.create(name=filename,
                                         description=kwargs.get('description'),
                                         url=kwargs.get('url'))
         except IntegrityError as e:
@@ -32,8 +32,8 @@ class SequenceLoader(object):
         self.soterm = retrieve_ontology_term(ontology='sequence',
                                              term=soterm)
 
-    def store_sequence(self, seq_obj, ignore_residues=False):
-        """Store sequence."""
+    def store_biopython_seq_record(self, seq_obj, ignore_residues=False):
+        """Store Biopython SeqRecord."""
         dbxref, created = Dbxref.objects.get_or_create(
             db=self.db, accession=seq_obj.id,
             description='')
