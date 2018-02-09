@@ -38,6 +38,9 @@ class Command(BaseCommand):
         if options.get('verbosity'):
             verbosity = options.get('verbosity')
 
+        if verbosity > 0:
+            self.stdout.write('Preprocessing')
+
         Validator().validate(options.get('fasta'))
 
         # retrieve only the file name
@@ -57,10 +60,8 @@ class Command(BaseCommand):
         cpu = options.get('cpu')
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        if verbosity > 0:
-            self.stdout.write('Preprocessing')
         for fasta in fasta_sequences:
-            tasks.append(pool.submit(sequence_file.store_sequence,
+            tasks.append(pool.submit(sequence_file.store_biopython_seq_record,
                                      fasta,
                                      options.get('nosequence')))
         if verbosity > 0:
