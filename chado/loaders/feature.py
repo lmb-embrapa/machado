@@ -166,16 +166,20 @@ class FeatureLoader(object):
             db=self.db, accession=attrs['id'])
 
         # creating a new feature
-        feature, created = Feature.objects.get_or_create(
-            organism=self.organism,
-            uniquename=attrs.get('id'),
-            type_id=cvterm.cvterm_id,
-            defaults={'name': attrs.get('name'),
-                      'dbxref': dbxref,
-                      'is_analysis': False,
-                      'is_obsolete': False,
-                      'timeaccessioned': datetime.now(timezone.utc),
-                      'timelastmodified': datetime.now(timezone.utc)})
+        try:
+            feature = Feature.objects.create(
+                    organism=self.organism,
+                    uniquename=attrs.get('id'),
+                    type_id=cvterm.cvterm_id,
+                    name=attrs.get('name'),
+                    dbxref=dbxref,
+                    is_analysis=False,
+                    is_obsolete=False,
+                    timeaccessioned=datetime.now(timezone.utc),
+                    timelastmodified=datetime.now(timezone.utc))
+        except IntegrityError as e:
+            raise ImportingError(
+                    'ID {} already registered. {}'.format(attrs.get('id'), e))
 
         # retrieving the source feature
         try:
@@ -183,7 +187,7 @@ class FeatureLoader(object):
                 uniquename=tabix_feature.contig, organism=self.organism)
         except ObjectDoesNotExist:
             raise ImportingError(
-                "Parent not found: %s. It's recommended to load "
+                "Parent not found: %s. It's required to load "
                 "a reference FASTA file before loading features."
                 % (tabix_feature.contig))
 
@@ -205,18 +209,26 @@ class FeatureLoader(object):
             phase = None
 
         # storing the feature location
-        Featureloc.objects.get_or_create(
-            feature=feature,
-            srcfeature_id=srcfeature.feature_id,
-            fmin=tabix_feature.start,
-            is_fmin_partial=False,
-            fmax=tabix_feature.end,
-            is_fmax_partial=False,
-            strand=strand,
-            phase=phase,
-            locgroup=0,
-            rank=0,
-        )
+        try:
+            Featureloc.objects.get_or_create(
+                feature=feature,
+                srcfeature_id=srcfeature.feature_id,
+                fmin=tabix_feature.start,
+                is_fmin_partial=False,
+                fmax=tabix_feature.end,
+                is_fmax_partial=False,
+                strand=strand,
+                phase=phase,
+                locgroup=0,
+                rank=0)
+        except IntegrityError as e:
+            print(feature.uniquename,
+                  srcfeature.uniquename,
+                  tabix_feature.start,
+                  tabix_feature.end,
+                  strand,
+                  phase)
+            raise ImportingError(e)
 
         # adding attributes to featureprop
         self.process_attributes(feature, attrs)
