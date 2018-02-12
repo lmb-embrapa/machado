@@ -11,6 +11,7 @@ from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from chado.models import Feature, Featureprop, FeatureSynonym
 from chado.models import FeatureCvterm, FeatureDbxref
+from chado.models import Featureloc, FeatureRelationship
 from django.test import TestCase
 from datetime import datetime, timezone
 import obonet
@@ -123,6 +124,91 @@ class FeatureTest(TestCase):
         self.assertEqual('Feature1', test_synonym.synonym.name)
         # asserting ignored goterms
         self.assertEqual('GO:54321', test_feature_file.ignored_goterms.pop())
+
+    def test_store_tabix_feature(self):
+        """Tests - store tabix feature / store relationships."""
+        # creating exact term
+        test_db_global = Db.objects.create(name='_global')
+        test_dbxref = Dbxref.objects.create(accession='exact',
+                                            db=test_db_global)
+        test_cv = Cv.objects.create(name='synonym_type')
+        Cvterm.objects.create(
+            name='exact', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # creating part_of term
+        test_dbxref = Dbxref.objects.create(accession='part_of',
+                                            db=test_db_global)
+        test_cv = Cv.objects.create(name='sequence')
+        Cvterm.objects.create(
+            name='part_of', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # create SO terms: assembly, gene, and exon
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
+        test_cvterm_assembly = Cvterm.objects.create(
+                name='assembly', cv=test_cv, dbxref=test_dbxref,
+                is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        Cvterm.objects.create(name='gene', cv=test_cv, dbxref=test_dbxref,
+                              is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='00003', db=test_db)
+        Cvterm.objects.create(name='exon', cv=test_cv, dbxref=test_dbxref,
+                              is_obsolete=0, is_relationshiptype=0)
+        # create an organism
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+        # create a srcfeature
+        test_db = Db.objects.create(name='test_db')
+        test_dbxref = Dbxref.objects.create(
+                accession='test_dbxref', db=test_db)
+        Feature.objects.create(
+                dbxref=test_dbxref, organism=test_organism, name='contig1',
+                type=test_cvterm_assembly, uniquename='contig1',
+                is_analysis=False, is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc))
+
+        # create a tabix feature
+        class TabixFeature(object):
+            """mock tabix feature."""
+
+        test_tabix_feature1 = TabixFeature()
+        test_tabix_feature1.contig = 'contig1'
+        test_tabix_feature1.feature = 'gene'
+        test_tabix_feature1.start = '10'
+        test_tabix_feature1.end = '100'
+        test_tabix_feature1.strand = '+'
+        test_tabix_feature1.frame = '1'
+        test_tabix_feature1.attributes = 'id=id1;name=name1'
+
+        test_tabix_feature2 = TabixFeature()
+        test_tabix_feature2.contig = 'contig1'
+        test_tabix_feature2.feature = 'exon'
+        test_tabix_feature2.start = '10'
+        test_tabix_feature2.end = '100'
+        test_tabix_feature2.strand = '-'
+        test_tabix_feature2.frame = '2'
+        test_tabix_feature2.attributes = 'id=id2;name=name2;parent=id1'
+
+        # instantiate the loader
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism='Mus musculus')
+        # store the tabix feature
+        test_feature_file.store_tabix_feature(test_tabix_feature1)
+        test_feature_file.store_tabix_feature(test_tabix_feature2)
+
+        # store the relationships
+        test_feature_file.store_relationships()
+
+        test_feature = Feature.objects.get(uniquename='id2')
+        test_featureloc = Featureloc.objects.get(feature=test_feature)
+        test_feature_relationship = FeatureRelationship.objects.get(
+                object=test_feature.feature_id)
+        test_src_feature = Feature.objects.get(
+                feature_id=test_feature_relationship.subject.feature_id)
+        self.assertEqual('name2', test_feature.name)
+        self.assertEqual(10, test_featureloc.fmin)
+        self.assertEqual('id1', test_src_feature.uniquename)
 
 
 class OntologyTest(TestCase):

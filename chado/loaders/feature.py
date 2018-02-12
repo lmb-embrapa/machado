@@ -83,7 +83,10 @@ class FeatureLoader(object):
             attrs: type dict
         """
         # retrieving the cvterm 'exact'
-        cvterm_exact = retrieve_ontology_term('synonym_type', 'exact')
+        try:
+            cvterm_exact = retrieve_ontology_term('synonym_type', 'exact')
+        except ObjectDoesNotExist as e:
+            raise ImportingError(e)
 
         # Don't forget to add the attribute to the constant VALID_ATTRS
         for key in attrs:
@@ -252,10 +255,10 @@ class FeatureLoader(object):
         relationships = list()
         for item in self.relationships:
             try:
-                subject = Feature.objects.get(uniquename=item[0],
-                                              organism=self.organism)
-                object = Feature.objects.get(uniquename=item[1],
+                object = Feature.objects.get(uniquename=item[0],
                                              organism=self.organism)
+                subject = Feature.objects.get(uniquename=item[1],
+                                              organism=self.organism)
                 relationships.append(FeatureRelationship(
                     subject_id=subject.feature_id,
                     object_id=object.feature_id,
