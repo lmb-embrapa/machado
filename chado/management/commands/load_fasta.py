@@ -41,7 +41,10 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Preprocessing')
 
-        Validator().validate(options.get('fasta'))
+        try:
+            Validator().validate(options.get('gff'))
+        except ImportingError as e:
+            raise CommandError(e)
 
         # retrieve only the file name
         filename = os.path.basename(options.get('fasta'))

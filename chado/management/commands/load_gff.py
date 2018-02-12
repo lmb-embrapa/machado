@@ -41,47 +41,48 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Preprocessing')
 
-        Validator().validate(options.get('gff'))
-
-        # retrieve only the file name
-        filename = os.path.basename(options.get('gff'))
         try:
-            feature_file = FeatureLoader(
-                filename=filename,
-                organism=options.get('organism'),
-                url=options.get('url'),
-                description=options.get('description'))
-
-            cpu = options.get('cpu')
-            pool = ThreadPoolExecutor(max_workers=cpu)
-            tasks = list()
-
-            # Load the GFF3 file
-            with open(options['gff']) as tbx_file:
-                # print(str(tbx_file.name))
-                tbx = pysam.TabixFile(tbx_file.name)
-                for row in tbx.fetch(parser=pysam.asGTF()):
-                    tasks.append(pool.submit(
-                        feature_file.store_tabix_feature, row))
-
-            if verbosity > 0:
-                self.stdout.write('Loading features')
-            for task in tqdm(as_completed(tasks), total=len(tasks)):
-                if task.result():
-                    raise(task.result())
-
+            Validator().validate(options.get('gff'))
         except ImportingError as e:
             raise CommandError(e)
 
-        finally:
-            if verbosity > 0:
-                self.stdout.write('Loading relationships')
+        # retrieve only the file name
+        filename = os.path.basename(options.get('gff'))
 
-            feature_file.store_relationships()
+        feature_file = FeatureLoader(
+            filename=filename,
+            organism=options.get('organism'),
+            url=options.get('url'),
+            description=options.get('description'))
 
-            if feature_file.ignored_attrs is not None:
-                self.stdout.write(
-                    self.style.WARNING('Ignored attrs: {}'.format(
-                        feature_file.ignored_attrs)))
+        cpu = options.get('cpu')
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        tasks = list()
+
+        # Load the GFF3 file
+        with open(options['gff']) as tbx_file:
+            # print(str(tbx_file.name))
+            tbx = pysam.TabixFile(tbx_file.name)
+            for row in tbx.fetch(parser=pysam.asGTF()):
+                tasks.append(pool.submit(
+                    feature_file.store_tabix_feature, row))
+
+        if verbosity > 0:
+            self.stdout.write('Loading features')
+        for task in tqdm(as_completed(tasks), total=len(tasks)):
+            try:
+                task.result()
+            except ImportingError as e:
+                raise CommandError(e)
+
+        if verbosity > 0:
+            self.stdout.write('Loading relationships')
+
+        feature_file.store_relationships()
+
+        if feature_file.ignored_attrs is not None:
+            self.stdout.write(
+                self.style.WARNING('Ignored attrs: {}'.format(
+                    feature_file.ignored_attrs)))
 
         self.stdout.write(self.style.SUCCESS('Done'))

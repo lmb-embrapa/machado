@@ -12,8 +12,11 @@ from django.db.utils import IntegrityError
 from time import time
 from urllib.parse import unquote
 
+# The following features are handled in a specific manner and should not
+# be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
-               'gene', 'id', 'name', 'orf_classification']
+               'gene', 'orf_classification', 'ncrna_class', 'pseudo',
+               'product', 'is_circular', 'gene_synonym', 'partial']
 
 
 class FeatureLoader(object):
@@ -84,26 +87,10 @@ class FeatureLoader(object):
 
         # Don't forget to add the attribute to the constant VALID_ATTRS
         for key in attrs:
-            if key in ['id', 'name', 'parent']:
+            if key not in VALID_ATTRS:
                 continue
-            elif key in ['note', 'display', 'gene', 'orf_classification']:
-                # Store in featureprop
-                note_dbxref, created = Dbxref.objects.get_or_create(
-                    db=self.db_null, accession=key)
-                cv_feature_property, created = Cv.objects.get_or_create(
-                    name='feature_property')
-                note_cvterm, created = Cvterm.objects.get_or_create(
-                    cv=cv_feature_property,
-                    name=key,
-                    dbxref=note_dbxref,
-                    defaults={'definition': '',
-                              'is_relationshiptype': 0,
-                              'is_obsolete': 0})
-                Featureprop.objects.create(feature=feature,
-                                           type_id=note_cvterm.cvterm_id,
-                                           value=attrs.get(key),
-                                           rank=0)
             elif key in ['ontology_term']:
+                # store in featurecvterm
                 terms = attrs.get(key).split(',')
                 for term in terms:
                     try:
@@ -134,6 +121,7 @@ class FeatureLoader(object):
                                                  dbxref=dbxref,
                                                  is_current=1)
             elif key in ['alias']:
+                # Store in featuresynonym
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
                     defaults={'type_id': cvterm_exact.cvterm_id,
@@ -143,6 +131,24 @@ class FeatureLoader(object):
                                               pub=self.pub,
                                               is_current=True,
                                               is_internal=False)
+            else:
+                # Store in featureprop
+                note_dbxref, created = Dbxref.objects.get_or_create(
+                    db=self.db_null, accession=key)
+                cv_feature_property, created = Cv.objects.get_or_create(
+                    name='feature_property')
+                note_cvterm, created = Cvterm.objects.get_or_create(
+                    cv=cv_feature_property,
+                    name=key,
+                    dbxref=note_dbxref,
+                    defaults={'definition': '',
+                              'is_relationshiptype': 0,
+                              'is_obsolete': 0})
+                Featureprop.objects.create(feature=feature,
+                                           type_id=note_cvterm.cvterm_id,
+                                           value=attrs.get(key),
+                                           rank=0)
+
         return
 
     def store_tabix_feature(self, tabix_feature):
@@ -150,7 +156,7 @@ class FeatureLoader(object):
         # populate tables related to GFF
         attrs = self.get_attributes(tabix_feature.attributes)
         for key in attrs:
-            if key not in VALID_ATTRS:
+            if key not in VALID_ATTRS and key not in ['id', 'name', 'parent']:
                 self.ignored_attrs.add(key)
 
         # Retrieve sequence ontology object
@@ -166,16 +172,20 @@ class FeatureLoader(object):
             db=self.db, accession=attrs['id'])
 
         # creating a new feature
-        feature, created = Feature.objects.get_or_create(
-            organism=self.organism,
-            uniquename=attrs.get('id'),
-            type_id=cvterm.cvterm_id,
-            defaults={'name': attrs.get('name'),
-                      'dbxref': dbxref,
-                      'is_analysis': False,
-                      'is_obsolete': False,
-                      'timeaccessioned': datetime.now(timezone.utc),
-                      'timelastmodified': datetime.now(timezone.utc)})
+        try:
+            feature = Feature.objects.create(
+                    organism=self.organism,
+                    uniquename=attrs.get('id'),
+                    type_id=cvterm.cvterm_id,
+                    name=attrs.get('name'),
+                    dbxref=dbxref,
+                    is_analysis=False,
+                    is_obsolete=False,
+                    timeaccessioned=datetime.now(timezone.utc),
+                    timelastmodified=datetime.now(timezone.utc))
+        except IntegrityError as e:
+            raise ImportingError(
+                    'ID {} already registered. {}'.format(attrs.get('id'), e))
 
         # retrieving the source feature
         try:
@@ -183,7 +193,7 @@ class FeatureLoader(object):
                 uniquename=tabix_feature.contig, organism=self.organism)
         except ObjectDoesNotExist:
             raise ImportingError(
-                "Parent not found: %s. It's recommended to load "
+                "Parent not found: %s. It's required to load "
                 "a reference FASTA file before loading features."
                 % (tabix_feature.contig))
 
@@ -205,18 +215,26 @@ class FeatureLoader(object):
             phase = None
 
         # storing the feature location
-        Featureloc.objects.get_or_create(
-            feature=feature,
-            srcfeature_id=srcfeature.feature_id,
-            fmin=tabix_feature.start,
-            is_fmin_partial=False,
-            fmax=tabix_feature.end,
-            is_fmax_partial=False,
-            strand=strand,
-            phase=phase,
-            locgroup=0,
-            rank=0,
-        )
+        try:
+            Featureloc.objects.get_or_create(
+                feature=feature,
+                srcfeature_id=srcfeature.feature_id,
+                fmin=tabix_feature.start,
+                is_fmin_partial=False,
+                fmax=tabix_feature.end,
+                is_fmax_partial=False,
+                strand=strand,
+                phase=phase,
+                locgroup=0,
+                rank=0)
+        except IntegrityError as e:
+            print(feature.uniquename,
+                  srcfeature.uniquename,
+                  tabix_feature.start,
+                  tabix_feature.end,
+                  strand,
+                  phase)
+            raise ImportingError(e)
 
         # adding attributes to featureprop
         self.process_attributes(feature, attrs)

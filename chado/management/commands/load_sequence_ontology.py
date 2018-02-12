@@ -1,8 +1,9 @@
 """Load Sequence Ontology."""
 
 from chado.loaders.common import Validator
+from chado.loaders.exceptions import ImportingError
 from chado.loaders.ontology import OntologyLoader
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import obonet
 
@@ -27,7 +28,10 @@ class Command(BaseCommand):
 
         file = options.get('so')
 
-        Validator().validate(file)
+        try:
+            Validator().validate(options.get('gff'))
+        except ImportingError as e:
+            raise CommandError(e)
 
         # Load the ontology file
         with open(file) as obo_file:
