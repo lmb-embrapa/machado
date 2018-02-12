@@ -106,24 +106,6 @@ class FeatureTest(TestCase):
         test_prop = Featureprop.objects.get(
             feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
         self.assertEqual('Test feature', test_prop.value)
-        # asserting display
-        test_prop_cvterm = Cvterm.objects.get(
-            name='display', cv=cv_feature_property)
-        test_prop = Featureprop.objects.get(
-            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
-        self.assertEqual('feat1', test_prop.value)
-        # asserting gene
-        test_prop_cvterm = Cvterm.objects.get(
-            name='gene', cv=cv_feature_property)
-        test_prop = Featureprop.objects.get(
-            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
-        self.assertEqual('gene1', test_prop.value)
-        # asserting orf_classification
-        test_prop_cvterm = Cvterm.objects.get(
-            name='orf_classification', cv=cv_feature_property)
-        test_prop = Featureprop.objects.get(
-            feature=test_feature, type_id=test_prop_cvterm.cvterm_id, rank=0)
-        self.assertEqual('1', test_prop.value)
         # asserting ontology_term
         test_feat_cvterm = FeatureCvterm.objects.get(feature=test_feature)
         test_cvterm = Cvterm.objects.get(cvterm_id=test_feat_cvterm.cvterm_id)
