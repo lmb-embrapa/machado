@@ -33,7 +33,10 @@ class Command(BaseCommand):
         if options.get('verbosity'):
             verbosity = options.get('verbosity')
 
-        Validator().validate(file)
+        try:
+            Validator().validate(options.get('gff'))
+        except ImportingError as e:
+            raise CommandError(e)
 
         # Load the ontology file
         with open(file) as obo_file:
