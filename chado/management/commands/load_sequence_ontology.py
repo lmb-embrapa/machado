@@ -29,7 +29,7 @@ class Command(BaseCommand):
         file = options.get('so')
 
         try:
-            Validator().validate(options.get('gff'))
+            Validator().validate(options.get('so'))
         except ImportingError as e:
             raise CommandError(e)
 

@@ -42,7 +42,7 @@ class Command(BaseCommand):
             self.stdout.write('Preprocessing')
 
         try:
-            Validator().validate(options.get('gff'))
+            Validator().validate(options.get('fasta'))
         except ImportingError as e:
             raise CommandError(e)
 

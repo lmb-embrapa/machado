@@ -27,7 +27,7 @@ class Command(BaseCommand):
             verbosity = options.get('verbosity')
 
         try:
-            Validator().validate(options.get('gff'))
+            Validator().validate(options.get('ro'))
         except ImportingError as e:
             raise CommandError(e)
 
