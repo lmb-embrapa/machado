@@ -10,10 +10,10 @@ from hashlib import md5
 
 
 class SequenceLoader(object):
-    """Sequence."""
+    """Load sequence records."""
 
     def __init__(self, filename, organism, soterm, *args, **kwargs):
-        """Invoke all validations."""
+        """Execute the init function."""
         # Retrieve organism object
         try:
             self.organism = retrieve_organism(organism)

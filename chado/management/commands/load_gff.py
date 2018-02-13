@@ -49,11 +49,14 @@ class Command(BaseCommand):
         # retrieve only the file name
         filename = os.path.basename(options.get('gff'))
 
-        feature_file = FeatureLoader(
-            filename=filename,
-            organism=options.get('organism'),
-            url=options.get('url'),
-            description=options.get('description'))
+        try:
+            feature_file = FeatureLoader(
+                filename=filename,
+                organism=options.get('organism'),
+                url=options.get('url'),
+                description=options.get('description'))
+        except ImportingError as e:
+            raise CommandError(e)
 
         cpu = options.get('cpu')
         pool = ThreadPoolExecutor(max_workers=cpu)

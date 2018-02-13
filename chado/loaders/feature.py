@@ -1,4 +1,4 @@
-"""Load GFF file."""
+"""Load feture file."""
 
 from chado.models import Cv, Db, Cvterm, Dbxref
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
@@ -20,12 +20,12 @@ VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
 
 
 class FeatureLoader(object):
-    """Load feature file."""
+    """Load feature records."""
 
-    help = 'Load GFF3 file indexed with tabix.'
+    help = 'Load feature records.'
 
     def __init__(self, filename, organism, *args, **kwargs):
-        """Execute the main function."""
+        """Execute the init function."""
         # Retrieve organism object
         try:
             self.organism = retrieve_organism(organism)
