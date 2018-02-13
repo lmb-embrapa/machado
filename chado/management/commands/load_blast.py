@@ -6,6 +6,7 @@ from chado.loaders.exceptions import ImportingError
 from chado.loaders.similarity import SimilarityLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
+import os
 from tqdm import tqdm
 
 
@@ -18,14 +19,12 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--blast", help="BLAST File", required=True,
                             type=str)
-        parser.add_argument("--program", help="Program name", required=True,
+        parser.add_argument("--program", help="Program", required=True,
                             type=str)
         parser.add_argument("--programversion", help="Program version",
                             required=True, type=str)
         parser.add_argument("--description", help="Description",
                             required=False, type=str)
-        parser.add_argument("--name", help="Analysis name", required=True,
-                            type=str)
         parser.add_argument("--algorithm", help="Algorithm",
                             required=False, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
@@ -45,12 +44,13 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
-        # retrieve only the file name
+        filename = os.path.basename(options.get('blast'))
+
         try:
             blast_file = SimilarityLoader(
+                    filename=filename,
                     algorithm=options.get('algorithm'),
                     description=options.get('description'),
-                    name=options.get('name'),
                     program=options.get('program'),
                     programversion=options.get('programversion'))
         except ImportingError as e:
@@ -63,7 +63,7 @@ class Command(BaseCommand):
         tasks = list()
         for record in blast_records:
             if len(record.alignments) > 0:
-                tasks.append(pool.submit(blast_file.store_ncbixml_record,
+                tasks.append(pool.submit(blast_file.store_bio_blast_record,
                                          record))
         if verbosity > 0:
             self.stdout.write('Loading')

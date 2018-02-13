@@ -12,13 +12,13 @@ class SimilarityLoader(object):
 
     help = 'Load simlarity records.'
 
-    def __init__(self, program, programversion, *args, **kwargs):
+    def __init__(self, filename, program, programversion, *args, **kwargs):
         """Execute the init function."""
         try:
             self.analysis = Analysis.objects.create(
                     algorithm=kwargs.get('algorithm'),
                     description=kwargs.get('description'),
-                    name=kwargs.get('name'),
+                    name=filename,
                     program=program,
                     programversion=programversion,
                     timeexecuted=datetime.now(timezone.utc))
@@ -36,8 +36,8 @@ class SimilarityLoader(object):
                 pass
         return None
 
-    def store_ncbixml_record(self, record):
-        """Store ncbixml record."""
+    def store_bio_blast_record(self, record):
+        """Store bio_blast_record record."""
         try:
             query_id = record.query.split(' ')[0]
             query_feature = Feature.objects.get(uniquename=query_id)

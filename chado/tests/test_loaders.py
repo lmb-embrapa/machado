@@ -7,6 +7,8 @@ from chado.loaders.common import retrieve_ontology_term
 from chado.loaders.feature import FeatureLoader
 from chado.loaders.ontology import OntologyLoader
 from chado.loaders.sequence import SequenceLoader
+from chado.loaders.similarity import SimilarityLoader
+from chado.models import Analysis, Analysisfeature
 from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from chado.models import Feature, Featureprop, FeatureSynonym
@@ -18,11 +20,100 @@ import obonet
 import os
 
 
+class SimilarityTest(TestCase):
+    """Tests Loaders - SequenceLoader."""
+
+    def test_store_bio_blast_record(self):
+        """Tests - __init__ and store_bio_blast_record."""
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+        # creating test SO term
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        test_so_term = Cvterm.objects.create(
+            name='gene', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        # creating test features
+        Feature.objects.create(
+            organism=test_organism, uniquename='feat1', is_analysis=False,
+            type_id=test_so_term.cvterm_id, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
+            organism=test_organism, uniquename='feat2', is_analysis=False,
+            type_id=test_so_term.cvterm_id, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+
+        # create a Bio.Blast.Record.Blast
+        class BlastRecord(object):
+            """mock Blast Record."""
+
+        # create a Bio.Blast.Record.Alignment
+        class BlastAlignment(object):
+            """mock Alignment Record."""
+
+        # create a Bio.Blast.Record.HSP
+        class BlastHSP(object):
+            """mock HSP Record."""
+
+        test_HSP1 = BlastHSP()
+        test_HSP1.identities = 98.0
+        test_HSP1.score = 1234
+        test_HSP1.expect = 0.0
+        test_HSP1.sbjct_start = 100
+        test_HSP1.sbjct_end = 1000
+        test_HSP2 = BlastHSP()
+        test_HSP2.identities = 98.2
+        test_HSP2.score = 2234
+        test_HSP2.expect = 0.00000001
+        test_HSP2.sbjct_start = 200
+        test_HSP2.sbjct_end = 2000
+
+        test_alignment1 = BlastAlignment()
+        test_alignment1.title = 'feat2.RNA ID=feat2'
+        test_alignment1.hsps = list()
+        test_alignment1.hsps.append(test_HSP1)
+        test_alignment1.hsps.append(test_HSP2)
+        test_alignment2 = BlastAlignment()
+        test_alignment2.title = 'feat2.RNA ID=feat2'
+        test_alignment2.hsps = list()
+        test_alignment2.hsps.append(test_HSP1)
+        test_alignment2.hsps.append(test_HSP2)
+
+        test_record = BlastRecord()
+        test_record.query = 'feat1 ID=feat1 moltype=DNA'
+        test_record.alignments = list()
+        test_record.alignments.append(test_alignment1)
+        test_record.alignments.append(test_alignment2)
+
+        test_blast_file = SimilarityLoader(
+                filename='similarity.file',
+                algorithm='smith-waterman',
+                description='command-line example',
+                program='blastn',
+                programversion='2.2.31+')
+
+        test_blast_file.store_bio_blast_record(test_record)
+
+        test_analysis = Analysis.objects.get(name='similarity.file')
+        self.assertEqual('blastn', test_analysis.program)
+
+        test_analysisfeature = Analysisfeature.objects.get(
+                analysis=test_analysis)
+        self.assertEqual(1234, test_analysisfeature.rawscore)
+
+        test_featureloc = Featureloc.objects.get(
+                locgroup=test_analysis.analysis_id)
+        self.assertEqual(100, test_featureloc.fmin)
+
+
 class SequenceTest(TestCase):
     """Tests Loaders - SequenceLoader."""
 
     def test_store_biopython_seq_record(self):
-        """Tests - __init__."""
+        """Tests - __init__ and store_biopython_seq_record."""
         Organism.objects.create(genus='Mus', species='musculus')
         test_db = Db.objects.create(name='SO')
         test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
