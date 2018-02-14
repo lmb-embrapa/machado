@@ -6,6 +6,7 @@ from chado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from time import time
 
 
 class SimilarityLoader(object):
@@ -21,6 +22,8 @@ class SimilarityLoader(object):
                     ontology='sequence', term=so_query)
             self.so_term_subject = retrieve_ontology_term(
                     ontology='sequence', term=so_subject)
+            self.so_term_match_part = retrieve_ontology_term(
+                    ontology='sequence', term='match_part')
             self.analysis = Analysis.objects.create(
                     algorithm=kwargs.get('algorithm'),
                     name=kwargs.get('name'),
@@ -45,6 +48,44 @@ class SimilarityLoader(object):
                 pass
         return None
 
+    def store_bio_blast_hsp(self, query_feature, subject_feature, hsp):
+        """Store bio_blast_hsp record."""
+        # set id = auto# for match_part features
+        match_part_id = 'match_part_{}{}{}'.format(
+            str(time()), query_feature.feature_id, subject_feature.feature_id)
+
+        match_part_feature = Feature.objects.create(
+                organism=query_feature.organism,
+                uniquename=match_part_id,
+                type_id=self.so_term_match_part.cvterm_id,
+                is_analysis=True,
+                is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc))
+
+        Analysisfeature.objects.create(analysis=self.analysis,
+                                       feature=match_part_feature,
+                                       identity=hsp.identities,
+                                       rawscore=hsp.score,
+                                       significance=hsp.expect)
+
+        Featureloc.objects.create(feature=match_part_feature,
+                                  srcfeature=query_feature,
+                                  fmax=hsp.query_end,
+                                  fmin=hsp.query_start,
+                                  is_fmax_partial=False,
+                                  is_fmin_partial=False,
+                                  locgroup=0,
+                                  rank=0)
+        Featureloc.objects.create(feature=match_part_feature,
+                                  srcfeature=subject_feature,
+                                  fmax=hsp.sbjct_end,
+                                  fmin=hsp.sbjct_start,
+                                  is_fmax_partial=False,
+                                  is_fmin_partial=False,
+                                  locgroup=0,
+                                  rank=1)
+
     def store_bio_blast_record(self, record):
         """Store bio_blast_record record."""
         try:
@@ -59,40 +100,20 @@ class SimilarityLoader(object):
             except ObjectDoesNotExist as e2:
                 raise ImportingError(e1, e2)
 
-        # Retrieve only the first alignment since the model does not allow to
-        # store more then one alignment per feature per analysis
-        alignment = record.alignments[0]
-
-        try:
-            subject_id = alignment.title.split(' ')[0]
-            subject_feature = Feature.objects.get(
-                    uniquename=subject_id, type=self.so_term_subject)
-        except ObjectDoesNotExist as e1:
+        for alignment in record.alignments:
             try:
-                subject_id = self.retrieve_id_from_description(alignment.title)
+                subject_id = alignment.title.split(' ')[0]
                 subject_feature = Feature.objects.get(
                         uniquename=subject_id, type=self.so_term_subject)
-            except ObjectDoesNotExist as e2:
-                raise ImportingError(e1, e2)
+            except ObjectDoesNotExist as e1:
+                try:
+                    subject_id = self.retrieve_id_from_description(
+                        alignment.title)
+                    subject_feature = Feature.objects.get(
+                            uniquename=subject_id, type=self.so_term_subject)
+                except ObjectDoesNotExist as e2:
+                    raise ImportingError(e1, e2)
 
-        # Retrieve only the first HSP since the model does not allow to store
-        # more then one alignment per feature per analysis
-        hsp = alignment.hsps[0]
-
-        Analysisfeature.objects.create(analysis=self.analysis,
-                                       feature=query_feature,
-                                       identity=hsp.identities,
-                                       rawscore=hsp.score,
-                                       significance=hsp.expect)
-
-        # Storing self.analysis.analysisfeature_id in locgroup in order to
-        # comply to the Featureloc constraint (feature, locgroup, rank) and to
-        # be able to track these records when erasing an analysis
-        Featureloc.objects.create(feature=query_feature,
-                                  srcfeature=subject_feature,
-                                  fmax=hsp.sbjct_end,
-                                  fmin=hsp.sbjct_start,
-                                  is_fmax_partial=False,
-                                  is_fmin_partial=False,
-                                  locgroup=self.analysis.analysis_id,
-                                  rank=0)
+            for hsp in alignment.hsps:
+                self.store_bio_blast_hsp(
+                    query_feature, subject_feature, hsp)

@@ -36,7 +36,7 @@ class SimilarityTest(TestCase):
             is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         test_aa_term = Cvterm.objects.create(
-            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
         # creating test features
         Feature.objects.create(
@@ -150,7 +150,7 @@ class FeatureTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
         test_cv = Cv.objects.create(name='sequence')
         Cvterm.objects.create(
-            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
 
         Organism.objects.create(genus='Mus', species='musculus')
@@ -180,7 +180,7 @@ class FeatureTest(TestCase):
             is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
         test_so_term = Cvterm.objects.create(
-            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
 
         # creating test feature
@@ -264,7 +264,7 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='exon', cv=test_cv, dbxref=test_dbxref,
                               is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='00004', db=test_db)
-        Cvterm.objects.create(name='amino_acid', cv=test_cv,
+        Cvterm.objects.create(name='polypeptide', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
         # create an organism

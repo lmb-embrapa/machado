@@ -56,7 +56,7 @@ class FeatureLoader(object):
             is_obsolete=False)
 
         self.aa_cvterm = retrieve_ontology_term(ontology='sequence',
-                                                term='amino_acid')
+                                                term='polypeptide')
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
         self.ignored_attrs = set()
