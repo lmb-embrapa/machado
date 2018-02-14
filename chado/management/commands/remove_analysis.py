@@ -20,7 +20,7 @@ class Command(BaseCommand):
             self.stdout.write('Deleting %s and every child record (CASCADE)'
                               % (options['name']))
 
-            analysis = Analysis.objects.get(name=options['name'])
+            analysis = Analysis.objects.get(sourcename=options['name'])
             Analysisfeature.objects.filter(analysis=analysis).delete()
             Featureloc.objects.filter(locgroup=analysis.analysis_id).delete()
             analysis.delete()
