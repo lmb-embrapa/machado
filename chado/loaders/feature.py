@@ -254,11 +254,11 @@ class FeatureLoader(object):
         part_of = retrieve_ontology_term(ontology='sequence',
                                          term='part_of')
         relationships = list()
+        features = Feature.objects.exclude(type=self.aa_cvterm)
         for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
-                features = Feature.objects.exclude(type=self.aa_cvterm)
                 object = features.get(uniquename=item['object_id'],
                                       organism=self.organism)
                 subject = features.get(uniquename=item['subject_id'],
