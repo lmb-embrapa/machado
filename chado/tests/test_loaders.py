@@ -31,18 +31,22 @@ class SimilarityTest(TestCase):
         test_db = Db.objects.create(name='SO')
         test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
         test_cv = Cv.objects.create(name='sequence')
-        test_so_term = Cvterm.objects.create(
+        test_gene_term = Cvterm.objects.create(
             name='gene', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
+        test_aa_term = Cvterm.objects.create(
+            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
         # creating test features
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
-            type_id=test_so_term.cvterm_id, is_obsolete=False,
+            type_id=test_gene_term.cvterm_id, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
         Feature.objects.create(
             organism=test_organism, uniquename='feat2', is_analysis=False,
-            type_id=test_so_term.cvterm_id, is_obsolete=False,
+            type_id=test_aa_term.cvterm_id, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
 
@@ -72,7 +76,7 @@ class SimilarityTest(TestCase):
         test_HSP2.sbjct_end = 2000
 
         test_alignment1 = BlastAlignment()
-        test_alignment1.title = 'feat2.RNA ID=feat2'
+        test_alignment1.title = 'feat1.RNA ID=feat1'
         test_alignment1.hsps = list()
         test_alignment1.hsps.append(test_HSP1)
         test_alignment1.hsps.append(test_HSP2)
@@ -93,11 +97,13 @@ class SimilarityTest(TestCase):
                 algorithm='smith-waterman',
                 description='command-line example',
                 program='blastn',
-                programversion='2.2.31+')
+                programversion='2.2.31+',
+                so_query='gene',
+                so_subject='gene')
 
         test_blast_file.store_bio_blast_record(test_record)
 
-        test_analysis = Analysis.objects.get(name='similarity.file')
+        test_analysis = Analysis.objects.get(sourcename='similarity.file')
         self.assertEqual('blastn', test_analysis.program)
 
         test_analysisfeature = Analysisfeature.objects.get(
@@ -140,6 +146,13 @@ class FeatureTest(TestCase):
 
     def test_get_attributes(self):
         """Tests - get attributes."""
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        Cvterm.objects.create(
+            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
         Organism.objects.create(genus='Mus', species='musculus')
         test_feature_file = FeatureLoader(filename='file.name',
                                           organism='Mus musculus')
@@ -165,6 +178,11 @@ class FeatureTest(TestCase):
         test_so_term = Cvterm.objects.create(
             name='gene', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
+        test_so_term = Cvterm.objects.create(
+            name='amino_acid', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
         # creating test feature
         test_feature = Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
@@ -245,6 +263,10 @@ class FeatureTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession='00003', db=test_db)
         Cvterm.objects.create(name='exon', cv=test_cv, dbxref=test_dbxref,
                               is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='00004', db=test_db)
+        Cvterm.objects.create(name='amino_acid', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
         # create an organism
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
