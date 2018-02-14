@@ -19,10 +19,18 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--blast", help="BLAST File", required=True,
                             type=str)
+        parser.add_argument("--so_query", help="Query Sequence Ontology term. "
+                            "eg. assembly, mRNA, CDS, amino_acid",
+                            required=True, type=str)
+        parser.add_argument("--so_subject", help="Subject Sequence Ontology "
+                            "term. eg. assembly, mRNA, CDS, amino_acid",
+                            required=True, type=str)
         parser.add_argument("--program", help="Program", required=True,
                             type=str)
         parser.add_argument("--programversion", help="Program version",
                             required=True, type=str)
+        parser.add_argument("--name", help="Name",
+                            required=False, type=str)
         parser.add_argument("--description", help="Description",
                             required=False, type=str)
         parser.add_argument("--algorithm", help="Algorithm",
@@ -49,14 +57,20 @@ class Command(BaseCommand):
         try:
             blast_file = SimilarityLoader(
                     filename=filename,
+                    so_query=options.get('so_query'),
+                    so_subject=options.get('so_subject'),
                     algorithm=options.get('algorithm'),
+                    name=options.get('name'),
                     description=options.get('description'),
                     program=options.get('program'),
                     programversion=options.get('programversion'))
         except ImportingError as e:
             raise CommandError(e)
 
-        blast_records = NCBIXML.parse(open(options.get('blast')))
+        try:
+            blast_records = NCBIXML.parse(open(options.get('blast')))
+        except ValueError as e:
+            return CommandError(e)
 
         cpu = options.get('cpu')
         pool = ThreadPoolExecutor(max_workers=cpu)
