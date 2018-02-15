@@ -24,9 +24,6 @@ class Command(BaseCommand):
         parser.add_argument("--soterm", help="SO Sequence Ontology Term (eg. "
                             "chromosome, supercontig)", required=True,
                             type=str)
-        parser.add_argument("--description", help="DB Description",
-                            required=False, type=str)
-        parser.add_argument("--url", help="DB URL", required=False, type=str)
         parser.add_argument("--nosequence", help="Don't load the sequence",
                             required=False, action='store_true')
         parser.add_argument("--cpu", help="Number of threads", default=1,
@@ -51,6 +48,7 @@ class Command(BaseCommand):
         try:
             sequence_file = SequenceLoader(
                 filename=filename,
+                source='FASTA_source',
                 organism=options.get('organism'),
                 soterm=options.get('soterm'),
                 url=options.get('url'),

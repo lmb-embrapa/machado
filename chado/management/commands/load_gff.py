@@ -26,9 +26,6 @@ class Command(BaseCommand):
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
-        parser.add_argument("--description", help="DB Description",
-                            required=False, type=str)
-        parser.add_argument("--url", help="DB URL", required=False, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
@@ -52,6 +49,7 @@ class Command(BaseCommand):
         try:
             feature_file = FeatureLoader(
                 filename=filename,
+                source='GFF_source',
                 organism=options.get('organism'),
                 url=options.get('url'),
                 description=options.get('description'))

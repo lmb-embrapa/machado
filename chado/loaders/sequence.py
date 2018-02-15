@@ -2,7 +2,7 @@
 
 from chado.loaders.common import retrieve_organism, retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
-from chado.models import Db, Dbxref, Feature
+from chado.models import Db, Dbxref, Dbxrefprop, Feature
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -12,7 +12,7 @@ from hashlib import md5
 class SequenceLoader(object):
     """Load sequence records."""
 
-    def __init__(self, filename, organism, soterm, *args, **kwargs):
+    def __init__(self, source, filename, organism, soterm, *args, **kwargs):
         """Execute the init function."""
         # Retrieve organism object
         try:
@@ -22,23 +22,25 @@ class SequenceLoader(object):
 
         # Save DB file info
         try:
-            self.db = Db.objects.create(name=filename,
-                                        description=kwargs.get('description'),
-                                        url=kwargs.get('url'))
+            self.db, created = Db.objects.get_or_create(name=source)
+            self.filename = filename
         except IntegrityError as e:
             raise ImportingError(e)
 
         # Retrieve sequence ontology object
         self.soterm = retrieve_ontology_term(ontology='sequence',
                                              term=soterm)
+        self.cvterm_contained_in = retrieve_ontology_term(
+            ontology='relationship', term='contained in')
 
     def store_biopython_seq_record(self, seq_obj, ignore_residues=False):
         """Store Biopython SeqRecord."""
-        dbxref, created = Dbxref.objects.get_or_create(
-            db=self.db, accession=seq_obj.id,
-            description='')
-
         try:
+            dbxref = Dbxref.objects.create(
+                db=self.db, accession=seq_obj.id)
+            Dbxrefprop.objects.create(
+                dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
+                value=self.filename, rank=0)
             feature = Feature.objects.get(uniquename=seq_obj.id)
             if feature is not None:
                 raise ImportingError('The sequence %s is already '
