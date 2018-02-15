@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Dbxref, Dbxrefprop
+from chado.models import Db, Dbxref, Dbxrefprop
 from chado.models import Feature, Featureloc, FeatureDbxref
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
 from chado.models import FeatureCvterm
@@ -40,6 +40,7 @@ class Command(BaseCommand):
             Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Dbxrefprop.objects.filter(value=options.get('name')).delete()
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+            Db.objects.filter(name=options.get('name')).delete()
 
             self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:

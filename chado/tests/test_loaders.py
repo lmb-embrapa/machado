@@ -38,6 +38,11 @@ class SimilarityTest(TestCase):
         test_aa_term = Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='1234567', db=test_db)
+        Cvterm.objects.create(
+            name='match_part', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
         # creating test features
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
@@ -46,6 +51,11 @@ class SimilarityTest(TestCase):
             timelastmodified=datetime.now(timezone.utc))
         Feature.objects.create(
             organism=test_organism, uniquename='feat2', is_analysis=False,
+            type_id=test_aa_term.cvterm_id, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        test_feat = Feature.objects.create(
+            organism=test_organism, uniquename='feat3', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
@@ -66,25 +76,36 @@ class SimilarityTest(TestCase):
         test_HSP1.identities = 98.0
         test_HSP1.score = 1234
         test_HSP1.expect = 0.0
+        test_HSP1.query_start = 110
+        test_HSP1.query_end = 1100
         test_HSP1.sbjct_start = 100
         test_HSP1.sbjct_end = 1000
         test_HSP2 = BlastHSP()
         test_HSP2.identities = 98.2
         test_HSP2.score = 2234
         test_HSP2.expect = 0.00000001
-        test_HSP2.sbjct_start = 200
-        test_HSP2.sbjct_end = 2000
+        test_HSP2.query_start = 200
+        test_HSP2.query_end = 2000
+        test_HSP2.sbjct_start = 220
+        test_HSP2.sbjct_end = 2200
+        test_HSP3 = BlastHSP()
+        test_HSP3.identities = 93.2
+        test_HSP3.score = 3234
+        test_HSP3.expect = 0.00000003
+        test_HSP3.query_start = 300
+        test_HSP3.query_end = 3000
+        test_HSP3.sbjct_start = 330
+        test_HSP3.sbjct_end = 3300
 
         test_alignment1 = BlastAlignment()
-        test_alignment1.title = 'feat1.RNA ID=feat1'
+        test_alignment1.title = 'feat2.RNA ID=feat2'
         test_alignment1.hsps = list()
         test_alignment1.hsps.append(test_HSP1)
-        test_alignment1.hsps.append(test_HSP2)
         test_alignment2 = BlastAlignment()
-        test_alignment2.title = 'feat2.RNA ID=feat2'
+        test_alignment2.title = 'feat3.RNA ID=feat3'
         test_alignment2.hsps = list()
-        test_alignment2.hsps.append(test_HSP1)
-        test_alignment2.hsps.append(test_HSP2)
+        test_alignment1.hsps.append(test_HSP2)
+        test_alignment2.hsps.append(test_HSP3)
 
         test_record = BlastRecord()
         test_record.query = 'feat1 ID=feat1 moltype=DNA'
@@ -96,23 +117,24 @@ class SimilarityTest(TestCase):
                 filename='similarity.file',
                 algorithm='smith-waterman',
                 description='command-line example',
-                program='blastn',
+                program='blastx',
                 programversion='2.2.31+',
                 so_query='gene',
-                so_subject='gene')
+                so_subject='polypeptide')
 
         test_blast_file.store_bio_blast_record(test_record)
 
         test_analysis = Analysis.objects.get(sourcename='similarity.file')
-        self.assertEqual('blastn', test_analysis.program)
-
-        test_analysisfeature = Analysisfeature.objects.get(
-                analysis=test_analysis)
-        self.assertEqual(1234, test_analysisfeature.rawscore)
+        self.assertEqual('blastx', test_analysis.program)
 
         test_featureloc = Featureloc.objects.get(
-                locgroup=test_analysis.analysis_id)
-        self.assertEqual(100, test_featureloc.fmin)
+                srcfeature=test_feat, rank=1)
+        print(test_featureloc)
+
+        test_analysisfeature = Analysisfeature.objects.get(
+                analysis=test_analysis,
+                feature_id=test_featureloc.feature_id)
+        self.assertEqual(3234.0, test_analysisfeature.rawscore)
 
 
 class SequenceTest(TestCase):
@@ -124,6 +146,14 @@ class SequenceTest(TestCase):
         test_db = Db.objects.create(name='SO')
         test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
         test_cv = Cv.objects.create(name='sequence')
+        Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
+                              is_obsolete=0, is_relationshiptype=0)
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
                               is_obsolete=0, is_relationshiptype=0)
         test_seq_file = SequenceLoader(filename='sequence.fasta',
@@ -152,10 +182,17 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
 
         Organism.objects.create(genus='Mus', species='musculus')
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus')
+                                          organism='Mus musculus',
+                                          source='GFF_loader')
         test_attrs = test_feature_file.get_attributes('ID=1;name=feat1')
         self.assertEqual('1', test_attrs.get('id'))
         self.assertEqual('feat1', test_attrs.get('name'))
@@ -197,9 +234,17 @@ class FeatureTest(TestCase):
         test_so_term = Cvterm.objects.create(
             name='exact', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
         # new FeatureLoader
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus')
+                                          organism='Mus musculus',
+                                          source='GFF_source')
         # running get_attributes
         test_attrs = test_feature_file.get_attributes(
             'ID=1;name=feat1;note=Test feature;display=feat1;gene=gene1;'
@@ -267,6 +312,14 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='polypeptide', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
+        # create RO term: contained in
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
         # create an organism
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
@@ -305,7 +358,8 @@ class FeatureTest(TestCase):
 
         # instantiate the loader
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus')
+                                          organism='Mus musculus',
+                                          source='GFF_source')
         # store the tabix feature
         test_feature_file.store_tabix_feature(test_tabix_feature1)
         test_feature_file.store_tabix_feature(test_tabix_feature2)

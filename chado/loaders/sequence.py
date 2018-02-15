@@ -12,7 +12,7 @@ from hashlib import md5
 class SequenceLoader(object):
     """Load sequence records."""
 
-    def __init__(self, source, filename, organism, soterm, *args, **kwargs):
+    def __init__(self, filename, organism, soterm, *args, **kwargs):
         """Execute the init function."""
         # Retrieve organism object
         try:
@@ -22,7 +22,7 @@ class SequenceLoader(object):
 
         # Save DB file info
         try:
-            self.db, created = Db.objects.get_or_create(name=source)
+            self.db, created = Db.objects.get_or_create(name=filename)
             self.filename = filename
         except IntegrityError as e:
             raise ImportingError(e)

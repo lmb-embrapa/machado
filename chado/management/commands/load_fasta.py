@@ -48,7 +48,6 @@ class Command(BaseCommand):
         try:
             sequence_file = SequenceLoader(
                 filename=filename,
-                source='FASTA_source',
                 organism=options.get('organism'),
                 soterm=options.get('soterm'),
                 url=options.get('url'),
