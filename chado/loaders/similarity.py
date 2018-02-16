@@ -69,6 +69,8 @@ class SimilarityLoader(object):
                                        rawscore=hsp.score,
                                        significance=hsp.expect)
 
+        if hsp.query_end < hsp.query_start:
+            hsp.query_start, hsp.query_end = hsp.query_end, hsp.query_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=query_feature,
                                   fmax=hsp.query_end,
@@ -77,6 +79,9 @@ class SimilarityLoader(object):
                                   is_fmin_partial=False,
                                   locgroup=0,
                                   rank=0)
+
+        if hsp.sbjct_end < hsp.sbjct_start:
+            hsp.sbjct_start, hsp.sbjct_end = hsp.sbjct_end, hsp.sbjct_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=subject_feature,
                                   fmax=hsp.sbjct_end,
