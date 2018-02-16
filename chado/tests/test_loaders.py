@@ -154,8 +154,6 @@ class SequenceTest(TestCase):
         Cvterm.objects.create(
             name='contained in', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-        Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
-                              is_obsolete=0, is_relationshiptype=0)
         test_seq_file = SequenceLoader(filename='sequence.fasta',
                                        organism='Mus musculus',
                                        soterm='assembly',
