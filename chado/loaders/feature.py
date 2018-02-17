@@ -1,6 +1,6 @@
 """Load feture file."""
 
-from chado.models import Cv, Db, Cvterm, Dbxref
+from chado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from chado.models import Featureprop, FeatureSynonym, FeatureRelationship
 from chado.models import Pub, Synonym
@@ -24,7 +24,7 @@ class FeatureLoader(object):
 
     help = 'Load feature records.'
 
-    def __init__(self, filename, organism, *args, **kwargs):
+    def __init__(self, source, filename, organism, *args, **kwargs):
         """Execute the init function."""
         try:
             self.organism = retrieve_organism(organism)
@@ -32,9 +32,9 @@ class FeatureLoader(object):
             raise ImportingError(e)
 
         try:
-            self.db = Db.objects.create(name=filename,
-                                        description=kwargs.get('description'),
-                                        url=kwargs.get('url'))
+            self.db, created = Db.objects.get_or_create(name=source)
+            self.filename = filename
+
         except IntegrityError as e:
             raise ImportingError(e)
 
@@ -55,8 +55,10 @@ class FeatureLoader(object):
             type_id=null_cvterm.cvterm_id,
             is_obsolete=False)
 
-        self.aa_cvterm = retrieve_ontology_term(ontology='sequence',
-                                                term='amino_acid')
+        self.cvterm_contained_in = retrieve_ontology_term(
+            ontology='relationship', term='contained in')
+        self.aa_cvterm = retrieve_ontology_term(
+            ontology='sequence', term='polypeptide')
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
         self.ignored_attrs = set()
@@ -95,8 +97,8 @@ class FeatureLoader(object):
                     try:
                         aux_db, aux_term = term.split(':')
                         term_db = Db.objects.get(name=aux_db)
-                        dbxref = Dbxref.objects.get(db=term_db,
-                                                    accession=aux_term)
+                        dbxref = Dbxref.objects.get(
+                            db=term_db, accession=aux_term)
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
                         FeatureCvterm.objects.create(feature=feature,
                                                      cvterm=cvterm,
@@ -159,10 +161,12 @@ class FeatureLoader(object):
         if attrs.get('id') is None:
             attrs['id'] = 'auto{}'.format(str(time()))
 
-        dbxref, created = Dbxref.objects.get_or_create(
-            db=self.db, accession=attrs['id'])
-
         try:
+            dbxref = Dbxref.objects.create(
+                db=self.db, accession=attrs['id'])
+            Dbxrefprop.objects.create(
+                dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
+                value=self.filename, rank=0)
             feature = Feature.objects.create(
                     organism=self.organism,
                     uniquename=attrs.get('id'),

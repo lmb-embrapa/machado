@@ -20,10 +20,10 @@ class Command(BaseCommand):
         parser.add_argument("--blast", help="BLAST File", required=True,
                             type=str)
         parser.add_argument("--so_query", help="Query Sequence Ontology term. "
-                            "eg. assembly, mRNA, CDS, amino_acid",
+                            "eg. assembly, mRNA, CDS, polypeptide",
                             required=True, type=str)
         parser.add_argument("--so_subject", help="Subject Sequence Ontology "
-                            "term. eg. assembly, mRNA, CDS, amino_acid",
+                            "term. eg. assembly, mRNA, CDS, polypeptide",
                             required=True, type=str)
         parser.add_argument("--program", help="Program", required=True,
                             type=str)

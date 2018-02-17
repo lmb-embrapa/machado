@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Analysis, Analysisfeature, Featureloc
+from chado.models import Analysis, Analysisfeature, Feature, Featureloc
 
 
 class Command(BaseCommand):
@@ -21,8 +21,13 @@ class Command(BaseCommand):
                               % (options['name']))
 
             analysis = Analysis.objects.get(sourcename=options['name'])
+
+            feature_ids = Analysisfeature.objects.filter(
+                analysis=analysis).values_list('feature_id', flat=True)
+
+            Featureloc.objects.filter(feature_id__in=feature_ids).delete()
             Analysisfeature.objects.filter(analysis=analysis).delete()
-            Featureloc.objects.filter(locgroup=analysis.analysis_id).delete()
+            Feature.objects.filter(feature_id__in=feature_ids).delete()
             analysis.delete()
 
             self.stdout.write(self.style.SUCCESS('Done'))
