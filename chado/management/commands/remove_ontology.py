@@ -18,13 +18,14 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--name", help="cv.name", required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, name: str, **options):
         """Execute the main function."""
         try:
-            cv = Cv.objects.get(name=options['name'])
+            cv = Cv.objects.get(name=name)
 
-            self.stdout.write('Deleting %s and every child record (CASCADE)'
-                              % (options['name']))
+            self.stdout.write(
+                    'Deleting {} and every child record (CASCADE)'
+                    .format(name))
 
             cvterm_ids = Cvterm.objects.filter(cv=cv).values_list('cvterm_id',
                                                                   flat=True)
@@ -48,12 +49,10 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS('Done'))
         except IntegrityError as e:
-            self.stdout.write(self.style.ERROR(
-                'It\'s not possible to delete every record. You must delete '
-                'ontologies loaded after \'{}\' that might depend on it'
-                .format(options['name'])))
-            raise CommandError(str(e))
+            raise CommandError(
+                    'It\'s not possible to delete every record. You must '
+                    'delete ontologies loaded after \'{}\' that might depend '
+                    'on it. {}'.format(name, e))
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR(
-                'Cannot remove \'{}\' (not registered)'
-                .format(options['name'])))
+            raise CommandError(
+                    'Cannot remove \'{}\' (not registered)'.format(name))

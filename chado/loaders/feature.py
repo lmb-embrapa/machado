@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
+from typing import Dict
 from urllib.parse import unquote
 
 # The following features are handled in a specific manner and should not
@@ -24,7 +25,16 @@ class FeatureLoader(object):
 
     help = 'Load feature records.'
 
-    def __init__(self, source, filename, organism, *args, **kwargs):
+    # initialization of lists/sets to store ignored attributes,
+    # ignored goterms, and relationships
+    ignored_attrs: set = set()
+    ignored_goterms: set = set()
+    relationships: list = list()
+
+    def __init__(self,
+                 source: str,
+                 filename: str,
+                 organism: str) -> None:
         """Execute the init function."""
         try:
             self.organism = retrieve_organism(organism)
@@ -59,13 +69,10 @@ class FeatureLoader(object):
             ontology='relationship', term='contained in')
         self.aa_cvterm = retrieve_ontology_term(
             ontology='sequence', term='polypeptide')
-        # initialization of lists/sets to store ignored attributes,
-        # ignored goterms, and relationships
-        self.ignored_attrs = set()
-        self.ignored_goterms = set()
-        self.relationships = list()
 
-    def get_attributes(self, attributes):
+        return None
+
+    def get_attributes(self, attributes: str) -> Dict[str, str]:
         """Get attributes."""
         result = dict()
         fields = attributes.split(";")
@@ -74,7 +81,7 @@ class FeatureLoader(object):
             result[key.lower()] = unquote(value)
         return result
 
-    def process_attributes(self, feature, attrs):
+    def process_attributes(self, feature: object, attrs: Dict[str, str]):
         """Process the VALID_ATTRS attributes.
 
         Args:
@@ -92,7 +99,7 @@ class FeatureLoader(object):
                 continue
             elif key in ['ontology_term']:
                 # store in featurecvterm
-                terms = attrs.get(key).split(',')
+                terms = attrs[key].split(',')
                 for term in terms:
                     try:
                         aux_db, aux_term = term.split(':')
@@ -186,9 +193,9 @@ class FeatureLoader(object):
                 uniquename=tabix_feature.contig, organism=self.organism)
         except ObjectDoesNotExist:
             raise ImportingError(
-                "Parent not found: %s. It's required to load "
+                "Parent not found: {}. It's required to load "
                 "a reference FASTA file before loading features."
-                % (tabix_feature.contig))
+                .format(tabix_feature.contig))
 
         # the database requires -1, 0, and +1 for strand
         if tabix_feature.strand == '+':

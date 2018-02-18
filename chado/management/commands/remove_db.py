@@ -1,6 +1,6 @@
 """Remove db."""
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbxref, Feature, Featureloc, FeatureDbxref
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
@@ -16,13 +16,13 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--name", help="db.name", required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, name: str, **options):
         """Execute the main function."""
         try:
-            self.stdout.write('Deleting %s and every child record (CASCADE)'
-                              % (options['name']))
+            self.stdout.write('Deleting {} and every child record (CASCADE)'
+                              .format(name))
 
-            db = Db.objects.get(name=options['name'])
+            db = Db.objects.get(name=name)
             dbxref_ids = Dbxref.objects.filter(
                 db=db).values_list('dbxref_id', flat=True)
             feature_ids = Feature.objects.filter(
@@ -42,5 +42,5 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR(
-                'Cannot remove %s (not registered)' % (options['name'])))
+            raise CommandError(
+                'Cannot remove {} (not registered)'.format(name))

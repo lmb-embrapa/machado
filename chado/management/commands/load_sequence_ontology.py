@@ -1,6 +1,6 @@
 """Load Sequence Ontology."""
 
-from chado.loaders.common import Validator
+from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.ontology import OntologyLoader
 from django.core.management.base import BaseCommand, CommandError
@@ -15,21 +15,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--so", help="Sequence Ontology file obo."
+        parser.add_argument("--file", help="Sequence Ontology file obo."
                             "Available at https://github.com/"
                             "The-Sequence-Ontology/SO-Ontologies",
                             required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, file: str, verbosity: int=1, **options):
         """Execute the main function."""
-        verbosity = 1
-        if options.get('verbosity'):
-            verbosity = options.get('verbosity')
-
-        file = options.get('so')
-
         try:
-            Validator().validate(options.get('so'))
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 

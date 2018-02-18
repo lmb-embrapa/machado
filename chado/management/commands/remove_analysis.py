@@ -1,6 +1,6 @@
 """Remove analysis."""
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Analysis, Analysisfeature, Feature, Featureloc
 
@@ -14,13 +14,13 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--name", help="db.name", required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, name: str, **options):
         """Execute the main function."""
         try:
-            self.stdout.write('Deleting %s and every child record (CASCADE)'
-                              % (options['name']))
+            self.stdout.write('Deleting {} and every child record (CASCADE)'
+                              .format(name))
 
-            analysis = Analysis.objects.get(sourcename=options['name'])
+            analysis = Analysis.objects.get(sourcename=name)
 
             feature_ids = Analysisfeature.objects.filter(
                 analysis=analysis).values_list('feature_id', flat=True)
@@ -32,5 +32,5 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR(
-                'Cannot remove %s (not registered)' % (options['name'])))
+            raise CommandError(
+                    'Cannot remove {} (not registered)'.format(name))

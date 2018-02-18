@@ -1,6 +1,6 @@
 """Load relations ontology."""
 
-from chado.loaders.common import Validator
+from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.ontology import OntologyLoader
 from django.core.management.base import BaseCommand, CommandError
@@ -15,19 +15,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--ro", help="Relations Ontology file obo. "
+        parser.add_argument("--file", help="Relations Ontology file obo. "
                             "Available at https://github.com/oborel/"
                             "obo-relations", required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, file: str, verbosity: int=1, **options):
         """Execute the main function."""
-        file = options.get('ro')
-        verbosity = 1
-        if options.get('verbosity'):
-            verbosity = options.get('verbosity')
-
         try:
-            Validator().validate(options.get('ro'))
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 

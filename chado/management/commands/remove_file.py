@@ -1,6 +1,6 @@
 """Remove file."""
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from chado.models import Db, Dbxref, Dbxrefprop
 from chado.models import Feature, Featureloc, FeatureDbxref
@@ -18,14 +18,14 @@ class Command(BaseCommand):
         parser.add_argument(
             "--name", help="File name", required=True, type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, name: str, **options):
         """Execute the main function."""
         try:
-            self.stdout.write('Deleting %s and every child record (CASCADE)'
-                              % (options['name']))
+            self.stdout.write('Deleting {} and every child record (CASCADE)'
+                              .format(name))
 
             dbxref_ids = list(Dbxrefprop.objects.filter(
-                value=options.get('name')).values_list('dbxref_id', flat=True))
+                value=name).values_list('dbxref_id', flat=True))
             feature_ids = Feature.objects.filter(
                 dbxref_id__in=dbxref_ids).values_list('feature_id', flat=True)
             Featureloc.objects.filter(feature_id__in=feature_ids).delete()
@@ -38,11 +38,11 @@ class Command(BaseCommand):
             FeatureRelationship.objects.filter(
                 subject_id__in=feature_ids).delete()
             Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
-            Dbxrefprop.objects.filter(value=options.get('name')).delete()
+            Dbxrefprop.objects.filter(value=name).delete()
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
-            Db.objects.filter(name=options.get('name')).delete()
+            Db.objects.filter(name=name).delete()
 
             self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
-            self.stdout.write(self.style.ERROR(
-                'Cannot remove %s (not registered)' % (options['name'])))
+            raise CommandError(
+                'Cannot remove {} (not registered)'.format(name))

@@ -1,6 +1,6 @@
 """Load GFF file."""
 
-from chado.loaders.common import Validator
+from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.feature import FeatureLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--gff",
+        parser.add_argument("--file",
                             help="GFF3 genome file indexed with tabix"
                             "(see http://www.htslib.org/doc/tabix.html)",
                             required=True,
@@ -29,39 +29,37 @@ class Command(BaseCommand):
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
-    def handle(self, *args, **options):
+    def handle(self,
+               file: str,
+               organism: str,
+               cpu: int=1,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
-        verbosity = 1
-        if options.get('verbosity'):
-            verbosity = options.get('verbosity')
-
         if verbosity > 0:
             self.stdout.write('Preprocessing')
 
         try:
-            Validator().validate(options.get('gff'))
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
         # retrieve only the file name
-        filename = os.path.basename(options.get('gff'))
+        filename = os.path.basename(file)
 
         try:
             feature_file = FeatureLoader(
                 filename=filename,
                 source='GFF_source',
-                organism=options.get('organism'),
-                url=options.get('url'),
-                description=options.get('description'))
+                organism=organism)
         except ImportingError as e:
             raise CommandError(e)
 
-        cpu = options.get('cpu')
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
 
         # Load the GFF3 file
-        with open(options['gff']) as tbx_file:
+        with open(file) as tbx_file:
             # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
             for row in tbx.fetch(parser=pysam.asGTF()):

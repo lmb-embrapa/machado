@@ -6,26 +6,26 @@ from django.core.exceptions import ObjectDoesNotExist
 import os
 
 
-class Validator(object):
+class FileValidator(object):
     """Validate input file."""
 
-    def validate(self, file_path):
+    def validate(self, file_path: str):
         """Invoke all validations."""
         self._exists(file_path)
         self._is_file(file_path)
         self._is_readable(file_path)
 
-    def _exists(self, file_path):
+    def _exists(self, file_path: str):
         """Check whether a file exists."""
         if not os.path.exists(file_path):
             raise ImportingError("{} does not exist".format(file_path))
 
-    def _is_file(self, file_path):
+    def _is_file(self, file_path: str):
         """Check whether file is actually a file type."""
         if not os.path.isfile(file_path):
             raise ImportingError("{} is not a file".format(file_path))
 
-    def _is_readable(self, file_path):
+    def _is_readable(self, file_path: str):
         """Check file is readable."""
         try:
             f = open(file_path, 'r')
@@ -34,7 +34,7 @@ class Validator(object):
             raise ImportingError("{} is not readable".format(file_path))
 
 
-def retrieve_ontology_term(ontology, term):
+def retrieve_ontology_term(ontology: str, term: str):
     """Retrieve ontology term."""
     # Retrieve sequence ontology object
     try:
@@ -52,15 +52,21 @@ def retrieve_ontology_term(ontology, term):
     return cvterm
 
 
-def insert_organism(genus, species='spp.', *args, **options):
+def insert_organism(genus: str,
+                    species: str='spp.',
+                    type: str=None,
+                    infraspecific_name: str=None,
+                    abbreviation: str=None,
+                    common_name: str=None,
+                    comment: str=None):
     """Insert organism."""
     if genus is None:
         raise ImportingError('genus is required!')
 
     type_id = ''
-    if options.get('type') is not None:
+    if type is not None:
         try:
-            cvterm = Cvterm.objects.get(name=options.get('type'))
+            cvterm = Cvterm.objects.get(name=type)
             type_id = cvterm.cvterm_id
         except ObjectDoesNotExist:
             raise ImportingError(
@@ -69,23 +75,23 @@ def insert_organism(genus, species='spp.', *args, **options):
     try:
         spp = Organism.objects.get(
             genus=genus, species=species,
-            infraspecific_name=options.get('infraspecific_name'))
+            infraspecific_name=infraspecific_name)
         if (spp is not None):
             raise ImportingError('Organism already registered ({} {})!'
                                  .format(genus, species))
     except ObjectDoesNotExist:
         organism = Organism.objects.create(
-            abbreviation=options.get('abbreviation'),
+            abbreviation=abbreviation,
             genus=genus,
             species=species,
-            common_name=options.get('common_name'),
-            infraspecific_name=options.get('infraspecific_name'),
+            common_name=common_name,
+            infraspecific_name=infraspecific_name,
             type_id=type_id,
-            comment=options.get('comment'))
+            comment=comment)
         organism.save()
 
 
-def retrieve_organism(organism):
+def retrieve_organism(organism: str):
     """Retrieve organism object."""
     try:
         aux = organism.split(' ')
@@ -107,6 +113,5 @@ def retrieve_organism(organism):
                                         genus=genus,
                                         infraspecific_name=infraspecific)
     except ObjectDoesNotExist:
-        raise ObjectDoesNotExist('%s not registered.'
-                                 % organism)
+        raise ObjectDoesNotExist('{} not registered.'.format(organism))
     return organism

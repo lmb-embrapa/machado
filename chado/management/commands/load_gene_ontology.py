@@ -1,6 +1,6 @@
 """Load Gene Ontology."""
 
-from chado.loaders.common import Validator
+from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.ontology import OntologyLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--go", help="Gene Ontology file obo. Available "
+        parser.add_argument("--file", help="Gene Ontology file obo. Available "
                             "at http://www.geneontology.org/ontology/gene_ont"
                             "ology.obo", required=True, type=str)
         parser.add_argument("--cpu",
@@ -25,16 +25,10 @@ class Command(BaseCommand):
                             default=1,
                             type=int)
 
-    def handle(self, *args, **options):
+    def handle(self, file: str, cpu: int=1, verbosity: int=1, **options):
         """Execute the main function."""
-        file = options.get('go')
-        cpu = options.get('cpu')
-        verbosity = 1
-        if options.get('verbosity'):
-            verbosity = options.get('verbosity')
-
         try:
-            Validator().validate(options.get('go'))
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 

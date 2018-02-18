@@ -41,17 +41,25 @@ class Command(BaseCommand):
                             required=False,
                             type=str)
 
-    def handle(self, *args, **options):
+    def handle(self,
+               genus: str,
+               species: str,
+               abbreviation: str=None,
+               common_name: str=None,
+               infraspecific_name: str=None,
+               type: str=None,
+               comment: str=None,
+               **options):
         """Execute the main function."""
-        species = options['species']
-        genus = options['genus']
-
         try:
-            insert_organism(genus, species, options)
+            insert_organism(genus,
+                            species,
+                            common_name,
+                            infraspecific_name,
+                            type,
+                            comment)
         except ImportingError as e:
             raise CommandError(e)
 
         self.stdout.write(
-            self.style.SUCCESS(
-                '{} {} registered'
-                .format(options['genus'], options['species'])))
+            self.style.SUCCESS('{} {} registered'.format(genus, species)))

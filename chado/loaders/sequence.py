@@ -43,8 +43,8 @@ class SequenceLoader(object):
                 value=self.filename, rank=0)
             feature = Feature.objects.get(uniquename=seq_obj.id)
             if feature is not None:
-                raise ImportingError('The sequence %s is already '
-                                     'registered.' % seq_obj.id)
+                raise ImportingError('The sequence {} is already '
+                                     'registered.'.format(seq_obj.id))
         except ObjectDoesNotExist:
             residues = seq_obj.seq
 

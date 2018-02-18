@@ -726,17 +726,17 @@ class CommonTest(TestCase):
                                             db=test_db)
 
         test_cv = Cv.objects.create(name='test_cv')
-        test_cvterm = Cvterm.objects.create(name='test_cvterm',
-                                            cv=test_cv,
-                                            dbxref=test_dbxref,
-                                            is_obsolete=0,
-                                            is_relationshiptype=0)
+        Cvterm.objects.create(name='test_cvterm',
+                              cv=test_cv,
+                              dbxref=test_dbxref,
+                              is_obsolete=0,
+                              is_relationshiptype=0)
         insert_organism(genus='Homo',
                         species='sapiens',
                         abbreviation='hs',
                         common_name='human',
                         comment='no comments',
-                        type_id=test_cvterm.cvterm_id)
+                        type='test_cvterm')
         test_organism_2 = Organism.objects.get(genus='Homo',
                                                species='sapiens')
         self.assertEqual('Homo', test_organism_2.genus)

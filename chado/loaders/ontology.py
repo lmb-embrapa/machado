@@ -11,7 +11,7 @@ import re
 class OntologyLoader(object):
     """Ontology."""
 
-    def __init__(self, cv_name, cv_definition=''):
+    def __init__(self, cv_name: str, cv_definition: str=None) -> None:
         """Invoke all validations."""
         # Save the name and definition to the Cv model
         try:
@@ -110,6 +110,8 @@ class OntologyLoader(object):
             dbxref=dbxref_is_a,
             is_obsolete=0,
             is_relationshiptype=1)
+
+        return None
 
     def store_type_def(self, typedef):
         """Store the type_def."""
