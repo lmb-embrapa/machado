@@ -1,5 +1,5 @@
 include LICENSE
-include README.rst
+include README.md
 include chado/admin.py
 include chado/models.py
 recursive-include bin *

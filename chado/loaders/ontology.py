@@ -298,16 +298,15 @@ class OntologyLoader(object):
          pyrrolysine." [SO:xp]
         '''
         # Retrieve text and dbxrefs
-        dbxrefs: Optional[str]
         try:
             text, dbxrefs = definition.split('" [')
             text = re.sub(r'^"', '', text)
             dbxrefs = re.sub(r'\]$', '', dbxrefs)
         except ValueError:
             text = definition
-            dbxrefs = None
+            dbxrefs = ''
 
-        if dbxrefs is not None:
+        if dbxrefs:
 
             dbxref_list = dbxrefs.split(', ')
 

@@ -710,7 +710,7 @@ class CommonTest(TestCase):
 
     def test_insert_organism_1(self):
         """Tests - insert_organism 1."""
-        insert_organism('Mus', 'musculus')
+        insert_organism(genus='Mus', species='musculus')
         test_organism_1 = Organism.objects.get(genus='Mus',
                                                species='musculus')
         self.assertEqual('Mus', test_organism_1.genus)

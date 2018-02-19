@@ -28,9 +28,9 @@ class FeatureLoader(object):
 
     # initialization of lists/sets to store ignored attributes,
     # ignored goterms, and relationships
-    ignored_attrs: set = set()
-    ignored_goterms: set = set()
-    relationships: list = list()
+    ignored_attrs = set()
+    ignored_goterms = set()
+    relationships = list()
 
     def __init__(self,
                  source: str,

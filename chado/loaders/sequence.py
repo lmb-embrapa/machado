@@ -36,7 +36,7 @@ class SequenceLoader(object):
 
     def store_biopython_seq_record(self,
                                    seq_obj: SeqRecord,
-                                   ignore_residues: bool=False):
+                                   ignore_residues: bool=False) -> None:
         """Store Biopython SeqRecord."""
         try:
             dbxref = Dbxref.objects.create(
