@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy
 from time import time
-from typing import Dict
+from typing import Dict, List, Set
 from urllib.parse import unquote
 
 # The following features are handled in a specific manner and should not
@@ -28,9 +28,9 @@ class FeatureLoader(object):
 
     # initialization of lists/sets to store ignored attributes,
     # ignored goterms, and relationships
-    ignored_attrs = set()
-    ignored_goterms = set()
-    relationships = list()
+    ignored_attrs: Set[str] = set()
+    ignored_goterms: Set[str] = set()
+    relationships: List[Dict[str, str]] = list()
 
     def __init__(self,
                  source: str,
@@ -279,7 +279,7 @@ class FeatureLoader(object):
                     type_id=part_of.cvterm_id,
                     rank=0))
             except ObjectDoesNotExist as e:
-                print('Parent/Feature ({}/{}) not registered.'.format(item[0],
-                                                                      item[1]))
+                print('Parent/Feature ({}/{}) not registered.'
+                      .format(item['object_id'], item['subject_id']))
 
         FeatureRelationship.objects.bulk_create(relationships)

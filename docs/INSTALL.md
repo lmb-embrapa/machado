@@ -16,37 +16,23 @@ As postgres user run:
     create database yourdatabase with owner username;
     alter user username createdb;
 
-#### Python 3.5.2
+#### Python 3.6
 
 We strongly recommend creating a new virtualenv for your project
 
-    virtualenv -p /usr/bin/python3 YOURPROJECT
+    virtualenv -p /usr/bin/python3.6 YOURPROJECT
     cd YOURPROJECT
     source bin/activate
 
-#### Django 2.0.1
+#### Dependencies
 
     pip install django==2.0.1
-
-#### psycopg2 2.7.3.2
-
     pip install psycopg2==2.7.3.2
-
-#### biopython 1.70
-
     pip install biopython==1.70
-
-#### pysam 0.13
-
     pip install pysam==0.13
-
-#### obonet 0.2.2
-
     pip install obonet==0.2.2
-
-#### tqdm 4.19.5
-
     pip install tqdm==4.19.5
+    pip install typing==3.6.4
 
 ### DjangoChado
 

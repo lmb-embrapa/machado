@@ -51,7 +51,8 @@ class Command(BaseCommand):
             feature_file = FeatureLoader(
                 filename=filename,
                 source='GFF_source',
-                organism=organism)
+                organism=organism
+            )
         except ImportingError as e:
             raise CommandError(e)
 

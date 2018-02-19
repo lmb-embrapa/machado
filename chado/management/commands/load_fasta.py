@@ -28,6 +28,10 @@ class Command(BaseCommand):
                             required=False, action='store_true')
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
+        parser.add_argument("--description", help="Description",
+                            required=False, type=str)
+        parser.add_argument("--url", help="URL",
+                            required=False, type=str)
 
     def handle(self,
                file: str,
@@ -35,6 +39,8 @@ class Command(BaseCommand):
                soterm: str,
                nosequence: bool=False,
                cpu: int=1,
+               description: str=None,
+               url: str=None,
                verbosity: int=1,
                **options):
         """Execute the main function."""
@@ -52,7 +58,9 @@ class Command(BaseCommand):
             sequence_file = SequenceLoader(
                 filename=filename,
                 organism=organism,
-                soterm=soterm)
+                soterm=soterm,
+                description=description,
+                url=url)
         except ImportingError as e:
             raise CommandError(e)
 
