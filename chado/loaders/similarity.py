@@ -109,12 +109,13 @@ class SimilarityLoader(object):
         try:
             query_id = record.query.split(' ')[0]
             query_feature = Feature.objects.get(
-                    uniquename=query_id, type=self.so_term_query)
+                    uniquename=query_id, type_id=self.so_term_query.cvterm_id)
         except ObjectDoesNotExist as e1:
             try:
                 query_id = self.retrieve_id_from_description(record.query)
                 query_feature = Feature.objects.get(
-                        uniquename=query_id, type=self.so_term_query)
+                        uniquename=query_id,
+                        type_id=self.so_term_query.cvterm_id)
             except ObjectDoesNotExist as e2:
                 raise ImportingError(e1, e2)
 
@@ -122,13 +123,15 @@ class SimilarityLoader(object):
             try:
                 subject_id = alignment.title.split(' ')[0]
                 subject_feature = Feature.objects.get(
-                        uniquename=subject_id, type=self.so_term_subject)
+                        uniquename=subject_id,
+                        type_id=self.so_term_subject.cvterm_id)
             except ObjectDoesNotExist as e1:
                 try:
                     subject_id = self.retrieve_id_from_description(
                         alignment.title)
                     subject_feature = Feature.objects.get(
-                            uniquename=subject_id, type=self.so_term_subject)
+                            uniquename=subject_id,
+                            type_id=self.so_term_subject.cvterm_id)
                 except ObjectDoesNotExist as e2:
                     raise ImportingError(e1, e2)
 
