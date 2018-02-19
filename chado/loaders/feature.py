@@ -9,6 +9,7 @@ from chado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from pysam.libctabixproxies import GTFProxy
 from time import time
 from typing import Dict
 from urllib.parse import unquote
@@ -70,8 +71,6 @@ class FeatureLoader(object):
         self.aa_cvterm = retrieve_ontology_term(
             ontology='sequence', term='polypeptide')
 
-        return None
-
     def get_attributes(self, attributes: str) -> Dict[str, str]:
         """Get attributes."""
         result = dict()
@@ -81,7 +80,9 @@ class FeatureLoader(object):
             result[key.lower()] = unquote(value)
         return result
 
-    def process_attributes(self, feature: object, attrs: Dict[str, str]):
+    def process_attributes(self,
+                           feature: object,
+                           attrs: Dict[str, str]) -> None:
         """Process the VALID_ATTRS attributes.
 
         Args:
@@ -152,9 +153,7 @@ class FeatureLoader(object):
                                            value=attrs.get(key),
                                            rank=0)
 
-        return
-
-    def store_tabix_feature(self, tabix_feature):
+    def store_tabix_feature(self, tabix_feature: GTFProxy) -> None:
         """Store tabix feature."""
         attrs = self.get_attributes(tabix_feature.attributes)
         for key in attrs:
@@ -260,7 +259,7 @@ class FeatureLoader(object):
                                                type=translation_of,
                                                rank=0)
 
-    def store_relationships(self):
+    def store_relationships(self) -> None:
         """Store the relationships."""
         part_of = retrieve_ontology_term(ontology='sequence',
                                          term='part_of')

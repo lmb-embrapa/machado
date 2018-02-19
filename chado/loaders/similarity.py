@@ -1,5 +1,7 @@
 """Load similarity file."""
 
+from Bio.Blast import Record
+from Bio.Blast.Record import HSP
 from chado.models import Analysis, Analysisfeature, Feature, Featureloc
 from chado.loaders.common import retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
@@ -7,6 +9,7 @@ from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
+from typing import Optional
 
 
 class SimilarityLoader(object):
@@ -14,8 +17,15 @@ class SimilarityLoader(object):
 
     help = 'Load simlarity records.'
 
-    def __init__(self, filename, program, programversion, so_query, so_subject,
-                 *args, **kwargs):
+    def __init__(self,
+                 filename: str,
+                 program: str,
+                 programversion: str,
+                 so_query: str,
+                 so_subject: str,
+                 algorithm: str=None,
+                 name: str=None,
+                 description: str=None) -> None:
         """Execute the init function."""
         try:
             self.so_term_query = retrieve_ontology_term(
@@ -25,9 +35,9 @@ class SimilarityLoader(object):
             self.so_term_match_part = retrieve_ontology_term(
                     ontology='sequence', term='match_part')
             self.analysis = Analysis.objects.create(
-                    algorithm=kwargs.get('algorithm'),
-                    name=kwargs.get('name'),
-                    description=kwargs.get('description'),
+                    algorithm=algorithm,
+                    name=name,
+                    description=description,
                     sourcename=filename,
                     program=program,
                     programversion=programversion,
@@ -37,7 +47,7 @@ class SimilarityLoader(object):
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
 
-    def retrieve_id_from_description(self, description):
+    def retrieve_id_from_description(self, description: str) -> Optional[str]:
         """Retrieve ID from description."""
         for item in description.split(' '):
             try:
@@ -48,7 +58,10 @@ class SimilarityLoader(object):
                 pass
         return None
 
-    def store_bio_blast_hsp(self, query_feature, subject_feature, hsp):
+    def store_bio_blast_hsp(self,
+                            query_feature: Feature,
+                            subject_feature: Feature,
+                            hsp: HSP):
         """Store bio_blast_hsp record."""
         # set id = auto# for match_part features
         match_part_id = 'match_part_{}{}{}'.format(
@@ -91,7 +104,7 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=1)
 
-    def store_bio_blast_record(self, record):
+    def store_bio_blast_record(self, record: Record):
         """Store bio_blast_record record."""
         try:
             query_id = record.query.split(' ')[0]

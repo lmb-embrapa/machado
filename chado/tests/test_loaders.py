@@ -129,7 +129,6 @@ class SimilarityTest(TestCase):
 
         test_featureloc = Featureloc.objects.get(
                 srcfeature=test_feat, rank=1)
-        print(test_featureloc)
 
         test_analysisfeature = Analysisfeature.objects.get(
                 analysis=test_analysis,
@@ -156,9 +155,7 @@ class SequenceTest(TestCase):
             is_obsolete=0, is_relationshiptype=0)
         test_seq_file = SequenceLoader(filename='sequence.fasta',
                                        organism='Mus musculus',
-                                       soterm='assembly',
-                                       url='http://teste.url',
-                                       description='test sequence file')
+                                       soterm='assembly')
         test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
                                  id='chr1',
                                  description='chromosome 1')

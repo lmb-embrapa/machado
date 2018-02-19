@@ -9,23 +9,23 @@ import os
 class FileValidator(object):
     """Validate input file."""
 
-    def validate(self, file_path: str):
+    def validate(self, file_path: str) -> None:
         """Invoke all validations."""
         self._exists(file_path)
         self._is_file(file_path)
         self._is_readable(file_path)
 
-    def _exists(self, file_path: str):
+    def _exists(self, file_path: str) -> None:
         """Check whether a file exists."""
         if not os.path.exists(file_path):
             raise ImportingError("{} does not exist".format(file_path))
 
-    def _is_file(self, file_path: str):
+    def _is_file(self, file_path: str) -> None:
         """Check whether file is actually a file type."""
         if not os.path.isfile(file_path):
             raise ImportingError("{} is not a file".format(file_path))
 
-    def _is_readable(self, file_path: str):
+    def _is_readable(self, file_path: str) -> None:
         """Check file is readable."""
         try:
             f = open(file_path, 'r')
@@ -34,7 +34,7 @@ class FileValidator(object):
             raise ImportingError("{} is not readable".format(file_path))
 
 
-def retrieve_ontology_term(ontology: str, term: str):
+def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
     """Retrieve ontology term."""
     # Retrieve sequence ontology object
     try:
@@ -58,7 +58,7 @@ def insert_organism(genus: str,
                     infraspecific_name: str=None,
                     abbreviation: str=None,
                     common_name: str=None,
-                    comment: str=None):
+                    comment: str=None) -> None:
     """Insert organism."""
     if genus is None:
         raise ImportingError('genus is required!')
@@ -91,7 +91,7 @@ def insert_organism(genus: str,
         organism.save()
 
 
-def retrieve_organism(organism: str):
+def retrieve_organism(organism: str) -> Organism:
     """Retrieve organism object."""
     try:
         aux = organism.split(' ')

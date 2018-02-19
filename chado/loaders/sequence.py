@@ -1,5 +1,6 @@
 """Sequence."""
 
+from Bio.SeqRecord import SeqRecord
 from chado.loaders.common import retrieve_organism, retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
 from chado.models import Db, Dbxref, Dbxrefprop, Feature
@@ -12,7 +13,7 @@ from hashlib import md5
 class SequenceLoader(object):
     """Load sequence records."""
 
-    def __init__(self, filename, organism, soterm, *args, **kwargs):
+    def __init__(self, filename: str, organism: str, soterm: str) -> None:
         """Execute the init function."""
         # Retrieve organism object
         try:
@@ -33,7 +34,9 @@ class SequenceLoader(object):
         self.cvterm_contained_in = retrieve_ontology_term(
             ontology='relationship', term='contained in')
 
-    def store_biopython_seq_record(self, seq_obj, ignore_residues=False):
+    def store_biopython_seq_record(self,
+                                   seq_obj: SeqRecord,
+                                   ignore_residues: bool=False):
         """Store Biopython SeqRecord."""
         try:
             dbxref = Dbxref.objects.create(

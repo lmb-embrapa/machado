@@ -5,6 +5,8 @@ from chado.models import CvtermRelationship
 from chado.models import Db, Dbxref
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from multiprocessing.synchronize import Lock
+from typing import Any, Dict, Optional
 import re
 
 
@@ -111,25 +113,23 @@ class OntologyLoader(object):
             is_obsolete=0,
             is_relationshiptype=1)
 
-        return None
-
-    def store_type_def(self, typedef):
+    def store_type_def(self, typedef: Dict[str, str]) -> None:
         """Store the type_def."""
         # Try to retrieve db from id
-        if ':' in typedef.get('id'):
-            aux_db, typedef_accession = typedef.get('id').split(':')
+        if ':' in typedef['id']:
+            aux_db, typedef_accession = typedef['id'].split(':')
             typedef_db, created = Db.objects.get_or_create(name=aux_db)
-            typedef_name = typedef.get('name')
+            typedef_name = typedef['name']
         else:
             typedef_db = self.db_global
-            typedef_accession = typedef.get('id')
-            typedef_name = typedef.get('id')
+            typedef_accession = typedef['id']
+            typedef_name = typedef['id']
 
         # Save the typedef to the Dbxref model
         dbxref_typedef, created = Dbxref.objects.get_or_create(
             db=typedef_db,
             accession=typedef_accession,
-            defaults={'description': typedef.get('def'),
+            defaults={'description': typedef['def'],
                       'version': ''})
 
         # Save the typedef to the Cvterm model
@@ -137,13 +137,13 @@ class OntologyLoader(object):
             name=typedef_name,
             is_obsolete=0,
             dbxref=dbxref_typedef,
-            defaults={'definition': typedef.get('def'),
+            defaults={'definition': typedef['def'],
                       'is_relationshiptype': 1,
                       'cv': self.cv})
 
         # Load comment
-        if typedef.get('comment'):
-            for comment in typedef.get('comment'):
+        if typedef.get('comment') is not None:
+            for comment in typedef['comment']:
                 Cvtermprop.objects.get_or_create(
                     cvterm=cvterm_typedef,
                     type_id=self.cvterm_comment.cvterm_id,
@@ -182,12 +182,15 @@ class OntologyLoader(object):
                 value=1,
                 rank=0)
 
-        if typedef.get('xref'):
-            for xref in typedef.get('xref'):
+        if typedef.get('xref') is not None:
+            for xref in typedef['xref']:
                 self.process_cvterm_xref(
                         cvterm_typedef, xref)
 
-    def store_term(self, n, data, lock=None):
+    def store_term(self,
+                   n: str,
+                   data: Dict[str, Any],
+                   lock: Optional[Lock]=None) -> None:
         """Store the ontology terms."""
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
@@ -197,12 +200,12 @@ class OntologyLoader(object):
 
         # Save the term to the Cvterm model
         if data.get('namespace') is not None:
-            cv, created = Cv.objects.get_or_create(name=data.get('namespace'))
+            cv, created = Cv.objects.get_or_create(name=data['namespace'])
         else:
             cv = self.cv
         cvterm, created = Cvterm.objects.get_or_create(
             cv=cv,
-            name=data.get('name'),
+            name=data['name'],
             definition='',
             dbxref=dbxref,
             is_obsolete=0,
@@ -215,13 +218,13 @@ class OntologyLoader(object):
             with lock:
                 # Load definition and dbxrefs
                 self.process_cvterm_def(
-                        cvterm, data.get('def'))
+                        cvterm, data['def'])
         else:
-            self.process_cvterm_def(cvterm, data.get('def'))
+            self.process_cvterm_def(cvterm, data['def'])
 
         # Load alt_ids
-        if data.get('alt_id'):
-            for alt_id in data.get('alt_id'):
+        if data.get('alt_id') is not None:
+            for alt_id in data['alt_id']:
                 aux_db, aux_accession = alt_id.split(':')
                 db_alt_id, created = Db.objects.get_or_create(name=aux_db)
                 dbxref_alt_id, created = Dbxref.objects.get_or_create(
@@ -232,24 +235,24 @@ class OntologyLoader(object):
                     defaults={'is_for_definition': 0})
 
         # Load comment
-        if data.get('comment'):
+        if data.get('comment') is not None:
             Cvtermprop.objects.get_or_create(
                 cvterm=cvterm,
                 type_id=self.cvterm_comment.cvterm_id,
-                value=data.get('comment'),
+                value=data['comment'],
                 rank=0)
 
         # Load xref
-        if data.get('xref'):
-            for xref in data.get('xref'):
+        if data.get('xref') is not None:
+            for xref in data['xref']:
                 self.process_cvterm_xref(cvterm, xref)
 
         # Load synonyms
         if data.get('synonym') is not None:
-            for synonym in data.get('synonym'):
+            for synonym in data['synonym']:
                 self.process_cvterm_so_synonym(cvterm, synonym)
 
-    def store_relationship(self, u, v, type):
+    def store_relationship(self, u: str, v: str, type: str) -> None:
         """Store the relationship between ontology terms."""
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
@@ -279,7 +282,10 @@ class OntologyLoader(object):
             object_id=object_cvterm.cvterm_id)
         cvrel.save()
 
-    def process_cvterm_def(self, cvterm, definition, is_for_definition=1):
+    def process_cvterm_def(self,
+                           cvterm: Cvterm,
+                           definition: str,
+                           is_for_definition: int=1) -> None:
         """Process defition to obtain cvterms."""
         text = ''
 
@@ -291,45 +297,46 @@ class OntologyLoader(object):
         "A gene encoding an mRNA that has the stop codon redefined as
          pyrrolysine." [SO:xp]
         '''
-        if definition:
+        # Retrieve text and dbxrefs
+        dbxrefs: Optional[str]
+        try:
+            text, dbxrefs = definition.split('" [')
+            text = re.sub(r'^"', '', text)
+            dbxrefs = re.sub(r'\]$', '', dbxrefs)
+        except ValueError:
+            text = definition
+            dbxrefs = None
 
-            # Retrieve text and dbxrefs
-            try:
-                text, dbxrefs = definition.split('" [')
-                text = re.sub(r'^"', '', text)
-                dbxrefs = re.sub(r'\]$', '', dbxrefs)
-            except ValueError:
-                text = definition
-                dbxrefs = ''
+        if dbxrefs is not None:
 
-            if dbxrefs:
+            dbxref_list = dbxrefs.split(', ')
 
-                dbxrefs = dbxrefs.split(', ')
+            # Save all dbxrefs
+            for dbxref in dbxref_list:
+                ref_db, ref_content = dbxref.split(':', 1)
 
-                # Save all dbxrefs
-                for dbxref in dbxrefs:
-                    ref_db, ref_content = dbxref.split(':', 1)
+                if ref_db == 'http':
+                    ref_db = 'URL'
+                    ref_content = 'http:'+ref_content
 
-                    if ref_db == 'http':
-                        ref_db = 'URL'
-                        ref_content = 'http:'+ref_content
+                # Get/Set Dbxref instance: ref_db,ref_content
+                db, created = Db.objects.get_or_create(name=ref_db)
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=db, accession=ref_content)
 
-                    # Get/Set Dbxref instance: ref_db,ref_content
-                    db, created = Db.objects.get_or_create(name=ref_db)
-                    dbxref, created = Dbxref.objects.get_or_create(
-                        db=db, accession=ref_content)
-
-                    # Estabilish the cvterm and the dbxref relationship
-                    CvtermDbxref.objects.get_or_create(
-                            cvterm=cvterm,
-                            dbxref=dbxref,
-                            defaults={'is_for_definition': is_for_definition})
+                # Estabilish the cvterm and the dbxref relationship
+                CvtermDbxref.objects.get_or_create(
+                        cvterm=cvterm,
+                        dbxref=dbxref,
+                        defaults={'is_for_definition': is_for_definition})
 
         cvterm.definition = text
         cvterm.save()
-        return
 
-    def process_cvterm_xref(self, cvterm, xref, is_for_definition=0):
+    def process_cvterm_xref(self,
+                            cvterm: Cvterm,
+                            xref: str,
+                            is_for_definition: int=0) -> None:
         """Process cvterm_xref."""
         if xref:
 
@@ -349,9 +356,11 @@ class OntologyLoader(object):
                     cvterm=cvterm,
                     dbxref=dbxref,
                     defaults={'is_for_definition': is_for_definition})
-        return
 
-    def process_cvterm_go_synonym(self, cvterm, synonym, synonym_type):
+    def process_cvterm_go_synonym(self,
+                                  cvterm: Cvterm,
+                                  synonym: str,
+                                  synonym_type: str) -> None:
         """Process cvterm_go_synonym.
 
         Definition format:
@@ -391,9 +400,9 @@ class OntologyLoader(object):
         except IntegrityError:
             pass
 
-        return
-
-    def process_cvterm_so_synonym(self, cvterm, synonym):
+    def process_cvterm_so_synonym(self,
+                                  cvterm: Cvterm,
+                                  synonym: str):
         """Process cvterm_so_synonym.
 
         Definition format:
@@ -429,4 +438,3 @@ class OntologyLoader(object):
         cvtermsynonym = Cvtermsynonym.objects.create(
             cvterm=cvterm, synonym=synonym_text, type_id=cvterm_type.cvterm_id)
         cvtermsynonym.save()
-        return
