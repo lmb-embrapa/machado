@@ -2,14 +2,19 @@
 
 # disabling NCBIXML
 # from Bio.Blast import NCBIXML
-from Bio import SearchIO
 from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.similarity import SimilarityLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
-import os
 from tqdm import tqdm
+import os
+
+import warnings
+from Bio import BiopythonExperimentalWarning
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
+    from Bio import SearchIO
 
 
 class Command(BaseCommand):

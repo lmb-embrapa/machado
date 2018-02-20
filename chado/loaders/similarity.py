@@ -1,7 +1,6 @@
 """Load similarity file."""
 
 from Bio.Blast import Record
-from Bio.SearchIO._model import query, hsp
 from chado.models import Analysis, Analysisfeature, Feature, Featureloc
 from chado.loaders.common import retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
@@ -10,6 +9,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
 from typing import Optional, Tuple
+
+import warnings
+from Bio import BiopythonExperimentalWarning
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
+    from Bio.SearchIO._model import query, hsp
 
 
 class SimilarityLoader(object):
