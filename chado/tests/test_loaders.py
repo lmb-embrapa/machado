@@ -8,20 +8,98 @@ from chado.loaders.feature import FeatureLoader
 from chado.loaders.ontology import OntologyLoader
 from chado.loaders.sequence import SequenceLoader
 from chado.loaders.similarity import SimilarityLoader
+from chado.loaders.publication import PublicationLoader
 from chado.models import Analysis, Analysisfeature
 from chado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from chado.models import Feature, Featureprop, FeatureSynonym
 from chado.models import FeatureCvterm, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
+from chado.models import Pub
 from django.test import TestCase
 from datetime import datetime, timezone
 import obonet
 import os
+from bibtexparser.bibdatabase import BibDatabase
+
+
+class PublicationTest(TestCase):
+    """Tests Loaders - PublicationLoader."""
+
+    def test_store_pub_record(self):
+        """Tests - __init__ and store_pub_record."""
+        test_db = Db.objects.create(name='internal')
+        test_dbxref = Dbxref.objects.create(accession='article',
+                                            db=test_db)
+        test_cv = Cv.objects.create(name='null')
+        test_cvterm = Cvterm.objects.create(
+                                            name='article',
+                                            cv=test_cv,
+                                            dbxref=test_dbxref,
+                                            is_obsolete=0,
+                                            is_relationshiptype=0)
+        # create test pub entry
+        Pub.objects.create(type=test_cvterm,
+                           uniquename='Test2018',
+                           title='Test Title',
+                           pyear='2018',
+                           pages='2000',
+                           volume='1',
+                           series_name='Journal of Testing')
+
+        # create mock object for insertion
+        class BibtexParser(dict):
+            """Mock BibTeXParser object"""
+
+        test_entry = BibtexParser()
+        test_entry['ENTRYTYPE'] = 'article'
+        test_entry['ID'] = 'Chado2003'
+        test_entry['title'] = "A mock test title"
+        test_entry['year'] = "2003"
+        test_entry['pages'] = '2000'
+        test_entry['volume'] = 'v1'
+        test_entry['journal'] = 'Journal of Testing'
+        Pub.objects.create(type=test_cvterm,
+                           uniquename=test_entry['ID'],
+                           title=test_entry['title'],
+                           pyear=test_entry['year'],
+                           pages=test_entry['pages'],
+                           volume=test_entry['volume'])
+        # test PublicationLoader
+        test_entry2 = BibtexParser()
+        test_entry2['ENTRYTYPE'] = 'article'
+        test_entry2['ID'] = 'Chado2006'
+        test_entry2['title'] = "A mock test title"
+        test_entry2['year'] = "2006"
+        test_entry2['pages'] = '12000'
+        test_entry2['volume'] = 'v2'
+        test_entry2['journal'] = 'Journal of Testing'
+        bibtest = PublicationLoader(test_entry2['ENTRYTYPE'])
+        bibtest.store_bibtex_entry(test_entry2)
+        # test mock bibtexparser object database
+        db = BibDatabase()
+        db.entries = [
+                      {'journal': 'Nice Journal',
+                       'comments': 'A comment',
+                       'pages': '12--23',
+                       'month': 'jan',
+                       'abstract': 'This is an abstract. This line should be '
+                                   'long enough to test multilines...',
+                       'title': 'An amazing title',
+                       'year': '2013',
+                       'volume': '12',
+                       'ID': 'Cesar2013',
+                       'author': 'Jean César',
+                       'keyword': 'keyword1, keyword2',
+                       'ENTRYTYPE': 'article'}
+                     ]
+        for entry in db.entries:
+            bibtest2 = PublicationLoader(entry['ENTRYTYPE'])
+            bibtest2.store_bibtex_entry(entry)
 
 
 class SimilarityTest(TestCase):
-    """Tests Loaders - SequenceLoader."""
+    """Tests Loaders - SimilarityLoader."""
 
     def test_store_bio_blast_record(self):
         """Tests - __init__ and store_bio_blast_record."""
