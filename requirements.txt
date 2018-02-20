@@ -5,3 +5,4 @@ psycopg2==2.7.3.2
 pysam==0.13
 tqdm==4.19.5
 typing==3.6.4
+bibtexparser=1.0.1
