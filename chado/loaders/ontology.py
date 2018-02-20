@@ -129,7 +129,7 @@ class OntologyLoader(object):
         dbxref_typedef, created = Dbxref.objects.get_or_create(
             db=typedef_db,
             accession=typedef_accession,
-            defaults={'description': typedef['def'],
+            defaults={'description': typedef.get('def'),
                       'version': ''})
 
         # Save the typedef to the Cvterm model
@@ -137,7 +137,7 @@ class OntologyLoader(object):
             name=typedef_name,
             is_obsolete=0,
             dbxref=dbxref_typedef,
-            defaults={'definition': typedef['def'],
+            defaults={'definition': typedef.get('def'),
                       'is_relationshiptype': 1,
                       'cv': self.cv})
 
@@ -217,10 +217,12 @@ class OntologyLoader(object):
         if lock is not None:
             with lock:
                 # Load definition and dbxrefs
-                self.process_cvterm_def(
-                        cvterm, data['def'])
+                if data.get('def'):
+                    self.process_cvterm_def(
+                            cvterm, data['def'])
         else:
-            self.process_cvterm_def(cvterm, data['def'])
+            if data.get('def'):
+                self.process_cvterm_def(cvterm, data['def'])
 
         # Load alt_ids
         if data.get('alt_id') is not None:

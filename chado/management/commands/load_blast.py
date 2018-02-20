@@ -1,6 +1,8 @@
 """Load FASTA file."""
 
-from Bio.Blast import NCBIXML
+# disabling NCBIXML
+# from Bio.Blast import NCBIXML
+from Bio import SearchIO
 from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.similarity import SimilarityLoader
@@ -75,16 +77,22 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
-            blast_records = NCBIXML.parse(open(file))
+            # disabling NCBIXML
+            # blast_records = NCBIXML.parse(open(file))
+            blast_records = SearchIO.parse(file, 'blast-xml')
         except ValueError as e:
             return CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for record in blast_records:
-            if len(record.alignments) > 0:
-                tasks.append(pool.submit(blast_file.store_bio_blast_record,
-                                         record))
+            if len(record.hsps) > 0:
+                # disabling NCBIXML
+                # if len(record.alignments) > 0:
+                tasks.append(pool.submit(
+                    blast_file.store_bio_searchio_query_result, record))
+                # disabling NCBIXML
+                # blast_file.store_bio_blast_record, record))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

@@ -1,11 +1,7 @@
 biopython==1.70
-decorator==4.2.1
 Django==2.0.1
-networkx==2.1
-numpy==1.14.0
 obonet==0.2.2
 psycopg2==2.7.3.2
 pysam==0.13
-pytz==2017.3
 tqdm==4.19.5
-cachetools==2.0.1
+typing==3.6.4
