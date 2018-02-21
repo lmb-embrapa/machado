@@ -15,7 +15,7 @@ from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from chado.models import Feature, Featureprop, FeatureSynonym
 from chado.models import FeatureCvterm, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
-from chado.models import Pub
+from chado.models import Pub, PubDbxref
 from django.test import TestCase
 from datetime import datetime, timezone
 import obonet
@@ -39,17 +39,25 @@ class PublicationTest(TestCase):
                                             is_obsolete=0,
                                             is_relationshiptype=0)
         # create test pub entry
-        Pub.objects.create(type=test_cvterm,
-                           uniquename='Test2018',
-                           title='Test Title',
-                           pyear='2018',
-                           pages='2000',
-                           volume='1',
-                           series_name='Journal of Testing')
+        test_pub = Pub.objects.create(type=test_cvterm,
+                                      uniquename='Test2018',
+                                      title='Test Title',
+                                      pyear='2018',
+                                      pages='2000',
+                                      volume='1',
+                                      series_name='Journal of Testing')
+        test_doi = '10.1111/t12121-013-1415-6'
+        test_db_doi = Db.objects.create(name='doi')
+        test_dbxref_doi = Dbxref.objects.create(
+                                        accession=test_doi,
+                                        db=test_db_doi)
+        PubDbxref.objects.create(pub=test_pub,
+                                 dbxref=test_dbxref_doi,
+                                 is_current=True)
 
-        # create mock object for insertion
+        # create mock object for insertion.
         class BibtexParser(dict):
-            """Mock BibTeXParser object"""
+            """Mock BibTeXParser object."""
 
         test_entry = BibtexParser()
         test_entry['ENTRYTYPE'] = 'article'
@@ -57,14 +65,21 @@ class PublicationTest(TestCase):
         test_entry['title'] = "A mock test title"
         test_entry['year'] = "2003"
         test_entry['pages'] = '2000'
+        test_entry['doi'] = '10.1111/s12122-012-1313-4'
         test_entry['volume'] = 'v1'
         test_entry['journal'] = 'Journal of Testing'
-        Pub.objects.create(type=test_cvterm,
-                           uniquename=test_entry['ID'],
-                           title=test_entry['title'],
-                           pyear=test_entry['year'],
-                           pages=test_entry['pages'],
-                           volume=test_entry['volume'])
+        test_pub2 = Pub.objects.create(type=test_cvterm,
+                                       uniquename=test_entry['ID'],
+                                       title=test_entry['title'],
+                                       pyear=test_entry['year'],
+                                       pages=test_entry['pages'],
+                                       volume=test_entry['volume'])
+        test_dbxref_doi2 = Dbxref.objects.create(
+                                        accession=test_entry['doi'],
+                                        db=test_db_doi)
+        PubDbxref.objects.create(pub=test_pub2,
+                                 dbxref=test_dbxref_doi2,
+                                 is_current=True)
         # test PublicationLoader
         test_entry2 = BibtexParser()
         test_entry2['ENTRYTYPE'] = 'article'
@@ -72,6 +87,7 @@ class PublicationTest(TestCase):
         test_entry2['title'] = "A mock test title"
         test_entry2['year'] = "2006"
         test_entry2['pages'] = '12000'
+        test_entry2['doi'] = '10.1111/s12122-012-1313-4'
         test_entry2['volume'] = 'v2'
         test_entry2['journal'] = 'Journal of Testing'
         bibtest = PublicationLoader(test_entry2['ENTRYTYPE'])
@@ -87,6 +103,7 @@ class PublicationTest(TestCase):
                                    'long enough to test multilines...',
                        'title': 'An amazing title',
                        'year': '2013',
+                       'doi': '10.1111/s12122-012-1313-4',
                        'volume': '12',
                        'ID': 'Cesar2013',
                        'author': 'Jean César',
