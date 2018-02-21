@@ -19,6 +19,8 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--file", help="BibTeX File", required=True,
                             type=str)
+        parser.add_argument("--cpu", help="Number of threads", default=1,
+                            type=int)
 
     def handle(self,
                file=str,
