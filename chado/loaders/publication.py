@@ -1,5 +1,5 @@
 """Load publication file."""
-from chado.models import Pub, Cvterm, Cv, Dbxref, Db
+from chado.models import Pub, PubDbxref, Cvterm, Cv, Dbxref, Db
 from chado.loaders.exceptions import ImportingError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -10,7 +10,7 @@ class PublicationLoader(object):
 
     help = 'Load publication records.'
 
-    def __init__(self, entrytype):
+    def __init__(self, entrytype: str) -> None:
         """Execute the init function."""
         try:
             self.db_type, created = Db.objects.get_or_create(name='internal')
@@ -27,7 +27,7 @@ class PublicationLoader(object):
         except IntegrityError as e:
             raise ImportingError(e)
 
-    def store_bibtex_entry(self, entry=object):
+    def store_bibtex_entry(self, entry: dict):
         """Store bibtex entry."""
         pub = 0
         try:
@@ -38,6 +38,20 @@ class PublicationLoader(object):
                                      pages=entry['pages'],
                                      volume=entry['volume'],
                                      series_name=entry['journal'])
+            # try to store DOI information
+            if (pub and (("doi" in entry) or ("DOI" in entry))):
+                    self.db_doi, created = Db.objects.get_or_create(name='doi')
+                    doi = ""
+                    if ("doi" in entry):
+                        doi = entry["doi"]
+                    elif ("DOI" in entry):
+                        doi = entry["DOI"]
+                    self.dbxref_doi, created = Dbxref.objects.get_or_create(
+                                                    accession=doi,
+                                                    db=self.db_doi)
+                    PubDbxref.objects.create(pub=pub,
+                                             dbxref=self.dbxref_doi,
+                                             is_current=True)
         except ObjectDoesNotExist as e1:
                 raise ImportingError(e1)
         return pub
