@@ -54,7 +54,6 @@ class PublicationTest(TestCase):
         PubDbxref.objects.create(pub=test_pub,
                                  dbxref=test_dbxref_doi,
                                  is_current=True)
-
         # create mock object for insertion.
         class BibtexParser(dict):
             """Mock BibTeXParser object."""
@@ -88,6 +87,7 @@ class PublicationTest(TestCase):
         test_entry2['year'] = "2006"
         test_entry2['pages'] = '12000'
         test_entry2['doi'] = '10.1111/s12122-012-1313-4'
+        test_entry2['author'] = 'Foo, b. and Foo1, b. and Foo b.'
         test_entry2['volume'] = 'v2'
         test_entry2['journal'] = 'Journal of Testing'
         bibtest = PublicationLoader(test_entry2['ENTRYTYPE'])
@@ -106,7 +106,7 @@ class PublicationTest(TestCase):
                        'doi': '10.1111/s12122-012-1313-4',
                        'volume': '12',
                        'ID': 'Cesar2013',
-                       'author': 'Jean César',
+                       'author': 'Foo, b. and Foo1, b. and Foo b.',
                        'keyword': 'keyword1, keyword2',
                        'ENTRYTYPE': 'article'}
                      ]
