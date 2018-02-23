@@ -1,5 +1,5 @@
 """Load publication file."""
-from chado.models import Pub, PubDbxref, Cvterm, Cv, Dbxref, Db
+from chado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
 from chado.loaders.exceptions import ImportingError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -52,6 +52,31 @@ class PublicationLoader(object):
                     PubDbxref.objects.create(pub=pub,
                                              dbxref=self.dbxref_doi,
                                              is_current=True)
+            # try to store author information
+            if (pub and (("author" in entry) or ("AUTHOR" in entry))):
+                    author_line = ""
+                    if ("author" in entry):
+                        author_line = entry["author"]
+                    elif ("AUTHOR" in entry):
+                        author_line = entry["AUTHOR"]
+
+                    # retrieve every givenname and surname and create tables
+                    # for them (authors are separated by "and"; surnames and
+                    # names are separated by ",".
+                    authors = author_line.split("and")
+
+                    # enumerate returns author ranks automagically
+                    for rank, author in enumerate(authors):
+                        names = author.split(",")
+                        surname = names[0].lstrip()
+                        givennames = ""
+                        if (len(names) > 1):
+                            givennames = names[1].lstrip()
+                        self.pubauthor, created = Pubauthor.objects.\
+                            get_or_create(pub=pub,
+                                          rank=rank,
+                                          surname=surname,
+                                          givennames=givennames)
         except ObjectDoesNotExist as e1:
                 raise ImportingError(e1)
         return pub
