@@ -54,6 +54,7 @@ class PublicationTest(TestCase):
         PubDbxref.objects.create(pub=test_pub,
                                  dbxref=test_dbxref_doi,
                                  is_current=True)
+
         # create mock object for insertion.
         class BibtexParser(dict):
             """Mock BibTeXParser object."""
@@ -259,6 +260,21 @@ class SequenceTest(TestCase):
         self.assertEqual('chromosome 1', test_feature.name)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
+        # DOI TESTING
+        test_db_pub = Db.objects.create(name='PUBLICATION')
+        Dbxref.objects.create(
+                accession='10.1186/s12864-016-2535-300002',
+                db=test_db_pub)
+        test_seq_file_pub = SequenceLoader(
+                                       filename='sequence_doi.fasta',
+                                       organism='Mus musculus',
+                                       soterm='assembly',
+                                       doi='10.1186/s12864-016-2535-300002')
+        test_seq_obj_pub = SeqRecord(
+                                 Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                                 id='chr2',
+                                 description='chromosome 2')
+        test_seq_file_pub.store_biopython_seq_record(test_seq_obj_pub)
 
 
 class FeatureTest(TestCase):
