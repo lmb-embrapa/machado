@@ -3,7 +3,7 @@
 from Bio.SeqRecord import SeqRecord
 from chado.loaders.common import retrieve_organism, retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
-from chado.models import Db, Dbxref, Dbxrefprop, Feature
+from chado.models import Db, Dbxref, Dbxrefprop, Feature, FeatureDbxref
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -17,6 +17,7 @@ class SequenceLoader(object):
                  filename: str,
                  organism: str,
                  soterm: str,
+                 doi: str=None,
                  description: str=None,
                  url: str=None) -> None:
         """Execute the init function."""
@@ -40,6 +41,14 @@ class SequenceLoader(object):
                                              term=soterm)
         self.cvterm_contained_in = retrieve_ontology_term(
             ontology='relationship', term='contained in')
+
+        # Retrieve DOI's Dbxref
+        self.dbxref_doi = None
+        if doi:
+            try:
+                self.dbxref_doi = Dbxref.objects.get(accession=doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
 
     def store_biopython_seq_record(self,
                                    seq_obj: SeqRecord,
@@ -78,3 +87,13 @@ class SequenceLoader(object):
                               timelastmodified=datetime.
                               now(timezone.utc))
             feature.save()
+
+            # DOI: try to link sequence to publication's DOI
+            if (feature and self.dbxref_doi):
+                try:
+                    FeatureDbxref.objects.create(
+                            feature=feature,
+                            dbxref=self.dbxref_doi,
+                            is_current=True)
+                except IntegrityError as e:
+                    raise ImportingError(e)
