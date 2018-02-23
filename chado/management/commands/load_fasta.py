@@ -32,6 +32,9 @@ class Command(BaseCommand):
                             required=False, type=str)
         parser.add_argument("--url", help="URL",
                             required=False, type=str)
+        parser.add_argument("--doi", help="DOI of the article reference to "
+                            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
+                            required=False, type=str)
 
     def handle(self,
                file: str,
@@ -41,6 +44,7 @@ class Command(BaseCommand):
                cpu: int=1,
                description: str=None,
                url: str=None,
+               doi: str=None,
                verbosity: int=1,
                **options):
         """Execute the main function."""
@@ -60,7 +64,8 @@ class Command(BaseCommand):
                 organism=organism,
                 soterm=soterm,
                 description=description,
-                url=url)
+                url=url,
+                doi=doi)
         except ImportingError as e:
             raise CommandError(e)
 
