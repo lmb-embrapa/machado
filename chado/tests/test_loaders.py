@@ -261,10 +261,28 @@ class SequenceTest(TestCase):
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
         # DOI TESTING
-        test_db_pub = Db.objects.create(name='PUBLICATION')
-        Dbxref.objects.create(
-                accession='10.1186/s12864-016-2535-300002',
-                db=test_db_pub)
+        db2 = BibDatabase()
+        db2.entries = [
+
+                      {'journal': 'Nice Journal',
+                       'comments': 'A comment',
+                       'pages': '12--23',
+                       'month': 'jan',
+                       'abstract': 'This is an abstract. This line should be '
+                                   'long enough to test multilines...',
+                       'title': 'An amazing title',
+                       'year': '2013',
+                       'doi': '10.1186/s12864-016-2535-300002',
+                       'volume': '12',
+                       'ID': 'Teste2018',
+                       'author': 'Foo, b. and Foo1, b. and Foo b.',
+                       'keyword': 'keyword1, keyword2',
+                       'ENTRYTYPE': 'article'}
+                     ]
+        for entry in db2.entries:
+            bibtest3 = PublicationLoader(entry['ENTRYTYPE'])
+            bibtest3.store_bibtex_entry(entry)
+
         test_seq_file_pub = SequenceLoader(
                                        filename='sequence_doi.fasta',
                                        organism='Mus musculus',
