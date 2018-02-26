@@ -3,7 +3,7 @@
 from Bio.SeqRecord import SeqRecord
 from chado.loaders.common import retrieve_organism, retrieve_ontology_term
 from chado.loaders.exceptions import ImportingError
-from chado.models import Db, Dbxref, Dbxrefprop, Feature, FeatureDbxref
+from chado.models import Db, Dbxref, Dbxrefprop, Feature, FeaturePub, PubDbxref
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -43,10 +43,15 @@ class SequenceLoader(object):
             ontology='relationship', term='contained in')
 
         # Retrieve DOI's Dbxref
-        self.dbxref_doi = None
+        dbxref_doi = None
+        self.pub_dbxref_doi = None
         if doi:
             try:
-                self.dbxref_doi = Dbxref.objects.get(accession=doi)
+                dbxref_doi = Dbxref.objects.get(accession=doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
+            try:
+                self.pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
@@ -89,11 +94,10 @@ class SequenceLoader(object):
             feature.save()
 
             # DOI: try to link sequence to publication's DOI
-            if (feature and self.dbxref_doi):
+            if (feature and self.pub_dbxref_doi):
                 try:
-                    FeatureDbxref.objects.create(
+                    FeaturePub.objects.create(
                             feature=feature,
-                            dbxref=self.dbxref_doi,
-                            is_current=True)
+                            pub_id=self.pub_dbxref_doi.pub_id)
                 except IntegrityError as e:
                     raise ImportingError(e)
