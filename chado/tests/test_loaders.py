@@ -15,7 +15,7 @@ from chado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref, Organism
 from chado.models import Feature, Featureprop, FeatureSynonym
 from chado.models import FeatureCvterm, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
-from chado.models import Pub, PubDbxref
+from chado.models import Pub, PubDbxref, FeaturePub
 from django.test import TestCase
 from datetime import datetime, timezone
 import obonet
@@ -39,12 +39,12 @@ class PublicationTest(TestCase):
                                             is_obsolete=0,
                                             is_relationshiptype=0)
         # create test pub entry
+        # ommited 'volume' just to test null values
         test_pub = Pub.objects.create(type=test_cvterm,
                                       uniquename='Test2018',
                                       title='Test Title',
                                       pyear='2018',
                                       pages='2000',
-                                      volume='1',
                                       series_name='Journal of Testing')
         test_doi = '10.1111/t12121-013-1415-6'
         test_db_doi = Db.objects.create(name='doi')
@@ -55,25 +55,27 @@ class PublicationTest(TestCase):
                                  dbxref=test_dbxref_doi,
                                  is_current=True)
 
+        pub_test = Pub.objects.get(uniquename='Test2018')
+        self.assertEqual('2018', pub_test.pyear)
+
         # create mock object for insertion.
         class BibtexParser(dict):
             """Mock BibTeXParser object."""
 
         test_entry = BibtexParser()
-        test_entry['ENTRYTYPE'] = 'article'
         test_entry['ID'] = 'Chado2003'
         test_entry['title'] = "A mock test title"
         test_entry['year'] = "2003"
         test_entry['pages'] = '2000'
         test_entry['doi'] = '10.1111/s12122-012-1313-4'
-        test_entry['volume'] = 'v1'
         test_entry['journal'] = 'Journal of Testing'
+        # 'volume' information not declared: test get null value
         test_pub2 = Pub.objects.create(type=test_cvterm,
                                        uniquename=test_entry['ID'],
                                        title=test_entry['title'],
                                        pyear=test_entry['year'],
                                        pages=test_entry['pages'],
-                                       volume=test_entry['volume'])
+                                       volume=test_entry.get('volume'))
         test_dbxref_doi2 = Dbxref.objects.create(
                                         accession=test_entry['doi'],
                                         db=test_db_doi)
@@ -93,12 +95,14 @@ class PublicationTest(TestCase):
         test_entry2['journal'] = 'Journal of Testing'
         bibtest = PublicationLoader(test_entry2['ENTRYTYPE'])
         bibtest.store_bibtex_entry(test_entry2)
-        # test mock bibtexparser object database
+        test_bibtex = Pub.objects.get(uniquename='Chado2006')
+        self.assertEqual('v2', test_bibtex.volume)
+        # test mock bibtexparser object database'
         db = BibDatabase()
+        # pages ommited
         db.entries = [
                       {'journal': 'Nice Journal',
                        'comments': 'A comment',
-                       'pages': '12--23',
                        'month': 'jan',
                        'abstract': 'This is an abstract. This line should be '
                                    'long enough to test multilines...',
@@ -114,6 +118,9 @@ class PublicationTest(TestCase):
         for entry in db.entries:
             bibtest2 = PublicationLoader(entry['ENTRYTYPE'])
             bibtest2.store_bibtex_entry(entry)
+        test_bibtex2 = Pub.objects.get(uniquename='Cesar2013')
+        self.assertEqual('12', test_bibtex2.volume)
+        self.assertEqual(None, test_bibtex2.pages)
 
 
 class SimilarityTest(TestCase):
@@ -260,6 +267,9 @@ class SequenceTest(TestCase):
         self.assertEqual('chromosome 1', test_feature.name)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
+
+    def test_store_biopython_seq_record_DOI(self):
+        """Tests - __init__ and store_biopython_seq_record with DOI."""
         # DOI TESTING
         db2 = BibDatabase()
         db2.entries = [
@@ -282,7 +292,25 @@ class SequenceTest(TestCase):
         for entry in db2.entries:
             bibtest3 = PublicationLoader(entry['ENTRYTYPE'])
             bibtest3.store_bibtex_entry(entry)
+        test_bibtex3 = Pub.objects.get(uniquename='Teste2018')
+        test_bibtex3_pubdbxref = PubDbxref.objects.get(pub=test_bibtex3)
+        test_bibtex3_dbxref = Dbxref.objects.get(
+                dbxref_id=test_bibtex3_pubdbxref.dbxref_id)
+        self.assertEqual('10.1186/s12864-016-2535-300002',
+                         test_bibtex3_dbxref.accession)
 
+        Organism.objects.create(genus='Mus', species='musculus')
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
+                              is_obsolete=0, is_relationshiptype=0)
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         test_seq_file_pub = SequenceLoader(
                                        filename='sequence_doi.fasta',
                                        organism='Mus musculus',
@@ -293,6 +321,17 @@ class SequenceTest(TestCase):
                                  id='chr2',
                                  description='chromosome 2')
         test_seq_file_pub.store_biopython_seq_record(test_seq_obj_pub)
+        test_feature_doi = Feature.objects.get(uniquename='chr2')
+
+        self.assertEqual('chromosome 2', test_feature_doi.name)
+        test_feature_pub_doi = FeaturePub.objects.get(
+                pub_id=test_bibtex3.pub_id)
+        test_pub_dbxref_doi = PubDbxref.objects.get(
+                pub_id=test_feature_pub_doi.pub_id)
+        test_dbxref_doi = Dbxref.objects.get(
+                dbxref_id=test_pub_dbxref_doi.dbxref_id)
+        self.assertEqual('10.1186/s12864-016-2535-300002',
+                         test_dbxref_doi.accession)
 
 
 class FeatureTest(TestCase):
