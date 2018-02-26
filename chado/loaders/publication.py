@@ -29,15 +29,14 @@ class PublicationLoader(object):
 
     def store_bibtex_entry(self, entry: dict):
         """Store bibtex entry."""
-        pub = 0
         try:
             pub = Pub.objects.create(type=self.cvterm_type,
-                                     uniquename=entry['ID'],
-                                     title=entry['title'],
-                                     pyear=entry['year'],
-                                     pages=entry['pages'],
-                                     volume=entry['volume'],
-                                     series_name=entry['journal'])
+                                     uniquename=entry.get('ID'),
+                                     title=entry.get('title'),
+                                     pyear=entry.get('year'),
+                                     pages=entry.get('pages'),
+                                     volume=entry.get('volume'),
+                                     series_name=entry.get('journal'))
             # try to store DOI information
             if (pub and (("doi" in entry) or ("DOI" in entry))):
                     self.db_doi, created = Db.objects.get_or_create(name='doi')
@@ -79,4 +78,3 @@ class PublicationLoader(object):
                                           givennames=givennames)
         except ObjectDoesNotExist as e1:
                 raise ImportingError(e1)
-        return pub
