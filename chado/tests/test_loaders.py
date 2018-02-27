@@ -28,62 +28,8 @@ class PublicationTest(TestCase):
 
     def test_store_pub_record(self):
         """Tests - __init__ and store_pub_record."""
-        test_db = Db.objects.create(name='internal')
-        test_dbxref = Dbxref.objects.create(accession='article',
-                                            db=test_db)
-        test_cv = Cv.objects.create(name='null')
-        test_cvterm = Cvterm.objects.create(
-                                            name='article',
-                                            cv=test_cv,
-                                            dbxref=test_dbxref,
-                                            is_obsolete=0,
-                                            is_relationshiptype=0)
-        # create test pub entry
-        # ommited 'volume' just to test null values
-        test_pub = Pub.objects.create(type=test_cvterm,
-                                      uniquename='Test2018',
-                                      title='Test Title',
-                                      pyear='2018',
-                                      pages='2000',
-                                      series_name='Journal of Testing')
-        test_doi = '10.1111/t12121-013-1415-6'
-        test_db_doi = Db.objects.create(name='doi')
-        test_dbxref_doi = Dbxref.objects.create(
-                                        accession=test_doi,
-                                        db=test_db_doi)
-        PubDbxref.objects.create(pub=test_pub,
-                                 dbxref=test_dbxref_doi,
-                                 is_current=True)
-
-        pub_test = Pub.objects.get(uniquename='Test2018')
-        self.assertEqual('2018', pub_test.pyear)
-
-        # create mock object for insertion.
-        class BibtexParser(dict):
-            """Mock BibTeXParser object."""
-
-        test_entry = BibtexParser()
-        test_entry['ID'] = 'Chado2003'
-        test_entry['title'] = "A mock test title"
-        test_entry['year'] = "2003"
-        test_entry['pages'] = '2000'
-        test_entry['doi'] = '10.1111/s12122-012-1313-4'
-        test_entry['journal'] = 'Journal of Testing'
-        # 'volume' information not declared: test get null value
-        test_pub2 = Pub.objects.create(type=test_cvterm,
-                                       uniquename=test_entry['ID'],
-                                       title=test_entry['title'],
-                                       pyear=test_entry['year'],
-                                       pages=test_entry['pages'],
-                                       volume=test_entry.get('volume'))
-        test_dbxref_doi2 = Dbxref.objects.create(
-                                        accession=test_entry['doi'],
-                                        db=test_db_doi)
-        PubDbxref.objects.create(pub=test_pub2,
-                                 dbxref=test_dbxref_doi2,
-                                 is_current=True)
         # test PublicationLoader
-        test_entry2 = BibtexParser()
+        test_entry2 = dict()
         test_entry2['ENTRYTYPE'] = 'article'
         test_entry2['ID'] = 'Chado2006'
         test_entry2['title'] = "A mock test title"
