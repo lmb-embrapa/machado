@@ -1,4 +1,4 @@
-"""Tests loaders functions."""
+"""Tests organism loader."""
 
 from chado.loaders.organism import OrganismLoader
 from chado.models import Db, Dbxref, Organism, OrganismDbxref, Organismprop
