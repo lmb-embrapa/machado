@@ -44,13 +44,35 @@ class Command(BaseCommand):
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        current_id = None
+        taxid, scname = '', ''
+        synonyms, common_names = [], []
         for line in file_names:
             columns = re.split('\s\|\s', line)
-            if columns[3] == 'scientific name':
+            if current_id is not None and current_id != columns[0]:
+                # store if new record
                 tasks.append(pool.submit(
-                    organism_db.store_ncbi_taxonomy_names_record,
-                    columns[0],
-                    columns[1]))
+                    organism_db.store_organism_record,
+                    taxid, scname, synonyms, common_names))
+                taxid, scname = '', ''
+                synonyms, common_names = [], []
+
+            current_id = columns[0]
+
+            # get data while current_id remains unchanged
+            if columns[3] == 'scientific name':
+                taxid = columns[0]
+                scname = columns[1]
+            elif columns[3] == 'synonym':
+                synonyms.append(columns[1])
+            elif columns[3] == 'common name':
+                common_names.append(columns[1])
+        else:
+            # insert the last record
+            tasks.append(pool.submit(
+                organism_db.store_organism_record,
+                taxid, scname, synonyms, common_names))
+
         if verbosity > 0:
             self.stdout.write('Loading names file')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

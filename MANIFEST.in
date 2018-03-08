@@ -11,3 +11,5 @@ recursive-include chado/tests *
 recursive-include docs *
 exclude chado/view.py
 exclude chado/tests.py
+
+global-exclude *.pyc *.pyo *.py{} *.py-e
