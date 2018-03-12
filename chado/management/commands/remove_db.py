@@ -2,9 +2,9 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from chado.models import Db, Dbxref, Feature, Featureloc, FeatureDbxref
+from chado.models import Db, Dbxref, Dbxrefprop, Feature, Featureloc
 from chado.models import Featureprop, FeatureRelationship, FeatureSynonym
-from chado.models import FeatureCvterm, Organism, OrganismDbxref
+from chado.models import FeatureCvterm, FeatureDbxref
 
 
 class Command(BaseCommand):
@@ -25,6 +25,7 @@ class Command(BaseCommand):
             db = Db.objects.get(name=name)
             dbxref_ids = Dbxref.objects.filter(
                 db=db).values_list('dbxref_id', flat=True)
+            Dbxrefprop.objects.filter(dbxref_id__in=dbxref_ids).delete()
             feature_ids = Feature.objects.filter(
                 dbxref_id__in=dbxref_ids).values_list('feature_id', flat=True)
             Featureloc.objects.filter(feature_id__in=feature_ids).delete()
@@ -37,10 +38,6 @@ class Command(BaseCommand):
             FeatureRelationship.objects.filter(
                 subject_id__in=feature_ids).delete()
             Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
-            organism_ids = OrganismDbxref.objects.filter(
-                dbxref_id__in=dbxref_ids).values_list('organism_id', flat=True)
-            Organism.objects.filter(organism_id__in=organism_ids).delete()
-            OrganismDbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Dbxref.objects.filter(db=db).delete()
             db.delete()
 
