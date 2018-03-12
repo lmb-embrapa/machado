@@ -1,4 +1,4 @@
-"""Taxonomy."""
+"""Organism."""
 
 from chado.loaders.exceptions import ImportingError
 from chado.models import Cv, Cvterm, Db, Dbxref
@@ -8,11 +8,10 @@ from typing import List, Optional, Tuple
 
 
 class OrganismLoader(object):
-    """Load taxonomy: organism names and relationships."""
+    """Load organism records."""
 
     def __init__(self, organism_db: str) -> None:
         """Execute the init function."""
-        # Save DB taxonomy info
         try:
             self.db = Db.objects.create(name=organism_db)
 
@@ -48,7 +47,7 @@ class OrganismLoader(object):
     def store_organism_record(
             self, taxid: str, scname: str, synonyms: List[str],
             common_names: List[str]) -> None:
-        """Store Biopython SeqRecord."""
+        """Store organism record."""
         dbxref = Dbxref.objects.create(
             db=self.db, accession=taxid, description=scname)
 
