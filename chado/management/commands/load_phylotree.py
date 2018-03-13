@@ -3,19 +3,34 @@
 from chado.loaders.common import FileValidator
 from chado.loaders.exceptions import ImportingError
 from chado.loaders.phylotree import PhylotreeLoader
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+from typing import Any, Dict
 import re
 
 
 class Command(BaseCommand):
-    """Load organism file."""
+    """Load phylonodes file."""
 
-    help = 'Load phylonodes file'
+    help = """Load phylonodes file. Each phylonode will get a left and right
+              indexes, which are calculated by walking down the entire tree
+              structure (reference: Chado load_ncbi_taxonomy.pl)"""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--nodes", help="names file <e.g.: nodes.dmp>",
+        parser.add_argument("--file", help="names file <e.g.: nodes.dmp>",
                             required=True, type=str)
+        parser.add_argument("--name", help="Set a phylotree name "
+                            "<e.g.: NCBI taxonomy tree>",
+                            required=True, type=str)
+        parser.add_argument("--organismdb", help="inform the Organism DB name "
+                            "<e.g.: DB:NCBI_taxonomy>",
+                            required=True, type=str)
+        parser.add_argument("--cpu",
+                            help="Number of threads",
+                            default=1,
+                            type=int)
 
     def walktree(self, node_id: int):
         """Walk the tree setting left_idx and right_idx."""
@@ -29,26 +44,10 @@ class Command(BaseCommand):
         self.ctr += 1
         self.nodes[node_id]['right_idx'] = self.ctr
 
-    def walktree_store(self, phylotree: PhylotreeLoader, node_id: int):
-        """Walk the tree to store data in valid order."""
-        self.ctr += 1
-        if self.ctr % 10000 == 0:
-            self.stdout.write(' {} nodes loaded'.format(self.ctr))
-        data = self.nodes[node_id]
-        phylotree.store_phylonode_record(
-            tax_id=node_id,
-            parent_id=data['parent_id'],
-            level=data['level'],
-            left_idx=data['left_idx'],
-            right_idx=data['right_idx'])
-
-        for child_id in self.nodes[node_id]['children']:
-            if node_id == child_id:
-                continue
-            self.walktree_store(phylotree, child_id)
-
     def handle(self,
-               nodes: str,
+               file: str,
+               name: str,
+               organismdb: str,
                verbosity: int=1,
                cpu: int=1,
                **options):
@@ -57,19 +56,20 @@ class Command(BaseCommand):
             self.stdout.write('Preprocessing')
 
         try:
-            FileValidator().validate(nodes)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
         try:
             phylotree = PhylotreeLoader(
-                phylotree_name='NCBI taxonomy tree')
+                phylotree_name=name,
+                organism_db=organismdb)
         except ImportingError as e:
             raise CommandError(e)
 
-        file_nodes = open(nodes)
+        file_nodes = open(file)
 
-        self.nodes = dict()
+        self.nodes: Dict[int, Dict[str, Any]] = dict()
         self.ctr = 0
         for line in file_nodes:
             columns = re.split('\s\|\s', line)
@@ -91,11 +91,46 @@ class Command(BaseCommand):
             else:
                 self.nodes[parent_id]['children'].append(tax_id)
 
-        self.walktree(1)
+        self.walktree(node_id=1)
 
         if verbosity > 0:
             self.stdout.write('Loading')
-        self.ctr = 0
-        self.walktree_store(phylotree, 1)
+
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        tasks = list()
+        # By setting the parent_id to None it's possible to load the
+        # nodes randomly and using threads.
+        try:
+            for key, data in self.nodes.items():
+                tasks.append(pool.submit(
+                    phylotree.store_phylonode_record,
+                    tax_id=key,
+                    parent_id=None,
+                    level=data['level'],
+                    left_idx=data['left_idx'],
+                    right_idx=data['right_idx']))
+            for task in tqdm(as_completed(tasks), total=len(tasks)):
+                if task.result():
+                    tax_id, phylonode = task.result()
+                    self.nodes[tax_id]['phylonode_id'] = phylonode.phylonode_id
+        except KeyError as e:
+            raise CommandError('Could not calculate {}. Make it sure it is '
+                               'possible to walk the entire tree '
+                               'structure.'.format(e))
+
+        if verbosity > 0:
+            self.stdout.write('Loading nodes relationships')
+        tasks = list()
+        # Load the nodes relationship info
+        for key, data in self.nodes.items():
+            if data.get('parent_id') is None:
+                continue
+            tasks.append(pool.submit(
+                phylotree.update_parent_phylonode_id,
+                data['phylonode_id'],
+                data['parent_id']))
+        for task in tqdm(as_completed(tasks), total=len(tasks)):
+            if task.result():
+                raise(task.result())
 
         self.stdout.write(self.style.SUCCESS('Done'))

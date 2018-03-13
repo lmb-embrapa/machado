@@ -16,13 +16,16 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--names", help="names file <e.g.: names.dmp>",
+        parser.add_argument("--file", help="names file <e.g.: names.dmp>",
+                            required=True, type=str)
+        parser.add_argument("--name", help="DB name <e.g.: DB:NCBI_taxonomy>",
                             required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
     def handle(self,
-               names: str,
+               file: str,
+               name: str,
                verbosity: int=1,
                cpu: int=1,
                **options):
@@ -31,16 +34,16 @@ class Command(BaseCommand):
             self.stdout.write('Preprocessing')
 
         try:
-            FileValidator().validate(names)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
         try:
-            organism_db = OrganismLoader(organism_db='DB:NCBI_taxonomy')
+            organism_db = OrganismLoader(organism_db=name)
         except ImportingError as e:
             raise CommandError(e)
 
-        file_names = open(names)
+        file_names = open(file)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
