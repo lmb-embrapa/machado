@@ -29,7 +29,7 @@ class SequenceLoader(object):
 
         # Save DB file info
         try:
-            self.db = Db.objects.create(name=filename,
+            self.db = Db.objects.create(name='FASTA_source',
                                         description=description,
                                         url=url)
             self.filename = filename
