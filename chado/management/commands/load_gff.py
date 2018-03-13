@@ -26,12 +26,17 @@ class Command(BaseCommand):
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
+        parser.add_argument("--doi", help="DOI of the article reference to "
+                            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
+                            required=False,
+                            type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
     def handle(self,
                file: str,
                organism: str,
+               doi: str=None,
                cpu: int=1,
                verbosity: int=1,
                **options):
@@ -51,7 +56,8 @@ class Command(BaseCommand):
             feature_file = FeatureLoader(
                 filename=filename,
                 source='GFF_source',
-                organism=organism
+                organism=organism,
+                doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)

@@ -3,7 +3,7 @@
 from chado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop
 from chado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from chado.models import Featureprop, FeatureSynonym, FeatureRelationship
-from chado.models import Pub, Synonym
+from chado.models import Pub, PubDbxref, FeaturePub, Synonym
 from chado.loaders.common import retrieve_ontology_term, retrieve_organism
 from chado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
@@ -35,7 +35,8 @@ class FeatureLoader(object):
     def __init__(self,
                  source: str,
                  filename: str,
-                 organism: str) -> None:
+                 organism: str,
+                 doi: str=None) -> None:
         """Execute the init function."""
         try:
             self.organism = retrieve_organism(organism)
@@ -70,6 +71,19 @@ class FeatureLoader(object):
             ontology='relationship', term='contained in')
         self.aa_cvterm = retrieve_ontology_term(
             ontology='sequence', term='polypeptide')
+
+        # Retrieve DOI's Dbxref
+        dbxref_doi = None
+        self.pub_dbxref_doi = None
+        if doi:
+            try:
+                dbxref_doi = Dbxref.objects.get(accession=doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
+            try:
+                self.pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
 
     def get_attributes(self, attributes: str) -> Dict[str, str]:
         """Get attributes."""
@@ -186,6 +200,15 @@ class FeatureLoader(object):
         except IntegrityError as e:
             raise ImportingError(
                     'ID {} already registered. {}'.format(attrs.get('id'), e))
+
+        # DOI: try to link feature to publication's DOI
+        if (feature and self.pub_dbxref_doi):
+            try:
+                FeaturePub.objects.get_or_create(
+                        feature=feature,
+                        pub_id=self.pub_dbxref_doi.pub_id)
+            except IntegrityError as e:
+                raise ImportingError(e)
 
         try:
             srcfeature = Feature.objects.get(

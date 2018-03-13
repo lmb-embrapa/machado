@@ -1,12 +1,15 @@
 """Tests feature loader."""
 
 from chado.models import Cv, Cvterm, Db, Dbxref, Organism
+from chado.models import Pub, PubDbxref, FeaturePub
 from chado.models import Feature, Featureprop, FeatureSynonym
 from chado.models import FeatureCvterm, FeatureDbxref
 from chado.models import Featureloc, FeatureRelationship
 from chado.loaders.feature import FeatureLoader
+from chado.loaders.publication import PublicationLoader
 from django.test import TestCase
 from datetime import datetime, timezone
+from bibtexparser.bibdatabase import BibDatabase
 
 
 class FeatureTest(TestCase):
@@ -165,12 +168,54 @@ class FeatureTest(TestCase):
         test_db = Db.objects.create(name='test_db')
         test_dbxref = Dbxref.objects.create(
                 accession='test_dbxref', db=test_db)
-        Feature.objects.create(
-                dbxref=test_dbxref, organism=test_organism, name='contig1',
-                type=test_cvterm_assembly, uniquename='contig1',
-                is_analysis=False, is_obsolete=False,
-                timeaccessioned=datetime.now(timezone.utc),
-                timelastmodified=datetime.now(timezone.utc))
+        feature = Feature.objects.create(
+                    dbxref=test_dbxref, organism=test_organism, name='contig1',
+                    type=test_cvterm_assembly, uniquename='contig1',
+                    is_analysis=False, is_obsolete=False,
+                    timeaccessioned=datetime.now(timezone.utc),
+                    timelastmodified=datetime.now(timezone.utc))
+
+        # DOI TESTING
+        db2 = BibDatabase()
+        db2.entries = [
+
+                      {'journal': 'Nice Journal',
+                       'comments': 'A comment',
+                       'pages': '12--23',
+                       'month': 'jan',
+                       'abstract': 'This is an abstract. This line should be '
+                                   'long enough to test multilines...',
+                       'title': 'An amazing title',
+                       'year': '2013',
+                       'doi': '10.1186/s12864-016-2535-300002',
+                       'volume': '12',
+                       'ID': 'Teste2018',
+                       'author': 'Foo, b. and Foo1, b. and Foo b.',
+                       'keyword': 'keyword1, keyword2',
+                       'ENTRYTYPE': 'article'}
+                     ]
+        for entry in db2.entries:
+            bibtest3 = PublicationLoader(entry['ENTRYTYPE'])
+            bibtest3.store_bibtex_entry(entry)
+        test_bibtex3 = Pub.objects.get(uniquename='Teste2018')
+        test_bibtex3_pubdbxref = PubDbxref.objects.get(pub=test_bibtex3)
+        test_bibtex3_dbxref = Dbxref.objects.get(
+                dbxref_id=test_bibtex3_pubdbxref.dbxref_id)
+        self.assertEqual('10.1186/s12864-016-2535-300002',
+                         test_bibtex3_dbxref.accession)
+        # DOI: try to link feature to publication's DOI
+        featurepub_test = None
+        if (feature and test_bibtex3_pubdbxref):
+            featurepub_test = FeaturePub.objects.create(
+                                 feature_id=feature.feature_id,
+                                 pub_id=test_bibtex3_pubdbxref.pub_id)
+        test_pub = Pub.objects.get(pub_id=featurepub_test.pub_id)
+        self.assertEqual('An amazing title', test_pub.title)
+        test_pubdbxref = PubDbxref.objects.get(pub=test_pub)
+        test_dbxref = Dbxref.objects.get(
+                dbxref_id=test_pubdbxref.dbxref_id)
+        self.assertEqual('10.1186/s12864-016-2535-300002',
+                         test_dbxref.accession)
 
         # create a tabix feature
         class TabixFeature(object):
