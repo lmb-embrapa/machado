@@ -1,17 +1,16 @@
 image: python:3.5.1
 pipelines:
-  defautl:
+  default:
     - step:
-      script:
-        - python setup.py install
-        - django-admin startproject WEBPROJECT
-        - python WEBPROJECT/manage.py test chado --settings chado/tests/settings.py
-      services:
-        - postgres
-
-definitions:
-  service:
-    postgres:
+        script:
+          - python setup.py install
+          - django-admin startproject WEBPROJECT
+          - python WEBPROJECT/manage.py test chado --settings chado/tests/settings.py
+        services:
+          - postgres
+definitions: 
+  services: 
+    postgres: 
       image: postgres
       environment:
         POSTGRES_DB: 'yourdatabase'
