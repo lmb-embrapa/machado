@@ -1,10 +1,14 @@
 <h1>Stats</h1>
 
-{% for key, data in context.items %}
-{{ key }}
+{% for item, data in context.items %}
+{{ item }}
 <ul>
-  {% for item in data.all %}
-    <li>{{ item.cv__name }}: {{ item.cv_id__count }}</li>
+  {% for entry in data %}
+    <li>
+      {% for value in entry.values %}
+        {{ value }}
+      {% endfor%}
+    </li>
   {% endfor %}
 </ul>
 {% endfor %}
