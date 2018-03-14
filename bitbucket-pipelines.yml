@@ -1,17 +1,17 @@
-image: python:3.5.1
+image: python:3.6
 pipelines:
-  defautl:
+  default:
     - step:
-      script:
-        - python setup.py install
-        - django-admin startproject WEBPROJECT
-        - python WEBPROJECT/manage.py test chado --settings chado/tests/settings.py
-      services:
-        - postgres
-
-definitions:
-  service:
-    postgres:
+        script:
+          - apt-get update && apt-get install -y samtools libbambamc-dev libbambamc0 pandoc 
+          - python3.6 setup.py install
+          - django-admin startproject WEBPROJECT
+          - python3.6 WEBPROJECT/manage.py test chado --settings chado.tests.settings
+        services:
+          - postgres
+definitions: 
+  services: 
+    postgres: 
       image: postgres
       environment:
         POSTGRES_DB: 'yourdatabase'
