@@ -36,6 +36,7 @@ setup(
         'obonet>=0.2.2',
         'tqdm>=4.19.5',
         'typing>=3.6.4',
+        'bibtexparser>=1.0.1',
     ],
     zip_safe=False,
 )
