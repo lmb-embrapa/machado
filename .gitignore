@@ -1,3 +1,5 @@
+__pycache__/
+*.py[cod]
+*-info
 build
 dist
-django_chado.egg-info
