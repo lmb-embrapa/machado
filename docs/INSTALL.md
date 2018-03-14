@@ -65,6 +65,15 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
 (Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
 
+
+In the WEBPROJECT/urls.py file, add chado to url_patterns.
+
+    url_patterns = [
+        ...
+        path('chado/', include('chado.urls')),
+    ]
+
+
 ### List django-chado commands
 
     python manage.py

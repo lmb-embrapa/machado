@@ -7,6 +7,7 @@ recursive-include chado/loaders *
 recursive-include chado/management *
 recursive-include chado/migrations *
 recursive-include chado/schemas *
+recursive-include chado/templates *
 recursive-include chado/tests *
 recursive-include docs *
 exclude chado/view.py
