@@ -8,7 +8,7 @@ pipelines:
           - source YOURPROJECT/bin/activate
           - python setup.py install
           - django-admin startproject WEBPROJECT
-          - export PYTHONPATH=`pwd`; python WEBPROJECT/manage.py test chado
+          - export PYTHONPATH=`pwd`; python WEBPROJECT/manage.py test chado --settings chado.tests.settings
         services:
           - postgres
 definitions: 
