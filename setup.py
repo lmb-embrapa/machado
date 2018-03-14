@@ -1,11 +1,11 @@
 import os
 from setuptools import find_packages, setup
 
-with open(os.path.join(os.path.dirname(__file__),'README.md')) as readme:
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 
 # allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__),os.pardir)))
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-chado',
@@ -13,7 +13,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
-    description='DjangoChado is a Django app that contains tools to interact with a Chado database.',
+    description='DjangoChado is a Django app that contains tools to interact '
+                'with a Chado database.',
     long_description=README,
     url='https://bitbucket.org/azneto/djangochado',
     author='Adhemar',
@@ -26,6 +27,15 @@ setup(
     ],
     scripts=[
         'bin/fixChadoModel.py'
+    ],
+    install_requires=[
+        'django>=2.0.1',
+        'psycopg2>=2.7.3.2',
+        'biopython>=1.70',
+        'pysam>=0.13',
+        'obonet>=0.2.2',
+        'tqdm>=4.19.5',
+        'typing>=3.6.4',
     ],
     zip_safe=False,
 )

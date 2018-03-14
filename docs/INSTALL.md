@@ -24,16 +24,6 @@ We strongly recommend creating a new virtualenv for your project
     cd YOURPROJECT
     source bin/activate
 
-#### Dependencies
-
-    pip install django==2.0.1
-    pip install psycopg2==2.7.3.2
-    pip install biopython==1.70
-    pip install pysam==0.13
-    pip install obonet==0.2.2
-    pip install tqdm==4.19.5
-    pip install typing==3.6.4
-
 ### DjangoChado
 
 Just grab the code using GIT and install it:
