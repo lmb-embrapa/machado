@@ -3,12 +3,12 @@ pipelines:
   default:
     - step:
         script:
-          - apt-get update && apt-get install -y samtools libbambamc-dev libbambamc0 pandoc python3-virtualenv
+          - apt-get update && apt-get install -y samtools libbambamc-dev libbambamc0 pandoc virtualenv
           - virtualenv YOURPROJECT
           - source YOURPROJECT/bin/activate
-          - python3.6 setup.py install
+          - python setup.py install
           - django-admin startproject WEBPROJECT
-          - python3.6 WEBPROJECT/manage.py test chado --settings chado.tests.settings
+          - python WEBPROJECT/manage.py test chado --settings chado.tests.settings
         services:
           - postgres
 definitions: 
