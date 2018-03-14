@@ -1,11 +1,12 @@
-image: python:3.5.1
+image: ubuntu
 pipelines:
   default:
     - step:
         script:
-          - python setup.py install
+          - apt-get install python3.6 python3.6-dev samtools libbambamc-dev libbambamc0 pandoc 
+          - python3.6 setup.py install
           - django-admin startproject WEBPROJECT
-          - python WEBPROJECT/manage.py test chado --settings chado/tests/settings.py
+          - python3.6 WEBPROJECT/manage.py test chado --settings chado/tests/settings.py
         services:
           - postgres
 definitions: 
