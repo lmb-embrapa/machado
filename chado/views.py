@@ -1,6 +1,7 @@
 """Views."""
 
-from django.db.models import Count
+from django.db.models import Count, F, Value
+from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -14,28 +15,35 @@ def index(request):
 
 def stats(request):
     """General stats."""
-    cv = Cvterm.objects.values('cv__name')
-    cv = cv.annotate(Count('cv_id'))
-    cv = cv.filter(cv_id__count__gt=5)
-    cv = cv.order_by('cv__name')
+    cvs = Cvterm.objects.values(key=F('cv__name'))
+    cvs = cvs.values('key')
+    cvs = cvs.annotate(count=Count('key'))
+    cvs = cvs.filter(count__gt=5)
+    cvs = cvs.order_by('key')
 
     chr_cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
-    chrs = Feature.objects.values('organism__genus', 'organism__species')
-    chrs = chrs.filter(type_id=chr_cvterm.cvterm_id)
-    chrs = chrs.annotate(Count('organism_id'))
+    chrs = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+    chrs = chrs.annotate(key=Concat(
+        'organism__genus', Value(' '), 'organism__species'))
+    chrs = chrs.values('key')
+    chrs = chrs.annotate(count=Count('key'))
 
     scaff_cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
-    scaffs = Feature.objects.values('organism__genus', 'organism__species')
-    scaffs = scaffs.filter(type_id=scaff_cvterm.cvterm_id)
-    scaffs = scaffs.annotate(Count('organism_id'))
+    scaffs = Feature.objects.filter(type_id=scaff_cvterm.cvterm_id)
+    scaffs = scaffs.annotate(key=Concat(
+        'organism__genus', Value(' '), 'organism__species'))
+    scaffs = scaffs.values('key')
+    scaffs = scaffs.annotate(count=Count('key'))
 
     gene_cvterm = Cvterm.objects.get(cv__name='sequence', name='gene')
-    genes = Feature.objects.values('organism__genus', 'organism__species')
-    genes = genes.filter(type_id=gene_cvterm.cvterm_id)
-    genes = genes.annotate(Count('organism_id'))
+    genes = Feature.objects.filter(type_id=gene_cvterm.cvterm_id)
+    genes = genes.annotate(key=Concat(
+        'organism__genus', Value(' '), 'organism__species'))
+    genes = genes.values('key')
+    genes = genes.annotate(count=Count('key'))
 
     data = {
-        'Controled vocabularies': cv,
+        'Controled vocabularies': cvs,
         'Chromosomes': chrs,
         'Scaffolds': scaffs,
         'Genes': genes,

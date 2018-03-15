@@ -12,9 +12,7 @@
 			  <ul class="mdl-list">
         {% for entry in data %}
 					<li class="mdl-list__item">
-            {% for value in entry.values %}
-              {{ value }}
-            {% endfor%}
+            {{ entry.key }}: {{ entry.count }}
 					</li>
         {% endfor %}
 			  </ul>
