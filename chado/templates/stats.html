@@ -1,14 +1,26 @@
-<h1>Stats</h1>
+{% extends 'base.html' %}
+
+{% block content %}
 
 {% for item, data in context.items %}
-{{ item }}
-<ul>
-  {% for entry in data %}
-    <li>
-      {% for value in entry.values %}
-        {{ value }}
-      {% endfor%}
-    </li>
-  {% endfor %}
-</ul>
+	<div class="mdl-grid">
+    <div class="mdl-cell--8-col mdl-card mdl-shadow--4dp">
+  	  <div class="mdl-card__title">
+      	<h3 class="mdl-card__title-text">{{ item }}</h3>
+		  </div>
+    	<div class="mdl-card__actions mdl-card--border">
+			  <ul class="mdl-list">
+        {% for entry in data %}
+					<li class="mdl-list__item">
+            {% for value in entry.values %}
+              {{ value }}
+            {% endfor%}
+					</li>
+        {% endfor %}
+			  </ul>
+			</div>
+    </div>
+	</div>
 {% endfor %}
+
+{% endblock%}
