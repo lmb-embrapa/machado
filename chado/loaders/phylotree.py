@@ -97,6 +97,8 @@ class PhylotreeLoader(object):
         organism = self.get_organism_by_accession(accession=tax_id)
         if organism is None:
             raise ImportingError('Organism not found: {}'.format(tax_id))
+        organism.type_id = level_cvterm.cvterm_id
+        organism.save()
         PhylonodeOrganism.objects.create(
             phylonode=phylonode, organism=organism)
         return (tax_id, phylonode)
