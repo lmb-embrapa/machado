@@ -29,9 +29,8 @@ class SequenceLoader(object):
 
         # Save DB file info
         try:
-            self.db = Db.objects.create(name='FASTA_source',
-                                        description=description,
-                                        url=url)
+            self.db, created = Db.objects.get_or_create(
+                name='FASTA_source', description=description, url=url)
             self.filename = filename
         except IntegrityError as e:
             raise ImportingError(e)
