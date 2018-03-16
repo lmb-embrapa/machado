@@ -1,11 +1,21 @@
 """Views."""
 
+from chado.models import Cvterm, Feature, Organism
+from chado.serializers import OrganismSerializer
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 
-from chado.models import Cvterm, Feature
+
+class StandardResultSetPagination(PageNumberPagination):
+    """Set the pagination parameters."""
+
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
 
 
 def index(request):
@@ -50,3 +60,11 @@ def stats(request):
     }
 
     return render(request, 'stats.html', {'context': data})
+
+
+class OrganismViewSet(viewsets.ModelViewSet):
+    """API endpoint to view Organisms."""
+
+    queryset = Organism.objects.all()
+    serializer_class = OrganismSerializer
+    pagination_class = StandardResultSetPagination

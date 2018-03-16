@@ -61,6 +61,8 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
     INSTALLED_APPS = [
         ...
         'chado',
+        'rest_framework',
+        ...
     ]
 
 (Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)

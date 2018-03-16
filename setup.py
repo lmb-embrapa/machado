@@ -1,3 +1,6 @@
+"""Setup."""
+
+
 import os
 from setuptools import find_packages, setup
 
@@ -37,6 +40,7 @@ setup(
         'tqdm>=4.19.5',
         'typing>=3.6.4',
         'bibtexparser>=1.0.1',
+        'django-rest-framework>=0.1.0',
     ],
     zip_safe=False,
 )
