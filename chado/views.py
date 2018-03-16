@@ -1,7 +1,8 @@
 """Views."""
 
-from chado.models import Cvterm, Feature, Organism
-from chado.serializers import OrganismSerializer
+from chado.models import Cv, Cvterm, Feature, Organism
+from chado.serializers import CvSerializer, OrganismSerializer
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
 from django.http import HttpResponse
@@ -62,9 +63,23 @@ def stats(request):
     return render(request, 'stats.html', {'context': data})
 
 
+class CvViewSet(viewsets.ModelViewSet):
+    """API endpoint to view Cv."""
+
+    queryset = Cv.objects.all().order_by('name')
+    serializer_class = CvSerializer
+    pagination_class = StandardResultSetPagination
+
+
 class OrganismViewSet(viewsets.ModelViewSet):
     """API endpoint to view Organisms."""
 
-    queryset = Organism.objects.all()
+    try:
+        cvterm_species = Cvterm.objects.get(cv__name='taxonomy',
+                                            name='species')
+        queryset = Organism.objects.filter(type_id=cvterm_species.cvterm_id)
+    except ObjectDoesNotExist:
+        queryset = Organism.objects.all()
+
     serializer_class = OrganismSerializer
     pagination_class = StandardResultSetPagination

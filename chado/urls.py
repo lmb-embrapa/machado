@@ -7,6 +7,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'organism', views.OrganismViewSet)
+router.register(r'cv', views.CvViewSet)
 
 urlpatterns = [
     path('', views.index),
