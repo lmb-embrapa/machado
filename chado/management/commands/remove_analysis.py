@@ -22,8 +22,8 @@ class Command(BaseCommand):
 
             analysis = Analysis.objects.get(sourcename=name)
 
-            feature_ids = Analysisfeature.objects.filter(
-                analysis=analysis).values_list('feature_id', flat=True)
+            feature_ids = list(Analysisfeature.objects.filter(
+                analysis=analysis).values_list('feature_id', flat=True))
 
             Featureloc.objects.filter(feature_id__in=feature_ids).delete()
             Analysisfeature.objects.filter(analysis=analysis).delete()

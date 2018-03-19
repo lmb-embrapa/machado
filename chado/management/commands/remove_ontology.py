@@ -27,10 +27,10 @@ class Command(BaseCommand):
                     'Deleting {} and every child record (CASCADE)'
                     .format(name))
 
-            cvterm_ids = Cvterm.objects.filter(cv=cv).values_list('cvterm_id',
-                                                                  flat=True)
-            dbxref_ids = CvtermDbxref.objects.filter(
-                cvterm_id__in=cvterm_ids).values_list('dbxref_id', flat=True)
+            cvterm_ids = list(Cvterm.objects.filter(
+                cv=cv).values_list('cvterm_id', flat=True))
+            dbxref_ids = list(CvtermDbxref.objects.filter(
+                cvterm_id__in=cvterm_ids).values_list('dbxref_id', flat=True))
             CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).delete()
             Cvtermsynonym.objects.filter(cvterm_id__in=cvterm_ids).delete()
             Cvtermprop.objects.filter(cvterm_id__in=cvterm_ids).delete()
@@ -41,8 +41,8 @@ class Command(BaseCommand):
             Cvterm.objects.filter(cvterm_id__in=cvterm_ids).delete()
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
 
-            dbxref_ids = Cvterm.objects.filter(
-                cv=cv).values_list('dbxref_id', flat=True)
+            dbxref_ids = list(Cvterm.objects.filter(
+                cv=cv).values_list('dbxref_id', flat=True))
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
 
             cv.delete()

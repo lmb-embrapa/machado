@@ -20,10 +20,11 @@ class Command(BaseCommand):
         """Execute the main function."""
         try:
             db = Db.objects.get(name=dbname)
-            dbxref_ids = Dbxref.objects.filter(
-                db=db).values_list('dbxref_id', flat=True)
-            organism_ids = OrganismDbxref.objects.filter(
-                dbxref_id__in=dbxref_ids).values_list('organism_id', flat=True)
+            dbxref_ids = list(Dbxref.objects.filter(
+                db=db).values_list('dbxref_id', flat=True))
+            organism_ids = list(OrganismDbxref.objects.filter(
+                dbxref_id__in=dbxref_ids).values_list(
+                    'organism_id', flat=True))
             Organismprop.objects.filter(organism_id__in=organism_ids).delete()
             OrganismDbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Organism.objects.filter(organism_id__in=organism_ids).delete()

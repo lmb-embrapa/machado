@@ -22,8 +22,8 @@ class Command(BaseCommand):
                               .format(name))
 
             phylotree = Phylotree.objects.get(name=name)
-            phylonode_ids = Phylonode.objects.filter(
-                phylotree=phylotree).values_list('phylonode_id', flat=True)
+            phylonode_ids = list(Phylonode.objects.filter(
+                phylotree=phylotree).values_list('phylonode_id', flat=True))
             PhylonodeOrganism.objects.filter(
                 phylonode_id__in=phylonode_ids).delete()
             Phylonode.objects.filter(phylotree=phylotree).delete()

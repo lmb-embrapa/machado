@@ -26,8 +26,8 @@ class Command(BaseCommand):
 
             dbxref_ids = list(Dbxrefprop.objects.filter(
                 value=name).values_list('dbxref_id', flat=True))
-            feature_ids = Feature.objects.filter(
-                dbxref_id__in=dbxref_ids).values_list('feature_id', flat=True)
+            feature_ids = list(Feature.objects.filter(
+                dbxref_id__in=dbxref_ids).values_list('feature_id', flat=True))
             Featureloc.objects.filter(feature_id__in=feature_ids).delete()
             Featureprop.objects.filter(feature_id__in=feature_ids).delete()
             FeatureSynonym.objects.filter(feature_id__in=feature_ids).delete()
