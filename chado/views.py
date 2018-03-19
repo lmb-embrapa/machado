@@ -1,8 +1,9 @@
 """Views."""
 
-from chado.models import Cv, Cvterm, Feature, Organism
+from chado.models import Cv, Cvterm, Db, Dbxref, Feature, Organism
 from chado.serializers import CvSerializer, CvtermSerializer
-from chado.serializers import OrganismSerializer
+from chado.serializers import DbSerializer, DbxrefSerializer
+from chado.serializers import FeatureSerializer, OrganismSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
@@ -64,7 +65,7 @@ def stats(request):
     return render(request, 'stats.html', {'context': data})
 
 
-class CvViewSet(viewsets.ModelViewSet):
+class CvViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view Cv."""
 
     queryset = Cv.objects.all().order_by('name')
@@ -72,11 +73,27 @@ class CvViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultSetPagination
 
 
-class CvtermViewSet(viewsets.ModelViewSet):
+class CvtermViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view Cvterm."""
 
     queryset = Cvterm.objects.all().order_by('name')
     serializer_class = CvtermSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class DbViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Db."""
+
+    queryset = Db.objects.all().order_by('name')
+    serializer_class = DbSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class DbxrefViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Dbxref."""
+
+    queryset = Dbxref.objects.all().order_by('accession')
+    serializer_class = DbxrefSerializer
     pagination_class = StandardResultSetPagination
 
 
@@ -85,11 +102,10 @@ class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Cvterm.objects.all()
     serializer_class = CvtermSerializer
+    pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
         """Get queryset."""
-        cvterms = Cvterm.objects.all()
-
         try:
             cvterms = self.queryset.filter(cv=self.kwargs['cv_pk'])
         except KeyError:
@@ -98,7 +114,7 @@ class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
         return cvterms
 
 
-class OrganismViewSet(viewsets.ModelViewSet):
+class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view Organisms."""
 
     try:
@@ -110,3 +126,37 @@ class OrganismViewSet(viewsets.ModelViewSet):
 
     serializer_class = OrganismSerializer
     pagination_class = StandardResultSetPagination
+
+
+class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view chromosomes."""
+
+    chr_cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+    queryset = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+    queryset = queryset.filter(is_obsolete=0)
+    queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view chromosomes."""
+
+    chr_cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+    queryset = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+    queryset = queryset.filter(is_obsolete=0)
+    queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            chromosomes = self.queryset.filter(
+                organism=self.kwargs['organism_pk'])
+        except KeyError:
+            pass
+
+        return chromosomes
