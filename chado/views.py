@@ -131,8 +131,8 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
 class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view chromosomes."""
 
-    chr_cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
-    queryset = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+    cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
     queryset = queryset.filter(is_obsolete=0)
     queryset = queryset.order_by('uniquename')
 
@@ -143,8 +143,8 @@ class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
 class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view chromosomes."""
 
-    chr_cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
-    queryset = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+    cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
     queryset = queryset.filter(is_obsolete=0)
     queryset = queryset.order_by('uniquename')
 
@@ -154,9 +154,43 @@ class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Get queryset."""
         try:
-            chromosomes = self.queryset.filter(
+            queryset = self.queryset.filter(
                 organism=self.kwargs['organism_pk'])
         except KeyError:
             pass
 
-        return chromosomes
+        return queryset
+
+
+class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view scaffold."""
+
+    cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
+    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+    queryset = queryset.filter(is_obsolete=0)
+    queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class NestedScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view scaffold."""
+
+    cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
+    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+    queryset = queryset.filter(is_obsolete=0)
+    queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            queryset = self.queryset.filter(
+                organism=self.kwargs['organism_pk'])
+        except KeyError:
+            pass
+
+        return queryset
