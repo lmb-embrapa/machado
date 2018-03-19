@@ -65,7 +65,10 @@ class Command(BaseCommand):
             # get data while current_id remains unchanged
             if columns[3] == 'scientific name':
                 taxid = columns[0]
-                scname = columns[1]
+                if columns[2] == '' or columns[1] == columns[2]:
+                    scname = columns[1]
+                else:
+                    scname = '{} {}'.format(columns[1], columns[2])
             elif columns[3] == 'synonym':
                 synonyms.append(columns[1])
             elif columns[3] == 'common name':
