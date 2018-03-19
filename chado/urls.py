@@ -3,6 +3,7 @@
 from chado import views
 from django.conf.urls import include, url
 from rest_framework_nested import routers
+from rest_framework.documentation import include_docs_urls
 
 router = routers.SimpleRouter()
 router.register(r'organism', views.OrganismViewSet, base_name='organism')
@@ -25,6 +26,7 @@ organism_router.register(r'scaffold', views.NestedScaffoldViewSet)
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^stats$', views.stats, name='stats'),
+    url(r'api/', include_docs_urls(title='machado API')),
     url(r'api/', include(router.urls)),
     url(r'api/', include(cv_router.urls)),
     url(r'api/', include(organism_router.urls)),

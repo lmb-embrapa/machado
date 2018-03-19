@@ -42,6 +42,7 @@ setup(
         'bibtexparser>=1.0.1',
         'django-rest-framework>=0.1.0',
         'drf-nested-routers>-0.90.2',
+        'coreapi>=2.3.3',
     ],
     zip_safe=False,
 )
