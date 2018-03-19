@@ -1,7 +1,8 @@
 """Views."""
 
 from chado.models import Cv, Cvterm, Feature, Organism
-from chado.serializers import CvSerializer, OrganismSerializer
+from chado.serializers import CvSerializer, CvtermSerializer
+from chado.serializers import OrganismSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
@@ -69,6 +70,32 @@ class CvViewSet(viewsets.ModelViewSet):
     queryset = Cv.objects.all().order_by('name')
     serializer_class = CvSerializer
     pagination_class = StandardResultSetPagination
+
+
+class CvtermViewSet(viewsets.ModelViewSet):
+    """API endpoint to view Cvterm."""
+
+    queryset = Cvterm.objects.all().order_by('name')
+    serializer_class = CvtermSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Cvterm."""
+
+    queryset = Cvterm.objects.all()
+    serializer_class = CvtermSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        cvterms = Cvterm.objects.all()
+
+        try:
+            cvterms = self.queryset.filter(cv=self.kwargs['cv_pk'])
+        except KeyError:
+            pass
+
+        return cvterms
 
 
 class OrganismViewSet(viewsets.ModelViewSet):

@@ -18,11 +18,17 @@ class OrganismSerializer(serializers.ModelSerializer):
 class CvSerializer(serializers.HyperlinkedModelSerializer):
     """Cv serializer."""
 
+    count_cvterms = serializers.SerializerMethodField()
+
     class Meta:
         """Meta."""
 
         model = Cv
-        fields = ('name', 'definition')
+        fields = ('cv_id', 'name', 'definition', 'count_cvterms')
+
+    def get_count_cvterms(self, obj):
+        """Get the number of child cvterms."""
+        return obj.Cvterm_cv_Cv.count()
 
 
 class CvtermSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,4 +38,4 @@ class CvtermSerializer(serializers.HyperlinkedModelSerializer):
         """Meta."""
 
         model = Cvterm
-        fields = ('name', 'definition')
+        fields = ('cvterm_id', 'name', 'definition')
