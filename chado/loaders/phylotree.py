@@ -76,7 +76,7 @@ class PhylotreeLoader(object):
         level_cvterm = self.level_cvterms.get(level)
         if level_cvterm is None:
             level_dbxref, created = Dbxref.objects.get_or_create(
-                db=self.level_db, accession='level')
+                db=self.level_db, accession=level)
             level_cvterm, created = Cvterm.objects.get_or_create(
                 cv=self.level_cv, dbxref=level_dbxref, name=level,
                 defaults={'is_obsolete': 0, 'is_relationshiptype': 1})
