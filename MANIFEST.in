@@ -1,7 +1,13 @@
 include LICENSE
 include README.md
 include chado/admin.py
+include chado/apps.py
 include chado/models.py
+include chado/view.py
+include chado/serializers.py
+include chado/settings.py
+include chado/tests.py
+include chado/urls.py
 recursive-include bin *
 recursive-include chado/loaders *
 recursive-include chado/management *
@@ -10,7 +16,5 @@ recursive-include chado/schemas *
 recursive-include chado/templates *
 recursive-include chado/tests *
 recursive-include docs *
-exclude chado/view.py
-exclude chado/tests.py
 
 global-exclude *.pyc *.pyo *.py{} *.py-e
