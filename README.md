@@ -16,11 +16,11 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
         python setup.py install
 
 
-3. Add "chado" to your INSTALLED_APPS setting like this:
+3. Add "machado" to your INSTALLED_APPS setting like this:
 
         INSTALLED_APPS = [
             ...
-            'chado',
+            'machado',
             'rest_framework',
             ...
         ]
