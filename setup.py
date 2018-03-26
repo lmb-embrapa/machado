@@ -11,12 +11,12 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='django-chado',
+    name='machado',
     version='0.1',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
-    description='DjangoChado is a Django app that contains tools to interact '
+    description='machado is a Django app that contains tools to interact '
                 'with a Chado database.',
     long_description=README,
     url='https://bitbucket.org/azneto/djangochado',

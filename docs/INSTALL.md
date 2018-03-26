@@ -1,10 +1,10 @@
-# Django Chado
+# machado
 
 This repository contains information and tools to use the [Django](https://www.djangoproject.com) framework for accessing a [Chado](http://gmod.org/wiki/Chado_-_Getting_Started) database.
 
 ## Prerequisites
 
-You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the Django Chado development.
+You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the machado development.
 
 #### PostgreSQL 9.5
 
@@ -24,12 +24,12 @@ We strongly recommend creating a new virtualenv for your project
     cd YOURPROJECT
     source bin/activate
 
-### DjangoChado
+### machado
 
 Just grab the code using GIT and install it:
 
-    git clone https://bitbucket.org/azneto/django-chado.git src/django-chado
-    python src/django-chado/setup.py install
+    git clone https://bitbucket.org/azneto/django-chado.git src/machado
+    python src/machado/setup.py install
 
 ## Preparations ##
 
@@ -54,13 +54,13 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
         },
     }
 
-### Let Django know about your django-chado
+### Let Django know about your machado
 
 In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
     INSTALLED_APPS = [
         ...
-        'chado',
+        'machado',
         'rest_framework',
         ...
     ]
@@ -68,7 +68,7 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 (Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
 
 
-### List django-chado commands
+### List machado commands
 
     python manage.py
 

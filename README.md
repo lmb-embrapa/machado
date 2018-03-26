@@ -1,6 +1,6 @@
-# Django Chado
+# machdo
 
-Django Chado is a Django app that contains tools to interact with a Chado database.
+machado is a Django app that contains tools to interact with a Chado database.
 Detailed documentation can be found in the **docs** directory ([INSTALL](docs/INSTALL.md)).
 
 
@@ -21,5 +21,7 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
         INSTALLED_APPS = [
             ...
             'chado',
+            'rest_framework',
+            ...
         ]
 

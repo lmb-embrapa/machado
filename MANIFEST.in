@@ -1,20 +1,20 @@
 include LICENSE
 include README.md
-include chado/admin.py
-include chado/apps.py
-include chado/models.py
-include chado/view.py
-include chado/serializers.py
-include chado/settings.py
-include chado/tests.py
-include chado/urls.py
+include machado/admin.py
+include machado/apps.py
+include machado/models.py
+include machado/view.py
+include machado/serializers.py
+include machado/settings.py
+include machado/tests.py
+include machado/urls.py
 recursive-include bin *
-recursive-include chado/loaders *
-recursive-include chado/management *
-recursive-include chado/migrations *
-recursive-include chado/schemas *
-recursive-include chado/templates *
-recursive-include chado/tests *
+recursive-include machado/loaders *
+recursive-include machado/management *
+recursive-include machado/migrations *
+recursive-include machado/schemas *
+recursive-include machado/templates *
+recursive-include machado/tests *
 recursive-include docs *
 
 global-exclude *.pyc *.pyo *.py{} *.py-e

@@ -1,10 +1,10 @@
-# Django Chado
+# machado
 
 This document contains information and tools to create a [Django](https://www.djangoproject.com) models.py file for a [Chado](http://gmod.org/wiki/Chado_-_Getting_Started) database.
 
 ## Prerequisites
 
-You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the Django Chado development.
+You may already have a populated Chado database and, therefore, are able to skip the PostgreSQL and Chado installation/configuration. The list bellow contains the softwares and versions used for the machado development.
 
 #### PostgreSQL 9.5
 
@@ -29,20 +29,12 @@ We strongly recommend creating a new virtualenv for your project
     cd YOURPROJECT
     source bin/activate
 
-#### Django 1.10.6
-
-    pip install django
-
-#### psycopg2 2.7.1
-
-    pip install psycopg2
-
-### DjangoChado
+### machado
 
 Just grab the code using GIT and install it:
 
-    git clone https://bitbucket.org/azneto/django-chado.git src/django-chado
-    python src/django-chado/setup.py install
+    git clone https://bitbucket.org/azneto/django-chado.git src/machado
+    python src/machado/setup.py install
 
 ### Create a Django project
 Inside YOURPROJECT directory create a Django project with the following command:
