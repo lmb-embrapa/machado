@@ -1,3 +1,9 @@
+# Copyright 2018 by Embrapa.  All rights reserved.
+#
+# This code is part of the machado distribution and governed by its
+# license. Please see the LICENSE.txt and README.md files that should
+# have been included as part of this package for licensing information.
+
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
 #   * Rearrange models' order
