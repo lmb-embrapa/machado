@@ -1,3 +1,8 @@
+.. image:: https://img.shields.io/travis/lmb-embrapa/machado/master.svg
+   :alt: Linux testing with TravisCI
+   :target: https://github.com/lmb-embrapa/machado
+   
+
 # machado
 
 machado is a Django app that contains tools to interact with a Chado database.
