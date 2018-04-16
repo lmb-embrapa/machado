@@ -1,28 +1,28 @@
 dist: trusty
 language: python
 python:
-	- "3.6"
+  - "3.6"
 cache: pip
 
 before_install:
-	-psql -c "create user username with encrypted password 'password';" -U postgres
-	-psql -c "create database yourdatabase with owner username;" -U postgres
-	-psql -c "alter user username createdb;" -U postgres
+  - psql -c "create user username with encrypted password 'password';" -U postgres
+  - psql -c "create database yourdatabase with owner username;" -U postgres
+  - psql -c "alter user username createdb;" -U postgres
 
 sudo: false
 addons:
-	apt:
-		packages:
-			- virtualenv
-			- samtools
-			- libbambamc-dev
-			- libbambamc0
-			- pandoc
+  apt:
+    packages:
+    - virtualenv
+    - samtools
+    - libbambamc-dev
+    - libbambamc0
+    - pandoc
 
 script:
-	- python setup.py install
+  - python setup.py install
   - django-admin startproject WEBPROJECT
   - export PYTHONPATH=`pwd`; python WEBPROJECT/manage.py test machado --settings machado.tests.settings
 
 notifications:
-	email: false
+  email: false
