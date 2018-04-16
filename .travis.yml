@@ -13,10 +13,7 @@ sudo: false
 addons:
   apt:
     packages:
-    - virtualenv
     - samtools
-    - libbambamc-dev
-    - libbambamc0
     - pandoc
 
 script:
