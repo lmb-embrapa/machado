@@ -28,7 +28,7 @@ We strongly recommend creating a new virtualenv for your project
 
 Just grab the code using GIT and install it:
 
-    git clone https://bitbucket.org/azneto/django-chado.git src/machado
+    git clone https://github.com/lmb-embrapa/machado.git src/machado
     python src/machado/setup.py install
 
 ## Preparations ##

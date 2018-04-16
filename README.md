@@ -8,7 +8,7 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
 
 1. Download the package
 
-        git clone https://azneto@bitbucket.org/azneto/django-chado.git
+        git clone https://github.com/lmb-embrapa/machado.git
 
 
 2. Install the package
