@@ -12,7 +12,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='machado',
-    version='0.1',
+    version='0.1.0',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
@@ -34,7 +34,7 @@ setup(
     install_requires=[
         'django>=2.0.1',
         'psycopg2>=2.7.3.2',
-        'biopython>=1.70',
+        'biopython>=1.71',
         'pysam>=0.13',
         'obonet>=0.2.2',
         'tqdm>=4.19.5',
