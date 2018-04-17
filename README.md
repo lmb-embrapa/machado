@@ -20,7 +20,7 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
         python setup.py install
 
 
-3. Add "machado" to your INSTALLED_APPS setting like this:
+3. Add "machado" to your settings.py INSTALLED_APPS like this:
 
         INSTALLED_APPS = [
             ...
@@ -28,6 +28,9 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
             'rest_framework',
             ...
         ]
+
+4. Configure the settings.py DATABASES to connect to a PostgreSQL database.
+
 
 # LICENSE
 
