@@ -19,11 +19,11 @@ addons:
 script:
   - python setup.py install
   - django-admin startproject WEBPROJECT
-  - export PYTHONPATH=`pwd`; python WEBPROJECT/manage.py test machado --settings machado.tests.settings
+  - export PYTHONPATH=`pwd`; coverage run WEBPROJECT/manage.py test machado --settings machado.tests.settings
 
 after_success:
   - pip install codecov
-  - export PYTHONPATH=`pwd`; coverage run WEBPROJECT/manage.py test machado --settings machado.tests.settings
+  - codecov
 
 notifications:
   email: false
