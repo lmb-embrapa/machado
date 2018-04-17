@@ -1,6 +1,7 @@
 [![build-status-image]][travis]
+[![cov-status-image]][codecov]
 
-# machado 
+# machado
 
 
 machado is a Django app that contains tools to interact with a Chado database.
@@ -59,3 +60,5 @@ See LICENSE.txt for complete gpl-3.0 license.
 
 [build-status-image]: https://secure.travis-ci.org/lmb-embrapa/machado.svg?branch=master
 [travis]: https://travis-ci.org/lmb-embrapa/machado
+[cov-status-image]: https://img.shields.io/codecov/c/github/lmb-embrapa/machado.svg
+[codecov]: https://codecov.io/gh/lmb-embrapa/machado
