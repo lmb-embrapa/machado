@@ -8,6 +8,7 @@ before_install:
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
+  - pip install coverage
 
 sudo: false
 addons:
