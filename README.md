@@ -1,4 +1,7 @@
-# machado
+[![build-status-image]][travis]
+
+# machado 
+
 
 machado is a Django app that contains tools to interact with a Chado database.
 Detailed documentation can be found in the **docs** directory ([INSTALL](docs/INSTALL.md)).
@@ -53,3 +56,6 @@ Source for a non-source form of such a combination shall include the source
 code for the parts of Chado used as well as that of the covered work.}
 
 See LICENSE.txt for complete gpl-3.0 license.
+
+[build-status-image]: https://secure.travis-ci.org/lmb-embrapa/machado.svg?branch=master
+[travis]: https://travis-ci.org/lmb-embrapa/machado
