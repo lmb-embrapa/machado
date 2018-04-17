@@ -1,4 +1,4 @@
 [run]
 branch = True
 source = machado
-omit=bin/*,docs/*,machado/migrations/*,machado/schemas/*,machado/tests/*,machado/management/*
+omit=bin/*,docs/*,machado/migrations/*,machado/schemas/*,machado/tests/*,machado/management/*,machado/admin.py
