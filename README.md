@@ -31,11 +31,11 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
 
 4. Configure the settings.py DATABASES to connect to a PostgreSQL database.
 
-# Example
+## Example
 
 ![Screenshot](static/screenshot.png)
 
-# LICENSE
+## LICENSE
 
 machado - A Django implementation of Chado's schema.
 Copyright (C) 2018 Embrapa
