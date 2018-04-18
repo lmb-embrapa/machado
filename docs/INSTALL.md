@@ -80,8 +80,8 @@ You have to run the following command to create django admin tables:
 
 Run tests to check the instalation:
 
-    python manage.py test chado.tests
-
+    python manage.py test machado
+    
 And the following command to create an admin user:
 
     python manage.py createsuperuser
@@ -90,7 +90,7 @@ Now, just run the DJango server to access the admin interface:
 
     python manage.py runserver
 
-The webapp admin interface will be available at http://localhost:8000/admin
+The API interface will be available at http://localhost:8000/machado/api
 
 
 ## References
