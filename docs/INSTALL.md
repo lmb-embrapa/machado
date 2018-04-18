@@ -82,11 +82,7 @@ Run tests to check the instalation:
 
     python manage.py test machado
     
-And the following command to create an admin user:
-
-    python manage.py createsuperuser
-
-Now, just run the DJango server to access the admin interface:
+Now, just run the DJango server to access the web interface:
 
     python manage.py runserver
 
