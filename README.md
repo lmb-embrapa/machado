@@ -31,6 +31,9 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](docs/IN
 
 4. Configure the settings.py DATABASES to connect to a PostgreSQL database.
 
+# Example
+
+![Screenshot](static/screenshot.png)
 
 # LICENSE
 
