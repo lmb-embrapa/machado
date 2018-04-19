@@ -33,7 +33,7 @@ setup(
     ],
     install_requires=[
         'django>=2.0.1',
-        'psycopg2>=2.7.3.2',
+        'psycopg2-binary>=2.7.4',
         'biopython>=1.71',
         'pysam>=0.13',
         'obonet>=0.2.2',
