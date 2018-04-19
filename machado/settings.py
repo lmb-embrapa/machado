@@ -26,8 +26,8 @@ def patch_all():
     """Apply patches."""
     from .models import Cv
     try:
-        bla = Cv.objects.get(name='sequence')
-        bla = Cv.objects.get(name='taxonomy')
+        Cv.objects.get(name='sequence')
+        Cv.objects.get(name='taxonomy')
         patch_root_urlconf()
     except ObjectDoesNotExist:
         warnings.warn("The APIs will be available once the sequence ontology "
