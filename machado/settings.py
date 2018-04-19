@@ -7,7 +7,9 @@
 """App settings file."""
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from importlib import import_module
+import warnings
 
 
 def patch_root_urlconf():
@@ -22,5 +24,13 @@ def patch_root_urlconf():
 
 def patch_all():
     """Apply patches."""
-    patch_root_urlconf()
+    from .models import Cv
+    try:
+        bla = Cv.objects.get(name='sequence')
+        bla = Cv.objects.get(name='taxonomy')
+        patch_root_urlconf()
+    except ObjectDoesNotExist:
+        warnings.warn("The APIs will be available once the sequence ontology "
+                      "and the NCBI taxonomy are loaded.")
+        pass
     settings.USE_THOUSAND_SEPARATOR = True
