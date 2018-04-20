@@ -24,13 +24,5 @@ def patch_root_urlconf():
 
 def patch_all():
     """Apply patches."""
-    from .models import Cv
-    try:
-        Cv.objects.get(name='sequence')
-        Cv.objects.get(name='taxonomy')
-        patch_root_urlconf()
-    except ObjectDoesNotExist:
-        warnings.warn("The APIs will be available once the sequence ontology "
-                      "and the NCBI taxonomy are loaded.")
-        pass
+    patch_root_urlconf()
     settings.USE_THOUSAND_SEPARATOR = True

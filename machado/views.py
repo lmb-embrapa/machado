@@ -137,10 +137,11 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
 class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view chromosomes."""
 
-    cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
-    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-    queryset = queryset.filter(is_obsolete=0)
-    queryset = queryset.order_by('uniquename')
+    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
     pagination_class = StandardResultSetPagination
@@ -149,10 +150,11 @@ class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
 class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view chromosomes."""
 
-    cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
-    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-    queryset = queryset.filter(is_obsolete=0)
-    queryset = queryset.order_by('uniquename')
+    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='chromosome')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
     pagination_class = StandardResultSetPagination
@@ -171,10 +173,11 @@ class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
 class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view scaffold."""
 
-    cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
-    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-    queryset = queryset.filter(is_obsolete=0)
-    queryset = queryset.order_by('uniquename')
+    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
     pagination_class = StandardResultSetPagination
@@ -183,10 +186,11 @@ class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
 class NestedScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view scaffold."""
 
-    cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
-    queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-    queryset = queryset.filter(is_obsolete=0)
-    queryset = queryset.order_by('uniquename')
+    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
     pagination_class = StandardResultSetPagination

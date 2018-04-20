@@ -26,8 +26,10 @@ cv_router.register(r'cvterm', views.NestedCvtermViewSet)
 
 organism_router = routers.NestedSimpleRouter(
     router, r'organism', lookup='organism')
-organism_router.register(r'chromosome', views.NestedChromosomeViewSet)
-organism_router.register(r'scaffold', views.NestedScaffoldViewSet)
+organism_router.register(r'chromosome', views.NestedChromosomeViewSet,
+                         base_name='chromosome')
+organism_router.register(r'scaffold', views.NestedScaffoldViewSet,
+                         base_name='scaffold')
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
