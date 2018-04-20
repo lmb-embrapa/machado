@@ -1,0 +1,172 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Models &#8212; machado 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Diagrams" href="diagrams.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="diagrams.html" title="Diagrams"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">machado 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+<p>This document describes how the <a class="reference external" href="https://www.djangoproject.com">Django</a> models.py file for the <a class="reference external" href="http://gmod.org/wiki/Chado_-_Getting_Started">Chado</a> schema was created. You <strong>don’t need</strong> to create it again since <em>machado</em> already contains a copy of this file.</p>
+<div class="section" id="prerequisite">
+<h2>Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
+<p>The list bellow contains the softwares and versions required by <em>machado</em>.</p>
+<p><strong>PostgreSQL 9.5</strong></p>
+<p>Install PostgreSQL and create a database and user for loading the Chado schema.
+As postgres user run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql
+create user username with encrypted password <span class="s1">&#39;password&#39;</span><span class="p">;</span>
+create database yourdatabase with owner username<span class="p">;</span>
+</pre></div>
+</div>
+<p><strong>Chado 1.31</strong></p>
+<p>Download <a class="reference external" href="https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz">Chado schema</a>, unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql -h localhost -U username -W -d yourdatabase &lt; chado-1.31/schemas/1.31/default_schema.sql
+</pre></div>
+</div>
+<p><strong>Python 3.5.2</strong></p>
+<p>We strongly recommend creating a new virtualenv for your project</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virtualenv -p /usr/bin/python3 YOURPROJECT
+<span class="nb">cd</span> YOURPROJECT
+<span class="nb">source</span> bin/activate
+</pre></div>
+</div>
+<p><strong>machado</strong></p>
+<p>Just grab the code using GIT and install it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/lmb-embrapa/machado.git src/machado
+python src/machado/setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-django-project">
+<h2>The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
+<p>Inside YOURPROJECT directory create a Django project with the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin startproject WEBPROJECT
+<span class="nb">cd</span> WEBPROJECT
+</pre></div>
+</div>
+<p>Then, configure the WEBPROJECT/settings.py file to connect to your Chado database.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.postgresql_psycopg2&#39;</span><span class="p">,</span>    <span class="c1"># Set the DB driver</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;yourdatabase&#39;</span><span class="p">,</span>                                <span class="c1"># Set the DB name</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span>                                    <span class="c1"># Set the DB user</span>
+        <span class="s1">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span>                                <span class="c1"># Set the DB password</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span>                                   <span class="c1"># Set the DB host</span>
+        <span class="s1">&#39;PORT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>                                            <span class="c1"># Set the DB port</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-model">
+<h2>The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
+<p>Django has a command to generate a Models file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">inspectdb</span> <span class="o">&gt;</span> <span class="n">unsortedmodels</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>This will create a raw models.py with a model for each table and view in the specified Postgres database. This file needs to be fixed as each foreign key relation should have a unique name in Django to support reverse relationships. The following Python code will create these unique names. The code rewrites the models and also generate a admin.py file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fixChadoModel.py --input unsortedmodels.py
+</pre></div>
+</div>
+<p>The resulting files, models.py and admin.py, are ready.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://gmod.org/wiki/Chado_Django_HOWTO">http://gmod.org/wiki/Chado_Django_HOWTO</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Models</a><ul>
+<li><a class="reference internal" href="#prerequisite">Prerequisite</a></li>
+<li><a class="reference internal" href="#the-django-project">The Django project</a></li>
+<li><a class="reference internal" href="#the-model">The model</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="diagrams.html"
+                        title="previous chapter">Diagrams</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/models.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="diagrams.html" title="Diagrams"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">machado 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Embrapa.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>
