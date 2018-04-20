@@ -42,7 +42,7 @@ Just grab the code using GIT and install it:
 Preparation
 -----------
 
-From this point on it is assumed you have read the `Django introduction and tutorial <https://docs.djangoproject.com/en/1.10/intro>`_ on the Django project website.
+From this point on it is assumed you have read the `Django introduction and tutorial <https://docs.djangoproject.com>`_ on the Django project website.
 
 **Create a Django project**
 
