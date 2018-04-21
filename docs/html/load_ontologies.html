@@ -25,19 +25,27 @@
   
 
   
+  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Loading taxonomy" href="load_taxonomy.html" />
-    <link rel="prev" title="Data loading" href="dataload.html" /> 
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="machado 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="Data loading" href="dataload.html"/>
+        <link rel="next" title="Loading taxonomy" href="load_taxonomy.html"/>
+        <link rel="prev" title="Data loading" href="dataload.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav" role="document">
 
    
   <div class="wy-grid-for-nav">
@@ -82,9 +90,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Ontologies</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ontologies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
@@ -104,7 +110,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" aria-label="top navigation">
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
@@ -112,10 +118,9 @@
       </nav>
 
 
+      
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
           
 
 
@@ -161,17 +166,62 @@
             
   <div class="section" id="loading-ontologies">
 <h1>Loading ontologies<a class="headerlink" href="#loading-ontologies" title="Permalink to this headline">¶</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It will be available soon.</p>
+<p>The ontologies are required and must be loaded first.</p>
+<div class="section" id="relations-ontology">
+<h2>Relations ontology<a class="headerlink" href="#relations-ontology" title="Permalink to this headline">¶</a></h2>
+<p>RO is an ontology of relations for use with biological ontologies.</p>
+<ul class="simple">
+<li><strong>URL</strong>: <a class="reference external" href="https://github.com/oborel/obo-relations">https://github.com/oborel/obo-relations</a></li>
+<li><strong>File</strong>: ro.obo</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python manage.py load_relations_ontology --file ro.obo
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="sequence-ontology">
+<h2>Sequence ontology<a class="headerlink" href="#sequence-ontology" title="Permalink to this headline">¶</a></h2>
+<p>Collect of SO Ontologies.</p>
+<ul class="simple">
+<li><strong>URL</strong>: <a class="reference external" href="https://github.com/The-Sequence-Ontology/SO-Ontologies">https://github.com/The-Sequence-Ontology/SO-Ontologies</a></li>
+<li><strong>File</strong>: so.obo</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python manage.py load_sequence_ontology --file so.obo
+</pre></div>
+</div>
+</div>
+<div class="section" id="gene-ontology">
+<h2>Gene ontology<a class="headerlink" href="#gene-ontology" title="Permalink to this headline">¶</a></h2>
+<p>Source ontology files for the Gene Ontology.</p>
+<ul class="simple">
+<li><strong>URL</strong>: <a class="reference external" href="http://www.geneontology.org/ontology/">http://www.geneontology.org/ontology/</a></li>
+<li><strong>File</strong>: gene_ontology.obo</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python manage.py load_gene_ontology --file so.obo
+</pre></div>
+</div>
+<ul class="simple">
+<li>Loading the gene ontology can be faster if you increase the number of threads (–cpu).</li>
+<li>After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.</li>
+</ul>
+</div>
+<div class="section" id="removing-an-ontology">
+<h2>Removing an ontology<a class="headerlink" href="#removing-an-ontology" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove an ontology you should use the command remove_ontology. Most data files you’ll load depend on the ontologies (eg. fasta, gff, blast). You should <strong>never</strong> delete an ontology after having data files loaded.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python manage.py remove_ontology --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>This command require the name of the ontology (Cv.name)</li>
+<li>There are dependencies between the Gene ontology records, therefore you need to delete the entry <em>external</em> first.</li>
+</ul>
 </div>
 </div>
 
 
            </div>
-           
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -193,7 +243,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -212,7 +262,6 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.1.0',
-            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -230,13 +279,14 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
+  
+  
   <script type="text/javascript">
       jQuery(function () {
-          
-          SphinxRtdTheme.Navigation.enableSticky();
-          
+          SphinxRtdTheme.StickyNav.enable();
       });
-  </script> 
+  </script>
+   
 
 </body>
 </html>

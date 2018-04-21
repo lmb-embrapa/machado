@@ -90,7 +90,8 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
     python manage.py
 
-**Start you app and open the admin interface**
+Start you app and open the admin interface
+------------------------------------------
 
 You have to run the following command to create django admin tables:
 
