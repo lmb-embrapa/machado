@@ -47,7 +47,7 @@ Source ontology files for the Gene Ontology.
 Removing an ontology
 --------------------
 
-If, by any reason, you need to remove an ontology you should use the command remove_ontology. Most data files you'll load depend on the ontologies (eg. fasta, gff, blast). You should **never** delete an ontology after having data files loaded.
+If, by any reason, you need to remove an ontology you should use the command *remove_ontology*. Most data files you'll load depend on the ontologies (eg. fasta, gff, blast). You should **never** delete an ontology after having data files loaded.
 
 .. code-block:: bash
 
