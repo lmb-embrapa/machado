@@ -25,25 +25,18 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="machado 0.1.0 documentation" href="index.html"/>
-        <link rel="prev" title="Diagrams" href="diagrams.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Diagrams" href="diagrams.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -101,7 +94,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
@@ -109,9 +102,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -162,26 +156,26 @@
 <p><strong>PostgreSQL 9.5</strong></p>
 <p>Install PostgreSQL and create a database and user for loading the Chado schema.
 As postgres user run:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>psql
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql
 create user username with encrypted password <span class="s1">&#39;password&#39;</span><span class="p">;</span>
 create database yourdatabase with owner username<span class="p">;</span>
 </pre></div>
 </div>
 <p><strong>Chado 1.31</strong></p>
 <p>Download <a class="reference external" href="https://downloads.sourceforge.net/project/gmod/gmod/chado-1.31/chado-1.31.tar.gz">Chado schema</a>, unpack the file and load the chado-1.31/schemas/1.31/default_schema.sql to the database.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>psql -h localhost -U username -W -d yourdatabase &lt; chado-1.31/schemas/1.31/default_schema.sql
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql -h localhost -U username -W -d yourdatabase &lt; chado-1.31/schemas/1.31/default_schema.sql
 </pre></div>
 </div>
 <p><strong>Python 3.5.2</strong></p>
 <p>We strongly recommend creating a new virtualenv for your project</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>virtualenv -p /usr/bin/python3 YOURPROJECT
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virtualenv -p /usr/bin/python3 YOURPROJECT
 <span class="nb">cd</span> YOURPROJECT
 <span class="nb">source</span> bin/activate
 </pre></div>
 </div>
 <p><strong>machado</strong></p>
 <p>Just grab the code using GIT and install it:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone https://github.com/lmb-embrapa/machado.git src/machado
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/lmb-embrapa/machado.git src/machado
 python src/machado/setup.py install
 </pre></div>
 </div>
@@ -189,12 +183,12 @@ python src/machado/setup.py install
 <div class="section" id="the-django-project">
 <h2>The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
 <p>Inside YOURPROJECT directory create a Django project with the following command:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>django-admin startproject WEBPROJECT
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin startproject WEBPROJECT
 <span class="nb">cd</span> WEBPROJECT
 </pre></div>
 </div>
 <p>Then, configure the WEBPROJECT/settings.py file to connect to your Chado database.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.postgresql_psycopg2&#39;</span><span class="p">,</span>    <span class="c1"># Set the DB driver</span>
         <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;yourdatabase&#39;</span><span class="p">,</span>                                <span class="c1"># Set the DB name</span>
@@ -210,11 +204,11 @@ python src/machado/setup.py install
 <div class="section" id="the-model">
 <h2>The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
 <p>Django has a command to generate a Models file:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">inspectdb</span> <span class="o">&gt;</span> <span class="n">unsortedmodels</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">inspectdb</span> <span class="o">&gt;</span> <span class="n">unsortedmodels</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>This will create a raw models.py with a model for each table and view in the specified Postgres database. This file needs to be fixed as each foreign key relation should have a unique name in Django to support reverse relationships. The following Python code will create these unique names. The code rewrites the models and also generate a admin.py file:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>fixChadoModel.py --input unsortedmodels.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fixChadoModel.py --input unsortedmodels.py
 </pre></div>
 </div>
 <p>The resulting files, models.py and admin.py, are ready.</p>
@@ -229,9 +223,7 @@ python src/machado/setup.py install
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -251,7 +243,7 @@ python src/machado/setup.py install
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -270,6 +262,7 @@ python src/machado/setup.py install
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.1.0',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -287,14 +280,13 @@ python src/machado/setup.py install
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

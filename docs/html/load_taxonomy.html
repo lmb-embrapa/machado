@@ -25,27 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="machado 0.1.0 documentation" href="index.html"/>
-        <link rel="up" title="Data loading" href="dataload.html"/>
-        <link rel="next" title="Loading FASTA files" href="load_fasta.html"/>
-        <link rel="prev" title="Loading ontologies" href="load_ontologies.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Insert organism" href="insert_organism.html" />
+    <link rel="prev" title="Loading ontologies" href="load_ontologies.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -91,9 +83,8 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Taxonomy</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
@@ -112,7 +103,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
@@ -120,9 +111,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -168,25 +160,49 @@
             
   <div class="section" id="loading-taxonomy">
 <h1>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this headline">¶</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It will be available soon.</p>
+<p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
+These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.
+This step is recommended, but is optional.
+If you decide to skip this step, you should insert the organisms individually using the command <em>insert_organism</em>.</p>
+<div class="section" id="ncbi-taxonomy">
+<h2>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this headline">¶</a></h2>
+<p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
+<ul class="simple">
+<li><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></li>
+<li><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></li>
+</ul>
+<p>After unpacking the file you’ll have the required files.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_organism --file names.dmp --name DB:NCBI_taxonomy
+python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NCBI taxonomy tree&#39;</span> --organismdb <span class="s1">&#39;DB:NCBI_taxonomy&#39;</span>
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
+<ul class="simple">
+<li>Loading these files can be faster if you increase the number of threads (–cpu).</li>
+<li>It will take a long time anyway (hours).</li>
+</ul>
+</div>
+<div class="section" id="removing-a-taxonomy">
+<h2>Removing a taxonomy<a class="headerlink" href="#removing-a-taxonomy" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove a taxonomy you should use the command <em>remove_phylotree</em> and <em>remove_organisms</em>. Most data files you’ll load depend on the organism database (eg. fasta, gff, blast). <strong>If you delete an organism database, every data file you loaded will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_phylotree --help
+python manage.py remove_organisms --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>These commands require the name of the databases (Db.name)</li>
+</ul>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_fasta.html" class="btn btn-neutral float-right" title="Loading FASTA files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="insert_organism.html" class="btn btn-neutral float-right" title="Insert organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="load_ontologies.html" class="btn btn-neutral" title="Loading ontologies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -202,7 +218,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -221,6 +237,7 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.1.0',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -238,14 +255,13 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
