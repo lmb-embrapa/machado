@@ -24,8 +24,8 @@ After unpacking the file you'll have the required files.
 * Loading these files can be faster if you increase the number of threads (--cpu).
 * It will take a long time anyway (hours).
 
-Removing a taxonomy
--------------------
+Remove taxonomy
+---------------
 
 If, by any reason, you need to remove a taxonomy you should use the command *remove_phylotree* and *remove_organisms*. Most data files you'll load depend on the organism database (eg. fasta, gff, blast). **If you delete an organism database, every data file you loaded will be deleted on cascade**.
 
@@ -34,4 +34,4 @@ If, by any reason, you need to remove a taxonomy you should use the command *rem
     python manage.py remove_phylotree --help
     python manage.py remove_organisms --help
 
-* These commands require the name of the databases (Db.name)
+* These commands require the names of the databases (Db.name)

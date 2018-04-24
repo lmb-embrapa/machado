@@ -44,8 +44,8 @@ Source ontology files for the Gene Ontology.
 * After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.
 
 
-Removing an ontology
---------------------
+Remove ontology
+---------------
 
 If, by any reason, you need to remove an ontology you should use the command *remove_ontology*. Most data files you'll load depend on the ontologies (eg. fasta, gff, blast). You should **never** delete an ontology after having data files loaded.
 
