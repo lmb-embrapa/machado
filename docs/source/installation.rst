@@ -21,6 +21,7 @@ As postgres user run:
     alter user username createdb;
 
 **Python 3.6**
+Be sure to have the python development libraries installed (in Ubuntu 16.04, install with 'apt-get install python-dev').
 
 We strongly recommend creating a new virtualenv for your project
 
