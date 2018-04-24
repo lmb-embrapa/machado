@@ -85,6 +85,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Ontologies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
@@ -198,8 +199,8 @@
 <li>After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.</li>
 </ul>
 </div>
-<div class="section" id="removing-an-ontology">
-<h2>Removing an ontology<a class="headerlink" href="#removing-an-ontology" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="remove-ontology">
+<h2>Remove ontology<a class="headerlink" href="#remove-ontology" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove an ontology you should use the command <em>remove_ontology</em>. Most data files you’ll load depend on the ontologies (eg. fasta, gff, blast). You should <strong>never</strong> delete an ontology after having data files loaded.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_ontology --help
 </pre></div>

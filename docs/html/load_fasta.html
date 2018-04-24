@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Loading GFF files" href="load_gff.html" />
-    <link rel="prev" title="Insert organism" href="insert_organism.html" /> 
+    <link rel="prev" title="Loading publication files" href="load_publication.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -85,9 +85,8 @@
 <li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">FASTA</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
 </ul>
@@ -162,11 +161,60 @@
             
   <div class="section" id="loading-fasta-files">
 <h1>Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this headline">¶</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It will be available soon.</p>
+<div class="section" id="load-fasta">
+<h2>Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span> --nosequence
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="87%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>FASTA File *</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Species name (eg. Homo sapiens, Mus musculus) *</td>
+</tr>
+<tr class="row-odd"><td>–soterm</td>
+<td>SO Sequence Ontology Term (eg. chromosome, assembly) *</td>
+</tr>
+<tr class="row-even"><td>–description</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td>–url</td>
+<td>URL</td>
+</tr>
+<tr class="row-even"><td>–doi</td>
+<td>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</td>
+</tr>
+<tr class="row-odd"><td>–nosequence</td>
+<td>Don’t load the sequences</td>
+</tr>
+<tr class="row-even"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* required fields</p>
+</div>
+<div class="section" id="remove-file">
+<h2>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove a fasta dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>This command requires the file name (Dbxrefprop.value)</li>
+</ul>
 </div>
 </div>
 
@@ -181,7 +229,7 @@
         <a href="load_gff.html" class="btn btn-neutral float-right" title="Loading GFF files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="insert_organism.html" class="btn btn-neutral" title="Insert organism" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_publication.html" class="btn btn-neutral" title="Loading publication files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

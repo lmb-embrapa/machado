@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file", help="BLAST File", required=True,
+        parser.add_argument("--file", help="BLAST XML File", required=True,
                             type=str)
         parser.add_argument("--so_query", help="Query Sequence Ontology term. "
                             "eg. assembly, mRNA, CDS, polypeptide",

@@ -28,7 +28,7 @@ class Command(BaseCommand):
         parser.add_argument("--organism", help="Species name (eg. Homo "
                             "sapiens, Mus musculus)", required=True, type=str)
         parser.add_argument("--soterm", help="SO Sequence Ontology Term (eg. "
-                            "chromosome, supercontig)", required=True,
+                            "chromosome, assembly)", required=True,
                             type=str)
         parser.add_argument("--nosequence", help="Don't load the sequence",
                             required=False, action='store_true')

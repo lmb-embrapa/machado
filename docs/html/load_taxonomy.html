@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Insert organism" href="insert_organism.html" />
+    <link rel="next" title="Inserting a new organism" href="insert_organism.html" />
     <link rel="prev" title="Loading ontologies" href="load_ontologies.html" /> 
 
   
@@ -85,6 +85,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
@@ -181,15 +182,15 @@ python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NC
 <li>It will take a long time anyway (hours).</li>
 </ul>
 </div>
-<div class="section" id="removing-a-taxonomy">
-<h2>Removing a taxonomy<a class="headerlink" href="#removing-a-taxonomy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="remove-taxonomy">
+<h2>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a taxonomy you should use the command <em>remove_phylotree</em> and <em>remove_organisms</em>. Most data files you’ll load depend on the organism database (eg. fasta, gff, blast). <strong>If you delete an organism database, every data file you loaded will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_phylotree --help
 python manage.py remove_organisms --help
 </pre></div>
 </div>
 <ul class="simple">
-<li>These commands require the name of the databases (Db.name)</li>
+<li>These commands require the names of the databases (Db.name)</li>
 </ul>
 </div>
 </div>
@@ -202,7 +203,7 @@ python manage.py remove_organisms --help
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="insert_organism.html" class="btn btn-neutral float-right" title="Insert organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="insert_organism.html" class="btn btn-neutral float-right" title="Inserting a new organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="load_ontologies.html" class="btn btn-neutral" title="Loading ontologies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

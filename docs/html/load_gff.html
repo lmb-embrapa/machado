@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Loading Blast files" href="load_blast.html" />
+    <link rel="next" title="Loading Blast results" href="load_blast.html" />
     <link rel="prev" title="Loading FASTA files" href="load_fasta.html" /> 
 
   
@@ -85,10 +85,9 @@
 <li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">GFF</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
 </ul>
 </li>
@@ -162,11 +161,50 @@
             
   <div class="section" id="loading-gff-files">
 <h1>Loading GFF files<a class="headerlink" href="#loading-gff-files" title="Permalink to this headline">¶</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It will be available soon.</p>
+<p>The first column of a GFF file is the reference sequence ID.
+Therefore, in order to load a GFF file, it’s required to have a reference FASTA file loaded.</p>
+<div class="section" id="load-gff">
+<h2>Load GFF<a class="headerlink" href="#load-gff" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --file organism_genes_sorted.gff3.gz --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>GFF3 genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Species name (eg. Homo sapiens, Mus musculus) *</td>
+</tr>
+<tr class="row-odd"><td>–doi</td>
+<td>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</td>
+</tr>
+<tr class="row-even"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* required fields</p>
+</div>
+<div class="section" id="remove-file">
+<h2>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove a GFF dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>This command requires the file name (Dbxrefprop.value)</li>
+</ul>
 </div>
 </div>
 
@@ -178,7 +216,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_blast.html" class="btn btn-neutral float-right" title="Loading Blast files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_blast.html" class="btn btn-neutral float-right" title="Loading Blast results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="load_fasta.html" class="btn btn-neutral" title="Loading FASTA files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
