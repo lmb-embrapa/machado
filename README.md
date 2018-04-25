@@ -3,9 +3,9 @@
 
 # machado
 
-
 machado is a Django app that contains tools to interact with a Chado database.
 Detailed documentation can be found in the **docs** directory ([INSTALL](http://machado.readthedocs.io/en/latest/installation.html)).
+machado is an acronym for 'Model Architecture for Chado'.
 
 
 ## Quick start
@@ -19,8 +19,9 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](http://
 
         python setup.py install
 
+3. Create a Django project and a Django app
 
-3. Add "machado" to your settings.py INSTALLED_APPS like this:
+4. Add "machado" to your settings.py INSTALLED_APPS like this:
 
         INSTALLED_APPS = [
             ...
@@ -29,7 +30,7 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](http://
             ...
         ]
 
-4. Configure the settings.py DATABASES to connect to a PostgreSQL database.
+5. Configure the settings.py DATABASES to connect to a PostgreSQL database.
 
 ## Example
 
