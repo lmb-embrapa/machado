@@ -7,9 +7,7 @@
 """App settings file."""
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from importlib import import_module
-import warnings
 
 
 def patch_root_urlconf():

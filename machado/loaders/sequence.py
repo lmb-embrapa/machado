@@ -9,7 +9,8 @@
 from Bio.SeqRecord import SeqRecord
 from machado.loaders.common import retrieve_organism, retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Db, Dbxref, Dbxrefprop, Feature, FeaturePub, PubDbxref
+from machado.models import Db, Dbxref, Dbxrefprop, Feature, FeaturePub
+from machado.models import PubDbxref
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
