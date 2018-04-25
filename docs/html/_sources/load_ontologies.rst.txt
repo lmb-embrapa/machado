@@ -38,7 +38,7 @@ Source ontology files for the Gene Ontology.
 
 .. code-block:: bash
 
-    python manage.py load_gene_ontology --file so.obo
+    python manage.py load_gene_ontology --file gene_ontology.obo
 
 * Loading the gene ontology can be faster if you increase the number of threads (--cpu).
 * After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.
