@@ -1,7 +1,7 @@
 This pull request addresses issue #...
 
 I hereby agree to licence this and any previous contributions under
-the terms of the GNU General Public License version 3as published by
+the terms of the GNU General Public License version 3 as published by
 the Free Software Foundation
 
 I have read the ``CONTRIBUTING.rst`` file and understand that
