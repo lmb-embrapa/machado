@@ -18,7 +18,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--name", help="db.name", required=True, type=str)
+        parser.add_argument("--name", help="analysis.sourcename",
+                            required=True, type=str)
 
     def handle(self, name: str, **options):
         """Execute the main function."""

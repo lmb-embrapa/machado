@@ -40,4 +40,4 @@ If, by any reason, you need to remove a Blast result set you should use the comm
 
     python manage.py remove_analysis --help
 
-* This command requires the database name (Db.name)
+* This command requires the analysis name (Analysis.sourcename)
