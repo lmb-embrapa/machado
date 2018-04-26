@@ -1,3 +1,4 @@
+"""Apps."""
 # Copyright 2018 by Embrapa.  All rights reserved.
 #
 # This code is part of the machado distribution and governed by its
@@ -11,10 +12,13 @@ import warnings
 
 
 class MachadoConfig(AppConfig):
+    """Machado config."""
+
     name = 'machado'
     verbose_name = 'machado'
 
     def ready(self):
+        """Ready."""
         try:
             dt_settings.patch_all()
         except ProgrammingError as e:

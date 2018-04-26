@@ -5,7 +5,6 @@
 
 machado is a Django app that contains tools to interact with a Chado database.
 Detailed documentation can be found in the **docs** directory ([INSTALL](http://machado.readthedocs.io/en/latest/installation.html)).
-machado is an acronym for 'Model Architecture for Chado'.
 
 
 ## Quick start
