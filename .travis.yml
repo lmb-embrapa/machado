@@ -9,7 +9,6 @@ before_install:
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
   - pip install coverage
-  - pip install sphinx
 
 sudo: false
 addons:
