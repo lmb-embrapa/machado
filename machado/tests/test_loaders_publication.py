@@ -6,8 +6,9 @@
 
 """Tests publicationtion loader."""
 
-from machado.models import Pub
+from machado.models import Pub, Dbxref, PubDbxref
 from machado.loaders.publication import PublicationLoader
+from django.core.management import call_command
 from django.test import TestCase
 from bibtexparser.bibdatabase import BibDatabase
 
@@ -43,7 +44,7 @@ class PublicationTest(TestCase):
                                    'long enough to test multilines...',
                        'title': 'An amazing title',
                        'year': '2013',
-                       'doi': '10.1111/s12122-012-1313-4',
+                       'doi': '10.1111/s12122-012-1313-5',
                        'volume': '12',
                        'ID': 'Cesar2013',
                        'author': 'Foo, b. and Foo1, b. and Foo b.',
@@ -56,3 +57,17 @@ class PublicationTest(TestCase):
         test_bibtex2 = Pub.objects.get(uniquename='Cesar2013')
         self.assertEqual('12', test_bibtex2.volume)
         self.assertEqual(None, test_bibtex2.pages)
+        test_bibtex2_pub_dbxref = PubDbxref.objects.get(
+                pub_id=test_bibtex2.pub_id)
+        self.assertEqual(test_bibtex2.pub_id, test_bibtex2_pub_dbxref.pub_id)
+        # test remove publication (with cascade enabled)
+        test_bibtex2_dbxref = Dbxref.objects.get(
+                dbxref_id=test_bibtex2_pub_dbxref.dbxref_id,
+                accession="10.1111/s12122-012-1313-5")
+        self.assertEqual('10.1111/s12122-012-1313-5',
+                         test_bibtex2_dbxref.accession)
+        call_command("remove_publication", "--doi=10.1111/s12122-012-1313-5")
+        self.assertFalse(Pub.objects.filter(uniquename='Cesar2013').exists())
+        # check if dbxref remains
+        self.assertTrue(Dbxref.objects.filter(
+            accession='10.1111/s12122-012-1313-5').exists())
