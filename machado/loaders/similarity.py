@@ -6,7 +6,6 @@
 
 """Load similarity file."""
 
-from Bio.Blast import Record
 from machado.models import Analysis, Analysisfeature, Feature, Featureloc
 from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
@@ -159,47 +158,6 @@ class SimilarityLoader(object):
                                   is_fmin_partial=False,
                                   locgroup=0,
                                   rank=1)
-
-    def store_bio_blast_record(self, record: Record):
-        """Store bio_blast_record record."""
-        try:
-            query_id = record.query.split(' ')[0]
-            query_feature = Feature.objects.get(
-                    uniquename=query_id, type_id=self.so_term_query.cvterm_id)
-        except ObjectDoesNotExist as e1:
-            try:
-                query_id = self.retrieve_id_from_description(record.query)
-                query_feature = Feature.objects.get(
-                        uniquename=query_id,
-                        type_id=self.so_term_query.cvterm_id)
-            except ObjectDoesNotExist as e2:
-                raise ImportingError(e1, e2)
-
-        for alignment in record.alignments:
-            try:
-                subject_id = alignment.title.split(' ')[0]
-                subject_feature = Feature.objects.get(
-                        uniquename=subject_id,
-                        type_id=self.so_term_subject.cvterm_id)
-            except ObjectDoesNotExist as e1:
-                try:
-                    subject_id = self.retrieve_id_from_description(
-                        alignment.title)
-                    subject_feature = Feature.objects.get(
-                            uniquename=subject_id,
-                            type_id=self.so_term_subject.cvterm_id)
-                except ObjectDoesNotExist as e2:
-                    raise ImportingError(e1, e2)
-            for hsp_item in alignment.hsps:
-                self.store_match_part(query_feature=query_feature,
-                                      subject_feature=subject_feature,
-                                      identity=hsp_item.identities,
-                                      rawscore=hsp_item.score,
-                                      significance=hsp_item.expect,
-                                      query_start=hsp_item.query_start,
-                                      query_end=hsp_item.query_end,
-                                      subject_start=hsp_item.sbjct_start,
-                                      subject_end=hsp_item.sbjct_end)
 
     def store_bio_searchio_query_result(
             self, query_result: query.QueryResult) -> None:
