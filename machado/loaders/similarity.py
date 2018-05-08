@@ -6,7 +6,6 @@
 
 """Load similarity file."""
 
-from Bio.Blast import Record
 from machado.models import Analysis, Analysisfeature, Feature, Featureloc
 from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
@@ -14,7 +13,7 @@ from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
-from typing import Optional, Tuple
+from typing import Optional
 
 import warnings
 from Bio import BiopythonExperimentalWarning
@@ -69,9 +68,9 @@ class SimilarityLoader(object):
                 pass
         return None
 
-    def retrieve_feats_from_hsp(
-            self, hsp: hsp.HSP) -> Tuple[Feature, Feature]:
-        """Retrieve features from searchio hsp."""
+    def retrieve_query_from_hsp(
+            self, hsp: hsp.HSP) -> Feature:
+        """Retrieve the query feature from searchio hsp."""
         try:
             query_feature = Feature.objects.get(
                     uniquename=hsp.query_id,
@@ -86,6 +85,11 @@ class SimilarityLoader(object):
             except ObjectDoesNotExist as e2:
                 raise ImportingError('Query', e1, e2)
 
+        return query_feature
+
+    def retrieve_subject_from_hsp(
+            self, hsp: hsp.HSP) -> Feature:
+        """Retrieve the subject feature from searchio hsp."""
         try:
             subject_feature = Feature.objects.get(
                     uniquename=hsp.hit_id,
@@ -100,7 +104,7 @@ class SimilarityLoader(object):
             except ObjectDoesNotExist as e2:
                 raise ImportingError('Subject', e1, e2)
 
-        return (query_feature, subject_feature)
+        return subject_feature
 
     def store_match_part(self,
                          query_feature: Feature,
@@ -160,53 +164,12 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=1)
 
-    def store_bio_blast_record(self, record: Record):
-        """Store bio_blast_record record."""
-        try:
-            query_id = record.query.split(' ')[0]
-            query_feature = Feature.objects.get(
-                    uniquename=query_id, type_id=self.so_term_query.cvterm_id)
-        except ObjectDoesNotExist as e1:
-            try:
-                query_id = self.retrieve_id_from_description(record.query)
-                query_feature = Feature.objects.get(
-                        uniquename=query_id,
-                        type_id=self.so_term_query.cvterm_id)
-            except ObjectDoesNotExist as e2:
-                raise ImportingError(e1, e2)
-
-        for alignment in record.alignments:
-            try:
-                subject_id = alignment.title.split(' ')[0]
-                subject_feature = Feature.objects.get(
-                        uniquename=subject_id,
-                        type_id=self.so_term_subject.cvterm_id)
-            except ObjectDoesNotExist as e1:
-                try:
-                    subject_id = self.retrieve_id_from_description(
-                        alignment.title)
-                    subject_feature = Feature.objects.get(
-                            uniquename=subject_id,
-                            type_id=self.so_term_subject.cvterm_id)
-                except ObjectDoesNotExist as e2:
-                    raise ImportingError(e1, e2)
-            for hsp_item in alignment.hsps:
-                self.store_match_part(query_feature=query_feature,
-                                      subject_feature=subject_feature,
-                                      identity=hsp_item.identities,
-                                      rawscore=hsp_item.score,
-                                      significance=hsp_item.expect,
-                                      query_start=hsp_item.query_start,
-                                      query_end=hsp_item.query_end,
-                                      subject_start=hsp_item.sbjct_start,
-                                      subject_end=hsp_item.sbjct_end)
-
     def store_bio_searchio_query_result(
             self, query_result: query.QueryResult) -> None:
         """Store bio_searchio_query_result."""
         for hsp_item in query_result.hsps:
-            query_feature, subject_feature = self.retrieve_feats_from_hsp(
-                    hsp_item)
+            query_feature = self.retrieve_query_from_hsp(hsp_item)
+            subject_feature = self.retrieve_subject_from_hsp(hsp_item)
             self.store_match_part(query_feature=query_feature,
                                   subject_feature=subject_feature,
                                   identity=hsp_item.ident_num,
