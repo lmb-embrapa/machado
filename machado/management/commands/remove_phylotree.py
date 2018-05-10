@@ -21,12 +21,16 @@ class Command(BaseCommand):
         parser.add_argument("--name", help="phylotree.name", required=True,
                             type=str)
 
-    def handle(self, name: str, **options):
+    def handle(self,
+               name: str,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
         try:
-            self.stdout.write('Deleting {} and every child record (CASCADE)'
-                              .format(name))
-
+            if verbosity > 0:
+                self.stdout.write('Deleting {} and every child'
+                                  'record (CASCADE)'
+                                  .format(name))
             phylotree = Phylotree.objects.get(name=name)
             phylonode_ids = list(Phylonode.objects.filter(
                 phylotree=phylotree).values_list('phylonode_id', flat=True))
@@ -34,8 +38,8 @@ class Command(BaseCommand):
                 phylonode_id__in=phylonode_ids).delete()
             Phylonode.objects.filter(phylotree=phylotree).delete()
             phylotree.delete()
-
-            self.stdout.write(self.style.SUCCESS('Done'))
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Cannot remove {} (not registered)'.format(name))

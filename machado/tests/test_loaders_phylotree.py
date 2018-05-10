@@ -8,8 +8,9 @@
 
 from machado.loaders.phylotree import PhylotreeLoader
 from machado.loaders.organism import OrganismLoader
-from machado.models import Organism, Phylonode
+from machado.models import Organism, Phylonode, Phylotree
 from django.test import TestCase
+from django.core.management import call_command
 
 
 class PhylotreeTest(TestCase):
@@ -90,3 +91,11 @@ class PhylotreeTest(TestCase):
         self.assertEqual(6, test_phylonode2.right_idx)
         self.assertEqual(test_phylonode1.phylonode_id,
                          test_phylonode2.parent_phylonode_id)
+        # test remove_phylotree
+        self.assertTrue(Phylotree.objects.filter(name='testTaxonomy')
+                        .exists())
+        call_command("remove_phylotree",
+                     "--name=testTaxonomy",
+                     "--verbosity=0")
+        self.assertFalse(Phylotree.objects.filter(name='testTaxonomy')
+                         .exists())

@@ -61,12 +61,9 @@ class PublicationTest(TestCase):
                 pub_id=test_bibtex2.pub_id)
         self.assertEqual(test_bibtex2.pub_id, test_bibtex2_pub_dbxref.pub_id)
         # test remove publication (with cascade enabled)
-        test_bibtex2_dbxref = Dbxref.objects.get(
-                dbxref_id=test_bibtex2_pub_dbxref.dbxref_id,
-                accession="10.1111/s12122-012-1313-5")
-        self.assertEqual('10.1111/s12122-012-1313-5',
-                         test_bibtex2_dbxref.accession)
-        call_command("remove_publication", "--doi=10.1111/s12122-012-1313-5")
+        self.assertTrue(Pub.objects.filter(uniquename='Cesar2013').exists())
+        call_command("remove_publication", "--doi=10.1111/s12122-012-1313-5",
+                     "--verbosity=0")
         self.assertFalse(Pub.objects.filter(uniquename='Cesar2013').exists())
         # check if dbxref remains
         self.assertTrue(Dbxref.objects.filter(

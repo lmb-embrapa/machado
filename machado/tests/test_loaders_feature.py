@@ -14,6 +14,7 @@ from machado.models import Featureloc, FeatureRelationship
 from machado.loaders.feature import FeatureLoader
 from machado.loaders.publication import PublicationLoader
 from django.test import TestCase
+from django.core.management import call_command
 from datetime import datetime, timezone
 from bibtexparser.bibdatabase import BibDatabase
 

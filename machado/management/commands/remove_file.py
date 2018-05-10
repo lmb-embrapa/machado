@@ -24,12 +24,16 @@ class Command(BaseCommand):
         parser.add_argument(
             "--name", help="File name", required=True, type=str)
 
-    def handle(self, name: str, **options):
+    def handle(self,
+               name: str,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
         try:
-            self.stdout.write('Deleting {} and every child record (CASCADE)'
-                              .format(name))
-
+            if verbosity > 0:
+                self.stdout.write('Deleting {} and every'
+                                  'child record (CASCADE)'
+                                  .format(name))
             dbxref_ids = list(Dbxrefprop.objects.filter(
                 value=name).values_list('dbxref_id', flat=True))
             feature_ids = list(Feature.objects.filter(
@@ -46,8 +50,8 @@ class Command(BaseCommand):
             Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Dbxrefprop.objects.filter(value=name).delete()
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
-
-            self.stdout.write(self.style.SUCCESS('Done'))
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Cannot remove {} (not registered)'.format(name))

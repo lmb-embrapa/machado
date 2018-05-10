@@ -26,14 +26,19 @@ class Command(BaseCommand):
                             required=True,
                             type=str)
 
-    def handle(self, genus: str, species: str, **options):
+    def handle(self,
+               genus: str,
+               species: str,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
         try:
             organism = Organism.objects.get(species=species, genus=genus)
             if organism:
                 organism.delete()
-                self.stdout.write(self.style.SUCCESS(
-                    '{} {} removed'.format(genus, species)))
+                if verbosity > 0:
+                    self.stdout.write(self.style.SUCCESS(
+                        '{} {} removed'.format(genus, species)))
 
         except ObjectDoesNotExist:
                 raise CommandError('Organism does not exist in database!')
