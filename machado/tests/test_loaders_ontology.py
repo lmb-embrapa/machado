@@ -10,6 +10,7 @@ from machado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref
 from machado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
 from machado.loaders.ontology import OntologyLoader
 from django.test import TestCase
+from django.core.management import call_command
 import obonet
 import os
 
@@ -99,6 +100,14 @@ class OntologyTest(TestCase):
                          test_dbxref_is_metadata_tag.accession)
         self.assertEqual('is_metadata_tag',
                          test_cvterm_is_metadata_tag.name)
+        # test remove_cv
+        self.assertTrue(Cv.objects.filter(name='test_ontology')
+                        .exists())
+        call_command("remove_ontology",
+                     "--name=test_ontology",
+                     "--verbosity=0")
+        self.assertFalse(Cv.objects.filter(name='test_ontology')
+                         .exists())
 
     def test_process_cvterm_def(self):
         """Tests - process_cvterm_def."""

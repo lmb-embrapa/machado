@@ -22,7 +22,10 @@ class Command(BaseCommand):
                             required=True,
                             type=str)
 
-    def handle(self, dbname: str, **options):
+    def handle(self,
+               dbname: str,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
         try:
             db = Db.objects.get(name=dbname)
@@ -37,7 +40,8 @@ class Command(BaseCommand):
             Dbxref.objects.filter(db=db).delete()
             db.delete()
 
-            self.stdout.write(self.style.SUCCESS('Done'))
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Cannot remove {} (not registered)'.format(dbname))

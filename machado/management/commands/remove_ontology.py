@@ -24,15 +24,17 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--name", help="cv.name", required=True, type=str)
 
-    def handle(self, name: str, **options):
+    def handle(self,
+               name: str,
+               verbosity: int=1,
+               **options):
         """Execute the main function."""
         try:
             cv = Cv.objects.get(name=name)
-
-            self.stdout.write(
-                    'Deleting {} and every child record (CASCADE)'
-                    .format(name))
-
+            if verbosity > 0:
+                self.stdout.write(
+                        'Deleting {} and every child record (CASCADE)'
+                        .format(name))
             cvterm_ids = list(Cvterm.objects.filter(
                 cv=cv).values_list('cvterm_id', flat=True))
             dbxref_ids = list(CvtermDbxref.objects.filter(
@@ -53,7 +55,8 @@ class Command(BaseCommand):
 
             cv.delete()
 
-            self.stdout.write(self.style.SUCCESS('Done'))
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS('Done'))
         except IntegrityError as e:
             raise CommandError(
                     'It\'s not possible to delete every record. You must '

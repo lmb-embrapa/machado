@@ -9,6 +9,7 @@
 from machado.loaders.organism import OrganismLoader
 from machado.models import Db, Dbxref, Organism, OrganismDbxref, Organismprop
 from django.test import TestCase
+from django.core.management import call_command
 
 
 class OrganismTest(TestCase):
@@ -41,3 +42,14 @@ class OrganismTest(TestCase):
         self.assertEqual('paraguariensis', test.species)
         self.assertEqual('mate,Brazilian-tea,yerba-mate', test.common_name)
         self.assertEqual('Ilex paraguensis', test_synonym[0].value)
+        # test remove_organism
+        self.assertTrue(Organism.objects.filter(genus='Ilex',
+                                                species='paraguariensis')
+                        .exists())
+        call_command("remove_organism",
+                     "--genus=Ilex",
+                     "--species=paraguariensis",
+                     "--verbosity=0")
+        self.assertFalse(Organism.objects.filter(genus='Ilex',
+                                                 species='paraguariensis')
+                         .exists())

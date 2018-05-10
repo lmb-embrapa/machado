@@ -12,6 +12,7 @@ from machado.models import Feature, Featureloc
 from machado.loaders.similarity import SimilarityLoader
 from datetime import datetime, timezone
 from django.test import TestCase
+from django.core.management import call_command
 
 import warnings
 from Bio import BiopythonExperimentalWarning
@@ -125,3 +126,11 @@ class SimilarityTest(TestCase):
                 analysis=test_analysis,
                 feature_id=test_featureloc.feature_id)
         self.assertEqual(234.0, test_analysisfeature.rawscore)
+        # test remove_feature
+        self.assertTrue(Analysis.objects.filter(sourcename='similarity.file')
+                        .exists())
+        call_command("remove_analysis",
+                     "--name=similarity.file",
+                     "--verbosity=0")
+        self.assertFalse(Analysis.objects.filter(sourcename='similarity.file')
+                         .exists())
