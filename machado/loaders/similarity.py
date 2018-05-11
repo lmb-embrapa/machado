@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load similarity file."""
+"""Load similarity."""
 
 from machado.models import Analysis, Analysisfeature, Feature, Featureloc
 from machado.loaders.common import retrieve_ontology_term
@@ -15,10 +15,11 @@ from django.db.utils import IntegrityError
 from time import time
 from typing import Optional
 
+
 import warnings
-from Bio import BiopythonExperimentalWarning
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
 with warnings.catch_warnings():
-    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
     from Bio.SearchIO._model import query, hsp
 
 
@@ -102,7 +103,7 @@ class SimilarityLoader(object):
                         uniquename=subject_id,
                         type_id=self.so_term_subject.cvterm_id)
             except ObjectDoesNotExist as e2:
-                raise ImportingError('Subject', e1, e2)
+                raise ImportingError('Subject', hsp.hit_id, e1, e2)
 
         return subject_feature
 
@@ -138,6 +139,9 @@ class SimilarityLoader(object):
                                        normscore=normscore,
                                        significance=significance)
 
+        if query_start is None or subject_start is None:
+            return None
+
         if (query_end is not None and
                 query_start is not None and
                 query_end < query_start):
@@ -170,6 +174,14 @@ class SimilarityLoader(object):
         for hsp_item in query_result.hsps:
             query_feature = self.retrieve_query_from_hsp(hsp_item)
             subject_feature = self.retrieve_subject_from_hsp(hsp_item)
+            if not hasattr(hsp_item, 'ident_num'):
+                hsp_item.ident_num = None
+            if not hasattr(hsp_item, 'bitscore'):
+                hsp_item.bitscore = None
+            if not hasattr(hsp_item, 'bitscore_raw'):
+                hsp_item.bitscore_raw = None
+            if not hasattr(hsp_item, 'evalue'):
+                hsp_item.evalue = None
             self.store_match_part(query_feature=query_feature,
                                   subject_feature=subject_feature,
                                   identity=hsp_item.ident_num,
