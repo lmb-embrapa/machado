@@ -15,7 +15,7 @@ from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -132,6 +132,9 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Organism.objects.all()
 
     serializer_class = OrganismSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('genus', 'species')
+    ordering_fields = ('genus', 'species')
     pagination_class = StandardResultSetPagination
 
 
@@ -145,6 +148,9 @@ class ChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
 
@@ -158,6 +164,9 @@ class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
@@ -181,6 +190,9 @@ class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
 
@@ -194,6 +206,51 @@ class NestedScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            queryset = self.queryset.filter(
+                organism=self.kwargs['organism_pk'])
+        except KeyError:
+            pass
+
+        return queryset
+
+
+class GeneViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view gene."""
+
+    if Cvterm.objects.filter(cv__name='sequence', name='gene').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='gene')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
+    pagination_class = StandardResultSetPagination
+
+
+class NestedGeneViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view gene."""
+
+    if Cvterm.objects.filter(cv__name='sequence', name='gene').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='gene')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
@@ -217,6 +274,9 @@ class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
 
@@ -230,6 +290,9 @@ class NestedProteinViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
+    search_fields = ('uniquename', 'name')
+    ordering_fields = ('uniquename', 'name')
     pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
