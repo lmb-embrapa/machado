@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
@@ -169,6 +170,13 @@
 <ul class="simple">
 <li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
+</div>
+<div class="section" id="remove-publication">
+<h2>Remove publication<a class="headerlink" href="#remove-publication" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove a publication you should use the command <em>remove_publication</em>. <strong>If you delete a publication, every record that depend on it will be deleted on cascade, with the exception of the Dbxref field that contains the DOI accession</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_publication --help
+</pre></div>
+</div>
 </div>
 </div>
 

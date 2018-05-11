@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load FASTA file."""
+"""Load similarity file."""
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
@@ -15,26 +15,32 @@ from tqdm import tqdm
 import os
 
 import warnings
-from Bio import BiopythonExperimentalWarning
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
 with warnings.catch_warnings():
-    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
     from Bio import SearchIO
+
+VALID_FORMAT = ['blast-xml', 'interproscan-xml']
 
 
 class Command(BaseCommand):
-    """Load FASTA file."""
+    """Load similarity file."""
 
-    help = 'Load FASTA file'
+    help = 'Load similarity file'
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file", help="BLAST XML File", required=True,
-                            type=str)
+        parser.add_argument("--file", help="Blast or InterproScan XML file",
+                            required=True, type=str)
+        parser.add_argument("--format",
+                            help="blast-xml or interproscan-xml",
+                            required=True, type=str)
         parser.add_argument("--so_query", help="Query Sequence Ontology term. "
                             "eg. assembly, mRNA, CDS, polypeptide",
                             required=True, type=str)
         parser.add_argument("--so_subject", help="Subject Sequence Ontology "
-                            "term. eg. assembly, mRNA, CDS, polypeptide",
+                            "term. eg. assembly, mRNA, CDS, polypeptide "
+                            "(protein_match if loading InterproScan XML file)",
                             required=True, type=str)
         parser.add_argument("--program", help="Program", required=True,
                             type=str)
@@ -51,6 +57,7 @@ class Command(BaseCommand):
 
     def handle(self,
                file: str,
+               format: str,
                so_query: str,
                so_subject: str,
                program: str,
@@ -65,6 +72,10 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Preprocessing')
 
+        if format not in VALID_FORMAT:
+            raise CommandError('The format is not valid. Please choose: '
+                               '{}'.format(VALID_FORMAT))
+
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -73,7 +84,7 @@ class Command(BaseCommand):
         filename = os.path.basename(file)
 
         try:
-            blast_file = SimilarityLoader(
+            similarity_file = SimilarityLoader(
                     filename=filename,
                     so_query=so_query,
                     so_subject=so_subject,
@@ -86,16 +97,16 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
-            blast_records = SearchIO.parse(file, 'blast-xml')
+            similarity_records = SearchIO.parse(file, format)
         except ValueError as e:
             return CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        for record in blast_records:
+        for record in similarity_records:
             if len(record.hsps) > 0:
                 tasks.append(pool.submit(
-                    blast_file.store_bio_searchio_query_result, record))
+                    similarity_file.store_bio_searchio_query_result, record))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

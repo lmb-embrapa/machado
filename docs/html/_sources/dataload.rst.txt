@@ -18,3 +18,4 @@ Data loading commands
    FASTA <load_fasta>
    GFF <load_gff>
    Blast <load_blast>
+   InterproScan <load_interproscan>

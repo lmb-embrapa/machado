@@ -17,6 +17,12 @@ from django.test import TestCase
 from datetime import datetime, timezone
 from bibtexparser.bibdatabase import BibDatabase
 
+import warnings
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
+with warnings.catch_warnings():
+    from Bio.SearchIO._model import Hit
+
 
 class FeatureTest(TestCase):
     """Tests Loaders - FeatureLoader."""
@@ -29,6 +35,10 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
         test_db = Db.objects.create(name='RO')
         test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
         test_cv = Cv.objects.create(name='relationship')
@@ -66,6 +76,11 @@ class FeatureTest(TestCase):
         test_so_term = Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='1234555', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+        # create RO term: contained in
 
         # creating test feature
         test_feature = Feature.objects.create(
@@ -157,6 +172,10 @@ class FeatureTest(TestCase):
                               is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='00004', db=test_db)
         Cvterm.objects.create(name='polypeptide', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='00005', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
         # create RO term: contained in
@@ -265,3 +284,63 @@ class FeatureTest(TestCase):
         self.assertEqual('name2', test_feature.name)
         self.assertEqual(10, test_featureloc.fmin)
         self.assertEqual('id1', test_src_feature.uniquename)
+
+    def test_store_bio_searchio_hit(self):
+        """Tests - store bio searchio hit."""
+        # create RO term: contained in
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        # create SO terms: protein_match
+        test_cv = Cv.objects.create(name='sequence')
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        Cvterm.objects.create(name='polypeptide', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+        # create GO term
+        test_db = Db.objects.create(name='GO')
+        test_dbxref = Dbxref.objects.create(accession='1234', db=test_db)
+        test_cv = Cv.objects.create(name='biological_process')
+        Cvterm.objects.create(name='GO:1234', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+
+        # create a bio searchio hit
+        test_searchio_hit = Hit()
+        test_searchio_hit.id = 'PF1234'
+        test_searchio_hit.accession = 'PFAM mock domain'
+        test_searchio_hit.attributes['Target'] = 'PFAM'
+        test_searchio_hit.dbxrefs = ['GO:1234', 'IPR:IPR012345',
+                                     'Reactome:R-HSA-12345']
+
+        test_organism = Organism.objects.create(
+            genus='test', species='organism')
+
+        # instantiate the loader
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism=test_organism,
+                                          source='InterproScan_source')
+        # store the bio searchio hit
+        test_feature_file.store_bio_searchio_hit(test_searchio_hit)
+
+        test_feature = Feature.objects.get(uniquename='PF1234')
+        self.assertEqual('PFAM mock domain', test_feature.name)
+
+        test_dbxref = Dbxref.objects.get(accession='IPR012345')
+        test_feature_dbxref = FeatureDbxref.objects.get(
+            feature=test_feature, dbxref=test_dbxref)
+        self.assertEqual(True, test_feature_dbxref.is_current)
+
+        test_cvterm = Cvterm.objects.get(name='GO:1234')
+        test_feature_cvterm = FeatureCvterm.objects.get(
+            feature=test_feature, cvterm=test_cvterm)
+        self.assertEqual(0, test_feature_cvterm.rank)

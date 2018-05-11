@@ -4,12 +4,12 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load feture file."""
+"""Load feature file."""
 
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop
 from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from machado.models import Featureprop, FeatureSynonym, FeatureRelationship
-from machado.models import Pub, PubDbxref, FeaturePub, Synonym
+from machado.models import Organism, Pub, PubDbxref, FeaturePub, Synonym
 from machado.loaders.common import retrieve_ontology_term, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
@@ -17,8 +17,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy
 from time import time
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Union
 from urllib.parse import unquote
+
+import warnings
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
+with warnings.catch_warnings():
+    from Bio.SearchIO._model import Hit
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
@@ -41,13 +47,16 @@ class FeatureLoader(object):
     def __init__(self,
                  source: str,
                  filename: str,
-                 organism: str,
+                 organism: Union[str, Organism],
                  doi: str=None) -> None:
         """Execute the init function."""
-        try:
-            self.organism = retrieve_organism(organism)
-        except ObjectDoesNotExist as e:
-            raise ImportingError(e)
+        if isinstance(organism, Organism):
+            self.organism = organism
+        else:
+            try:
+                self.organism = retrieve_organism(organism)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
 
         try:
             self.db, created = Db.objects.get_or_create(name=source)
@@ -78,6 +87,8 @@ class FeatureLoader(object):
         self.aa_cvterm = retrieve_ontology_term(
             ontology='sequence', term='polypeptide')
 
+        self.so_term_protein_match = retrieve_ontology_term(
+                ontology='sequence', term='protein_match')
         # Retrieve DOI's Dbxref
         dbxref_doi = None
         self.pub_dbxref_doi = None
@@ -312,3 +323,47 @@ class FeatureLoader(object):
                       .format(item['object_id'], item['subject_id']))
 
         FeatureRelationship.objects.bulk_create(relationships)
+
+    def store_bio_searchio_hit(self, searchio_hit: Hit) -> None:
+        """Store tabix feature."""
+        if not hasattr(searchio_hit, 'accession'):
+            searchio_hit.accession = None
+        db, created = Db.objects.get_or_create(
+            name=searchio_hit.attributes['Target'])
+        dbxref, created = Dbxref.objects.get_or_create(
+            db=db, accession=searchio_hit.id)
+        feature, created = Feature.objects.get_or_create(
+                organism=self.organism,
+                uniquename=searchio_hit.id,
+                type_id=self.so_term_protein_match.cvterm_id,
+                name=searchio_hit.accession,
+                dbxref=dbxref,
+                defaults={
+                    'is_analysis': False,
+                    'is_obsolete': False,
+                    'timeaccessioned': datetime.now(timezone.utc),
+                    'timelastmodified': datetime.now(timezone.utc)})
+        if not created:
+            return None
+
+        for aux_dbxref in searchio_hit.dbxrefs:
+            aux_db, aux_term = aux_dbxref.split(':')
+            if aux_db == 'GO':
+                try:
+                    term_db = Db.objects.get(name=aux_db)
+                    dbxref = Dbxref.objects.get(
+                        db=term_db, accession=aux_term)
+                    cvterm = Cvterm.objects.get(dbxref=dbxref)
+                    FeatureCvterm.objects.get_or_create(
+                        feature=feature, cvterm=cvterm, pub=self.pub,
+                        is_not=False, rank=0)
+                except ObjectDoesNotExist:
+                    self.ignored_goterms.add(aux_dbxref)
+            else:
+                term_db, created = Db.objects.get_or_create(name=aux_db)
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=term_db, accession=aux_term)
+                FeatureDbxref.objects.get_or_create(
+                    feature=feature, dbxref=dbxref, is_current=1)
+
+        return None
