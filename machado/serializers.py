@@ -44,6 +44,7 @@ class CvtermSerializer(serializers.HyperlinkedModelSerializer):
         """Meta."""
 
         model = Cvterm
+        depth = 1
         fields = ('cvterm_id', 'name', 'definition', 'dbxref', 'cv')
 
 
@@ -71,6 +72,7 @@ class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
         """Meta."""
 
         model = Dbxref
+        depth = 1
         fields = ('dbxref_id', 'accession', 'description', 'version', 'db')
 
 

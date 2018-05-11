@@ -19,6 +19,7 @@ router.register(r'db', views.DbViewSet, base_name='db')
 router.register(r'dbxref', views.DbxrefViewSet, base_name='dbxref')
 router.register(r'chromosome', views.ChromosomeViewSet, base_name='chromosome')
 router.register(r'scaffold', views.ScaffoldViewSet, base_name='scaffold')
+router.register(r'gene', views.GeneViewSet, base_name='gene')
 router.register(r'protein', views.ProteinViewSet, base_name='protein')
 
 cv_router = routers.NestedSimpleRouter(
@@ -31,6 +32,8 @@ organism_router.register(r'chromosome', views.NestedChromosomeViewSet,
                          base_name='chromosome')
 organism_router.register(r'scaffold', views.NestedScaffoldViewSet,
                          base_name='scaffold')
+organism_router.register(r'gene', views.NestedGeneViewSet,
+                         base_name='gene')
 organism_router.register(r'protein', views.NestedProteinViewSet,
                          base_name='protein')
 
