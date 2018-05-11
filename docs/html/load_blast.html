@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Diagrams" href="diagrams.html" />
+    <link rel="next" title="Loading InterproScan results" href="load_interproscan.html" />
     <link rel="prev" title="Loading GFF files" href="load_gff.html" /> 
 
   
@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
@@ -164,13 +165,13 @@
 <p>In order to load a Blast results file, both the query and the subject records must be previously stored.</p>
 <div class="section" id="load-blast">
 <h2>Load Blast<a class="headerlink" href="#load-blast" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_blast --file blast_result.xml --so_query mRNA --so_subject assembly --program blastn --version <span class="m">2</span>.2.31+
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query mRNA --so_subject assembly --program blastn --version <span class="m">2</span>.2.31+
 </pre></div>
 </div>
 <ul class="simple">
 <li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --help
 </pre></div>
 </div>
 <table border="1" class="docutils">
@@ -182,28 +183,31 @@
 <tr class="row-odd"><td>–file</td>
 <td>Blast XML file *</td>
 </tr>
-<tr class="row-even"><td>–so_query</td>
+<tr class="row-even"><td>–format</td>
+<td>blast-xml *</td>
+</tr>
+<tr class="row-odd"><td>–so_query</td>
 <td>Query Sequence Ontology term. (eg. assembly, mRNA, polypeptide) *</td>
 </tr>
-<tr class="row-odd"><td>–so_subject</td>
+<tr class="row-even"><td>–so_subject</td>
 <td>Subject Sequence Ontology term. (eg. assembly, mRNA, polypeptide) *</td>
 </tr>
-<tr class="row-even"><td>–program</td>
+<tr class="row-odd"><td>–program</td>
 <td>Program *</td>
 </tr>
-<tr class="row-odd"><td>–programversion</td>
+<tr class="row-even"><td>–programversion</td>
 <td>Program version *</td>
 </tr>
-<tr class="row-even"><td>–name</td>
+<tr class="row-odd"><td>–name</td>
 <td>Name</td>
 </tr>
-<tr class="row-odd"><td>–description</td>
+<tr class="row-even"><td>–description</td>
 <td>Description</td>
 </tr>
-<tr class="row-even"><td>–algorithm</td>
+<tr class="row-odd"><td>–algorithm</td>
 <td>Algorithm</td>
 </tr>
-<tr class="row-odd"><td>–cpu</td>
+<tr class="row-even"><td>–cpu</td>
 <td>Number of threads</td>
 </tr>
 </tbody>
@@ -230,7 +234,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="diagrams.html" class="btn btn-neutral float-right" title="Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_interproscan.html" class="btn btn-neutral float-right" title="Loading InterproScan results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="load_gff.html" class="btn btn-neutral" title="Loading GFF files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
