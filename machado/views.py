@@ -127,6 +127,7 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
         cvterm_species = Cvterm.objects.get(cv__name='taxonomy',
                                             name='species')
         queryset = Organism.objects.filter(type_id=cvterm_species.cvterm_id)
+        queryset = queryset.order_by('genus', 'species')
     except ObjectDoesNotExist:
         queryset = Organism.objects.all()
 
@@ -173,7 +174,7 @@ class NestedChromosomeViewSet(viewsets.ReadOnlyModelViewSet):
 class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view scaffold."""
 
-    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+    if Cvterm.objects.filter(cv__name='sequence', name='assembly').exists():
         cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
         queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
         queryset = queryset.filter(is_obsolete=0)
@@ -186,8 +187,44 @@ class ScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
 class NestedScaffoldViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view scaffold."""
 
-    if Cvterm.objects.filter(cv__name='sequence', name='chromosome').exists():
+    if Cvterm.objects.filter(cv__name='sequence', name='assembly').exists():
         cvterm = Cvterm.objects.get(cv__name='sequence', name='assembly')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            queryset = self.queryset.filter(
+                organism=self.kwargs['organism_pk'])
+        except KeyError:
+            pass
+
+        return queryset
+
+
+class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view protein."""
+
+    if Cvterm.objects.filter(cv__name='sequence', name='polypeptide').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='polypeptide')
+        queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+        queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
+
+    serializer_class = FeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class NestedProteinViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view protein."""
+
+    if Cvterm.objects.filter(cv__name='sequence', name='polypeptide').exists():
+        cvterm = Cvterm.objects.get(cv__name='sequence', name='polypeptide')
         queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
         queryset = queryset.filter(is_obsolete=0)
         queryset = queryset.order_by('uniquename')

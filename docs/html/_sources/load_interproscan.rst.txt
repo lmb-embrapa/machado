@@ -18,7 +18,7 @@ Load InterproScan similarity
 
 .. code-block:: bash
 
-    python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --version 5
+    python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion 5
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
