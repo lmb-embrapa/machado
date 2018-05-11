@@ -8,7 +8,7 @@ Load Blast
 
 .. code-block:: bash
 
-    python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query mRNA --so_subject assembly --program blastn --version 2.2.31+
+    python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query mRNA --so_subject assembly --program blastn --programversion 2.2.31+
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
