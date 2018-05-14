@@ -158,6 +158,8 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
         cvterm_species = Cvterm.objects.get(cv__name='taxonomy',
                                             name='species')
         queryset = Organism.objects.filter(type_id=cvterm_species.cvterm_id)
+        queryset = queryset.annotate(feats=Count('Feature_organism_Organism'))
+        queryset = queryset.filter(feats__gt=0)
         queryset = queryset.order_by('genus', 'species')
     except ObjectDoesNotExist:
         queryset = Organism.objects.all()
