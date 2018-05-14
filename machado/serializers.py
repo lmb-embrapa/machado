@@ -79,9 +79,15 @@ class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
 class FeatureSerializer(serializers.HyperlinkedModelSerializer):
     """Feature serializer."""
 
+    count_matches = serializers.SerializerMethodField()
+
     class Meta:
         """Meta."""
 
         model = Feature
         fields = ('feature_id', 'name', 'uniquename', 'md5checksum',
-                  'organism', 'dbxref')
+                  'organism', 'dbxref', 'count_matches')
+
+    def get_count_matches(self, obj):
+        """Get the number of matches in featureloc."""
+        return obj.Featureloc_srcfeature_Feature.count()

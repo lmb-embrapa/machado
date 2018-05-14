@@ -26,6 +26,10 @@ cv_router = routers.NestedSimpleRouter(
     router, r'cv', lookup='cv')
 cv_router.register(r'cvterm', views.NestedCvtermViewSet)
 
+db_router = routers.NestedSimpleRouter(
+    router, r'db', lookup='db')
+db_router.register(r'dbxref', views.NestedDbxrefViewSet)
+
 organism_router = routers.NestedSimpleRouter(
     router, r'organism', lookup='organism')
 organism_router.register(r'chromosome', views.NestedChromosomeViewSet,
@@ -43,5 +47,6 @@ urlpatterns = [
     url(r'api/', include_docs_urls(title='machado API')),
     url(r'api/', include(router.urls)),
     url(r'api/', include(cv_router.urls)),
+    url(r'api/', include(db_router.urls)),
     url(r'api/', include(organism_router.urls)),
 ]

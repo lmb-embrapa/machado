@@ -118,22 +118,6 @@ class CvtermViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = StandardResultSetPagination
 
 
-class DbViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Db."""
-
-    queryset = Db.objects.all().order_by('name')
-    serializer_class = DbSerializer
-    pagination_class = StandardResultSetPagination
-
-
-class DbxrefViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Dbxref."""
-
-    queryset = Dbxref.objects.all().order_by('accession')
-    serializer_class = DbxrefSerializer
-    pagination_class = StandardResultSetPagination
-
-
 class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view Cvterm."""
 
@@ -149,6 +133,44 @@ class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
             pass
 
         return cvterms
+
+
+class DbViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Db."""
+
+    queryset = Db.objects.all().order_by('name')
+    serializer_class = DbSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'description',)
+    pagination_class = StandardResultSetPagination
+
+
+class DbxrefViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Dbxref."""
+
+    queryset = Dbxref.objects.all()
+    queryset = queryset.order_by('accession')
+    serializer_class = DbxrefSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('db__name', 'description',)
+    pagination_class = StandardResultSetPagination
+
+
+class NestedDbxrefViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view Cvterm."""
+
+    queryset = Dbxref.objects.all()
+    serializer_class = DbxrefSerializer
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            dbxrefs = self.queryset.filter(db=self.kwargs['db_pk'])
+        except KeyError:
+            pass
+
+        return dbxrefs
 
 
 class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
