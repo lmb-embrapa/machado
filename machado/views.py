@@ -6,7 +6,9 @@
 
 """Views."""
 
+from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref, Feature, Organism
+from machado.serializers import AnalysisSerializer, AnalysisfeatureSerializer
 from machado.serializers import CvSerializer, CvtermSerializer
 from machado.serializers import DbSerializer, DbxrefSerializer
 from machado.serializers import FeatureSerializer, OrganismSerializer
@@ -17,6 +19,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import viewsets, filters
 from rest_framework.pagination import PageNumberPagination
+import django_filters
 
 
 class StandardResultSetPagination(PageNumberPagination):
@@ -319,6 +322,22 @@ class NestedGeneViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
+class ProteinFilter(django_filters.FilterSet):
+    """Protein filter class."""
+
+    name = django_filters.CharFilter(name='name',
+                                     lookup_expr='icontains')
+    match_count = django_filters.NumberFilter(name='match_count',
+                                              lookup_expr='exact',
+                                              label='Match count')
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = ['name', 'match_count']
+
+
 class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view protein."""
 
@@ -326,12 +345,14 @@ class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
         cvterm = Cvterm.objects.get(cv__name='sequence', name='polypeptide')
         queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
         queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.annotate(
+            match_count=Count('Featureloc_srcfeature_Feature'))
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
-    search_fields = ('uniquename', 'name')
-    ordering_fields = ('uniquename', 'name')
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
+                       filters.SearchFilter)
+    filter_class = ProteinFilter
     pagination_class = StandardResultSetPagination
 
 
@@ -342,12 +363,14 @@ class NestedProteinViewSet(viewsets.ReadOnlyModelViewSet):
         cvterm = Cvterm.objects.get(cv__name='sequence', name='polypeptide')
         queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
         queryset = queryset.filter(is_obsolete=0)
+        queryset = queryset.annotate(
+            match_count=Count('Featureloc_srcfeature_Feature'))
         queryset = queryset.order_by('uniquename')
 
     serializer_class = FeatureSerializer
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
-    search_fields = ('uniquename', 'name')
-    ordering_fields = ('uniquename', 'name')
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
+                       filters.SearchFilter)
+    filter_class = ProteinFilter
     pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
@@ -359,3 +382,41 @@ class NestedProteinViewSet(viewsets.ReadOnlyModelViewSet):
             pass
 
         return queryset
+
+
+class AnalysisViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view analysis."""
+
+    queryset = Analysis.objects.all()
+    queryset = queryset.order_by('sourcename')
+
+    serializer_class = AnalysisSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('sourcename', 'program')
+    pagination_class = StandardResultSetPagination
+
+
+class MatchesViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view analysis matches."""
+
+    queryset = Analysisfeature.objects.all()
+    serializer_class = AnalysisfeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+
+class NestedMatchesViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view analysis matches."""
+
+    queryset = Analysisfeature.objects.all()
+    serializer_class = AnalysisfeatureSerializer
+    pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            analysisfeatures = self.queryset.filter(
+                analysis=self.kwargs['analysis_pk'])
+        except KeyError:
+            pass
+
+        return analysisfeatures
