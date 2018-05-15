@@ -325,8 +325,8 @@ class NestedGeneViewSet(viewsets.ReadOnlyModelViewSet):
 class ProteinFilter(django_filters.FilterSet):
     """Protein filter class."""
 
-    name = django_filters.CharFilter(name='name',
-                                     lookup_expr='icontains')
+    uniquename = django_filters.CharFilter(name='uniquename',
+                                           lookup_expr='icontains')
     match_count = django_filters.NumberFilter(name='match_count',
                                               lookup_expr='exact',
                                               label='Match count')
@@ -335,7 +335,7 @@ class ProteinFilter(django_filters.FilterSet):
         """Meta."""
 
         model = Feature
-        fields = ['name', 'match_count']
+        fields = ['uniquename', 'match_count']
 
 
 class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
