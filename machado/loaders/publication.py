@@ -45,12 +45,11 @@ class PublicationLoader(object):
                                      series_name=entry.get('journal'))
             # try to store DOI information
             if (pub and (("doi" in entry) or ("DOI" in entry))):
-                    self.db_doi, created = Db.objects.get_or_create(name='doi')
-                    doi = ""
-                    if ("doi" in entry):
-                        doi = entry["doi"]
-                    elif ("DOI" in entry):
+                    self.db_doi, created = Db.objects.get_or_create(name='DOI')
+                    try:
                         doi = entry["DOI"]
+                    except KeyError:
+                        doi = entry["doi"]
                     self.dbxref_doi, created = Dbxref.objects.get_or_create(
                                                     accession=doi,
                                                     db=self.db_doi)
