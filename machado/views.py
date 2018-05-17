@@ -348,6 +348,8 @@ class ProteinViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.annotate(
             match_count=Count('Featureloc_srcfeature_Feature'))
         queryset = queryset.order_by('uniquename')
+    else:
+        queryset = Feature.objects.none()
 
     serializer_class = FeatureSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
@@ -366,6 +368,8 @@ class NestedProteinViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.annotate(
             match_count=Count('Featureloc_srcfeature_Feature'))
         queryset = queryset.order_by('uniquename')
+    else:
+        queryset = Feature.objects.none()
 
     serializer_class = FeatureSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
