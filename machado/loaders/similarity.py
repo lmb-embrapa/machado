@@ -139,9 +139,6 @@ class SimilarityLoader(object):
                                        normscore=normscore,
                                        significance=significance)
 
-        if query_start is None or subject_start is None:
-            return None
-
         if (query_end is not None and
                 query_start is not None and
                 query_end < query_start):

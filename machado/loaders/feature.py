@@ -59,7 +59,7 @@ class FeatureLoader(object):
                 raise ImportingError(e)
 
         try:
-            self.db, created = Db.objects.get_or_create(name=source)
+            self.db, created = Db.objects.get_or_create(name=source.upper())
             self.filename = filename
 
         except IntegrityError as e:
@@ -135,7 +135,7 @@ class FeatureLoader(object):
                 for term in terms:
                     try:
                         aux_db, aux_term = term.split(':')
-                        term_db = Db.objects.get(name=aux_db)
+                        term_db = Db.objects.get(name=aux_db.upper())
                         dbxref = Dbxref.objects.get(
                             db=term_db, accession=aux_term)
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
@@ -151,7 +151,7 @@ class FeatureLoader(object):
                 for dbxref in dbxrefs:
                     # It expects just one dbxref formated as XX:012345
                     aux_db, aux_dbxref = dbxref.split(':')
-                    db, created = Db.objects.get_or_create(name=aux_db)
+                    db, created = Db.objects.get_or_create(name=aux_db.upper())
                     dbxref, created = Dbxref.objects.get_or_create(
                         db=db, accession=aux_dbxref)
                     FeatureDbxref.objects.create(feature=feature,
@@ -329,7 +329,7 @@ class FeatureLoader(object):
         if not hasattr(searchio_hit, 'accession'):
             searchio_hit.accession = None
         db, created = Db.objects.get_or_create(
-            name=searchio_hit.attributes['Target'])
+            name=searchio_hit.attributes['Target'].upper())
         dbxref, created = Dbxref.objects.get_or_create(
             db=db, accession=searchio_hit.id)
         feature, created = Feature.objects.get_or_create(
@@ -350,7 +350,7 @@ class FeatureLoader(object):
             aux_db, aux_term = aux_dbxref.split(':')
             if aux_db == 'GO':
                 try:
-                    term_db = Db.objects.get(name=aux_db)
+                    term_db = Db.objects.get(name=aux_db.upper())
                     dbxref = Dbxref.objects.get(
                         db=term_db, accession=aux_term)
                     cvterm = Cvterm.objects.get(dbxref=dbxref)
@@ -360,7 +360,8 @@ class FeatureLoader(object):
                 except ObjectDoesNotExist:
                     self.ignored_goterms.add(aux_dbxref)
             else:
-                term_db, created = Db.objects.get_or_create(name=aux_db)
+                term_db, created = Db.objects.get_or_create(
+                    name=aux_db.upper())
                 dbxref, created = Dbxref.objects.get_or_create(
                     db=term_db, accession=aux_term)
                 FeatureDbxref.objects.get_or_create(

@@ -124,7 +124,7 @@ class OntologyLoader(object):
         # Try to retrieve db from id
         if ':' in typedef['id']:
             aux_db, typedef_accession = typedef['id'].split(':')
-            typedef_db, created = Db.objects.get_or_create(name=aux_db)
+            typedef_db, created = Db.objects.get_or_create(name=aux_db.upper())
             typedef_name = typedef['name']
         else:
             typedef_db = self.db_global
@@ -200,7 +200,7 @@ class OntologyLoader(object):
         """Store the ontology terms."""
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
-        db, created = Db.objects.get_or_create(name=aux_db)
+        db, created = Db.objects.get_or_create(name=aux_db.upper())
         dbxref, created = Dbxref.objects.get_or_create(
             db=db, accession=aux_accession)
 
@@ -234,7 +234,8 @@ class OntologyLoader(object):
         if data.get('alt_id') is not None:
             for alt_id in data['alt_id']:
                 aux_db, aux_accession = alt_id.split(':')
-                db_alt_id, created = Db.objects.get_or_create(name=aux_db)
+                db_alt_id, created = Db.objects.get_or_create(
+                    name=aux_db.upper())
                 dbxref_alt_id, created = Dbxref.objects.get_or_create(
                     db=db_alt_id, accession=aux_accession)
                 CvtermDbxref.objects.get_or_create(
@@ -264,14 +265,16 @@ class OntologyLoader(object):
         """Store the relationship between ontology terms."""
         # Get the subject cvterm
         subject_db_name, subject_dbxref_accession = u.split(':')
-        subject_db, created = Db.objects.get_or_create(name=subject_db_name)
+        subject_db, created = Db.objects.get_or_create(
+            name=subject_db_name.upper())
         subject_dbxref = Dbxref.objects.get(
                 db=subject_db, accession=subject_dbxref_accession)
         subject_cvterm = Cvterm.objects.get(dbxref=subject_dbxref)
 
         # Get the object cvterm
         object_db_name, object_dbxref_accession = v.split(':')
-        object_db, created = Db.objects.get_or_create(name=object_db_name)
+        object_db, created = Db.objects.get_or_create(
+            name=object_db_name.upper())
         object_dbxref = Dbxref.objects.get(
             db=object_db, accession=object_dbxref_accession)
         object_cvterm = Cvterm.objects.get(dbxref=object_dbxref)
@@ -327,7 +330,7 @@ class OntologyLoader(object):
                     ref_content = 'http:'+ref_content
 
                 # Get/Set Dbxref instance: ref_db,ref_content
-                db, created = Db.objects.get_or_create(name=ref_db)
+                db, created = Db.objects.get_or_create(name=ref_db.upper())
                 dbxref, created = Dbxref.objects.get_or_create(
                     db=db, accession=ref_content)
 
@@ -354,7 +357,7 @@ class OntologyLoader(object):
                 ref_content = 'http:'+ref_content
 
             # Get/Set Dbxref instance: ref_db,ref_content
-            db, created = Db.objects.get_or_create(name=ref_db)
+            db, created = Db.objects.get_or_create(name=ref_db.upper())
             dbxref, created = Dbxref.objects.get_or_create(
                 db=db, accession=ref_content)
 
