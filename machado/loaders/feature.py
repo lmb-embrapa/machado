@@ -199,9 +199,9 @@ class FeatureLoader(object):
             attrs['id'] = 'auto{}'.format(str(time()))
 
         try:
-            dbxref = Dbxref.objects.create(
+            dbxref, created = Dbxref.objects.get_or_create(
                 db=self.db, accession=attrs['id'])
-            Dbxrefprop.objects.create(
+            Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
             feature = Feature.objects.create(

@@ -32,6 +32,11 @@ class Command(BaseCommand):
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
+        parser.add_argument("--ignore", help="List of feature "
+                            "types to ignore (eg. chromosome,scaffold)",
+                            required=False,
+                            nargs='+',
+                            type=str)
         parser.add_argument("--doi", help="DOI of the article reference to "
                             "this sequence. E.g.: 10.1111/s12122-012-1313-4",
                             required=False,
@@ -43,6 +48,7 @@ class Command(BaseCommand):
                file: str,
                organism: str,
                doi: str=None,
+               ignore: str=None,
                cpu: int=1,
                verbosity: int=1,
                **options):
@@ -76,6 +82,8 @@ class Command(BaseCommand):
             # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
             for row in tbx.fetch(parser=pysam.asGTF()):
+                if ignore is not None and row.feature in ignore:
+                    continue
                 tasks.append(pool.submit(
                     feature_file.store_tabix_feature, row))
 
