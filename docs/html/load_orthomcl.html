@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Loading taxonomy &mdash; machado 0.1.0 documentation</title>
+  <title>Loading OrthoMCL results &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Inserting a new organism" href="insert_organism.html" />
-    <link rel="prev" title="Loading ontologies" href="load_ontologies.html" /> 
+    <link rel="next" title="Diagrams" href="diagrams.html" />
+    <link rel="prev" title="Loading InterproScan results" href="load_interproscan.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,14 +82,14 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">OrthoMCL</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">OrthoMCL</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
@@ -141,13 +141,13 @@
         
           <li><a href="dataload.html">Data loading</a> &raquo;</li>
         
-      <li>Loading taxonomy</li>
+      <li>Loading OrthoMCL results</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/load_taxonomy.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/load_orthomcl.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -160,38 +160,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="loading-taxonomy">
-<h1>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this headline">¶</a></h1>
-<p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
-These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.
-This step is recommended, but is optional.
-If you decide to skip this step, you should insert the organisms individually using the command <em>insert_organism</em>.</p>
-<div class="section" id="ncbi-taxonomy">
-<h2>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this headline">¶</a></h2>
-<p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
-<ul class="simple">
-<li><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></li>
-<li><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></li>
-</ul>
-<p>After unpacking the file you’ll have the required files.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_organism --file names.dmp --name DB:NCBI_taxonomy
-python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NCBI taxonomy tree&#39;</span> --organismdb <span class="s1">&#39;DB:NCBI_taxonomy&#39;</span>
+  <div class="section" id="loading-orthomcl-results">
+<h1>Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-orthomcl">
+<h2>Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --filename groups.txt
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading these files can be faster if you increase the number of threads (–cpu).</li>
-<li>It will take a long time anyway (hours).</li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --help
+</pre></div>
 </div>
-<div class="section" id="remove-taxonomy">
-<h2>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove a taxonomy you should use the command <em>remove_phylotree</em> and <em>remove_organisms</em>. Most data files you’ll load depend on the organism database (eg. fasta, gff, blast). <strong>If you delete an organism database, every data file you loaded will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_phylotree --help
-python manage.py remove_organisms --help
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>groups.txt file *</td>
+</tr>
+<tr class="row-even"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* output result from OrthoMCL software. Mandatory.</p>
+</div>
+<div class="section" id="remove-orthology">
+<h2>Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
+<p>TODO - If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_orthology –filename</em>. <strong>Every orthologous relations from filename will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_orthology --help
 </pre></div>
 </div>
 <ul class="simple">
-<li>These commands require the names of the databases (Db.name)</li>
+<li>This command requires the file name ‘groups.txt’ used before as input to load orthologies.</li>
 </ul>
 </div>
 </div>
@@ -204,10 +209,10 @@ python manage.py remove_organisms --help
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="insert_organism.html" class="btn btn-neutral float-right" title="Inserting a new organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="diagrams.html" class="btn btn-neutral float-right" title="Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_ontologies.html" class="btn btn-neutral" title="Loading ontologies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_interproscan.html" class="btn btn-neutral" title="Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
