@@ -19,3 +19,4 @@ Data loading commands
    GFF <load_gff>
    Blast <load_blast>
    InterproScan <load_interproscan>
+   OrthoMCL <load_orthomcl>
