@@ -61,7 +61,7 @@ class Command(BaseCommand):
             if re.search('^(\w+)\:', fields[0]):
                 group_field = re.match('^(\w+)\:', fields[0])
                 name = group_field.group(1)
-                group = OrthologyLoader(name)
+                group = OrthologyLoader(name, filename)
                 fields.pop(0)
                 for field in fields:
                     if re.search('^(\w+)\|(\S+)', field):

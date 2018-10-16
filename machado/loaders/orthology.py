@@ -19,11 +19,13 @@ class OrthologyLoader(object):
     help = 'Load feature records.'
 
     def __init__(self,
-                 name:str) -> None:
+                 name:str,
+                 filename:str) -> None:
         """Execute the init function."""
         self.excluded = list()
         self.included = list()
         self.name = name
+        self.filename = filename
 
         # get cvterm for orthology
         try:
@@ -42,7 +44,7 @@ class OrthologyLoader(object):
                                             subject_id=member.feature_id,
                                             object_id=othermember.feature_id,
                                             type_id=self.cvterm.cvterm_id,
-                                            value=None,
+                                            value=self.filename,
                                             rank=0)
                 except IntegrityError as e:
                     raise ImportingError(e)
