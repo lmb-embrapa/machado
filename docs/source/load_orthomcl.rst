@@ -25,7 +25,7 @@ Load OrthoMCL
 Remove orthology
 ----------------
 
-TODO - If, by any reason, you need to remove orthology relationships, you should use the command *remove_orthology --filename*. **Every orthologous relations from filename will be deleted on cascade**.
+If, by any reason, you need to remove orthology relationships, you should use the command *remove_orthology --name*. **Every orthologous relations from filename (e.g. 'groups.txt' from OrthoMCL) will be deleted on cascade**.
 
 .. code-block:: bash
 
