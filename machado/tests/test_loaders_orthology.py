@@ -22,6 +22,7 @@ class OrthologyTest(TestCase):
 
     def test_orthology(self):
         """Tests - __init__."""
+        filename = 'groups.txt'
         global_db = Db.objects.create(name='_global')
         so_db = Db.objects.create(name='SO')
         ro_db = Db.objects.create(name='RO')
@@ -308,31 +309,31 @@ class OrthologyTest(TestCase):
         self.assertTrue(Feature.objects.filter(
                            uniquename='Kaladp0598s0002.1.v1.1').exists())
         # store orthologous groups:
-        group1 = OrthologyLoader('machado0001')
+        group1 = OrthologyLoader('machado0001', filename)
         members1 = ['Aqcoe0131s0001.1.v3.1', 'Bradi0180s00100.1.v3.1',
                 'Bradi2g20400.1.v3.1', 'Ciclev10013963m.v1.0',
                 'DCAR_032223.v1.0.388', 'UnknownProtein.v1.1']
         group1.store_orthologous_group(members1)
-        group2 = OrthologyLoader('machado0002')
+        group2 = OrthologyLoader('machado0002', filename)
         members2 = ['Eucgr.L02820.1.v2.0',
                 'mrna13067.1-v1.0-hybrid.v1.1', 'Ciclev10013970m.v1.0',
                 'DCAR_031986.v1.0.388']
         group2.store_orthologous_group(members2)
-        group3 = OrthologyLoader('machado0003')
+        group3 = OrthologyLoader('machado0003', filename)
         members3 = ['Glyma.10G030500.1.Wm82.a2.v1',
                 'Glyma.10G053100.1.Wm82.a2.v1', 'DCAR_032182.v1.0.388']
         group3.store_orthologous_group(members3)
-        group4 = OrthologyLoader('machado0004')
+        group4 = OrthologyLoader('machado0004', filename)
         members4 = ['Glyma.10G008400.1.Wm82.a2.v1',
                 'Ciclev10013963m.v1.0', 'UnknownProtein.v1.2']
         group4.store_orthologous_group(members4)
-        group5 = OrthologyLoader('machado0005')
+        group5 = OrthologyLoader('machado0005', filename)
         members5 = ['DCAR_000323.v1.0.388', 'Kaladp0598s0002.1.v1.1']
         group5.store_orthologous_group(members5)
-        group6 = OrthologyLoader('machado0006')
+        group6 = OrthologyLoader('machado0006', filename)
         members6 = ['Kaladp0598s0001.1.v1.1', 'UnknownProtein.v1.3']
         group6.store_orthologous_group(members6)
-        group7 = OrthologyLoader('machado0007')
+        group7 = OrthologyLoader('machado0007', filename)
         members7 = ['UnknownProtein.v1.4']
         group7.store_orthologous_group(members7)
 
@@ -357,3 +358,16 @@ class OrthologyTest(TestCase):
         # in orphaned groups (machado0006)
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature16.feature_id).exists())
+        #removing all relationships
+        frs = FeatureRelationship.objects.filter(value=filename)
+        for fr in frs:
+            fr.delete()
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=feature9.feature_id,
+                           object_id=feature1.feature_id).exists())
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id).exists())
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=feature10.feature_id,
+                           object_id=feature17.feature_id).exists())
