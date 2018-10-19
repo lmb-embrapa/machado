@@ -7,15 +7,21 @@
 """Views."""
 
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cv, Cvterm, Db, Dbxref, Feature, Organism
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism
+from machado.models import Feature, Featureloc
 from machado.api.serializers import AnalysisSerializer
 from machado.api.serializers import AnalysisfeatureSerializer
 from machado.api.serializers import CvSerializer, CvtermSerializer
 from machado.api.serializers import DbSerializer, DbxrefSerializer
 from machado.api.serializers import FeatureSerializer, OrganismSerializer
+from machado.api.serializers import JBrowseTranscriptSerializer
+from machado.api.serializers import JBrowseNamesSerializer
+from machado.api.serializers import JBrowseGlobalSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from rest_framework import viewsets, filters
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 import django_filters
 
@@ -347,3 +353,88 @@ class NestedMatchesViewSet(viewsets.ReadOnlyModelViewSet):
             pass
 
         return analysisfeatures
+
+
+class NestedJBrowseGlobalViewSet(viewsets.ViewSet):
+    """API endpoint to view JBrowse global settings."""
+
+    renderer_classes = (JSONRenderer, )
+
+    def list(self, request, organism_pk=None):
+        """List."""
+        data = {
+            'featureDensity': 0.02
+        }
+        serializer = JBrowseGlobalSerializer(data)
+        return Response(serializer.data)
+
+
+class NestedJBrowseNamesViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to JBrowse names."""
+
+    renderer_classes = (JSONRenderer, )
+
+    serializer_class = JBrowseNamesSerializer
+    # pagination_class = StandardResultSetPagination
+
+    def get_queryset(self):
+        """Get queryset."""
+        queryset = Feature.objects.filter(is_obsolete=0)
+        queryset = queryset.order_by('uniquename')
+
+        try:
+            equals = self.request.query_params.get('equals')
+            startswith = self.request.query_params.get('startswith')
+            if equals is not None:
+                queryset = queryset.filter(name=equals)
+            if startswith is not None:
+                queryset = queryset.filter(name__startswith=startswith)
+        except KeyError:
+            pass
+
+        return queryset
+
+
+class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to view gene."""
+
+    renderer_classes = (JSONRenderer, )
+    serializer_class = JBrowseTranscriptSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            refseq = Feature.objects.get(uniquename=self.kwargs['refseq'])
+        except ObjectDoesNotExist:
+            return
+
+        try:
+            soType = self.request.query_params.get('soType')
+            start = self.request.query_params.get('start') or 1
+            end = self.request.query_params.get('end') or refseq.seqlen
+
+            cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
+
+            queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+            queryset = queryset.filter(is_obsolete=0)
+            queryset = queryset.order_by('uniquename')
+
+            transcriptsloc = Featureloc.objects.filter(srcfeature=refseq)
+            transcriptsloc = transcriptsloc.filter(fmin__lte=end)
+            transcriptsloc = transcriptsloc.filter(fmax__gte=start)
+            transcript_ids = transcriptsloc.values_list('feature_id',
+                                                        flat=True)
+
+            queryset = queryset.filter(feature_id__in=transcript_ids)
+            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
+        except ObjectDoesNotExist:
+            pass
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """Override return the list inside a dict."""
+        response = super(NestedJBrowseTranscriptViewSet,
+                         self).list(request, *args, **kwargs)
+        response.data = {"features": response.data}
+        return response

@@ -24,3 +24,4 @@ def patch_all():
     """Apply patches."""
     patch_root_urlconf()
     settings.USE_THOUSAND_SEPARATOR = True
+    settings.APPEND_SLASH = False
