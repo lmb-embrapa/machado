@@ -11,7 +11,8 @@ from django.conf.urls import include, url
 from rest_framework_nested import routers
 from rest_framework.documentation import include_docs_urls
 
-router = routers.SimpleRouter()
+
+router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'analysis', views.AnalysisViewSet, base_name='analysis')
 router.register(r'matches', views.MatchesViewSet,
                 base_name='matches')
@@ -38,7 +39,7 @@ db_router = routers.NestedSimpleRouter(
 db_router.register(r'dbxref', views.NestedDbxrefViewSet)
 
 organism_router = routers.NestedSimpleRouter(
-    router, r'organism', lookup='organism')
+    router, r'organism', lookup='organism', trailing_slash=False)
 organism_router.register(r'chromosome', views.NestedChromosomeViewSet,
                          base_name='chromosome')
 organism_router.register(r'scaffold', views.NestedScaffoldViewSet,
@@ -47,6 +48,15 @@ organism_router.register(r'gene', views.NestedGeneViewSet,
                          base_name='gene')
 organism_router.register(r'protein', views.NestedProteinViewSet,
                          base_name='protein')
+organism_router.register(r'jbrowse/stats/global',
+                         views.NestedJBrowseGlobalViewSet,
+                         base_name='jbrowse_global')
+organism_router.register(r'jbrowse/features/(?P<refseq>.+)',
+                         views.NestedJBrowseTranscriptViewSet,
+                         base_name='jbrowse')
+organism_router.register(r'jbrowse/names',
+                         views.NestedJBrowseNamesViewSet,
+                         base_name='jbrowse')
 
 urlpatterns = [
     url(r'', include_docs_urls(title='machado API')),
