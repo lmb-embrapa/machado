@@ -413,6 +413,11 @@ class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
             start = self.request.query_params.get('start') or 1
             end = self.request.query_params.get('end') or refseq.seqlen
 
+            if soType == "reference":
+                queryset = list()
+                queryset.append(refseq)
+                return queryset
+
             cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
 
             queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)

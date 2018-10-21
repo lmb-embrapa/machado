@@ -183,30 +183,40 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     uniqueID = serializers.SerializerMethodField()
     subfeatures = serializers.SerializerMethodField()
+    seq = serializers.SerializerMethodField()
 
     class Meta:
         """Meta."""
 
         model = Feature
         fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
-                  'subfeatures')
+                  'subfeatures', 'seq')
 
 #        fields = ('start', 'end')
 
     def get_start(self, obj):
         """Get the start location."""
-        feature_loc = obj.Featureloc_feature_Feature.first()
-        return feature_loc.fmin
+        try:
+            feature_loc = obj.Featureloc_feature_Feature.first()
+            return feature_loc.fmin
+        except AttributeError:
+            return 1
 
     def get_end(self, obj):
         """Get the end location."""
-        feature_loc = obj.Featureloc_feature_Feature.first()
-        return feature_loc.fmax
+        try:
+            feature_loc = obj.Featureloc_feature_Feature.first()
+            return feature_loc.fmax
+        except AttributeError:
+            return obj.seqlen
 
     def get_strand(self, obj):
         """Get the strand."""
-        feature_loc = obj.Featureloc_feature_Feature.first()
-        return feature_loc.strand
+        try:
+            feature_loc = obj.Featureloc_feature_Feature.first()
+            return feature_loc.strand
+        except AttributeError:
+            pass
 
     def get_type(self, obj):
         """Get the type."""
@@ -236,3 +246,7 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
             feat_dict['phase'] = feature_loc.phase
             result.append(feat_dict)
         return result
+
+    def get_seq(self, obj):
+        """Get the sequence."""
+        return obj.residues
