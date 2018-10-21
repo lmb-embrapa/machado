@@ -162,6 +162,7 @@ create database yourdatabase with owner username<span class="p">;</span>
 alter user username createdb<span class="p">;</span>
 </pre></div>
 </div>
+<p>Don’t forget to configure the PostgreSQL server to allow regular users to connect (pg_hba.conf).</p>
 <p><strong>Python 3.6</strong></p>
 <p>Be sure to have the python development libraries installed (in Ubuntu 16.04, install with ‘apt-get install python-dev’).</p>
 <p>We strongly recommend creating a new virtualenv for your project</p>
@@ -210,7 +211,7 @@ python src/machado/setup.py install
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>(Follow instructions here: <a class="reference external" href="https://docs.djangoproject.com/en/1.10/intro/tutorial02/">https://docs.djangoproject.com/en/1.10/intro/tutorial02/</a>)</p>
+<p>(Additional information here: <a class="reference external" href="https://docs.djangoproject.com/en/2.1/intro/tutorial02/">https://docs.djangoproject.com/en/2.1/intro/tutorial02/</a>)</p>
 <p><strong>List the machado commands</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py
 </pre></div>

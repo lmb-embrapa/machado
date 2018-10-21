@@ -20,6 +20,8 @@ As postgres user run:
     create database yourdatabase with owner username;
     alter user username createdb;
 
+Don't forget to configure the PostgreSQL server to allow regular users to connect (pg_hba.conf).
+
 **Python 3.6**
 
 Be sure to have the python development libraries installed (in Ubuntu 16.04, install with 'apt-get install python-dev').
@@ -84,7 +86,7 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
         ...
     ]
 
-(Follow instructions here: https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
+(Additional information here: https://docs.djangoproject.com/en/2.1/intro/tutorial02/)
 
 
 **List the machado commands**
