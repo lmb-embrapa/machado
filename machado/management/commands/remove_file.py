@@ -31,7 +31,7 @@ class Command(BaseCommand):
         """Execute the main function."""
         try:
             if verbosity > 0:
-                self.stdout.write('Deleting {} and every'
+                self.stdout.write('Deleting {} and every '
                                   'child record (CASCADE)'
                                   .format(name))
             dbxref_ids = list(Dbxrefprop.objects.filter(
