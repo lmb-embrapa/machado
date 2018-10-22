@@ -6,6 +6,7 @@
 
 """Views."""
 
+from machado.loaders.common import retrieve_organism
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureloc
@@ -356,12 +357,12 @@ class NestedMatchesViewSet(viewsets.ReadOnlyModelViewSet):
         return analysisfeatures
 
 
-class NestedJBrowseGlobalViewSet(viewsets.ViewSet):
+class JBrowseGlobalViewSet(viewsets.ViewSet):
     """API endpoint to view JBrowse global settings."""
 
     renderer_classes = (JSONRenderer, )
 
-    def list(self, request, organism_pk=None):
+    def list(self, request):
         """List."""
         data = {
             'featureDensity': 0.02
@@ -370,17 +371,23 @@ class NestedJBrowseGlobalViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class NestedJBrowseNamesViewSet(viewsets.ReadOnlyModelViewSet):
+class JBrowseNamesViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to JBrowse names."""
 
     renderer_classes = (JSONRenderer, )
 
     serializer_class = JBrowseNamesSerializer
-    # pagination_class = StandardResultSetPagination
 
     def get_queryset(self):
         """Get queryset."""
-        queryset = Feature.objects.filter(is_obsolete=0)
+        try:
+            organism = retrieve_organism(
+                self.request.query_params.get('organism'))
+        except (ObjectDoesNotExist, AttributeError):
+            return
+
+        queryset = Feature.objects.filter(organism=organism)
+        queryset = queryset.filter(is_obsolete=0)
         queryset = queryset.order_by('uniquename')
 
         try:
@@ -396,7 +403,7 @@ class NestedJBrowseNamesViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class NestedJBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
+class JBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to JBrowse refSeqs.json."""
 
     renderer_classes = (JSONRenderer, )
@@ -405,23 +412,26 @@ class NestedJBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Get queryset."""
         try:
+            organism = retrieve_organism(
+                self.request.query_params.get('organism'))
+        except (ObjectDoesNotExist, AttributeError):
+            return
 
+        try:
             soType = 'chromosome'
             cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
 
             queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
+            queryset = queryset.filter(organism=organism)
             queryset = queryset.filter(is_obsolete=0)
             queryset = queryset.order_by('uniquename')
-
-            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
         except ObjectDoesNotExist:
-            pass
+            return
 
         return queryset
 
 
-class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
+class JBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view gene."""
 
     renderer_classes = (JSONRenderer, )
@@ -432,6 +442,12 @@ class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             refseq = Feature.objects.get(uniquename=self.kwargs['refseq'])
         except ObjectDoesNotExist:
+            return
+
+        try:
+            organism = retrieve_organism(
+                self.request.query_params.get('organism'))
+        except (ObjectDoesNotExist, AttributeError):
             return
 
         try:
@@ -447,6 +463,7 @@ class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
             cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
 
             queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+            queryset = queryset.filter(organism=organism)
             queryset = queryset.filter(is_obsolete=0)
             queryset = queryset.order_by('uniquename')
 
@@ -457,7 +474,6 @@ class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
                                                         flat=True)
 
             queryset = queryset.filter(feature_id__in=transcript_ids)
-            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
         except ObjectDoesNotExist:
             pass
 
@@ -465,7 +481,7 @@ class NestedJBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """Override return the list inside a dict."""
-        response = super(NestedJBrowseTranscriptViewSet,
+        response = super(JBrowseTranscriptViewSet,
                          self).list(request, *args, **kwargs)
         response.data = {"features": response.data}
         return response

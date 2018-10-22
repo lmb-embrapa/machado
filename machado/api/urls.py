@@ -26,6 +26,16 @@ router.register(r'scaffold', views.ScaffoldViewSet, base_name='scaffold')
 router.register(r'gene', views.GeneViewSet, base_name='gene')
 router.register(r'protein', views.ProteinViewSet, base_name='protein')
 
+router.register(r'jbrowse/stats/global', views.JBrowseGlobalViewSet,
+                base_name='jbrowse_global')
+router.register(r'jbrowse/features/(?P<refseq>.+)',
+                views.JBrowseTranscriptViewSet,
+                base_name='jbrowse_features')
+router.register(r'jbrowse/names', views.JBrowseNamesViewSet,
+                base_name='jbrowse_names')
+router.register(r'jbrowse/refSeqs.json', views.JBrowseRefSeqsViewSet,
+                base_name='jbrowse_refseqs')
+
 analysis_router = routers.NestedSimpleRouter(
     router, r'analysis', lookup='analysis')
 analysis_router.register(r'matches', views.NestedMatchesViewSet)
@@ -48,18 +58,6 @@ organism_router.register(r'gene', views.NestedGeneViewSet,
                          base_name='gene')
 organism_router.register(r'protein', views.NestedProteinViewSet,
                          base_name='protein')
-organism_router.register(r'jbrowse/stats/global',
-                         views.NestedJBrowseGlobalViewSet,
-                         base_name='jbrowse_global')
-organism_router.register(r'jbrowse/features/(?P<refseq>.+)',
-                         views.NestedJBrowseTranscriptViewSet,
-                         base_name='jbrowse')
-organism_router.register(r'jbrowse/names',
-                         views.NestedJBrowseNamesViewSet,
-                         base_name='jbrowse')
-organism_router.register(r'jbrowse/refSeqs.json',
-                         views.NestedJBrowseRefSeqsViewSet,
-                         base_name='jbrowse')
 
 urlpatterns = [
     url(r'', include_docs_urls(title='machado API')),
