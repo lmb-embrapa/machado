@@ -57,6 +57,9 @@ organism_router.register(r'jbrowse/features/(?P<refseq>.+)',
 organism_router.register(r'jbrowse/names',
                          views.NestedJBrowseNamesViewSet,
                          base_name='jbrowse')
+organism_router.register(r'jbrowse/refSeqs.json',
+                         views.NestedJBrowseRefSeqsViewSet,
+                         base_name='jbrowse')
 
 urlpatterns = [
     url(r'', include_docs_urls(title='machado API')),
