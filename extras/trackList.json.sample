@@ -1,6 +1,6 @@
 {
    "formatVersion" : 1,
-   "refSeqs": "http://localhost:8000/machado/api/jbrowse/refSeqs.json?organism=Arabidopsis thaliana",
+   "refSeqs": "http://localhost:8000/machado/api/jbrowse/refSeqs.json?soType=chromosome&organism=Arabidopsis thaliana",
    "names" : {
       "type" : "REST",
       "url" : "http://localhost:8000/machado/api/jbrowse/names",
