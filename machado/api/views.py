@@ -418,9 +418,13 @@ class JBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
             return
 
         try:
-            soType = 'chromosome'
-            cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
+            cvterm = Cvterm.objects.get(
+                cv__name='sequence',
+                name=self.request.query_params.get('soType'))
+        except (ObjectDoesNotExist, AttributeError):
+            return
 
+        try:
             queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
             queryset = queryset.filter(organism=organism)
             queryset = queryset.filter(is_obsolete=0)
