@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Loading OrthoMCL results &mdash; machado 0.1.0 documentation</title>
+  <title>Visualization &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -28,8 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Diagrams" href="diagrams.html" />
-    <link rel="prev" title="Loading InterproScan results" href="load_interproscan.html" /> 
+    <link rel="prev" title="Models" href="models.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,21 +79,10 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">OrthoMCL</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="dataload.html">Data loading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualization</a></li>
 </ul>
 
             
@@ -140,15 +128,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">Data loading</a> &raquo;</li>
-        
-      <li>Loading OrthoMCL results</li>
+      <li>Visualization</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/load_orthomcl.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/visualization.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -161,44 +147,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="loading-orthomcl-results">
-<h1>Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="load-orthomcl">
-<h2>Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --filename groups.txt
+  <div class="section" id="visualization">
+<h1>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h1>
+<p>The <em>machado</em> API framework</p>
+<div class="section" id="jbrowse">
+<h2>JBrowse<a class="headerlink" href="#jbrowse" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://jbrowse.org">JBrowse</a> software renders genomic tracks from Chado using the <em>machado</em> API.</p>
+<p><strong>JBrowse</strong></p>
+<p>Install JBrowse following the <a class="reference external" href="https://jbrowse.org/docs/installation.html">official instructions</a>.</p>
+<p>The <em>machado</em> source contains the directory extras. Copy the file extras/trackList.json.sample to the JBrowse data directory (eg. /var/www/html/jbrowse/data) and rename it to trackList.json</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp extras/trackList.json.sample /var/www/html/jbrowse/data/trackList.json
 </pre></div>
 </div>
-<ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
-</ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --help
+<p>Edit the file to set the <strong>organism</strong> name you have loaded to the database.</p>
+<p><strong>machado API</strong></p>
+<p>Start the <em>machado</em> API framework:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
 </pre></div>
 </div>
-<table border="1" class="docutils">
-<colgroup>
-<col width="14%" />
-<col width="86%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–filename</td>
-<td>groups.txt file *</td>
-</tr>
-<tr class="row-even"><td>–cpu</td>
-<td>Number of threads</td>
-</tr>
-</tbody>
-</table>
-<p>* output result from OrthoMCL software. Mandatory.</p>
-</div>
-<div class="section" id="remove-orthology">
-<h2>Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_orthology –name</em>. <strong>Every orthologous relations from filename (e.g. ‘groups.txt’ from OrthoMCL) will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_orthology --help
-</pre></div>
-</div>
-<ul class="simple">
-<li>This command requires the file name ‘groups.txt’ used before as input to load orthologies.</li>
-</ul>
 </div>
 </div>
 
@@ -210,10 +176,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="diagrams.html" class="btn btn-neutral float-right" title="Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="load_interproscan.html" class="btn btn-neutral" title="Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="models.html" class="btn btn-neutral" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
