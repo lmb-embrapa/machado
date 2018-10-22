@@ -192,8 +192,6 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
         fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
                   'subfeatures', 'seq')
 
-#        fields = ('start', 'end')
-
     def get_start(self, obj):
         """Get the start location."""
         try:
@@ -250,3 +248,29 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
     def get_seq(self, obj):
         """Get the sequence."""
         return obj.residues
+
+
+class JBrowseRefseqSerializer(serializers.ModelSerializer):
+    """JBrowse transcript serializer."""
+
+    start = serializers.SerializerMethodField()
+    end = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = ('name', 'start', 'end')
+
+    def get_start(self, obj):
+        """Get the start location."""
+        return 1
+
+    def get_end(self, obj):
+        """Get the end location."""
+        return obj.seqlen
+
+    def get_name(self, obj):
+        """Get the name."""
+        return obj.uniquename

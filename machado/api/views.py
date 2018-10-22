@@ -17,6 +17,7 @@ from machado.api.serializers import FeatureSerializer, OrganismSerializer
 from machado.api.serializers import JBrowseTranscriptSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
+from machado.api.serializers import JBrowseRefseqSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from rest_framework import viewsets, filters
@@ -390,6 +391,31 @@ class NestedJBrowseNamesViewSet(viewsets.ReadOnlyModelViewSet):
             if startswith is not None:
                 queryset = queryset.filter(name__startswith=startswith)
         except KeyError:
+            pass
+
+        return queryset
+
+
+class NestedJBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
+    """API endpoint to JBrowse refSeqs.json."""
+
+    renderer_classes = (JSONRenderer, )
+    serializer_class = JBrowseRefseqSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+
+            soType = 'chromosome'
+            cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
+
+            queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
+            queryset = queryset.filter(is_obsolete=0)
+            queryset = queryset.order_by('uniquename')
+
+            queryset = queryset.filter(organism=self.kwargs['organism_pk'])
+        except ObjectDoesNotExist:
             pass
 
         return queryset

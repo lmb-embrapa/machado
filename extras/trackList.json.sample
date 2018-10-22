@@ -1,8 +1,9 @@
 {
    "formatVersion" : 1,
+   "refSeqs": "http://localhost:8000/machado/api/organism/4672581/jbrowse/refSeqs.json",
    "names" : {
       "type" : "REST",
-      "url" : "http://localhost:8000/machado/api/organism/2981/jbrowse/names"
+      "url" : "http://localhost:8000/machado/api/organism/4672581/jbrowse/names"
    },
    "tracks" : [
        {
@@ -12,13 +13,13 @@
          "key":        "REST Reference Sequence",
          "type":       "JBrowse/View/Track/Sequence",
          "storeClass": "JBrowse/Store/SeqFeature/REST",
-         "baseUrl":    "http://localhost:8000/machado/api/organism/2981/jbrowse",
+         "baseUrl":    "http://localhost:8000/machado/api/organism/4672581/jbrowse",
          "query": {
             "soType": "reference"
          }
        },
       {
-         "baseUrl" : "http://localhost:8000/machado/api/organism/2981/jbrowse",
+         "baseUrl" : "http://localhost:8000/machado/api/organism/4672581/jbrowse",
          "key" : "Transcript track",
          "label" : "transcripts",
          "query" : {
@@ -28,7 +29,7 @@
          "type" : "JBrowse/View/Track/HTMLFeatures"
       },
       {
-         "baseUrl" : "http://localhost:8000/machado/api/organism/2981/jbrowse",
+         "baseUrl" : "http://localhost:8000/machado/api/organism/4672581/jbrowse",
          "key" : "CDS track",
          "label" : "CDS",
          "query" : {
