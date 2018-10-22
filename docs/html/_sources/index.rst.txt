@@ -17,8 +17,8 @@ Contents
 
    installation
    dataload
-
    diagrams
    models
+   visualization
 
 * :ref:`search`
