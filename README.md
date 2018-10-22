@@ -69,3 +69,4 @@ See LICENSE.txt for complete gpl-3.0 license.
 [travis]: https://travis-ci.org/lmb-embrapa/machado
 [cov-status-image]: https://img.shields.io/codecov/c/github/lmb-embrapa/machado/master.svg
 [codecov]: https://codecov.io/gh/lmb-embrapa/machado
+
