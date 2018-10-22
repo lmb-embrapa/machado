@@ -10,7 +10,7 @@
    },
    "tracks" : [
        {
-         "category": "Reference sequence",
+         "category": "1. Reference sequence",
          "useAsRefSeqStore": true,
          "label":      "ref_seq",
          "key":        "REST Reference Sequence",
@@ -22,7 +22,25 @@
             "organism": "Arabidopsis thaliana"
          }
        },
-      {
+       {
+         "category": "2. Genes",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "Gene track",
+         "label" : "gene",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "gene"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/CanvasFeatures",
+         "trackType" : "JBrowse/View/Track/CanvasFeatures",
+         "style": {
+             "showLabels": true,
+             "label": "name,id"
+         }
+      },
+     {
+         "category": "2. Genes",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
          "key" : "Transcript track",
          "label" : "transcripts",
@@ -31,9 +49,10 @@
             "soType" : "mRNA"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
+         "type" : "JBrowse/View/Track/CanvasFeatures"
       },
       {
+         "category": "2. Genes",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
          "key" : "CDS track",
          "label" : "CDS",
@@ -42,7 +61,8 @@
             "soType" : "CDS"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-      }
+         "type" : "JBrowse/View/Track/CanvasFeatures",
+         "displayMode": "normal"
+     }
    ]
 }
