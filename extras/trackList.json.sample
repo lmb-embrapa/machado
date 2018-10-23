@@ -33,7 +33,6 @@
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/CanvasFeatures",
-         "trackType" : "JBrowse/View/Track/CanvasFeatures",
          "style": {
              "showLabels": true,
              "label": "name,id"
@@ -61,8 +60,7 @@
             "soType" : "CDS"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/CanvasFeatures",
-         "displayMode": "normal"
+         "type" : "JBrowse/View/Track/CanvasFeatures"
      }
    ]
 }
