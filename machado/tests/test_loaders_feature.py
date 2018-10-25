@@ -344,3 +344,81 @@ class FeatureTest(TestCase):
         test_feature_cvterm = FeatureCvterm.objects.get(
             feature=test_feature, cvterm=test_cvterm)
         self.assertEqual(0, test_feature_cvterm.rank)
+
+    def test_store_feature_annotation(self):
+        """Tests - store feature annotation."""
+        # creating exact term
+        test_db_global = Db.objects.create(name='_global')
+        test_dbxref = Dbxref.objects.create(accession='exact',
+                                            db=test_db_global)
+        test_cv = Cv.objects.create(name='synonym_type')
+        test_so_term = Cvterm.objects.create(
+            name='exact', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        test_so_term = Cvterm.objects.create(
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+
+        test_db = Db.objects.create(name='GO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='biological_process')
+        Cvterm.objects.create(
+            name='go test term', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+
+        test_feature = Feature.objects.create(
+            organism=test_organism, uniquename='feat2', is_analysis=False,
+            type_id=test_so_term.cvterm_id, is_obsolete=False, name='feat2',
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism='Mus musculus',
+                                          source='GFF_loader')
+
+        # store the feature annotation
+        test_feature_file.store_feature_annotation(
+            feature='feat2', cvterm='display', annotation='feature one')
+        test_featureprop = Featureprop.objects.get(feature=test_feature)
+        self.assertEqual('feature one', test_featureprop.value)
+
+        # replace the feature annotation
+        test_feature_file.store_feature_annotation(
+            feature='feat2', cvterm='display', annotation='feature new')
+        test_featureprop = Featureprop.objects.get(feature=test_feature)
+        self.assertEqual('feature new', test_featureprop.value)
+
+        # store the ontology_term
+        test_feature_file.store_feature_annotation(
+            feature='feat2', cvterm='ontology_term', annotation='GO:12345')
+        test_cvterm = Cvterm.objects.get(name='go test term')
+        test_feature_cvterm = FeatureCvterm.objects.get(
+            feature=test_feature, cvterm=test_cvterm)
+        self.assertIsNotNone(test_feature_cvterm)
+
+        # store the dbxref
+        test_feature_file.store_feature_annotation(
+            feature='feat2', cvterm='dbxref', annotation='GEO:123456')
+        test_db = Db.objects.get(name='GEO')
+        test_dbxref = Dbxref.objects.get(db=test_db, accession='123456')
+        test_feature_dbxref = FeatureDbxref.objects.get(feature=test_feature,
+                                                        dbxref=test_dbxref)
+        self.assertIsNotNone(test_feature_dbxref)

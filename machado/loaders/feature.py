@@ -114,12 +114,7 @@ class FeatureLoader(object):
     def process_attributes(self,
                            feature: object,
                            attrs: Dict[str, str]) -> None:
-        """Process the VALID_ATTRS attributes.
-
-        Args:
-            feature: type object
-            attrs: type dict
-        """
+        """Process the VALID_ATTRS attributes."""
         try:
             cvterm_exact = retrieve_ontology_term('synonym_type', 'exact')
         except ObjectDoesNotExist as e:
@@ -179,10 +174,12 @@ class FeatureLoader(object):
                     defaults={'definition': '',
                               'is_relationshiptype': 0,
                               'is_obsolete': 0})
-                Featureprop.objects.create(feature=feature,
-                                           type_id=note_cvterm.cvterm_id,
-                                           value=attrs.get(key),
-                                           rank=0)
+                featureprop_obj, created = Featureprop.objects.get_or_create(
+                    feature=feature, type_id=note_cvterm.cvterm_id, rank=0,
+                    defaults={'value': attrs.get(key)})
+                if not created:
+                    featureprop_obj.value = attrs.get(key)
+                    featureprop_obj.save()
 
     def store_tabix_feature(self, tabix_feature: GTFProxy) -> None:
         """Store tabix feature."""
@@ -368,3 +365,21 @@ class FeatureLoader(object):
                     feature=feature, dbxref=dbxref, is_current=1)
 
         return None
+
+    def store_feature_annotation(self,
+                                 feature: str,
+                                 cvterm: str,
+                                 annotation: str) -> None:
+        """Store feature annotation."""
+        attrs = {cvterm: annotation}
+        for key in attrs:
+            if key not in VALID_ATTRS:
+                self.ignored_attrs.add(key)
+
+        features = Feature.objects.filter(name=feature)
+
+        if len(features) == 0:
+            raise ImportingError('{} not found.'.format(feature))
+
+        for feature_obj in features:
+            self.process_attributes(feature_obj, attrs)
