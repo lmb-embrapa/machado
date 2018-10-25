@@ -16,7 +16,7 @@ from django.db.utils import IntegrityError
 class OrthologyLoader(object):
     """Load orthology records."""
 
-    help = 'Load feature records.'
+    help = 'Load orthology records.'
 
     def __init__(self,
                  name:str,
