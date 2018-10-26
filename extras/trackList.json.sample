@@ -34,8 +34,8 @@
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/CanvasFeatures",
          "style": {
-             "showLabels": true,
-             "label": "name,id"
+             "label": "name,id",
+             "description": "display"
          }
       },
      {
@@ -48,7 +48,11 @@
             "soType" : "mRNA"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/CanvasFeatures"
+         "type" : "JBrowse/View/Track/CanvasFeatures",
+         "style": {
+             "label": "name,id",
+             "description": "display"
+         }
       },
       {
          "category": "2. Genes",
