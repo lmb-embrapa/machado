@@ -19,31 +19,29 @@ class ProjectLoader(object):
     """Load project."""
 
     help = 'Load project record.'
-    def __init__(self,
-                 db: Union[str, Db]) -> None:
-        """Execute the init function."""
-        # get database for biomaterial (e.g.: "GEO" - from NCBI)
-        if isinstance(db, Db):
-            self.db = db
-        else:
-            try:
-                self.db = Db.objects.create(name=db)
-            except IntegrityError as e:
-                raise ImportingError(e)
 
-    def load_project(self,
-                     name:str) -> None:
+    def store_project(self,
+                     name:str) -> Project:
         self.name = name
-
         try:
             self.project = Project.objects.create(name=self.name)
         except IntegrityError as e:
             raise ImportingError(e)
+        return self.project
 
-    def load_project_dbxref(self,
+    def store_project_dbxref(self,
+                            db: Union[str, Db],
                             acc: Union[str, Dbxref],
-                            is_current:bool) -> None:
+                            is_current: bool=True) -> None:
         if self.project:
+            # get database for biomaterial (e.g.: "GEO" - from NCBI)
+            if isinstance(db, Db):
+                self.db = db
+            else:
+                try:
+                    self.db = Db.objects.create(name=db)
+                except IntegrityError as e:
+                    raise ImportingError(e)
             # for example, acc is the "GSExxxx" sample accession from GEO
             if isinstance(acc, Dbxref):
                 self.dbxref = acc

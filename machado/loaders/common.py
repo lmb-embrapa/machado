@@ -45,6 +45,27 @@ class FileValidator(object):
         except IOError:
             raise ImportingError("{} is not readable".format(file_path))
 
+class FieldsValidator(object):
+    """Validate fields from tabular or .csv file."""
+
+    def validate(self, nfields: int, fields: list) -> None:
+        """Invoke all validations."""
+        self._nfields(nfields, fields)
+        self._nullfields(fields)
+
+    def _nfields(self, nfields: int, fields:list) -> None:
+        """Check if number of fields are correct."""
+        if len(fields)!=nfields:
+            raise ImportingError("Provided number of fields {} differ from {}"
+                    .format(nfields, len(fields)))
+
+    def _nullfields(fields: list) -> None:
+        counter = 0;
+        for field in fields:
+            if not field:
+                raise ImportingError("Found null field in position {}"
+                    .format(counter))
+            counter += 1
 
 def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
     """Retrieve ontology term."""
@@ -127,3 +148,12 @@ def retrieve_organism(organism: str) -> Organism:
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist('{} not registered.'.format(organism))
     return organism
+
+
+def retrieve_project(project: str) -> Project:
+    """Retrieve project object."""
+    try:
+        project = Project.objects.get(name=project)
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist('{} not registered.'.format(project))
+    return project
