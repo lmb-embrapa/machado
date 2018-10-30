@@ -45,6 +45,7 @@ class FileValidator(object):
         except IOError:
             raise ImportingError("{} is not readable".format(file_path))
 
+
 class FieldsValidator(object):
     """Validate fields from tabular or .csv file."""
 
@@ -66,6 +67,7 @@ class FieldsValidator(object):
                 raise ImportingError("Found null field in position {}"
                     .format(counter))
             counter += 1
+
 
 def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
     """Retrieve ontology term."""
