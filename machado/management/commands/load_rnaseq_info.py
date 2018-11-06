@@ -11,12 +11,14 @@ from machado.loaders.common import retrieve_organism
 from machado.loaders.assay import AssayLoader
 from machado.loaders.project import ProjectLoader
 from machado.loaders.biomaterial import BiomaterialLoader
+from machado.loaders.treatment import TreatmentLoader
 from machado.loaders.exceptions import ImportingError
 from machado.models import Db, Dbxref, Cv, Cvterm
-from machado.models import Biomaterial, Project
+from machado.models import Biomaterial, Project, Treatment
 from machado.models import Assay, Arraydesign, Protocol, Contact
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import ObjectDoesNotExist
 from tqdm import tqdm
 import re
 
@@ -24,13 +26,17 @@ import re
 class Command(BaseCommand):
     """Load RNA-seq information file."""
 
-    help = 'Load RNA-seq .csv information file.'
-    'The file is headless and should have the following columns:'
-    'Organism,ProjectAcc,BiomaterialAcc,AssayAcc,Condition,Tissue,Date'
-    'Example of a line sampled from such a file:'
-    'Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018'
-    'The information about the database related to the project, biomaterial'
-    ' and assay accessions (e.g: "SRA") need to be provided from command line.'
+    help = """Load RNA-seq .csv information file. The input file should be
+    headless and have the following columns:
+
+    Organism,ProjectAcc,BiomaterialAcc,AssayAcc,Condition,Tissue,Date
+
+    Example of a line sampled from such a file:
+
+    Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+
+    The information about the database related to the project, biomaterial
+    and assay accessions (e.g: "SRA") need to be provided from command line."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
@@ -67,8 +73,6 @@ class Command(BaseCommand):
         nfields = 7
         if verbosity > 0:
             self.stdout.write('Preprocessing')
-            self.stdout.write('Number of fields in file should be {}'
-                    .format(nfields))
         try:
             FileValidator().validate(filename)
         except ImportingError as e:
@@ -80,56 +84,91 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
-        # each line is an orthologous group
+        # instantiate project, biomaterial and assay
+        try:
+            biomaterial = BiomaterialLoader(biomaterialdb)
+            project = ProjectLoader(projectdb)
+            assay = AssayLoader(assaydb)
+            treatment = TreatmentLoader()
+        except ImportingError as e:
+            raise CommandError(e)
+
+        # each line is an RNA-seq experiment
+        # e.g:
+        # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
         for line in rnaseq_data:
             fields = re.split(',', line.strip())
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
                 raise CommandError(e)
-            # get organism
+            # get organism - mandatory
             try:
                 organism = retrieve_organism(fields[0])
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
-
-            # get project
-            project = Union[fields[1], Project]
-            if not isinstance(project, Project):
+            # store project
+            if not Dbxref.objects.filter(
+                    accession=fields[1],
+                    db=project.db).exists():
                 try:
-                    project = ProjectLoader().store_project(fields[1])
-                    project_dbxref = project.store_project_dbxref(
-                            db=projectdb,
-                            acc=fields[1])
-                except ImportingError as e:
-                    raise CommandError(e)
+                    # e.g: "GSExxx" from GEO
+                    project.store_project(fields[1])
+                    project.store_projectprop(filename)
+                    # project_dbxref is same as project (refers to accession:
+                    # e.g: "GSExxx" from GEO)
+                    project.store_project_dbxref(acc=fields[1])
+                except ObjectDoesNotExist as e:
+                    raise ImportingError(e)
 
-            # get biomaterial (sample)
-            biomaterial = Union[fields[2], Biomaterial]
-            if not isinstance(biomaterial, Biomaterial):
+            # store biomaterial (sample)
+            if not Dbxref.objects.filter(
+                    accession=fields[2],
+                    db=biomaterial.db).exists():
                 try:
-                    biomaterial = BiomaterialLoader(biomaterialdb)
+                    # e.g: "GSMxxxx" from GEO)
                     biomaterial.store_biomaterial(
                         acc=fields[2],
                         organism=organism,
-                        tissue=fields[5],
-                        condition=fields[4])
+                        name=fields[2],
+                        description=fields[5])
                 except ImportingError as e:
                     raise CommandError(e)
+            # biomaterial is needed to store treatment
+            if biomaterial:
+                if not Treatment.objects.filter(
+                        name=fields[4],
+                        biomaterial=biomaterial.biomaterial).exists():
+                    try:
+                        # e.g. "Heat"
+                        treatment.store_treatment(
+                                name=fields[4],
+                                biomaterial=biomaterial.biomaterial)
+                        biomaterial.store_biomaterial_treatment(
+                                treatment.treatment)
+                    except ImportingError as e:
+                        raise CommandError(e)
+            else:
+                raise ImportingError(
+                    "Parent not found: biomaterial is required "
+                    "to store a treatment.")
 
-            # get assay (experiment)
-            assay = Union[fields[3], Assay]
-            if not isinstance(assay, Assay):
-                assay = AssayLoader(assaydb)
-                # will use acc information for other fields as well
+            # store assay (experiment)
+            # if not Assay.objects.filter(name=fields[3]).exists():
+            # will use acc information for other fields as well
+            if (project and biomaterial):
                 try:
                     assay.store_assay(
                         acc=fields[3],
-                        date=fields[6],
+                        assaydate=fields[6],
                         name=fields[3],
                         description=fields[3])
-                    assay.store_assay_project(project)
-                    assay.store_assay_biomaterial(biomaterial)
+                    assay.store_assay_project(project.project)
+                    assay.store_assay_biomaterial(biomaterial.biomaterial)
                 except ImportingError as e:
                     raise CommandError(e)
+            else:
+                raise ImportingError(
+                    "Parent not found: project and biomaterial are required "
+                    "to store an assay.")
         self.stdout.write(self.style.SUCCESS('Done'))

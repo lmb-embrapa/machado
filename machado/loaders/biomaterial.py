@@ -8,11 +8,11 @@
 
 from machado.loaders.common import retrieve_organism, retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Db, Dbxref
-from machado.models import Biomaterial, Db, Dbxref
-from machado.models import Cv, Cvterm
+from machado.models import Biomaterial, Db, Dbxref, Organism 
+from machado.models import Cv, Cvterm, Treatment, BiomaterialTreatment
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from typing import Dict, List, Set, Union
 
 
 class BiomaterialLoader(object):
@@ -21,41 +21,51 @@ class BiomaterialLoader(object):
     help = 'Load biomaterial record.'
 
     def __init__(self,
-                 db: Union[str, Db]) -> None:
+                 db: str=None) -> None:
 
         """Execute the init function."""
         # get database for biomaterial (e.g.: "GEO" - from NCBI)
-        if isinstance(db, Db):
-            self.db = db
-        else:
+        if db:
             try:
-                self.db = Db.objects.create(name=db)
+                self.db, created = Db.objects.get_or_create(name=db)
             except IntegrityError as e:
                 raise ImportingError(e)
+        else:
+            self.db = None
 
     def store_biomaterial(self,
-                          acc: Union[str, Dbxref],
-                          organism: Union[str, Organism],
-                          tissue:str,
-                          condition:str) -> None:
-        # for example, acc is the "GSMxxxx" sample accession from GEO
-        if isinstance(acc, Dbxref):
-            self.dbxref = acc
-        else:
-            try:
-                self.dbxref = Dbxref.objects.create(accession=acc,
-                                                    db=self.db,
-                                                    version=None)
-            except IntegrityError as e:
-                raise ImportingError(e)
+                          name:str,
+                          acc:str=None,
+                          organism: Union[str, Organism]=None,
+                          description:str=None) -> None:
+
+        """Store biomaterial."""
         # organism
-        if isinstance(organism, Organism):
-            self.organism = organism
+        if organism:
+            if isinstance(organism, Organism):
+                self.organism = organism
+            else:
+                try:
+                    self.organism = retrieve_organism(organism)
+                except IntegrityError as e:
+                    raise ImportingError(e)
         else:
+            self.organism, created  = Organism.object.get_or_create(
+                    genus="null",
+                    species="null")
+
+        # for example, acc is the "GSMxxxx" sample accession from GEO
+        if acc:
             try:
-                self.organism = retrieve_organism(organism)
+                self.dbxref, created = Dbxref.objects.get_or_create(
+                                                           db=self.db,
+                                                           accession=acc)
             except IntegrityError as e:
                 raise ImportingError(e)
+        else:
+            self.dbxref, created = Dbxref.objects.get_or_create(
+                                             db=self.db,
+                                             accession='null')
 
         # get cvterm for condition - TODO
         # create treatment table
@@ -69,11 +79,36 @@ class BiomaterialLoader(object):
         #     self.cvterm = retrieve_ontology_term(ontology, condition)
         # except IntegrityError as e:
         #     raise ImportingError(e)
+
+        # finally, create biomaterial entry
         try:
-            biomaterial = Biomaterial.objects.create(
+            self.biomaterial = Biomaterial.objects.create(
                                     taxon_id=self.organism.organism_id,
                                     dbxref=self.dbxref,
-                                    name=tissue,
-                                    description=condition)
+                                    name=name,
+                                    description=description)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+    def store_biomaterial_treatment(self,
+                                    treatment: Union[str, Biomaterial],
+                                    rank:int=0
+                                    ) -> None:
+        """Store biomaterial_treatment."""
+        if isinstance(treatment, Treatment):
+            self.treatment = treatment
+        else:
+            try:
+                self.treatment = Treatment.objects.get(
+                        name=treatment,
+                        biomaterial=self.biomaterial)
+            except IntegrityError as e:
+                raise ImportingError(e)
+        # finally, create biomaterial_treatment entry
+        try:
+            self.biomaterial_treatment = BiomaterialTreatment.objects.create(
+                                    biomaterial=self.biomaterial,
+                                    treatment=self.treatment,
+                                    rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

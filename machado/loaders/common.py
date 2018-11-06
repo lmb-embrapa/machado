@@ -12,7 +12,7 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
-from machado.models import Cv, Cvterm
+from machado.models import Cv, Cvterm, Project
 from machado.models import Organism
 from django.core.exceptions import ObjectDoesNotExist
 import os
@@ -60,7 +60,7 @@ class FieldsValidator(object):
             raise ImportingError("Provided number of fields {} differ from {}"
                     .format(nfields, len(fields)))
 
-    def _nullfields(fields: list) -> None:
+    def _nullfields(self, fields: list) -> None:
         counter = 0;
         for field in fields:
             if not field:

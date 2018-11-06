@@ -18,12 +18,12 @@ import re
 class Command(BaseCommand):
     """Load OrthoMCL groups.txt results."""
 
-    help = 'Load "groups.txt" output result file from orthoMCL.'
-    'The "groups.txt" file is headless and have the format as follows: '
-    'nameofthegroup1: featuremember1 featuremember2 featuremember3'
-    'nameofthegroup2: featuremember4 featuremember5'
-    '... and so on.'
-    'The feature members need to be loaded previously.'
+    help = """Load 'groups.txt' output result file from orthoMCL.
+The 'groups.txt' file is headless and have the format as follows: nameofthegroup1:
+featuremember1 featuremember2 featuremember3
+nameofthegroup2: featuremember4 featuremember5 ...
+and so on.
+The feature members need to be loaded previously."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
