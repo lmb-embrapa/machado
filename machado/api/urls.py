@@ -29,7 +29,7 @@ router.register(r'protein', views.ProteinViewSet, base_name='protein')
 router.register(r'jbrowse/stats/global', views.JBrowseGlobalViewSet,
                 base_name='jbrowse_global')
 router.register(r'jbrowse/features/(?P<refseq>.+)',
-                views.JBrowseTranscriptViewSet,
+                views.JBrowseFeatureViewSet,
                 base_name='jbrowse_features')
 router.register(r'jbrowse/names', views.JBrowseNamesViewSet,
                 base_name='jbrowse_names')

@@ -15,7 +15,7 @@ from machado.api.serializers import AnalysisfeatureSerializer
 from machado.api.serializers import CvSerializer, CvtermSerializer
 from machado.api.serializers import DbSerializer, DbxrefSerializer
 from machado.api.serializers import FeatureSerializer, OrganismSerializer
-from machado.api.serializers import JBrowseTranscriptSerializer
+from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
@@ -435,14 +435,22 @@ class JBrowseRefSeqsViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class JBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
+class JBrowseFeatureViewSet(viewsets.ReadOnlyModelViewSet):
     """API endpoint to view gene."""
 
     renderer_classes = (JSONRenderer, )
-    serializer_class = JBrowseTranscriptSerializer
+    serializer_class = JBrowseFeatureSerializer
+
+    def get_serializer_context(self):
+        """Get the serializer context."""
+        cv_feature_property = Cv.objects.get(name='feature_property')
+        cvterm_display = Cvterm.objects.get(cv=cv_feature_property,
+                                            name='display')
+        return {'cvterm_display': cvterm_display}
 
     def get_queryset(self):
         """Get queryset."""
+        soType = self.request.query_params.get('soType')
         try:
             refseq = Feature.objects.get(uniquename=self.kwargs['refseq'])
         except ObjectDoesNotExist:
@@ -485,7 +493,7 @@ class JBrowseTranscriptViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """Override return the list inside a dict."""
-        response = super(JBrowseTranscriptViewSet,
+        response = super(JBrowseFeatureViewSet,
                          self).list(request, *args, **kwargs)
         response.data = {"features": response.data}
         return response

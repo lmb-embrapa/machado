@@ -5,10 +5,12 @@
 # have been included as part of this package for licensing information.
 
 """Serializers."""
+from django.core.exceptions import ObjectDoesNotExist
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref
-from machado.models import Feature, Featureloc, FeatureRelationship
+from machado.models import Feature, Featureloc
+from machado.models import FeatureRelationship, Featureprop
 from machado.models import Organism
 from rest_framework import serializers
 
@@ -174,7 +176,7 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
         return result
 
 
-class JBrowseTranscriptSerializer(serializers.ModelSerializer):
+class JBrowseFeatureSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
     start = serializers.SerializerMethodField()
@@ -184,13 +186,14 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
     uniqueID = serializers.SerializerMethodField()
     subfeatures = serializers.SerializerMethodField()
     seq = serializers.SerializerMethodField()
+    display = serializers.SerializerMethodField()
 
     class Meta:
         """Meta."""
 
         model = Feature
         fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
-                  'subfeatures', 'seq')
+                  'subfeatures', 'seq', 'display')
 
     def get_start(self, obj):
         """Get the start location."""
@@ -248,6 +251,16 @@ class JBrowseTranscriptSerializer(serializers.ModelSerializer):
     def get_seq(self, obj):
         """Get the sequence."""
         return obj.residues
+
+    def get_display(self, obj):
+        """Get the display."""
+        try:
+            cvterm_display = self.context['cvterm_display']
+            featureprop = Featureprop.objects.get(feature_id=obj.feature_id,
+                                                  type_id=cvterm_display)
+            return featureprop.value
+        except ObjectDoesNotExist:
+            return None
 
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
