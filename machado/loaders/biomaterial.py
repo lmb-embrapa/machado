@@ -8,7 +8,7 @@
 
 from machado.loaders.common import retrieve_organism, retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Biomaterial, Db, Dbxref, Organism 
+from machado.models import Biomaterial, Db, Dbxref, Organism
 from machado.models import Cv, Cvterm, Treatment, BiomaterialTreatment
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -24,14 +24,17 @@ class BiomaterialLoader(object):
                  db: str=None) -> None:
 
         """Execute the init function."""
+        # initialize self db and dbxref
+        self.db, created = Db.objects.get_or_create(name="null")
+        self.dbxref, created = Dbxref.objects.get_or_create(
+                db=self.db,
+                accession="null")
         # get database for biomaterial (e.g.: "GEO" - from NCBI)
         if db:
             try:
                 self.db, created = Db.objects.get_or_create(name=db)
             except IntegrityError as e:
                 raise ImportingError(e)
-        else:
-            self.db = None
 
     def store_biomaterial(self,
                           name:str,
@@ -40,7 +43,10 @@ class BiomaterialLoader(object):
                           description:str=None) -> None:
 
         """Store biomaterial."""
-        # organism
+        # initialize organism
+        self.organism, created  = Organism.objects.get_or_create(
+                genus="null",
+                species="null")
         if organism:
             if isinstance(organism, Organism):
                 self.organism = organism
@@ -49,12 +55,7 @@ class BiomaterialLoader(object):
                     self.organism = retrieve_organism(organism)
                 except IntegrityError as e:
                     raise ImportingError(e)
-        else:
-            self.organism, created  = Organism.object.get_or_create(
-                    genus="null",
-                    species="null")
-
-        # for example, acc is the "GSMxxxx" sample accession from GEO
+        # e.g.: acc is the "GSMxxxx" sample accession from GEO
         if acc:
             try:
                 self.dbxref, created = Dbxref.objects.get_or_create(
@@ -62,25 +63,14 @@ class BiomaterialLoader(object):
                                                            accession=acc)
             except IntegrityError as e:
                 raise ImportingError(e)
-        else:
-            self.dbxref, created = Dbxref.objects.get_or_create(
-                                             db=self.db,
-                                             accession='null')
 
         # get cvterm for condition - TODO
-        # create treatment table
-        # but before, import required ontology,
+        # import required ontology,
         # check http://obi-ontology.org/
         # or: https://www.bioontology.org/
         # #######
-        # self.name = tissue
-        # self.description = condition
-        # try:
-        #     self.cvterm = retrieve_ontology_term(ontology, condition)
-        # except IntegrityError as e:
-        #     raise ImportingError(e)
 
-        # finally, create biomaterial entry
+        #create biomaterial entry
         try:
             self.biomaterial = Biomaterial.objects.create(
                                     taxon_id=self.organism.organism_id,
@@ -92,8 +82,7 @@ class BiomaterialLoader(object):
 
     def store_biomaterial_treatment(self,
                                     treatment: Union[str, Biomaterial],
-                                    rank:int=0
-                                    ) -> None:
+                                    rank:int=0) -> None:
         """Store biomaterial_treatment."""
         if isinstance(treatment, Treatment):
             self.treatment = treatment

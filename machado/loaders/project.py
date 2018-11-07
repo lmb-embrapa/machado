@@ -44,38 +44,28 @@ class ProjectLoader(object):
     def store_projectprop(self,
                           filename:str) -> None:
         """Store project_prop."""
-        if self.project:
-            try:
-                self.projectprop = Projectprop.objects.create(
-                        project=self.project,
-                        value=filename,
-                        type_id=self.cvterm_contained.cvterm_id,
-                        rank=0)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        else:
-            raise ImportingError(
-                "Parent not found: Project is required to store "
-                "an Projectprop.")
+        try:
+            self.projectprop = Projectprop.objects.create(
+                    project=self.project,
+                    value=filename,
+                    type_id=self.cvterm_contained.cvterm_id,
+                    rank=0)
+        except IntegrityError as e:
+            raise ImportingError(e)
 
 
     def store_project_dbxref(self,
                              acc:str,
                              is_current: bool=True) -> None:
         """Store project_dbxref."""
-        if (self.project and self.db):
-            try:
-                # for example, acc is the "GSExxxx" sample accession from GEO
-                self.dbxref, created = Dbxref.objects.get_or_create(
-                                                                    accession=acc,
-                                                                    db=self.db)
-                self.project_dbxref = ProjectDbxref.objects.create(
-                                           project=self.project,
-                                           dbxref=self.dbxref,
-                                           is_current=is_current)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        else:
-            raise ImportingError(
-                "Parent not found: Project and Projectdb are required "
-                "to store a ProjectDbxref.")
+        try:
+            # for example, acc is the "GSExxxx" sample accession from GEO
+            self.dbxref, created = Dbxref.objects.get_or_create(
+                                                                accession=acc,
+                                                                db=self.db)
+            self.project_dbxref = ProjectDbxref.objects.create(
+                                       project=self.project,
+                                       dbxref=self.dbxref,
+                                       is_current=is_current)
+        except IntegrityError as e:
+            raise ImportingError(e)

@@ -25,11 +25,12 @@ class AssayLoader(object):
     def __init__(self,
                  db: str=None) -> None:
         """Execute the init function."""
-        # get database for assay (e.g.: "SRA" - from NCBI)
-        try:
-            self.db, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
-            raise ImportingError(e)
+        if db:
+            # get database for assay (e.g.: "SRA" - from NCBI)
+            try:
+                self.db, created = Db.objects.get_or_create(name=db)
+            except IntegrityError as e:
+                raise ImportingError(e)
 
         # need to create several null fields for dummy arraydesign table
         self.db_null, created = Db.objects.get_or_create(name='null')
@@ -43,6 +44,7 @@ class AssayLoader(object):
             dbxref=self.null_dbxref,
             is_obsolete=0,
             is_relationshiptype=0)
+
         # will not use contact's operator
         self.null_contact, created = Contact.objects.get_or_create(
             name='null',
@@ -52,6 +54,9 @@ class AssayLoader(object):
             manufacturer_id=self.null_contact.contact_id,
             platformtype_id=self.null_cvterm.cvterm_id,
             name="Null")
+
+        # initialize self.dbxref
+        self.dbxref = self.null_dbxref
 
     def store_assay(self,
                     name: str,
@@ -64,25 +69,21 @@ class AssayLoader(object):
             # format date mandatory, e.g.: Oct-16-2016)
             # in settings.py set USE_TZ = False
             date_format = '%b-%d-%Y'
-            self.assaydate = datetime.strptime(assaydate, date_format)
-        else:
-            self.assaydate = None
+            assaydate = datetime.strptime(assaydate, date_format)
         # for example, acc is the "SRRxxxx" experiment accession from SRA
-        if self.db:
+        if acc:
             try:
                 self.dbxref, created = Dbxref.objects.get_or_create(
                                                            accession=acc,
                                                            db=self.db)
             except IntegrityError as e:
                 raise ImportingError(e)
-        else:
-            self.dbxref = self.null_dbxref
             #create assay object
         try:
             self.assay = Assay.objects.create(
                             arraydesign=self.arraydesign,
                             operator_id=self.null_contact.contact_id,
-                            assaydate=self.assaydate,
+                            assaydate=assaydate,
                             dbxref=self.dbxref,
                             name=name,
                             description=description)
@@ -96,22 +97,16 @@ class AssayLoader(object):
             self.project = project
         else:
             try:
-                self.project, created = Project.objects.get(
-                        name=project)
+                self.project, created = Project.objects.get(name=project)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
-        if self.assay:
-            try:
-                self.assayproject = AssayProject.objects.create(
-                        assay=self.assay,
-                        project=self.project)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        else:
-            raise ImportingError(
-                "Parent not found: Assay is required to store "
-                "an assay_project.")
+        try:
+            self.assayproject = AssayProject.objects.create(
+                    assay=self.assay,
+                    project=self.project)
+        except IntegrityError as e:
+            raise ImportingError(e)
 
     def store_assay_biomaterial(self,
                                 biomaterial:Union[str, Biomaterial]):
@@ -124,15 +119,10 @@ class AssayLoader(object):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
-        if self.assay:
-            try:
-                self.assaybiomaterial = AssayBiomaterial.objects.create(
-                        assay=self.assay,
-                        biomaterial=self.biomaterial,
-                        rank=0)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        else:
-            raise ImportingError(
-                "Parent not found: Assay is required to store "
-                "an assay_project.")
+        try:
+            self.assaybiomaterial = AssayBiomaterial.objects.create(
+                    assay=self.assay,
+                    biomaterial=self.biomaterial,
+                    rank=0)
+        except IntegrityError as e:
+            raise ImportingError(e)

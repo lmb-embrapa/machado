@@ -25,6 +25,17 @@ class TreatmentLoader(object):
                  cvterm: str=None) -> None:
 
         """Execute the init function."""
+        self.db, created = Db.objects.get_or_create(name='null')
+        self.dbxref, created = Dbxref.objects.get_or_create(
+            db=self.db, accession='null')
+        self.cv, created = Cv.objects.get_or_create(name='null')
+        self.cvterm, created = Cvterm.objects.get_or_create(
+            cv=self.cv,
+            name='null',
+            definition='',
+            dbxref=self.dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
         # get database for biomaterial (e.g.: "GEO" - from NCBI)
         if cv and cvterm:
             try:
@@ -35,18 +46,6 @@ class TreatmentLoader(object):
                                                 )
             except IntegrityError as e:
                 raise ImportingError(e)
-        else:
-            self.db, created = Db.objects.get_or_create(name='null')
-            self.dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession='null')
-            self.cv, created = Cv.objects.get_or_create(name='null')
-            self.cvterm, created = Cvterm.objects.get_or_create(
-                cv=self.cv,
-                name='null',
-                definition='',
-                dbxref=self.dbxref,
-                is_obsolete=0,
-                is_relationshiptype=0)
 
     def store_treatment(self,
                         name:str,
