@@ -134,41 +134,29 @@ class Command(BaseCommand):
                         description=fields[5])
                 except ImportingError as e:
                     raise CommandError(e)
-            # biomaterial is needed to store treatment
-            if biomaterial:
-                if not Treatment.objects.filter(
-                        name=fields[4],
-                        biomaterial=biomaterial.biomaterial).exists():
-                    try:
-                        # e.g. "Heat"
-                        treatment.store_treatment(
-                                name=fields[4],
-                                biomaterial=biomaterial.biomaterial)
-                        biomaterial.store_biomaterial_treatment(
-                                treatment.treatment)
-                    except ImportingError as e:
-                        raise CommandError(e)
-            else:
-                raise ImportingError(
-                    "Parent not found: biomaterial is required "
-                    "to store a treatment.")
-
-            # store assay (experiment)
-            # if not Assay.objects.filter(name=fields[3]).exists():
-            # will use acc information for other fields as well
-            if (project and biomaterial):
+            # store treatment
+            if not Treatment.objects.filter(
+                    name=fields[4],
+                    biomaterial=biomaterial.biomaterial).exists():
                 try:
-                    assay.store_assay(
-                        acc=fields[3],
-                        assaydate=fields[6],
-                        name=fields[3],
-                        description=fields[3])
-                    assay.store_assay_project(project.project)
-                    assay.store_assay_biomaterial(biomaterial.biomaterial)
+                    # e.g. "Heat"
+                    treatment.store_treatment(
+                            name=fields[4],
+                            biomaterial=biomaterial.biomaterial)
+                    biomaterial.store_biomaterial_treatment(
+                            treatment.treatment)
                 except ImportingError as e:
                     raise CommandError(e)
-            else:
-                raise ImportingError(
-                    "Parent not found: project and biomaterial are required "
-                    "to store an assay.")
+
+            # store assay (experiment)
+            try:
+                assay.store_assay(
+                    acc=fields[3],
+                    assaydate=fields[6],
+                    name=fields[3],
+                    description=fields[3])
+                assay.store_assay_project(project.project)
+                assay.store_assay_biomaterial(biomaterial.biomaterial)
+            except ImportingError as e:
+                raise CommandError(e)
         self.stdout.write(self.style.SUCCESS('Done'))
