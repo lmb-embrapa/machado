@@ -20,51 +20,40 @@ class TreatmentLoader(object):
 
     help = 'Load treatment record.'
 
-    def __init__(self,
-                 cv: str=None,
-                 cvterm: str=None) -> None:
+    def __init__(self) -> None:
 
         """Execute the init function."""
-        self.db, created = Db.objects.get_or_create(name='null')
-        self.dbxref, created = Dbxref.objects.get_or_create(
-            db=self.db, accession='null')
-        self.cv, created = Cv.objects.get_or_create(name='null')
-        self.cvterm, created = Cvterm.objects.get_or_create(
-            cv=self.cv,
+        # will not use type_id - TODO - load specific ontology for treatment
+        self.db_null, created = Db.objects.get_or_create(name='null')
+        self.dbxref_null, created = Dbxref.objects.get_or_create(
+            db=self.db_null, accession='null')
+        self.cv_null, created = Cv.objects.get_or_create(name='null')
+        self.cvterm_null, created = Cvterm.objects.get_or_create(
+            cv=self.cv_null,
             name='null',
             definition='',
-            dbxref=self.dbxref,
+            dbxref=self.dbxref_null,
             is_obsolete=0,
             is_relationshiptype=0)
-        # get database for biomaterial (e.g.: "GEO" - from NCBI)
-        if cv and cvterm:
-            try:
-                self.cv = Cv.objects.get(name=cv)
-                self.cvterm = Cvterm.objects.get(
-                                                 name=cvterm,
-                                                 cv=self.cv
-                                                )
-            except IntegrityError as e:
-                raise ImportingError(e)
 
     def store_treatment(self,
                         name:str,
                         biomaterial: Union[str, Biomaterial],
                         rank: int=0) -> None:
         """Store treatment."""
+        # biomaterial is mandatory
         if isinstance(biomaterial, Biomaterial):
             self.biomaterial = biomaterial
         else:
             try:
-                self.biomaterial = Biomaterial.objects.get_or_create(
+                self.biomaterial = Biomaterial.objects.get(
                         name=biomaterial)
             except IntegrityError as e:
                 raise ImportingError(e)
-        # TODO - implement protocol input
         try:
             self.treatment = Treatment.objects.create(
                                     biomaterial=self.biomaterial,
-                                    type_id=self.cvterm.cvterm_id,
+                                    type_id=self.cvterm_null.cvterm_id,
                                     name=name,
                                     rank=rank
                                     )

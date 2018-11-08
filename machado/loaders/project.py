@@ -20,42 +20,22 @@ class ProjectLoader(object):
     help = 'Load project record.'
 
     def __init__(self,
-                 projectdb:str=None) -> None:
+                 db: str=None) -> None:
         """Execute the init function."""
-        if projectdb:
-            try:
-                self.db, created = Db.objects.get_or_create(name=projectdb)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        # get cvterm for store filename in Projectprop
         try:
-            self.cvterm_contained = Cvterm.objects.get(name='contained in')
+            self.db, created = Db.objects.get_or_create(name=db)
         except IntegrityError as e:
-            raise ImportingError(e)
+            self.db = None
 
     def store_project(self,
-                      name:str) -> None:
+                      name: str) -> None:
         try:
-            self.project = Project.objects.create(name=name)
+            self.project, created = Project.objects.get_or_create(name=name)
         except IntegrityError as e:
             raise ImportingError(e)
-
-
-    def store_projectprop(self,
-                          filename:str) -> None:
-        """Store project_prop."""
-        try:
-            self.projectprop = Projectprop.objects.create(
-                    project=self.project,
-                    value=filename,
-                    type_id=self.cvterm_contained.cvterm_id,
-                    rank=0)
-        except IntegrityError as e:
-            raise ImportingError(e)
-
 
     def store_project_dbxref(self,
-                             acc:str,
+                             acc: str,
                              is_current: bool=True) -> None:
         """Store project_dbxref."""
         try:
@@ -63,7 +43,10 @@ class ProjectLoader(object):
             self.dbxref, created = Dbxref.objects.get_or_create(
                                                                 accession=acc,
                                                                 db=self.db)
-            self.project_dbxref = ProjectDbxref.objects.create(
+        except IntegrityError as e:
+            raise ImportingError(e)
+        try:
+            self.project_dbxref, created = ProjectDbxref.objects.get_or_create(
                                        project=self.project,
                                        dbxref=self.dbxref,
                                        is_current=is_current)

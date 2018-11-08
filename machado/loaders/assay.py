@@ -25,41 +25,34 @@ class AssayLoader(object):
     def __init__(self,
                  db: str=None) -> None:
         """Execute the init function."""
-        if db:
-            # get database for assay (e.g.: "SRA" - from NCBI)
-            try:
-                self.db, created = Db.objects.get_or_create(name=db)
-            except IntegrityError as e:
-                raise ImportingError(e)
+        # get database for assay (e.g.: "SRA" - from NCBI)
+        try:
+            self.db, created = Db.objects.get_or_create(name=db)
+        except IntegrityError as e:
+            self.db = None
 
-        # need to create several null fields for dummy arraydesign table
+        # will not use arraydesign nor operator
         self.db_null, created = Db.objects.get_or_create(name='null')
-        self.null_dbxref, created = Dbxref.objects.get_or_create(
+        self.dbxref_null, created = Dbxref.objects.get_or_create(
             db=self.db_null, accession='null')
-        self.null_cv, created = Cv.objects.get_or_create(name='null')
-        self.null_cvterm, created = Cvterm.objects.get_or_create(
-            cv=self.null_cv,
+        self.cv_null, created = Cv.objects.get_or_create(name='null')
+        self.cvterm_null, created = Cvterm.objects.get_or_create(
+            cv=self.cv_null,
             name='null',
             definition='',
-            dbxref=self.null_dbxref,
+            dbxref=self.dbxref_null,
             is_obsolete=0,
             is_relationshiptype=0)
-
-        # will not use contact's operator
-        self.null_contact, created = Contact.objects.get_or_create(
+        self.contact_null, created = Contact.objects.get_or_create(
             name='null',
-            type_id=self.null_cvterm.cvterm_id)
-        # will not use arraydesign
-        self.arraydesign, created = Arraydesign.objects.get_or_create(
-            manufacturer_id=self.null_contact.contact_id,
-            platformtype_id=self.null_cvterm.cvterm_id,
+            type_id=self.cvterm_null.cvterm_id)
+        self.arraydesign_null, created = Arraydesign.objects.get_or_create(
+            manufacturer_id=self.contact_null.contact_id,
+            platformtype_id=self.cvterm_null.cvterm_id,
             name="Null")
 
-        # initialize self.dbxref
-        self.dbxref = self.null_dbxref
-
     def store_assay(self,
-                    name: str,
+                    name: str=None,
                     acc: str=None,
                     assaydate: str=None,
                     description: str=None) -> None:
@@ -71,18 +64,17 @@ class AssayLoader(object):
             date_format = '%b-%d-%Y'
             assaydate = datetime.strptime(assaydate, date_format)
         # for example, acc is the "SRRxxxx" experiment accession from SRA
-        if acc:
-            try:
-                self.dbxref, created = Dbxref.objects.get_or_create(
-                                                           accession=acc,
-                                                           db=self.db)
-            except IntegrityError as e:
-                raise ImportingError(e)
+        try:
+            self.dbxref, created = Dbxref.objects.get_or_create(
+                                                       accession=acc,
+                                                       db=self.db)
+        except IntegrityError as e:
+            self.dbxref = None
             #create assay object
         try:
-            self.assay = Assay.objects.create(
-                            arraydesign=self.arraydesign,
-                            operator_id=self.null_contact.contact_id,
+            self.assay, created = Assay.objects.get_or_create(
+                            arraydesign=self.arraydesign_null,
+                            operator_id=self.contact_null.contact_id,
                             assaydate=assaydate,
                             dbxref=self.dbxref,
                             name=name,
@@ -91,8 +83,9 @@ class AssayLoader(object):
             raise ImportingError(e)
 
     def store_assay_project(self,
-                            project:Union[str, Project]):
+                            project: Union[str, Project]):
         """Store assay_project."""
+        # project is mandatory
         if isinstance(project, Project):
             self.project = project
         else:
@@ -102,15 +95,17 @@ class AssayLoader(object):
                 raise ImportingError(e)
 
         try:
-            self.assayproject = AssayProject.objects.create(
+            self.assayproject, created = AssayProject.objects.get_or_create(
                     assay=self.assay,
                     project=self.project)
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_assay_biomaterial(self,
-                                biomaterial:Union[str, Biomaterial]):
+                                biomaterial: Union[str, Biomaterial],
+                                rank: int=0):
         """Store assay_biomaterial."""
+        # biomaterial is mandatory
         if isinstance(biomaterial, Biomaterial):
             self.biomaterial = biomaterial
         else:
@@ -118,11 +113,11 @@ class AssayLoader(object):
                 self.biomaterial = Biomaterial.objects.get(name=biomaterial)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
-
         try:
-            self.assaybiomaterial = AssayBiomaterial.objects.create(
+            (self.assaybiomaterial,
+                    created) = AssayBiomaterial.objects.get_or_create(
                     assay=self.assay,
                     biomaterial=self.biomaterial,
-                    rank=0)
+                    rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

@@ -86,9 +86,9 @@ class Command(BaseCommand):
 
         # instantiate project, biomaterial and assay
         try:
-            biomaterial = BiomaterialLoader(biomaterialdb)
-            project = ProjectLoader(projectdb)
-            assay = AssayLoader(assaydb)
+            project = ProjectLoader(db=projectdb)
+            biomaterial = BiomaterialLoader(db=biomaterialdb)
+            assay = AssayLoader(db=assaydb)
             treatment = TreatmentLoader()
         except ImportingError as e:
             raise CommandError(e)
@@ -104,59 +104,52 @@ class Command(BaseCommand):
                 raise CommandError(e)
             # get organism - mandatory
             try:
-                organism = retrieve_organism(fields[0])
+                organism = retrieve_organism(organism=fields[0])
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
             # store project
-            if not Dbxref.objects.filter(
-                    accession=fields[1],
-                    db=project.db).exists():
-                try:
-                    # e.g: "GSExxx" from GEO
-                    project.store_project(fields[1])
-                    project.store_projectprop(filename)
-                    # project_dbxref is same as project (refers to accession:
-                    # e.g: "GSExxx" from GEO)
-                    project.store_project_dbxref(acc=fields[1])
-                except ObjectDoesNotExist as e:
-                    raise ImportingError(e)
+            try:
+                # e.g: "GSExxx" from GEO
+                project.store_project(name=fields[1])
+                # project_dbxref is same as project (refers to accession:
+                # e.g: "GSExxx" from GEO)
+                project.store_project_dbxref(acc=fields[1])
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
 
             # store biomaterial (sample)
-            if not Dbxref.objects.filter(
-                    accession=fields[2],
-                    db=biomaterial.db).exists():
-                try:
-                    # e.g: "GSMxxxx" from GEO)
-                    biomaterial.store_biomaterial(
-                        acc=fields[2],
-                        organism=organism,
-                        name=fields[2],
-                        description=fields[5])
-                except ImportingError as e:
-                    raise CommandError(e)
+            try:
+                # e.g: "GSMxxxx" from GEO
+                biomaterial.store_biomaterial(
+                    acc=fields[2],
+                    organism=organism,
+                    name=fields[2],
+                    description=fields[5])
+            except ImportingError as e:
+                raise CommandError(e)
             # store treatment
-            if not Treatment.objects.filter(
-                    name=fields[4],
-                    biomaterial=biomaterial.biomaterial).exists():
-                try:
-                    # e.g. "Heat"
-                    treatment.store_treatment(
-                            name=fields[4],
-                            biomaterial=biomaterial.biomaterial)
-                    biomaterial.store_biomaterial_treatment(
-                            treatment.treatment)
-                except ImportingError as e:
-                    raise CommandError(e)
+            try:
+                # e.g. "Heat"
+                treatment.store_treatment(
+                        name=fields[4],
+                        biomaterial=biomaterial.biomaterial)
+                biomaterial.store_biomaterial_treatment(
+                        treatment=treatment.treatment)
+            except ImportingError as e:
+                raise CommandError(e)
 
             # store assay (experiment)
             try:
+                # e.g. "SRRxxxx" from GEO
                 assay.store_assay(
                     acc=fields[3],
                     assaydate=fields[6],
                     name=fields[3],
                     description=fields[3])
-                assay.store_assay_project(project.project)
-                assay.store_assay_biomaterial(biomaterial.biomaterial)
+                assay.store_assay_project(
+                    project=project.project)
+                assay.store_assay_biomaterial(
+                    biomaterial=biomaterial.biomaterial)
             except ImportingError as e:
                 raise CommandError(e)
         self.stdout.write(self.style.SUCCESS('Done'))

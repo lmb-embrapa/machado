@@ -63,8 +63,8 @@ class FieldsValidator(object):
     def _nullfields(self, fields: list) -> None:
         counter = 0;
         for field in fields:
-            if not field:
-                raise ImportingError("Found null field in position {}"
+            if (field==None or field==""):
+                raise ImportingError("Found null or empty field in position {}"
                     .format(counter))
             counter += 1
 
