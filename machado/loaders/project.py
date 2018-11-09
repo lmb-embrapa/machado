@@ -40,15 +40,15 @@ class ProjectLoader(object):
         """Store project_dbxref."""
         try:
             # for example, acc is the "GSExxxx" sample accession from GEO
-            self.dbxref, created = Dbxref.objects.get_or_create(
-                                                                accession=acc,
-                                                                db=self.db)
+            dbxref, created = Dbxref.objects.get_or_create(
+                                                           accession=acc,
+                                                           db=self.db)
         except IntegrityError as e:
             raise ImportingError(e)
         try:
             self.project_dbxref, created = ProjectDbxref.objects.get_or_create(
                                        project=self.project,
-                                       dbxref=self.dbxref,
+                                       dbxref=dbxref,
                                        is_current=is_current)
         except IntegrityError as e:
             raise ImportingError(e)

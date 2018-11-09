@@ -32,27 +32,27 @@ class AssayLoader(object):
             self.db = None
 
         # will not use arraydesign nor operator
-        self.db_null, created = Db.objects.get_or_create(name='null')
-        self.dbxref_null, created = Dbxref.objects.get_or_create(
-            db=self.db_null, accession='null')
-        self.cv_null, created = Cv.objects.get_or_create(name='null')
-        self.cvterm_null, created = Cvterm.objects.get_or_create(
-            cv=self.cv_null,
+        db_null, created = Db.objects.get_or_create(name='null')
+        dbxref_null, created = Dbxref.objects.get_or_create(
+            db=db_null, accession='null')
+        cv_null, created = Cv.objects.get_or_create(name='null')
+        cvterm_null, created = Cvterm.objects.get_or_create(
+            cv=cv_null,
             name='null',
             definition='',
-            dbxref=self.dbxref_null,
+            dbxref=dbxref_null,
             is_obsolete=0,
             is_relationshiptype=0)
         self.contact_null, created = Contact.objects.get_or_create(
             name='null',
-            type_id=self.cvterm_null.cvterm_id)
+            type_id=cvterm_null.cvterm_id)
         self.arraydesign_null, created = Arraydesign.objects.get_or_create(
             manufacturer_id=self.contact_null.contact_id,
-            platformtype_id=self.cvterm_null.cvterm_id,
+            platformtype_id=cvterm_null.cvterm_id,
             name="Null")
 
     def store_assay(self,
-                    name: str=None,
+                    name: str,
                     acc: str=None,
                     assaydate: str=None,
                     description: str=None) -> None:
@@ -65,59 +65,53 @@ class AssayLoader(object):
             assaydate = datetime.strptime(assaydate, date_format)
         # for example, acc is the "SRRxxxx" experiment accession from SRA
         try:
-            self.dbxref, created = Dbxref.objects.get_or_create(
+            dbxref, created = Dbxref.objects.get_or_create(
                                                        accession=acc,
                                                        db=self.db)
         except IntegrityError as e:
-            self.dbxref = None
-            #create assay object
+            dbxref = None
+        #create assay object
         try:
             self.assay, created = Assay.objects.get_or_create(
                             arraydesign=self.arraydesign_null,
-                            operator_id=self.contact_null.contact_id,
                             assaydate=assaydate,
-                            dbxref=self.dbxref,
+                            operator_id=self.contact_null.contact_id,
                             name=name,
-                            description=description)
+                            dbxref=dbxref,
+                            description=description,
+                            defaults={
+                                'protocol_id': None,
+                                'dbxref_id': None,
+                                'arrayidentifier': None,
+                                'arraybatchidentifier': None,
+                                }
+                            )
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_assay_project(self,
-                            project: Union[str, Project]):
+                            project: Project):
         """Store assay_project."""
-        # project is mandatory
-        if isinstance(project, Project):
-            self.project = project
-        else:
-            try:
-                self.project, created = Project.objects.get(name=project)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
-
         try:
             self.assayproject, created = AssayProject.objects.get_or_create(
                     assay=self.assay,
-                    project=self.project)
+                    project=project)
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_assay_biomaterial(self,
-                                biomaterial: Union[str, Biomaterial],
+                                biomaterial: Biomaterial,
                                 rank: int=0):
         """Store assay_biomaterial."""
         # biomaterial is mandatory
-        if isinstance(biomaterial, Biomaterial):
-            self.biomaterial = biomaterial
-        else:
-            try:
-                self.biomaterial = Biomaterial.objects.get(name=biomaterial)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
         try:
             (self.assaybiomaterial,
                     created) = AssayBiomaterial.objects.get_or_create(
                     assay=self.assay,
-                    biomaterial=self.biomaterial,
-                    rank=rank)
+                    biomaterial=biomaterial,
+                    rank=rank,
+                    defaults={
+                        'channel_id': None}
+                    )
         except IntegrityError as e:
             raise ImportingError(e)

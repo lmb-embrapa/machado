@@ -47,11 +47,11 @@ class BiomaterialLoader(object):
                 organism_id = None
         # e.g.: acc is the "GSMxxxx" sample accession from GEO
         try:
-            self.dbxref, created = Dbxref.objects.get_or_create(
+            dbxref, created = Dbxref.objects.get_or_create(
                                                        db=self.db,
                                                        accession=acc)
         except IntegrityError as e:
-            self.dbxref = None
+            dbxref = None
 
         # get cvterm for condition - TODO
         # import required ontology,
@@ -63,30 +63,26 @@ class BiomaterialLoader(object):
         try:
             self.biomaterial, created = Biomaterial.objects.get_or_create(
                                     taxon_id=organism_id,
-                                    dbxref=self.dbxref,
+                                    dbxref=dbxref,
                                     name=name,
-                                    description=description)
+                                    description=description,
+                                    defaults={
+                                        'biosourceprovider_id': None,
+                                        }
+                                    )
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_biomaterial_treatment(self,
-                                    treatment: Union[str, Biomaterial],
-                                    rank: int=1) -> None:
+                                    treatment: Treatment,
+                                    rank: int=0) -> None:
         """Store biomaterial_treatment."""
         # treatment is mandatory
-        if isinstance(treatment, Treatment):
-            self.treatment = treatment
-        else:
-            try:
-                self.treatment = Treatment.objects.get(
-                        name=treatment,
-                        biomaterial=self.biomaterial)
-            except IntegrityError as e:
-                raise ImportingError(e)
         try:
-            self.biomaterialtreatment, created = BiomaterialTreatment.objects.get_or_create(
+            (self.biomaterialtreatment,
+                    created) = BiomaterialTreatment.objects.get_or_create(
                                 biomaterial=self.biomaterial,
-                                treatment=self.treatment,
+                                treatment=treatment,
                                 rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

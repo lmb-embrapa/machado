@@ -150,12 +150,3 @@ def retrieve_organism(organism: str) -> Organism:
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist('{} not registered.'.format(organism))
     return organism
-
-
-def retrieve_project(project: str) -> Project:
-    """Retrieve project object."""
-    try:
-        project = Project.objects.get(name=project)
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist('{} not registered.'.format(project))
-    return project

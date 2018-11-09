@@ -24,38 +24,35 @@ class TreatmentLoader(object):
 
         """Execute the init function."""
         # will not use type_id - TODO - load specific ontology for treatment
-        self.db_null, created = Db.objects.get_or_create(name='null')
-        self.dbxref_null, created = Dbxref.objects.get_or_create(
-            db=self.db_null, accession='null')
-        self.cv_null, created = Cv.objects.get_or_create(name='null')
+        db_null, created = Db.objects.get_or_create(name='null')
+        dbxref_null, created = Dbxref.objects.get_or_create(
+            db=db_null, accession='null')
+        cv_null, created = Cv.objects.get_or_create(name='null')
         self.cvterm_null, created = Cvterm.objects.get_or_create(
-            cv=self.cv_null,
+            cv=cv_null,
             name='null',
             definition='',
-            dbxref=self.dbxref_null,
+            dbxref=dbxref_null,
             is_obsolete=0,
             is_relationshiptype=0)
 
     def store_treatment(self,
                         name:str,
-                        biomaterial: Union[str, Biomaterial],
+                        biomaterial: Biomaterial,
                         rank: int=0) -> None:
         """Store treatment."""
         # biomaterial is mandatory
-        if isinstance(biomaterial, Biomaterial):
-            self.biomaterial = biomaterial
-        else:
-            try:
-                self.biomaterial = Biomaterial.objects.get(
-                        name=biomaterial)
-            except IntegrityError as e:
-                raise ImportingError(e)
+        try:
+            isinstance(biomaterial, Biomaterial)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
         try:
             self.treatment = Treatment.objects.create(
-                                    biomaterial=self.biomaterial,
+                                    biomaterial=biomaterial,
                                     type_id=self.cvterm_null.cvterm_id,
                                     name=name,
-                                    rank=rank
+                                    rank=rank,
                                     )
         except IntegrityError as e:
             raise ImportingError(e)
