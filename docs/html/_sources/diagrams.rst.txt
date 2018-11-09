@@ -1,6 +1,11 @@
 Diagrams
 ========
 
+AnalysisFeature
+---------------
+
+.. image:: _static/analysis_feature.png
+
 
 Feature
 -------
@@ -32,3 +37,9 @@ Taxonomy
 --------
 
 .. image:: _static/taxonomy.png
+
+
+-----
+
+.. note:: Instructions to generate the diagrams: https://django-extensions.readthedocs.io/en/latest/graph_models.html (eg. python manage.py graph_models --pygraphviz -a -I Analysis,Analysisfeature,Feature -o analysis_feature.png)
+

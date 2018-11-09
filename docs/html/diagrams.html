@@ -24,7 +24,8 @@
 
   
 
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -150,6 +151,10 @@
             
   <div class="section" id="diagrams">
 <h1>Diagrams<a class="headerlink" href="#diagrams" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="analysisfeature">
+<h2>AnalysisFeature<a class="headerlink" href="#analysisfeature" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/analysis_feature.png" src="_images/analysis_feature.png" />
+</div>
 <div class="section" id="feature">
 <h2>Feature<a class="headerlink" href="#feature" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/feature.png" src="_images/feature.png" />
@@ -173,6 +178,11 @@
 <div class="section" id="taxonomy">
 <h2>Taxonomy<a class="headerlink" href="#taxonomy" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/taxonomy.png" src="_images/taxonomy.png" />
+<hr class="docutils" />
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Instructions to generate the diagrams: <a class="reference external" href="https://django-extensions.readthedocs.io/en/latest/graph_models.html">https://django-extensions.readthedocs.io/en/latest/graph_models.html</a> (eg. python manage.py graph_models –pygraphviz -a -I Analysis,Analysisfeature,Feature -o analysis_feature.png)</p>
+</div>
 </div>
 </div>
 
@@ -196,7 +206,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa
+        &copy; Copyright 2018, Embrapa.
 
     </p>
   </div>
@@ -215,18 +225,27 @@
 
   
 
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
 
   
 
-  <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {
