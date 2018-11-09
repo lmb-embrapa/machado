@@ -39,7 +39,7 @@ Taxonomy
 .. image:: _static/taxonomy.png
 
 
+-----
 
-> Instructions to generate the diagrams
-> https://django-extensions.readthedocs.io/en/latest/graph_models.html
-> python manage.py graph_models --pygraphviz -a -I Analysis,Analysisfeature,Feature -o analysis_feature.png
+.. note:: Instructions to generate the diagrams: https://django-extensions.readthedocs.io/en/latest/graph_models.html (eg. python manage.py graph_models --pygraphviz -a -I Analysis,Analysisfeature,Feature -o analysis_feature.png)
+
