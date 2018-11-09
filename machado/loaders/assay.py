@@ -55,7 +55,7 @@ class AssayLoader(object):
                     name: str,
                     acc: str=None,
                     assaydate: str=None,
-                    description: str=None) -> None:
+                    description: str=None) -> Assay:
         """Store assay."""
 
         if assaydate:
@@ -72,42 +72,44 @@ class AssayLoader(object):
             dbxref = None
         #create assay object
         try:
-            self.assay, created = Assay.objects.get_or_create(
-                            arraydesign=self.arraydesign_null,
-                            assaydate=assaydate,
-                            operator_id=self.contact_null.contact_id,
-                            name=name,
-                            dbxref=dbxref,
-                            description=description,
-                            defaults={
-                                'protocol_id': None,
-                                'dbxref_id': None,
-                                'arrayidentifier': None,
-                                'arraybatchidentifier': None,
-                                }
-                            )
+            assay, created = Assay.objects.get_or_create(
+                                    arraydesign=self.arraydesign_null,
+                                    assaydate=assaydate,
+                                    operator_id=self.contact_null.contact_id,
+                                    name=name,
+                                    dbxref=dbxref,
+                                    description=description,
+                                    defaults={
+                                        'protocol_id': None,
+                                        'arrayidentifier': None,
+                                        'arraybatchidentifier': None,
+                                        }
+                                    )
         except IntegrityError as e:
             raise ImportingError(e)
+        return assay
 
     def store_assay_project(self,
-                            project: Project):
+                            assay: Assay,
+                            project: Project) -> None:
         """Store assay_project."""
         try:
-            self.assayproject, created = AssayProject.objects.get_or_create(
-                    assay=self.assay,
+            assayproject, created = AssayProject.objects.get_or_create(
+                    assay=assay,
                     project=project)
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_assay_biomaterial(self,
+                                assay: Assay,
                                 biomaterial: Biomaterial,
-                                rank: int=0):
+                                rank: int=0) -> None:
         """Store assay_biomaterial."""
         # biomaterial is mandatory
         try:
-            (self.assaybiomaterial,
+            (assaybiomaterial,
                     created) = AssayBiomaterial.objects.get_or_create(
-                    assay=self.assay,
+                    assay=assay,
                     biomaterial=biomaterial,
                     rank=rank,
                     defaults={

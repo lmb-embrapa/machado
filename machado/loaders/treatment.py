@@ -39,7 +39,7 @@ class TreatmentLoader(object):
     def store_treatment(self,
                         name:str,
                         biomaterial: Biomaterial,
-                        rank: int=0) -> None:
+                        rank: int=0) -> Treatment:
         """Store treatment."""
         # biomaterial is mandatory
         try:
@@ -48,7 +48,7 @@ class TreatmentLoader(object):
             raise ImportingError(e)
 
         try:
-            self.treatment = Treatment.objects.create(
+            treatment = Treatment.objects.create(
                                     biomaterial=biomaterial,
                                     type_id=self.cvterm_null.cvterm_id,
                                     name=name,
@@ -56,3 +56,4 @@ class TreatmentLoader(object):
                                     )
         except IntegrityError as e:
             raise ImportingError(e)
+        return treatment

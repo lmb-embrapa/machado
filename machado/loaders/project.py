@@ -28,13 +28,15 @@ class ProjectLoader(object):
             self.db = None
 
     def store_project(self,
-                      name: str) -> None:
+                      name: str) -> Project:
         try:
-            self.project, created = Project.objects.get_or_create(name=name)
+            project, created = Project.objects.get_or_create(name=name)
         except IntegrityError as e:
             raise ImportingError(e)
+        return project
 
     def store_project_dbxref(self,
+                             project: Project,
                              acc: str,
                              is_current: bool=True) -> None:
         """Store project_dbxref."""
@@ -46,8 +48,8 @@ class ProjectLoader(object):
         except IntegrityError as e:
             raise ImportingError(e)
         try:
-            self.project_dbxref, created = ProjectDbxref.objects.get_or_create(
-                                       project=self.project,
+            project_dbxref, created = ProjectDbxref.objects.get_or_create(
+                                       project=project,
                                        dbxref=dbxref,
                                        is_current=is_current)
         except IntegrityError as e:

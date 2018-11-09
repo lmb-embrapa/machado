@@ -33,7 +33,7 @@ class BiomaterialLoader(object):
                           name:str,
                           acc:str=None,
                           organism: Union[str, Organism]=None,
-                          description:str=None) -> None:
+                          description:str=None) -> Biomaterial:
 
         """Store biomaterial."""
         # organism is mandatory
@@ -61,27 +61,29 @@ class BiomaterialLoader(object):
 
         #create biomaterial entry
         try:
-            self.biomaterial, created = Biomaterial.objects.get_or_create(
-                                    taxon_id=organism_id,
-                                    dbxref=dbxref,
-                                    name=name,
-                                    description=description,
-                                    defaults={
-                                        'biosourceprovider_id': None,
-                                        }
-                                    )
+            biomaterial, created = Biomaterial.objects.get_or_create(
+                                        taxon_id=organism_id,
+                                        dbxref=dbxref,
+                                        name=name,
+                                        description=description,
+                                        defaults={
+                                            'biosourceprovider_id': None,
+                                            }
+                                        )
         except IntegrityError as e:
             raise ImportingError(e)
+        return biomaterial
 
     def store_biomaterial_treatment(self,
+                                    biomaterial: Biomaterial,
                                     treatment: Treatment,
                                     rank: int=0) -> None:
         """Store biomaterial_treatment."""
         # treatment is mandatory
         try:
-            (self.biomaterialtreatment,
+            (biomaterialtreatment,
                     created) = BiomaterialTreatment.objects.get_or_create(
-                                biomaterial=self.biomaterial,
+                                biomaterial=biomaterial,
                                 treatment=treatment,
                                 rank=rank)
         except IntegrityError as e:
