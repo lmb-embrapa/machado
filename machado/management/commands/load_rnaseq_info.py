@@ -75,9 +75,9 @@ class Command(BaseCommand):
             self.stdout.write('Preprocessing')
         # instantiate project, biomaterial and assay
         try:
-            project_file = ProjectLoader(db=projectdb)
-            biomaterial_file = BiomaterialLoader(db=biomaterialdb)
-            assay_file = AssayLoader(db=assaydb)
+            project_file = ProjectLoader()
+            biomaterial_file = BiomaterialLoader()
+            assay_file = AssayLoader()
             treatment_file = TreatmentLoader()
         except ImportingError as e:
             raise CommandError(e)
@@ -114,8 +114,10 @@ class Command(BaseCommand):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
             try:
-                project_file.store_project_dbxref(acc=fields[1],
-                                             project=project_model)
+                project_file.store_project_dbxref(
+                        db=projectdb,
+                        acc=fields[1],
+                        project=project_model)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
@@ -123,6 +125,7 @@ class Command(BaseCommand):
             try:
                 # e.g: "GSMxxxx" from GEO
                 biomaterial_model = biomaterial_file.store_biomaterial(
+                                        db=biomaterialdb,
                                         acc=fields[2],
                                         organism=organism,
                                         name=fields[2],
@@ -148,6 +151,7 @@ class Command(BaseCommand):
             try:
                 # e.g. "SRRxxxx" from GEO
                 assay_model = assay_file.store_assay(
+                                        db=assaydb,
                                         acc=fields[3],
                                         assaydate=fields[6],
                                         name=fields[3],

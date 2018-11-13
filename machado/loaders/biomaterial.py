@@ -20,22 +20,25 @@ class BiomaterialLoader(object):
 
     help = 'Load biomaterial record.'
 
-    def __init__(self,
-                 db: str=None) -> None:
-
-        """Execute the init function."""
-        try:
-            self.db, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
-            self.db = None
-
     def store_biomaterial(self,
-                          name:str,
-                          acc:str=None,
+                          name: str,
+                          db: str=None,
+                          acc: str=None,
                           organism: Union[str, Organism]=None,
-                          description:str=None) -> Biomaterial:
-
+                          description: str=None) -> Biomaterial:
         """Store biomaterial."""
+        # db is not mandatory
+        try:
+            biodb, created = Db.objects.get_or_create(name=db)
+        except IntegrityError as e:
+            biodb = None
+        # e.g.: acc is the "GSMxxxx" sample accession from GEO
+        try:
+            biodbxref, created = Dbxref.objects.get_or_create(
+                                                       db=biodb,
+                                                       accession=acc)
+        except IntegrityError as e:
+            biodbxref = None
         # organism is mandatory
         if isinstance(organism, Organism):
             organism_id = organism.organism_id
@@ -45,26 +48,18 @@ class BiomaterialLoader(object):
                 organism_id = self.organism.organism_id
             except IntegrityError as e:
                 organism_id = None
-        # e.g.: acc is the "GSMxxxx" sample accession from GEO
-        try:
-            dbxref, created = Dbxref.objects.get_or_create(
-                                                       db=self.db,
-                                                       accession=acc)
-        except IntegrityError as e:
-            dbxref = None
 
         # get cvterm for condition - TODO
         # import required ontology,
         # check http://obi-ontology.org/
         # or: https://www.bioontology.org/
         # #######
-
-        #create biomaterial entry
         try:
+            # made name mandatory (it is not regarding the schema definition)
             biomaterial, created = Biomaterial.objects.get_or_create(
-                                        taxon_id=organism_id,
-                                        dbxref=dbxref,
                                         name=name,
+                                        taxon_id=organism_id,
+                                        dbxref=biodbxref,
                                         description=description,
                                         defaults={
                                             'biosourceprovider_id': None,
@@ -79,7 +74,7 @@ class BiomaterialLoader(object):
                                     treatment: Treatment,
                                     rank: int=0) -> None:
         """Store biomaterial_treatment."""
-        # treatment is mandatory
+        # treatment and biomaterial are mandatory
         try:
             (biomaterialtreatment,
                     created) = BiomaterialTreatment.objects.get_or_create(

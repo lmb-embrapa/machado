@@ -22,15 +22,13 @@ class AssayLoader(object):
 
     help = 'Load assay record.'
 
-    def __init__(self,
-                 db: str=None) -> None:
-        """Execute the init function."""
-        # get database for assay (e.g.: "SRA" - from NCBI)
-        try:
-            self.db, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
-            self.db = None
-
+    def store_assay(self,
+                    name: str,
+                    db: str=None,
+                    acc: str=None,
+                    assaydate: str=None,
+                    description: str=None) -> Assay:
+        """Store assay."""
         # will not use arraydesign nor operator
         db_null, created = Db.objects.get_or_create(name='null')
         dbxref_null, created = Dbxref.objects.get_or_create(
@@ -43,41 +41,39 @@ class AssayLoader(object):
             dbxref=dbxref_null,
             is_obsolete=0,
             is_relationshiptype=0)
-        self.contact_null, created = Contact.objects.get_or_create(
+        contact_null, created = Contact.objects.get_or_create(
             name='null',
             type_id=cvterm_null.cvterm_id)
-        self.arraydesign_null, created = Arraydesign.objects.get_or_create(
-            manufacturer_id=self.contact_null.contact_id,
+        arraydesign_null, created = Arraydesign.objects.get_or_create(
+            manufacturer_id=contact_null.contact_id,
             platformtype_id=cvterm_null.cvterm_id,
             name="Null")
 
-    def store_assay(self,
-                    name: str,
-                    acc: str=None,
-                    assaydate: str=None,
-                    description: str=None) -> Assay:
-        """Store assay."""
-
+        # get database for assay (e.g.: "SRA" - from NCBI)
+        try:
+            assaydb, created = Db.objects.get_or_create(name=db)
+        except IntegrityError as e:
+            assaydb = None
+        # for example, acc is the "SRRxxxx" experiment accession from SRA
+        try:
+            assaydbxref, created = Dbxref.objects.get_or_create(
+                                                       accession=acc,
+                                                       db=assaydb)
+        except IntegrityError as e:
+            assaydbxref = None
         if assaydate:
-            # format date mandatory, e.g.: Oct-16-2016)
+            # format is mandatory, e.g.: Oct-16-2016)
             # in settings.py set USE_TZ = False
             date_format = '%b-%d-%Y'
             assaydate = datetime.strptime(assaydate, date_format)
-        # for example, acc is the "SRRxxxx" experiment accession from SRA
-        try:
-            dbxref, created = Dbxref.objects.get_or_create(
-                                                       accession=acc,
-                                                       db=self.db)
-        except IntegrityError as e:
-            dbxref = None
         #create assay object
         try:
             assay, created = Assay.objects.get_or_create(
-                                    arraydesign=self.arraydesign_null,
+                                    arraydesign=arraydesign_null,
                                     assaydate=assaydate,
-                                    operator_id=self.contact_null.contact_id,
+                                    operator_id=contact_null.contact_id,
                                     name=name,
-                                    dbxref=dbxref,
+                                    dbxref=assaydbxref,
                                     description=description,
                                     defaults={
                                         'protocol_id': None,
@@ -105,7 +101,6 @@ class AssayLoader(object):
                                 biomaterial: Biomaterial,
                                 rank: int=0) -> None:
         """Store assay_biomaterial."""
-        # biomaterial is mandatory
         try:
             (assaybiomaterial,
                     created) = AssayBiomaterial.objects.get_or_create(

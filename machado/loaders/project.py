@@ -19,14 +19,6 @@ class ProjectLoader(object):
 
     help = 'Load project record.'
 
-    def __init__(self,
-                 db: str=None) -> None:
-        """Execute the init function."""
-        try:
-            self.db, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
-            self.db = None
-
     def store_project(self,
                       name: str) -> Project:
         try:
@@ -38,13 +30,19 @@ class ProjectLoader(object):
     def store_project_dbxref(self,
                              project: Project,
                              acc: str,
+                             db: str,
                              is_current: bool=True) -> None:
         """Store project_dbxref."""
+        # db is mandatory
+        try:
+            projectdb, created = Db.objects.get_or_create(name=db)
+        except IntegrityError as e:
+            raise ImportingError(e)
         try:
             # for example, acc is the "GSExxxx" sample accession from GEO
             dbxref, created = Dbxref.objects.get_or_create(
                                                            accession=acc,
-                                                           db=self.db)
+                                                           db=projectdb)
         except IntegrityError as e:
             raise ImportingError(e)
         try:

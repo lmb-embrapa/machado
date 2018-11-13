@@ -8,6 +8,7 @@
 
 from machado.loaders.common import insert_organism, retrieve_organism
 from machado.loaders.common import retrieve_ontology_term
+from machado.loaders.common import FieldsValidator
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
 
