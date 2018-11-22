@@ -12,7 +12,7 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
-from machado.models import Cv, Cvterm, Project
+from machado.models import Cv, Cvterm
 from machado.models import Organism
 from django.core.exceptions import ObjectDoesNotExist
 import os
