@@ -46,6 +46,29 @@ class FileValidator(object):
             raise ImportingError("{} is not readable".format(file_path))
 
 
+class FieldsValidator(object):
+    """Validate fields from tabular or .csv file."""
+
+    def validate(self, nfields: int, fields: list) -> None:
+        """Invoke all validations."""
+        self._nfields(nfields, fields)
+        self._nullfields(fields)
+
+    def _nfields(self, nfields: int, fields:list) -> None:
+        """Check if number of fields are correct."""
+        if len(fields)!=nfields:
+            raise ImportingError("Provided number of fields {} differ from {}"
+                    .format(nfields, len(fields)))
+
+    def _nullfields(self, fields: list) -> None:
+        counter = 0;
+        for field in fields:
+            if (field==None or field==""):
+                raise ImportingError("Found null or empty field in position {}"
+                    .format(counter))
+            counter += 1
+
+
 def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
     """Retrieve ontology term."""
     # Retrieve sequence ontology object
