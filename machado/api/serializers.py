@@ -6,7 +6,6 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
-from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Feature, Featureloc
@@ -157,7 +156,8 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         """Get the location."""
-        location = obj.Featureloc_feature_Feature.first()
+        # location = obj.Featureloc_feature_Feature.first()
+        location = Featureloc.objects.get(feature_id=obj.feature_id)
 
         result = dict()
 
@@ -179,6 +179,10 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
 class JBrowseFeatureSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
+    _locs = dict()
+    _subfeatures = dict()
+    _types = dict()
+
     start = serializers.SerializerMethodField()
     end = serializers.SerializerMethodField()
     strand = serializers.SerializerMethodField()
@@ -195,33 +199,55 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
                   'subfeatures', 'seq', 'display')
 
+    def _get_location(self, obj):
+        """Get the location."""
+        if obj.feature_id not in self._locs:
+            self._locs = {
+                # obj.feature_id: obj.Featureloc_feature_Feature.first()
+                obj.feature_id: Featureloc.objects.get(
+                    feature_id=obj.feature_id)
+            }
+        return self._locs.get(obj.feature_id)
+
+    def _get_subfeature(self, feature_id):
+        """Get subfeature."""
+        if feature_id not in self._subfeatures:
+            feat_obj = Feature.objects.get(feature_id=feature_id)
+            # feature_loc = feat_obj.Featureloc_feature_Feature.first()
+            feature_loc = Featureloc.objects.get(
+                feature_id=feature_id)
+            self._subfeatures[feature_id] = {
+                'type': Cvterm.objects.get(cvterm_id=feat_obj.type_id).name,
+                'start': feature_loc.fmin,
+                'end': feature_loc.fmax,
+                'strand': feature_loc.strand,
+                'phase': feature_loc.phase
+            }
+        return self._subfeatures.get(feature_id)
+
+    def _get_type(self, cvterm_id):
+        """Get cvterm from type_id."""
+        if cvterm_id not in self._types:
+            self._types = {
+                cvterm_id: Cvterm.objects.get(cvterm_id=cvterm_id)
+            }
+        return self._types.get(cvterm_id)
+
     def get_start(self, obj):
         """Get the start location."""
-        try:
-            feature_loc = obj.Featureloc_feature_Feature.first()
-            return feature_loc.fmin
-        except AttributeError:
-            return 1
+        return self._get_location(obj).fmin
 
     def get_end(self, obj):
         """Get the end location."""
-        try:
-            feature_loc = obj.Featureloc_feature_Feature.first()
-            return feature_loc.fmax
-        except AttributeError:
-            return obj.seqlen
+        return self._get_location(obj).fmax
 
     def get_strand(self, obj):
         """Get the strand."""
-        try:
-            feature_loc = obj.Featureloc_feature_Feature.first()
-            return feature_loc.strand
-        except AttributeError:
-            pass
+        return self._get_location(obj).strand
 
     def get_type(self, obj):
         """Get the type."""
-        feat_type = Cvterm.objects.get(cvterm_id=obj.type_id).name
+        feat_type = self._get_type(obj.type_id).name
         return feat_type
 
     def get_uniqueID(self, obj):
@@ -230,22 +256,13 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_subfeatures(self, obj):
         """Get the subfeatures."""
-        part_of = retrieve_ontology_term(ontology='sequence', term='part_of')
+        cvterm_part_of = self.context['cvterm_part_of']
         relationship = FeatureRelationship.objects.filter(
             subject_id=obj.feature_id,
-            type_id=part_of.cvterm_id)
+            type_id=cvterm_part_of.cvterm_id)
         result = list()
         for feat in relationship:
-            feat_obj = Feature.objects.get(feature_id=feat.object_id)
-            feat_dict = dict()
-            feat_dict['type'] = Cvterm.objects.get(
-                cvterm_id=feat_obj.type_id).name
-            feature_loc = feat_obj.Featureloc_feature_Feature.first()
-            feat_dict['start'] = feature_loc.fmin
-            feat_dict['end'] = feature_loc.fmax
-            feat_dict['strand'] = feature_loc.strand
-            feat_dict['phase'] = feature_loc.phase
-            result.append(feat_dict)
+            result.append(self._get_subfeature(feat.object_id))
         return result
 
     def get_seq(self, obj):
@@ -256,7 +273,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the display."""
         try:
             cvterm_display = self.context['cvterm_display']
-            featureprop = Featureprop.objects.get(feature_id=obj.feature_id,
+            featureprop = Featureprop.objects.get(feature=obj,
                                                   type_id=cvterm_display)
             return featureprop.value
         except ObjectDoesNotExist:
