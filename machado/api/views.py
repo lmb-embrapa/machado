@@ -447,9 +447,12 @@ class JBrowseFeatureViewSet(viewsets.ReadOnlyModelViewSet):
                                                 term='display')
         cvterm_part_of = retrieve_ontology_term(ontology='sequence',
                                                 term='part_of')
+        refseq_feature_id = Feature.objects.get(
+            uniquename=self.kwargs['refseq'])
         return {
             'cvterm_display': cvterm_display,
             'cvterm_part_of': cvterm_part_of,
+            'refseq': refseq_feature_id,
         }
 
     def get_queryset(self):

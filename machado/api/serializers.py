@@ -157,7 +157,8 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
     def get_location(self, obj):
         """Get the location."""
         # location = obj.Featureloc_feature_Feature.first()
-        location = Featureloc.objects.get(feature_id=obj.feature_id)
+        location = Featureloc.objects.get(feature_id=obj.feature_id,
+                                          srcfeature_id=self.context['refseq'])
 
         result = dict()
 
@@ -205,7 +206,8 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
             self._locs = {
                 # obj.feature_id: obj.Featureloc_feature_Feature.first()
                 obj.feature_id: Featureloc.objects.get(
-                    feature_id=obj.feature_id)
+                    feature_id=obj.feature_id,
+                    srcfeature_id=self.context['refseq'])
             }
         return self._locs.get(obj.feature_id)
 
@@ -215,7 +217,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
             feat_obj = Feature.objects.get(feature_id=feature_id)
             # feature_loc = feat_obj.Featureloc_feature_Feature.first()
             feature_loc = Featureloc.objects.get(
-                feature_id=feature_id)
+                feature_id=feature_id, srcfeature_id=self.context['refseq'])
             self._subfeatures[feature_id] = {
                 'type': Cvterm.objects.get(cvterm_id=feat_obj.type_id).name,
                 'start': feature_loc.fmin,
