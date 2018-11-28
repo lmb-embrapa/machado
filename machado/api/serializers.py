@@ -6,39 +6,11 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship, Featureprop
 from machado.models import Organism
 from rest_framework import serializers
-
-
-class AnalysisSerializer(serializers.ModelSerializer):
-    """Analysis serializer."""
-
-    match_count = serializers.SerializerMethodField()
-
-    class Meta:
-        """Meta."""
-
-        model = Analysis
-        fields = ('analysis_id', 'program', 'programversion', 'sourcename',
-                  'timeexecuted', 'match_count', )
-
-    def get_match_count(self, obj):
-        """Get the number of matches."""
-        return obj.Analysisfeature_analysis_Analysis.count()
-
-
-class AnalysisfeatureSerializer(serializers.ModelSerializer):
-    """Analysis feature serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Analysisfeature
-        fields = ('rawscore', 'normscore', 'significance', 'identity')
 
 
 class CvSerializer(serializers.HyperlinkedModelSerializer):
@@ -94,36 +66,6 @@ class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
         model = Dbxref
         depth = 1
         fields = ('dbxref_id', 'accession', 'description', 'version', 'db')
-
-
-class FeatureLocSerializer(serializers.HyperlinkedModelSerializer):
-    """FeatureLoc serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Featureloc
-        fields = ('feature_id', 'srcfeature_id', 'fmin', 'fmax',
-                  'strand', 'phase')
-
-
-class FeatureSerializer(serializers.HyperlinkedModelSerializer):
-    """Feature serializer."""
-
-    Featureloc_feature_Feature = FeatureLocSerializer(many=True)
-    match_count = serializers.SerializerMethodField()
-
-    class Meta:
-        """Meta."""
-
-        model = Feature
-        fields = ('feature_id', 'name', 'uniquename', 'md5checksum',
-                  'organism', 'dbxref', 'match_count',
-                  'Featureloc_feature_Feature')
-
-    def get_match_count(self, obj):
-        """Get the number of matches in featureloc."""
-        return obj.Featureloc_srcfeature_Feature.count()
 
 
 class OrganismSerializer(serializers.ModelSerializer):

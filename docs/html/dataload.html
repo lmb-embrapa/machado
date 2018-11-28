@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data loading &mdash; machado 0.1.0 documentation</title>
+  <title>2. Data loading &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Loading ontologies" href="load_ontologies.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="2.1. Loading ontologies" href="load_ontologies.html" />
+    <link rel="prev" title="1. Installation" href="installation.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,22 +80,22 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data loading</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">OrthoMCL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Data loading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.8. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
             
@@ -141,7 +141,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Data loading</li>
+      <li>2. Data loading</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -161,23 +161,20 @@
            <div itemprop="articleBody">
             
   <div class="section" id="data-loading">
-<h1>Data loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h1>
+<h1>2. Data loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h1>
 <p>The data files must be loaded in a particular order, taking into account their <a class="reference external" href="http://gmod.org/wiki/Chado_Manual#Module_Dependencies">inter dependencies</a>.</p>
-<div class="section" id="data-loading-commands">
-<h2>Data loading commands<a class="headerlink" href="#data-loading-commands" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_publication.html">Publication</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_gff.html">GFF</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_blast.html">Blast</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="load_orthomcl.html">OrthoMCL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_interproscan.html">2.8. InterproScan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
 </ul>
-</div>
 </div>
 </div>
 
@@ -189,10 +186,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_ontologies.html" class="btn btn-neutral float-right" title="Loading ontologies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_ontologies.html" class="btn btn-neutral float-right" title="2.1. Loading ontologies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral" title="1. Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

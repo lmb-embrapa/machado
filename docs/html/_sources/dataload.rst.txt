@@ -4,9 +4,6 @@ Data loading
 The data files must be loaded in a particular order, taking into account their `inter dependencies <http://gmod.org/wiki/Chado_Manual#Module_Dependencies>`_.
 
 
-Data loading commands
----------------------
-
 .. toctree::
    :maxdepth: 2
    :titlesonly:

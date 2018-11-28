@@ -14,11 +14,12 @@ Contents
 .. toctree::
    :maxdepth: 2
    :titlesonly:
+   :numbered:
 
    installation
    dataload
+   visualization
    diagrams
    models
-   visualization
 
 * :ref:`search`

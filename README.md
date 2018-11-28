@@ -6,6 +6,11 @@
 machado is a Django app that contains tools to interact with a Chado database.
 Detailed documentation can be found in the **docs** directory ([INSTALL](http://machado.readthedocs.io/en/latest/installation.html)).
 
+## Features
+- The Django framework allows rapid development
+- There are data loaders for the major bioinformatics formats: fasta, gff, obo, bibtex, blast, interproscan, orthomcl
+- The machado API delivers data directly to the JBrowse genome browser
+
 
 ## Quick start
 
