@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Loading GFF files &mdash; machado 0.1.0 documentation</title>
+  <title>2.6. Loading GFF files &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Loading Blast results" href="load_blast.html" />
-    <link rel="prev" title="Loading FASTA files" href="load_fasta.html" /> 
+    <link rel="next" title="2.7. Loading Blast results" href="load_blast.html" />
+    <link rel="prev" title="2.5. Loading FASTA files" href="load_fasta.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,22 +80,22 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">OrthoMCL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.8. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
             
@@ -141,9 +141,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">Data loading</a> &raquo;</li>
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>Loading GFF files</li>
+      <li>2.6. Loading GFF files</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -163,7 +163,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-gff-files">
-<h1>Loading GFF files<a class="headerlink" href="#loading-gff-files" title="Permalink to this headline">¶</a></h1>
+<h1>2.6. Loading GFF files<a class="headerlink" href="#loading-gff-files" title="Permalink to this headline">¶</a></h1>
 <p>The first column of a GFF file is the reference sequence ID.
 Usually, in order to load a GFF file, it’s required to have a reference FASTA file loaded.
 But some GFF files already have the reference features such as chromosome or scaffold.
@@ -173,7 +173,7 @@ In this case, there are two options:</p>
 <li>Load the FASTA file and then load the GFF using the parameter ‘ignore’ to not load the reference features</li>
 </ul>
 <div class="section" id="load-gff">
-<h2>Load GFF<a class="headerlink" href="#load-gff" title="Permalink to this headline">¶</a></h2>
+<h2>2.6.1. Load GFF<a class="headerlink" href="#load-gff" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --file organism_genes_sorted.gff3.gz --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
@@ -209,7 +209,7 @@ In this case, there are two options:</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.6.2. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a GFF dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
 </pre></div>
@@ -228,10 +228,10 @@ In this case, there are two options:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_blast.html" class="btn btn-neutral float-right" title="Loading Blast results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_blast.html" class="btn btn-neutral float-right" title="2.7. Loading Blast results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_fasta.html" class="btn btn-neutral" title="Loading FASTA files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_fasta.html" class="btn btn-neutral" title="2.5. Loading FASTA files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

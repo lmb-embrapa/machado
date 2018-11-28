@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Loading InterproScan results &mdash; machado 0.1.0 documentation</title>
+  <title>2.8. Loading InterproScan results &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Loading OrthoMCL results" href="load_orthomcl.html" />
-    <link rel="prev" title="Loading Blast results" href="load_blast.html" /> 
+    <link rel="next" title="2.9. Loading OrthoMCL results" href="load_orthomcl.html" />
+    <link rel="prev" title="2.7. Loading Blast results" href="load_blast.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,22 +80,22 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">Data loading</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">Taxonomy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">FASTA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_gff.html">GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">Blast</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">OrthoMCL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.8. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
             
@@ -141,9 +141,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">Data loading</a> &raquo;</li>
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>Loading InterproScan results</li>
+      <li>2.8. Loading InterproScan results</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -163,11 +163,11 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-interproscan-results">
-<h1>Loading InterproScan results<a class="headerlink" href="#loading-interproscan-results" title="Permalink to this headline">¶</a></h1>
+<h1>2.8. Loading InterproScan results<a class="headerlink" href="#loading-interproscan-results" title="Permalink to this headline">¶</a></h1>
 <p>In order to load an InterproScan results file, both the query and the subject records must be previously stored.
 The current version was tested for loading InterproScan analysis on <strong>proteins</strong>.</p>
 <div class="section" id="load-interproscan-subject-records">
-<h2>Load InterproScan subject records<a class="headerlink" href="#load-interproscan-subject-records" title="Permalink to this headline">¶</a></h2>
+<h2>2.8.1. Load InterproScan subject records<a class="headerlink" href="#load-interproscan-subject-records" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_interproscan_matches --file interproscan_result.xml
 </pre></div>
 </div>
@@ -176,7 +176,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 </ul>
 </div>
 <div class="section" id="load-interproscan-similarity">
-<h2>Load InterproScan similarity<a class="headerlink" href="#load-interproscan-similarity" title="Permalink to this headline">¶</a></h2>
+<h2>2.8.2. Load InterproScan similarity<a class="headerlink" href="#load-interproscan-similarity" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion <span class="m">5</span>
 </pre></div>
 </div>
@@ -227,7 +227,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.8.3. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove an InterproScan result set you should use the command <em>remove_analysis</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_analysis --help
 </pre></div>
@@ -246,10 +246,10 @@ The current version was tested for loading InterproScan analysis on <strong>prot
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_orthomcl.html" class="btn btn-neutral float-right" title="Loading OrthoMCL results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_orthomcl.html" class="btn btn-neutral float-right" title="2.9. Loading OrthoMCL results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_blast.html" class="btn btn-neutral" title="Loading Blast results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_blast.html" class="btn btn-neutral" title="2.7. Loading Blast results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

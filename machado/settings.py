@@ -14,9 +14,11 @@ def patch_installed_apps():
     """Include dependencies to INSTALLED_APPS."""
     settings.INSTALLED_APPS.append('corsheaders')
 
+
 def patch_middleware():
     """Include dependencies to MIDDLEWARE."""
     settings.MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
+
 
 def patch_root_urlconf():
     """Include the machado urls."""
@@ -35,5 +37,5 @@ def patch_all():
     patch_middleware()
 
     settings.USE_THOUSAND_SEPARATOR = True
-    settings.APPEND_SLASH = False
+    settings.APPEND_SLASH = True
     settings.CORS_ORIGIN_ALLOW_ALL = True

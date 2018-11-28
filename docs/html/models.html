@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Models &mdash; machado 0.1.0 documentation</title>
+  <title>5. Models &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,8 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Visualization" href="visualization.html" />
-    <link rel="prev" title="Diagrams" href="diagrams.html" /> 
+    <link rel="prev" title="4. Visualization" href="visualization.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,11 +79,11 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dataload.html">Data loading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="diagrams.html">Diagrams</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataload.html">2. Data loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">3. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">4. Visualization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Models</a></li>
 </ul>
 
             
@@ -130,7 +129,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Models</li>
+      <li>5. Models</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -150,10 +149,10 @@
            <div itemprop="articleBody">
             
   <div class="section" id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+<h1>5. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
 <p>This document describes how the <a class="reference external" href="https://www.djangoproject.com">Django</a> models.py file for the <a class="reference external" href="http://gmod.org/wiki/Chado_-_Getting_Started">Chado</a> schema was created. You <strong>don’t need</strong> to create it again since <em>machado</em> already contains a copy of this file.</p>
 <div class="section" id="prerequisite">
-<h2>Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
+<h2>5.1. Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
 <p>The list bellow contains the softwares and versions required by <em>machado</em>.</p>
 <p><strong>PostgreSQL 9.5</strong></p>
 <p>Install PostgreSQL and create a database and user for loading the Chado schema.
@@ -183,7 +182,7 @@ python src/machado/setup.py install
 </div>
 </div>
 <div class="section" id="the-django-project">
-<h2>The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
+<h2>5.2. The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
 <p>Inside YOURPROJECT directory create a Django project with the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin startproject WEBPROJECT
 <span class="nb">cd</span> WEBPROJECT
@@ -204,7 +203,7 @@ python src/machado/setup.py install
 </div>
 </div>
 <div class="section" id="the-model">
-<h2>The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
+<h2>5.3. The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
 <p>Django has a command to generate a Models file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">inspectdb</span> <span class="o">&gt;</span> <span class="n">unsortedmodels</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
@@ -216,7 +215,7 @@ python src/machado/setup.py install
 <p>The resulting files, models.py and admin.py, are ready.</p>
 </div>
 <div class="section" id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<h2>5.4. References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://gmod.org/wiki/Chado_Django_HOWTO">http://gmod.org/wiki/Chado_Django_HOWTO</a></li>
 </ul>
@@ -231,10 +230,8 @@ python src/machado/setup.py install
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="visualization.html" class="btn btn-neutral float-right" title="Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="diagrams.html" class="btn btn-neutral" title="Diagrams" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="visualization.html" class="btn btn-neutral" title="4. Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
