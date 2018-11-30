@@ -10,6 +10,7 @@ DEBUG = True
 
 INSTALLED_APPS = [
     'machado',
+    'rest_framework',
 ]
 
 DATABASES = {

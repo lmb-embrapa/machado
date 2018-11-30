@@ -31,7 +31,6 @@ Detailed documentation can be found in the **docs** directory ([INSTALL](http://
             ...
             'machado',
             'rest_framework',
-            'django_filters',
             ...
         ]
 
