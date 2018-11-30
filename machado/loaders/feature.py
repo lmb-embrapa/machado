@@ -19,12 +19,7 @@ from pysam.libctabixproxies import GTFProxy
 from time import time
 from typing import Dict, List, Set, Union
 from urllib.parse import unquote
-
-import warnings
-from Bio import BiopythonWarning
-warnings.simplefilter('ignore', BiopythonWarning)
-with warnings.catch_warnings():
-    from Bio.SearchIO._model import Hit
+from Bio.SearchIO._model import Hit
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent

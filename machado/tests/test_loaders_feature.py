@@ -16,12 +16,7 @@ from machado.loaders.publication import PublicationLoader
 from django.test import TestCase
 from datetime import datetime, timezone
 from bibtexparser.bibdatabase import BibDatabase
-
-import warnings
-from Bio import BiopythonWarning
-warnings.simplefilter('ignore', BiopythonWarning)
-with warnings.catch_warnings():
-    from Bio.SearchIO._model import Hit
+from Bio.SearchIO._model import Hit
 
 
 class FeatureTest(TestCase):

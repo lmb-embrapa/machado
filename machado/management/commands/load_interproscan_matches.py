@@ -14,12 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import os
-
-import warnings
-from Bio import BiopythonWarning
-warnings.simplefilter('ignore', BiopythonWarning)
-with warnings.catch_warnings():
-    from Bio import SearchIO
+from Bio import SearchIO
 
 
 class Command(BaseCommand):

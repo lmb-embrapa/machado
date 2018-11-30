@@ -1,4 +1,11 @@
+# Copyright 2018 by Embrapa.  All rights reserved.
+#
+# This code is part of the machado distribution and governed by its
+# license. Please see the LICENSE.txt and README.md files that should
+# have been included as part of this package for licensing information.
+
 """Tests JBrowse API."""
+
 from datetime import datetime, timezone
 from django.urls import include, path, reverse
 from machado.loaders.feature import FeatureLoader
@@ -113,8 +120,7 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         test_feature2.end = '100'
         test_feature2.strand = '+'
         test_feature2.frame = '1'
-        test_feature2.attributes = 'id=id1m;name=name1m;display=transcript1;' \
-                                   'parent=id1'
+        test_feature2.attributes = 'id=id1m;name=name1m;display=transcript1'
 
         test_feature3 = TabixFeature()
         test_feature3.contig = 'contig1'
@@ -123,8 +129,7 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         test_feature3.end = '100'
         test_feature3.strand = '-'
         test_feature3.frame = '2'
-        test_feature3.attributes = 'id=id2;name=name2;parent=id1m;' \
-                                   'display=exon1'
+        test_feature3.attributes = 'id=id2;name=name2;display=exon1'
 
         # instantiate the loader
         test_feature_file = FeatureLoader(filename='file.name',
@@ -133,9 +138,7 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         # store the tabix feature
         test_feature_file.store_tabix_feature(test_feature1)
         test_feature_file.store_tabix_feature(test_feature2)
-
-        # store the relationships
-        test_feature_file.store_relationships()
+        test_feature_file.store_tabix_feature(test_feature3)
 
         # Tests stats/global
         url = reverse('jbrowse_global-list')
