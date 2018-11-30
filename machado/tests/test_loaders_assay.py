@@ -6,15 +6,14 @@
 
 """Tests Assay loader."""
 
-from machado.models import Assay, AssayBiomaterial, AssayProject, Biomaterial
-from machado.models import Db, Dbxref, Organism, Contact, Arraydesign
-from machado.models import Cv, Cvterm, Treatment, Project
-from machado.loaders.common import insert_organism
+from machado.models import Assay, AssayBiomaterial, AssayProject
+from machado.models import Db, Dbxref, Organism
+from machado.models import Project
 from machado.loaders.assay import AssayLoader
 from machado.loaders.biomaterial import BiomaterialLoader
-from machado.loaders.project import ProjectLoader
 from django.test import TestCase
 from datetime import datetime
+
 
 class AssayTest(TestCase):
     """Tests Loaders - AssayLoader."""
@@ -87,4 +86,3 @@ class AssayTest(TestCase):
             assay=test_assay,
             project=test_project
             ).exists())
-
