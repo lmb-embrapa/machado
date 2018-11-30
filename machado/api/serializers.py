@@ -98,9 +98,10 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         """Get the location."""
-        # location = obj.Featureloc_feature_Feature.first()
-        location = Featureloc.objects.get(feature_id=obj.feature_id,
-                                          srcfeature_id=self.context['refseq'])
+        try:
+            location = Featureloc.objects.get(feature_id=obj.feature_id)
+        except ObjectDoesNotExist:
+            location = None
 
         result = dict()
 
