@@ -20,6 +20,7 @@ addons:
 script:
   - python setup.py install
   - django-admin startproject WEBPROJECT
+  - python manage.py migrate
   - export PYTHONPATH=`pwd`; coverage run WEBPROJECT/manage.py test machado --settings machado.tests.settings
 
 after_success:
