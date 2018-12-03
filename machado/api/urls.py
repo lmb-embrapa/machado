@@ -13,7 +13,6 @@ from rest_framework.documentation import include_docs_urls
 
 
 router = routers.SimpleRouter(trailing_slash=False)
-router.register(r'organism', views.OrganismViewSet, base_name='organism')
 router.register(r'cv', views.CvViewSet, base_name='cv')
 router.register(r'cvterm', views.CvtermViewSet, base_name='cvterm')
 router.register(r'db', views.DbViewSet, base_name='db')
@@ -37,13 +36,9 @@ db_router = routers.NestedSimpleRouter(
     router, r'db', lookup='db')
 db_router.register(r'dbxref', views.NestedDbxrefViewSet)
 
-organism_router = routers.NestedSimpleRouter(
-    router, r'organism', lookup='organism', trailing_slash=False)
-
 urlpatterns = [
     url(r'', include_docs_urls(title='machado API')),
     url(r'', include(router.urls)),
     url(r'', include(cv_router.urls)),
     url(r'', include(db_router.urls)),
-    url(r'', include(organism_router.urls)),
 ]

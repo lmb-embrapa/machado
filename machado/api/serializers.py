@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship, Featureprop
-from machado.models import Organism
 from rest_framework import serializers
 
 
@@ -66,17 +65,6 @@ class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
         model = Dbxref
         depth = 1
         fields = ('dbxref_id', 'accession', 'description', 'version', 'db')
-
-
-class OrganismSerializer(serializers.ModelSerializer):
-    """Organism serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Organism
-        fields = ('organism_id', 'abbreviation', 'genus', 'species',
-                  'common_name', 'infraspecific_name')
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):

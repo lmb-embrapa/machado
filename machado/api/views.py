@@ -7,17 +7,15 @@
 """Views."""
 
 from machado.loaders.common import retrieve_organism, retrieve_ontology_term
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism
+from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Feature, Featureloc
 from machado.api.serializers import CvSerializer, CvtermSerializer
 from machado.api.serializers import DbSerializer, DbxrefSerializer
-from machado.api.serializers import OrganismSerializer
 from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count
 from rest_framework import viewsets, filters, mixins
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -101,26 +99,6 @@ class NestedDbxrefViewSet(viewsets.ReadOnlyModelViewSet):
             pass
 
         return dbxrefs
-
-
-class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Organisms."""
-
-    try:
-        cvterm_species = Cvterm.objects.get(cv__name='taxonomy',
-                                            name='species')
-        queryset = Organism.objects.filter(type_id=cvterm_species.cvterm_id)
-        queryset = queryset.annotate(feats=Count('Feature_organism_Organism'))
-        queryset = queryset.filter(feats__gt=0)
-        queryset = queryset.order_by('genus', 'species')
-    except ObjectDoesNotExist:
-        queryset = Organism.objects.all()
-
-    serializer_class = OrganismSerializer
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
-    search_fields = ('genus', 'species')
-    ordering_fields = ('genus', 'species')
-    pagination_class = StandardResultSetPagination
 
 
 class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
