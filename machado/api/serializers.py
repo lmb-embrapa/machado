@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship, Featureprop
-from machado.models import Organism
 from rest_framework import serializers
 
 
@@ -68,17 +67,6 @@ class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('dbxref_id', 'accession', 'description', 'version', 'db')
 
 
-class OrganismSerializer(serializers.ModelSerializer):
-    """Organism serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Organism
-        fields = ('organism_id', 'abbreviation', 'genus', 'species',
-                  'common_name', 'infraspecific_name')
-
-
 class JBrowseGlobalSerializer(serializers.Serializer):
     """JBrowse Global settings serializer."""
 
@@ -98,9 +86,10 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         """Get the location."""
-        # location = obj.Featureloc_feature_Feature.first()
-        location = Featureloc.objects.get(feature_id=obj.feature_id,
-                                          srcfeature_id=self.context['refseq'])
+        try:
+            location = Featureloc.objects.get(feature_id=obj.feature_id)
+        except ObjectDoesNotExist:
+            location = None
 
         result = dict()
 

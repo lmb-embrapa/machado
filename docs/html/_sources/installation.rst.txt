@@ -82,7 +82,6 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
         ...
         'machado',
         'rest_framework',
-        'django_filters',
         ...
     ]
 

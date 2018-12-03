@@ -14,13 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
 from typing import Optional
-
-
-import warnings
-from Bio import BiopythonWarning
-warnings.simplefilter('ignore', BiopythonWarning)
-with warnings.catch_warnings():
-    from Bio.SearchIO._model import query, hsp
+from Bio.SearchIO._model import query, hsp
 
 
 class SimilarityLoader(object):

@@ -39,3 +39,4 @@ def patch_all():
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True
     settings.CORS_ORIGIN_ALLOW_ALL = True
+    settings.USE_TZ = False
