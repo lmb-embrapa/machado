@@ -9,8 +9,9 @@ SECRET_KEY = 'secret-test-key'
 DEBUG = True
 
 INSTALLED_APPS = [
-    'machado',
+    'django.contrib.contenttypes',
     'rest_framework',
+    'machado',
 ]
 
 DATABASES = {
