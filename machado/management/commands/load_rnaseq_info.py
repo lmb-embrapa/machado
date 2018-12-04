@@ -13,13 +13,8 @@ from machado.loaders.project import ProjectLoader
 from machado.loaders.biomaterial import BiomaterialLoader
 from machado.loaders.treatment import TreatmentLoader
 from machado.loaders.exceptions import ImportingError
-from machado.models import Db, Dbxref, Cv, Cvterm
-from machado.models import Biomaterial, Project, Treatment
-from machado.models import Assay, Arraydesign, Protocol, Contact
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from tqdm import tqdm
 import re
 
 
@@ -66,8 +61,8 @@ class Command(BaseCommand):
                projectdb: str,
                biomaterialdb: str,
                assaydb: str,
-               cpu: int=1,
-               verbosity: int=0,
+               cpu: int = 1,
+               verbosity: int = 0,
                **options):
         """Execute the main function."""
         nfields = 7
@@ -142,7 +137,7 @@ class Command(BaseCommand):
                 raise CommandError(e)
             try:
                 biomaterial_file.store_biomaterial_treatment(
-                        biomaterial = biomaterial_model,
+                        biomaterial=biomaterial_model,
                         treatment=treatment_model)
             except ImportingError as e:
                 raise CommandError(e)

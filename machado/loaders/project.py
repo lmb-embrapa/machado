@@ -6,11 +6,9 @@
 
 """Project."""
 
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Biomaterial, Db, Dbxref
-from machado.models import Cv, Cvterm, Project, Projectprop, ProjectDbxref
-from django.core.exceptions import ObjectDoesNotExist
+from machado.models import Db, Dbxref
+from machado.models import Project, ProjectDbxref
 from django.db.utils import IntegrityError
 
 
@@ -21,6 +19,7 @@ class ProjectLoader(object):
 
     def store_project(self,
                       name: str) -> Project:
+        """Store project."""
         try:
             project, created = Project.objects.get_or_create(name=name)
         except IntegrityError as e:
@@ -31,7 +30,7 @@ class ProjectLoader(object):
                              project: Project,
                              acc: str,
                              db: str,
-                             is_current: bool=True) -> None:
+                             is_current: bool = True) -> None:
         """Store project_dbxref."""
         # db is mandatory
         try:

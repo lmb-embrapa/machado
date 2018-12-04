@@ -6,13 +6,12 @@
 
 """Biomaterial."""
 
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
+from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Biomaterial, Db, Dbxref, Organism
-from machado.models import Cv, Cvterm, Treatment, BiomaterialTreatment
-from django.core.exceptions import ObjectDoesNotExist
+from machado.models import Treatment, BiomaterialTreatment
 from django.db.utils import IntegrityError
-from typing import Dict, List, Set, Union
+from typing import Union
 
 
 class BiomaterialLoader(object):
@@ -22,22 +21,22 @@ class BiomaterialLoader(object):
 
     def store_biomaterial(self,
                           name: str,
-                          db: str=None,
-                          acc: str=None,
-                          organism: Union[str, Organism]=None,
-                          description: str=None) -> Biomaterial:
+                          db: str = None,
+                          acc: str = None,
+                          organism: Union[str, Organism] = None,
+                          description: str = None) -> Biomaterial:
         """Store biomaterial."""
         # db is not mandatory
         try:
             biodb, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
+        except IntegrityError:
             biodb = None
         # e.g.: acc is the "GSMxxxx" sample accession from GEO
         try:
             biodbxref, created = Dbxref.objects.get_or_create(
                                                        db=biodb,
                                                        accession=acc)
-        except IntegrityError as e:
+        except IntegrityError:
             biodbxref = None
         # organism is mandatory
         if isinstance(organism, Organism):
@@ -46,7 +45,7 @@ class BiomaterialLoader(object):
             try:
                 self.organism = retrieve_organism(organism)
                 organism_id = self.organism.organism_id
-            except IntegrityError as e:
+            except IntegrityError:
                 organism_id = None
 
         # get cvterm for condition - TODO
@@ -72,12 +71,12 @@ class BiomaterialLoader(object):
     def store_biomaterial_treatment(self,
                                     biomaterial: Biomaterial,
                                     treatment: Treatment,
-                                    rank: int=0) -> None:
+                                    rank: int = 0) -> None:
         """Store biomaterial_treatment."""
         # treatment and biomaterial are mandatory
         try:
             (biomaterialtreatment,
-                    created) = BiomaterialTreatment.objects.get_or_create(
+             created) = BiomaterialTreatment.objects.get_or_create(
                                 biomaterial=biomaterial,
                                 treatment=treatment,
                                 rank=rank)
