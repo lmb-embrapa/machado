@@ -7,16 +7,13 @@
 """Views."""
 
 from machado.loaders.common import retrieve_organism, retrieve_ontology_term
-from machado.models import Cv, Cvterm, Db, Dbxref
-from machado.models import Feature, Featureloc
-from machado.api.serializers import CvSerializer, CvtermSerializer
-from machado.api.serializers import DbSerializer, DbxrefSerializer
+from machado.models import Cvterm, Feature, Featureloc
 from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets, filters, mixins
+from rest_framework import viewsets, mixins
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -28,77 +25,6 @@ class StandardResultSetPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = 'page_size'
     max_page_size = 1000
-
-
-class CvViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Cv."""
-
-    queryset = Cv.objects.all().order_by('name')
-    serializer_class = CvSerializer
-    pagination_class = StandardResultSetPagination
-
-
-class CvtermViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Cvterm."""
-
-    queryset = Cvterm.objects.all().order_by('name')
-    serializer_class = CvtermSerializer
-    pagination_class = StandardResultSetPagination
-
-
-class NestedCvtermViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Cvterm."""
-
-    queryset = Cvterm.objects.all()
-    serializer_class = CvtermSerializer
-    pagination_class = StandardResultSetPagination
-
-    def get_queryset(self):
-        """Get queryset."""
-        try:
-            cvterms = self.queryset.filter(cv=self.kwargs['cv_pk'])
-        except KeyError:
-            pass
-
-        return cvterms
-
-
-class DbViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Db."""
-
-    queryset = Db.objects.all().order_by('name')
-    serializer_class = DbSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'description',)
-    pagination_class = StandardResultSetPagination
-
-
-class DbxrefViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Dbxref."""
-
-    queryset = Dbxref.objects.all()
-    queryset = queryset.order_by('accession')
-    serializer_class = DbxrefSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('db__name', 'description',)
-    pagination_class = StandardResultSetPagination
-
-
-class NestedDbxrefViewSet(viewsets.ReadOnlyModelViewSet):
-    """API endpoint to view Cvterm."""
-
-    queryset = Dbxref.objects.all()
-    serializer_class = DbxrefSerializer
-    pagination_class = StandardResultSetPagination
-
-    def get_queryset(self):
-        """Get queryset."""
-        try:
-            dbxrefs = self.queryset.filter(db=self.kwargs['db_pk'])
-        except KeyError:
-            pass
-
-        return dbxrefs
 
 
 class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

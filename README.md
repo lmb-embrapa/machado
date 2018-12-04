@@ -4,41 +4,26 @@
 # machado
 
 machado is a Django app that contains tools to interact with a Chado database.
-Detailed documentation can be found in the **docs** directory ([INSTALL](http://machado.readthedocs.io/en/latest/installation.html)).
+It provides users with a framework to store, search and visualize biological data.
+Detailed documentation can be found in the **docs** directory ([Read the docs](http://machado.readthedocs.io)).
 
 ## Features
 - The Django framework allows rapid development
 - There are data loaders for the major bioinformatics formats: fasta, gff, obo, bibtex, blast, interproscan, orthomcl
 - The machado API delivers data directly to the JBrowse genome browser
 
-
-## Quick start
-
-1. Download the package
-
-        git clone https://github.com/lmb-embrapa/machado.git
-
-
-2. Install the package
-
-        python setup.py install
-
-3. Create a Django project and a Django app
-
-4. Add "machado" to your settings.py INSTALLED_APPS like this:
-
-        INSTALLED_APPS = [
-            ...
-            'machado',
-            'rest_framework',
-            ...
-        ]
-
-5. Configure the settings.py DATABASES to connect to a PostgreSQL database.
+## Instalation
+Please refer to the complete documentation at [Read the docs](http://machado.readthedocs.io/en/latest/installation.html).
 
 ## Example
 
 ![Screenshot](static/screenshot.png)
+
+## Contributing
+
+machado is run by volunteers and we are always looking for people interested in helping with code development, documentation writing, and bug report.
+
+If you wish to contribute, please create an issue.
 
 ## LICENSE
 
