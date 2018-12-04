@@ -6,65 +6,9 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Cv, Cvterm, Db, Dbxref
-from machado.models import Feature, Featureloc
+from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureRelationship, Featureprop
 from rest_framework import serializers
-
-
-class CvSerializer(serializers.HyperlinkedModelSerializer):
-    """Cv serializer."""
-
-    cvterm_count = serializers.SerializerMethodField()
-
-    class Meta:
-        """Meta."""
-
-        model = Cv
-        fields = ('cv_id', 'name', 'definition', 'cvterm_count')
-
-    def get_cvterm_count(self, obj):
-        """Get the number of child cvterms."""
-        return obj.Cvterm_cv_Cv.count()
-
-
-class CvtermSerializer(serializers.HyperlinkedModelSerializer):
-    """Cvterm serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Cvterm
-        depth = 1
-        fields = ('cvterm_id', 'name', 'definition', 'dbxref', 'cv')
-
-
-class DbSerializer(serializers.HyperlinkedModelSerializer):
-    """Db serializer."""
-
-    dbxref_count = serializers.SerializerMethodField()
-
-    class Meta:
-        """Meta."""
-
-        model = Db
-        fields = ('db_id', 'name', 'description', 'urlprefix', 'url',
-                  'dbxref_count')
-
-    def get_dbxref_count(self, obj):
-        """Get the number of child dbxrefs."""
-        return obj.Dbxref_db_Db.count()
-
-
-class DbxrefSerializer(serializers.HyperlinkedModelSerializer):
-    """Dbxref serializer."""
-
-    class Meta:
-        """Meta."""
-
-        model = Dbxref
-        depth = 1
-        fields = ('dbxref_id', 'accession', 'description', 'version', 'db')
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):
