@@ -9,12 +9,9 @@
 from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref
 from machado.models import Feature, FeatureRelationship
-from machado.loaders.ontology import OntologyLoader
 from machado.loaders.orthology import OrthologyLoader
 from django.test import TestCase
-from django.core.management import call_command
 from datetime import datetime, timezone
-import os, re
 
 
 class OrthologyTest(TestCase):
@@ -26,23 +23,27 @@ class OrthologyTest(TestCase):
         global_db = Db.objects.create(name='_global')
         so_db = Db.objects.create(name='SO')
         ro_db = Db.objects.create(name='RO')
-        fasta_db = Db.objects.create(name='FASTA_source')
+        Db.objects.create(name='FASTA_source')
         so_dbxref = Dbxref.objects.create(accession='00001', db=so_db)
-        sequence_cv = Cv.objects.create(name='sequence',
+        sequence_cv = Cv.objects.create(
+                name='sequence',
                 definition="so-xp/releases/2015-11-24/so-xp.owl")
-        assembly_cvterm = Cvterm.objects.create(name='assembly',
+        Cvterm.objects.create(
+                name='assembly',
                 cv=sequence_cv, dbxref=so_dbxref, is_obsolete=0,
                 is_relationshiptype=0)
         ro_dbxref = Dbxref.objects.create(accession='00002', db=ro_db)
         ro_cv = Cv.objects.create(name='relationship')
-        contained_cvterm = Cvterm.objects.create(
+        Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-        ortho_dbxref = Dbxref.objects.create(accession='orthologous_to',
+        ortho_dbxref = Dbxref.objects.create(
+                accession='orthologous_to',
                 db=global_db)
-        poly_dbxref = Dbxref.objects.create(accession='0000104',
+        poly_dbxref = Dbxref.objects.create(
+                accession='0000104',
                 db=so_db)
-        ortho_cvterm = Cvterm.objects.create(
+        Cvterm.objects.create(
                 name='orthologous_to', cv=sequence_cv,
                 dbxref=ortho_dbxref, is_obsolete=0,
                 is_relationshiptype=1)
@@ -52,49 +53,42 @@ class OrthologyTest(TestCase):
                 is_obsolete=0, is_relationshiptype=0)
         # need to insert organisms first
         organism1 = Organism.objects.create(species="coerulea",
-                                        genus="Aquilegia",
-                                        abbreviation='Aco')
+                                            genus="Aquilegia",
+                                            abbreviation='Aco')
         organism2 = Organism.objects.create(species="distachyon",
-                                        genus="Brachypodium",
-                                        abbreviation='Brd')
+                                            genus="Brachypodium",
+                                            abbreviation='Brd')
         organism3 = Organism.objects.create(species="clementina",
-                                        genus="Citrus",
-                                        abbreviation='Ccl')
+                                            genus="Citrus",
+                                            abbreviation='Ccl')
         organism4 = Organism.objects.create(species="carota",
-                                        genus="Dacus",
-                                        abbreviation='Dca')
+                                            genus="Dacus",
+                                            abbreviation='Dca')
         organism5 = Organism.objects.create(species="grandis",
-                                        genus="Eucalyptus",
-                                        abbreviation='Egr')
+                                            genus="Eucalyptus",
+                                            abbreviation='Egr')
         organism6 = Organism.objects.create(species="vesca",
-                                        genus="Fragaria",
-                                        abbreviation='Fve')
+                                            genus="Fragaria",
+                                            abbreviation='Fve')
         organism7 = Organism.objects.create(species="max",
-                                        genus="Glycine",
-                                        abbreviation='Gma')
+                                            genus="Glycine",
+                                            abbreviation='Gma')
         organism8 = Organism.objects.create(species="fedtschenkoi",
-                                        genus="Kalanchoe",
-                                        abbreviation='Kld')
-        self.assertTrue(Organism.objects.filter(abbreviation='Aco')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Brd')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Ccl')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Dca')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Egr')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Fve')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Gma')
-                         .exists())
-        self.assertTrue(Organism.objects.filter(abbreviation='Kld')
-                         .exists())
+                                            genus="Kalanchoe",
+                                            abbreviation='Kld')
+        self.assertTrue(Organism.objects.filter(abbreviation='Aco').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Brd').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Ccl').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Dca').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Egr').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Fve').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Gma').exists())
+        self.assertTrue(Organism.objects.filter(abbreviation='Kld').exists())
 
         # also need to insert Features from fasta file first.
         # inserting: Aqcoe0131s0001.1.v3.1
-        feature1 = Feature.objects.create(dbxref=poly_dbxref,
+        feature1 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism1,
                               uniquename="Aqcoe0131s0001.1.v3.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -107,7 +101,8 @@ class OrthologyTest(TestCase):
         self.assertTrue(Feature.objects.filter(
                                   uniquename='Aqcoe0131s0001.1.v3.1').exists())
         # inserting: Bradi0180s00100.1.v3.1; Bradi2g20400.1.v3.1
-        feature2 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism2,
                               uniquename="Bradi0180s00100.1.v3.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -117,7 +112,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature3 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism2,
                               uniquename="Bradi2g20400.1.v3.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -133,7 +129,8 @@ class OrthologyTest(TestCase):
                                  uniquename='Bradi2g20400.1.v3.1').exists())
         # inserting: Ciclev10013963m.v1.0; Ciclev10013962m.v1.0;
         # Ciclev10013970m.v1.0
-        feature4 = Feature.objects.create(dbxref=poly_dbxref,
+        feature4 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism3,
                               uniquename="Ciclev10013963m.v1.0",
                               type_id=poly_cvterm.cvterm_id,
@@ -143,7 +140,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature5 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism3,
                               uniquename="Ciclev10013962m.v1.0",
                               type_id=poly_cvterm.cvterm_id,
@@ -153,7 +151,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature6 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism3,
                               uniquename="Ciclev10013970m.v1.0",
                               type_id=poly_cvterm.cvterm_id,
@@ -171,7 +170,8 @@ class OrthologyTest(TestCase):
                                  uniquename='Ciclev10013970m.v1.0').exists())
         # inserting: DCAR_032182.v1.0.388; DCAR_031986.v1.0.388;
         # DCAR_032223.v1.0.388; DCAR_000323.v1.0.388
-        feature7 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism4,
                               uniquename="DCAR_032182.v1.0.388",
                               type_id=poly_cvterm.cvterm_id,
@@ -181,7 +181,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature8 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism4,
                               uniquename="DCAR_031986.v1.0.388",
                               type_id=poly_cvterm.cvterm_id,
@@ -191,7 +192,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature9 = Feature.objects.create(dbxref=poly_dbxref,
+        feature9 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism4,
                               uniquename="DCAR_032223.v1.0.388",
                               type_id=poly_cvterm.cvterm_id,
@@ -201,7 +203,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature10 = Feature.objects.create(dbxref=poly_dbxref,
+        feature10 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism4,
                               uniquename="DCAR_000323.v1.0.388",
                               type_id=poly_cvterm.cvterm_id,
@@ -220,7 +223,8 @@ class OrthologyTest(TestCase):
         self.assertTrue(Feature.objects.filter(
                                  uniquename='DCAR_000323.v1.0.388').exists())
         # inserting: Eucgr.L02820.1.v2.0
-        feature11 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism5,
                               uniquename="Eucgr.L02820.1.v2.0",
                               type_id=poly_cvterm.cvterm_id,
@@ -233,7 +237,8 @@ class OrthologyTest(TestCase):
         self.assertTrue(Feature.objects.filter(
                                  uniquename='Eucgr.L02820.1.v2.0').exists())
         # inserting: mrna13067.1-v1.0-hybrid.v1.1
-        feature12 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism6,
                               uniquename="mrna13067.1-v1.0-hybrid.v1.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -247,7 +252,8 @@ class OrthologyTest(TestCase):
                            uniquename='mrna13067.1-v1.0-hybrid.v1.1').exists())
         # inserting: Glyma.10G030500.1.Wm82.a2.v1; Glyma.10G053100.1.Wm82.a2.v1
         # Glyma.10G008400.1.Wm82.a2.v1
-        feature13 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism7,
                               uniquename="Glyma.10G030500.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -257,7 +263,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature14 = Feature.objects.create(dbxref=poly_dbxref,
+        feature14 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism7,
                               uniquename="Glyma.10G053100.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -267,7 +274,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature15 = Feature.objects.create(dbxref=poly_dbxref,
+        Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism7,
                               uniquename="Glyma.10G008400.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -284,7 +292,8 @@ class OrthologyTest(TestCase):
         self.assertTrue(Feature.objects.filter(
                            uniquename='Glyma.10G008400.1.Wm82.a2.v1').exists())
         # inserting: Kaladp0598s0001.1.v1.1
-        feature16 = Feature.objects.create(dbxref=poly_dbxref,
+        feature16 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism8,
                               uniquename="Kaladp0598s0001.1.v1.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -294,7 +303,8 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
-        feature17 = Feature.objects.create(dbxref=poly_dbxref,
+        feature17 = Feature.objects.create(
+                              dbxref=poly_dbxref,
                               organism=organism8,
                               uniquename="Kaladp0598s0002.1.v1.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -311,21 +321,21 @@ class OrthologyTest(TestCase):
         # store orthologous groups:
         group1 = OrthologyLoader('machado0001', filename)
         members1 = ['Aqcoe0131s0001.1.v3.1', 'Bradi0180s00100.1.v3.1',
-                'Bradi2g20400.1.v3.1', 'Ciclev10013963m.v1.0',
-                'DCAR_032223.v1.0.388', 'UnknownProtein.v1.1']
+                    'Bradi2g20400.1.v3.1', 'Ciclev10013963m.v1.0',
+                    'DCAR_032223.v1.0.388', 'UnknownProtein.v1.1']
         group1.store_orthologous_group(members1)
         group2 = OrthologyLoader('machado0002', filename)
         members2 = ['Eucgr.L02820.1.v2.0',
-                'mrna13067.1-v1.0-hybrid.v1.1', 'Ciclev10013970m.v1.0',
-                'DCAR_031986.v1.0.388']
+                    'mrna13067.1-v1.0-hybrid.v1.1', 'Ciclev10013970m.v1.0',
+                    'DCAR_031986.v1.0.388']
         group2.store_orthologous_group(members2)
         group3 = OrthologyLoader('machado0003', filename)
         members3 = ['Glyma.10G030500.1.Wm82.a2.v1',
-                'Glyma.10G053100.1.Wm82.a2.v1', 'DCAR_032182.v1.0.388']
+                    'Glyma.10G053100.1.Wm82.a2.v1', 'DCAR_032182.v1.0.388']
         group3.store_orthologous_group(members3)
         group4 = OrthologyLoader('machado0004', filename)
         members4 = ['Glyma.10G008400.1.Wm82.a2.v1',
-                'Ciclev10013963m.v1.0', 'UnknownProtein.v1.2']
+                    'Ciclev10013963m.v1.0', 'UnknownProtein.v1.2']
         group4.store_orthologous_group(members4)
         group5 = OrthologyLoader('machado0005', filename)
         members5 = ['DCAR_000323.v1.0.388', 'Kaladp0598s0002.1.v1.1']
@@ -358,7 +368,7 @@ class OrthologyTest(TestCase):
         # in orphaned groups (machado0006)
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature16.feature_id).exists())
-        #removing all relationships
+        # removing all relationships
         frs = FeatureRelationship.objects.filter(value=filename)
         for fr in frs:
             fr.delete()

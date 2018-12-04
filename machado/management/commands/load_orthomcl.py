@@ -19,8 +19,8 @@ class Command(BaseCommand):
     """Load OrthoMCL groups.txt results."""
 
     help = """Load 'groups.txt' output result file from orthoMCL.
-The 'groups.txt' file is headless and have the format as follows: nameofthegroup1:
-featuremember1 featuremember2 featuremember3
+The 'groups.txt' file is headless and have the format as follows:
+nameofthegroup1: featuremember1 featuremember2 featuremember3
 nameofthegroup2: featuremember4 featuremember5 ...
 and so on.
 The feature members need to be loaded previously."""
@@ -38,8 +38,8 @@ The feature members need to be loaded previously."""
 
     def handle(self,
                filename: str,
-               cpu: int=1,
-               verbosity: int=0,
+               cpu: int = 1,
+               verbosity: int = 0,
                **options):
         """Execute the main function."""
         if verbosity > 0:
@@ -62,20 +62,20 @@ The feature members need to be loaded previously."""
         for line in groups:
             members = []
             name = ''
-            fields = re.split('\s+', line.strip())
-            if re.search('^(\w+)\:', fields[0]):
-                group_field = re.match('^(\w+)\:', fields[0])
+            fields = re.split(r'\s+', line.strip())
+            if re.search(r'^(\w+)\:', fields[0]):
+                group_field = re.match(r'^(\w+)\:', fields[0])
                 name = group_field.group(1)
                 group = OrthologyLoader(name, filename)
                 fields.pop(0)
                 for field in fields:
-                    if re.search('^(\w+)\|(\S+)', field):
-                        member_field = re.match('^(\w+)\|(\S+)', field)
-                        species = member_field.group(1)
+                    if re.search(r'^(\w+)\|(\S+)', field):
+                        member_field = re.match(r'^(\w+)\|(\S+)', field)
+                        # species = member_field.group(1)
                         ident = member_field.group(2)
                         members.append(ident)
             # only orthologous groups with 2 or more members allowed
-            if len(members)>1:
+            if len(members) > 1:
                 tasks.append(pool.submit(
                            group.store_orthologous_group, members))
         if verbosity > 0:

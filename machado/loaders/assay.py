@@ -21,6 +21,7 @@ class AssayLoader(object):
     help = 'Load assay record.'
 
     def __init__(self) -> None:
+        """Execute the init function."""
         # will not use arraydesign nor operator
         db_null, created = Db.objects.get_or_create(name='null')
         dbxref_null, created = Dbxref.objects.get_or_create(
@@ -48,7 +49,6 @@ class AssayLoader(object):
                     assaydate: str = None,
                     description: str = None) -> Assay:
         """Store assay."""
-
         # get database for assay (e.g.: "SRA" - from NCBI)
         try:
             assaydb, created = Db.objects.get_or_create(name=db)

@@ -54,18 +54,18 @@ class FieldsValidator(object):
         self._nfields(nfields, fields)
         self._nullfields(fields)
 
-    def _nfields(self, nfields: int, fields:list) -> None:
+    def _nfields(self, nfields: int, fields: list) -> None:
         """Check if number of fields are correct."""
-        if len(fields)!=nfields:
+        if len(fields) != nfields:
             raise ImportingError("Provided number of fields {} differ from {}"
-                    .format(nfields, len(fields)))
+                                 .format(nfields, len(fields)))
 
     def _nullfields(self, fields: list) -> None:
-        counter = 0;
+        counter = 0
         for field in fields:
-            if (field==None or field==""):
+            if (field is None or field == ""):
                 raise ImportingError("Found null or empty field in position {}"
-                    .format(counter))
+                                     .format(counter))
             counter += 1
 
 
@@ -88,12 +88,12 @@ def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
 
 
 def insert_organism(genus: str,
-                    species: str='spp.',
-                    type: str=None,
-                    infraspecific_name: str=None,
-                    abbreviation: str=None,
-                    common_name: str=None,
-                    comment: str=None) -> None:
+                    species: str = 'spp.',
+                    type: str = None,
+                    infraspecific_name: str = None,
+                    abbreviation: str = None,
+                    common_name: str = None,
+                    comment: str = None) -> None:
     """Insert organism."""
     if genus is None:
         raise ImportingError('genus is required!')
