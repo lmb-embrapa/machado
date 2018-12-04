@@ -6,13 +6,10 @@
 
 """Treatment."""
 
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Biomaterial, Db, Dbxref, Organism
+from machado.models import Biomaterial, Db, Dbxref
 from machado.models import Cv, Cvterm, Treatment
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from typing import Dict, List, Set, Union
 
 
 class TreatmentLoader(object):
@@ -21,6 +18,7 @@ class TreatmentLoader(object):
     help = 'Load treatment record.'
 
     def __init__(self) -> None:
+        """Execute the init function."""
         # will not use type_id - TODO - load specific ontology for treatment
         db_null, created = Db.objects.get_or_create(name='null')
         dbxref_null, created = Dbxref.objects.get_or_create(
@@ -34,11 +32,10 @@ class TreatmentLoader(object):
             is_obsolete=0,
             is_relationshiptype=0)
 
-
     def store_treatment(self,
-                        name:str,
+                        name: str,
                         biomaterial: Biomaterial,
-                        rank: int=0) -> Treatment:
+                        rank: int = 0) -> Treatment:
         """Store treatment."""
         try:
             treatment = Treatment.objects.create(
