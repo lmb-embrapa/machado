@@ -4,13 +4,12 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""URLs."""
+"""index views."""
 
-from machado.views import index, stats
-from django.conf.urls import include, url
+from django.shortcuts import render
 
-urlpatterns = [
-    url(r'^$', index.index, name='index'),
-    url(r'stats/', stats.stats, name='stats'),
-    url(r'api/', include('machado.api.urls')),
-]
+
+def index(request):
+    """Index."""
+    data = 'Hello, world.'
+    return render(request, 'index.html', {'context': data})

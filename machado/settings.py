@@ -30,11 +30,21 @@ def patch_root_urlconf():
         ] + urlconf_module.urlpatterns
 
 
+def patch_templates():
+    """Include dependencies to TEMPLATE."""
+    for template in settings.TEMPLATES:
+        if template['BACKEND'] == 'django.template.backends.django.'\
+           'DjangoTemplates':
+            template['OPTIONS']['context_processors'].append(
+                'machado.views.context_processors.organism_processor')
+
+
 def patch_all():
     """Apply patches."""
     patch_root_urlconf()
     patch_installed_apps()
     patch_middleware()
+    patch_templates()
 
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True

@@ -10,22 +10,21 @@
 {% block content %}
 
 {% for item, data in context.items %}
-	<div class="mdl-grid">
-    <div class="mdl-cell--8-col mdl-card mdl-shadow--4dp">
-  	  <div class="mdl-card__title">
-      	<h3 class="mdl-card__title-text">{{ item }}</h3>
-		  </div>
-    	<div class="mdl-card__actions mdl-card--border">
-			  <ul class="mdl-list">
-        {% for entry in data %}
-					<li class="mdl-list__item">
-            {{ entry.key }}: {{ entry.count }}
-					</li>
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">{{ item }}</h4>
+    <div class="card-text">
+        <ul class="list-group">
+            {% for entry in data %}
+            <li class="list-group-item">
+                {{ entry.key }}: {{ entry.count }}
+            </li>
         {% endfor %}
-			  </ul>
-			</div>
+        </ul>
     </div>
-	</div>
+  </div>
+</div>
+</br>
 {% endfor %}
 
 {% endblock%}

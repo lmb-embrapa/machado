@@ -4,19 +4,13 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Views."""
+"""stats views."""
 
 from machado.models import Cvterm, Feature
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
-from django.http import HttpResponse
 from django.shortcuts import render
-
-
-def index(request):
-    """Index."""
-    return HttpResponse('Hello, world.')
 
 
 def stats(request):
