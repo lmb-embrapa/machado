@@ -21,7 +21,43 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  <div class="container">
+
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="/machado/">machado</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/machado/stats">Summary</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="organism-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {% if current_organism_id %}
+                {{ current_organism_name }}
+              {% else %}
+                Organism
+              {% endif %}
+            </a>
+            <div class="dropdown-menu" aria-labelledby="organism-dropdown">
+              {% for organism in organism_dict %}
+              <a href="?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
+              {% endfor %}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+
+    </nav>
+  </header>
+
+  <div class="container" name="content">
+    {{ current_organism_name }}
     {% block content %}
     {% endblock %}
   </div>
