@@ -1,0 +1,41 @@
+<!--
+ Copyright 2018 by Embrapa.  All rights reserved.
+
+ This code is part of the machado distribution and governed by its
+ license. Please see the LICENSE.txt and README.md files that should
+ have been included as part of this package for licensing information.
+ -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">Gene search</h4>
+    <div class="card-text">
+
+      <form action="summary" method="get" class="form-group">
+        <div class="input-group">
+          <input type="text" class="form-control" id="gene_id" name="gene_id" aria-describedby="geneID" placeholder="by ID" required>
+          <span class="input-group-btn">
+            <input type="submit" value="Search" class="btn btn-primary">
+          </span>
+        </div>
+      </form>
+
+      <form action="summary" method="get" class="form-group">
+        <div class="input-group">
+          <input type="text" class="form-control" id="gene_keyword" name="gene_keyword" aria-describedby="geneKeyword" placeholder="by Keyword" required>
+          <span class="input-group-btn">
+            <input type="submit" value="Search" class="btn btn-primary">
+          </span>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
