@@ -44,9 +44,9 @@
               {% endif %}
             </a>
             <div class="dropdown-menu bg-light" aria-labelledby="organism-dropdown">
-              <a class="nav-link btn-light {% if current_organism_id == None %}active{% endif %}" href="/machado/?current_organism_id=None">None</a>
+              <a class="nav-link btn-light {% if request.session.current_organism_id == None %}active{% endif %}" href="/machado/?current_organism_id=None">None</a>
               {% for organism in organism_list %}
-              <a class="nav-link btn-light {% if current_organism_id == organism.organism_id|safe|escape %}active{% endif %}" href="/machado/?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
+              <a class="nav-link btn-light {% if request.session.current_organism_id == organism.organism_id|safe|escape %}active{% endif %}" href="/machado/?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
               {% endfor %}
             </div>
           </li>
