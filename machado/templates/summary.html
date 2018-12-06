@@ -9,6 +9,17 @@
 
 {% block content %}
 
-    <h1>{{ context }}</h1>
+{% for entry in context %}
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">{{ entry.name }}</h4>
+    <div class="card-text">
+      {{ entry.uniquename }}
+    </div>
+  </div>
+</div>
+</br>
+{% endfor %}
+
 
 {% endblock %}

@@ -9,6 +9,7 @@
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Feature
+from typing import Dict, List
 
 
 def summary(request):
@@ -22,8 +23,16 @@ def summary(request):
             organism_id=current_organism_id,
             type_id=so_term_gene.cvterm_id,
             uniquename__contains=request.GET.get('gene_id'))
-        genes = genes.values_list('feature_id')
-
-        return render(request, 'summary.html', {'context': genes})
+        genes = genes.values_list('feature_id', flat=True)
+        return render(request,
+                      'summary.html',
+                      {'context': gene_details(genes)})
     else:
         return render(request, 'query')
+
+
+def gene_details(genes: List[int]) -> List[Dict]:
+    """Gene details."""
+    details = Feature.objects.filter(feature_id__in=genes)
+    details = details.values('name', 'uniquename')
+    return details
