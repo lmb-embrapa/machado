@@ -16,22 +16,26 @@ from django.shortcuts import render
 def stats(request):
     """General stats."""
     data = dict()
+    current_organism_id = request.session.get('current_organism_id')
 
-    try:
-        cvs = Cvterm.objects.values(key=F('cv__name'))
-        cvs = cvs.values('key')
-        cvs = cvs.annotate(count=Count('key'))
-        cvs = cvs.filter(count__gt=5)
-        cvs = cvs.order_by('key')
-        if cvs:
-            data.update({'Controlled vocabularies': cvs})
-    except ObjectDoesNotExist:
-        pass
+    if current_organism_id is None:
+        try:
+            cvs = Cvterm.objects.values(key=F('cv__name'))
+            cvs = cvs.values('key')
+            cvs = cvs.annotate(count=Count('key'))
+            cvs = cvs.filter(count__gt=5)
+            cvs = cvs.order_by('key')
+            if cvs:
+                data.update({'Controlled vocabularies': cvs})
+        except ObjectDoesNotExist:
+            pass
 
     try:
         chr_cvterm = Cvterm.objects.get(
             cv__name='sequence', name='chromosome')
         chrs = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
+        if current_organism_id is not None:
+            chrs = chrs.filter(organism_id=current_organism_id)
         chrs = chrs.annotate(key=Concat(
             'organism__genus', Value(' '), 'organism__species'))
         chrs = chrs.values('key')
@@ -45,6 +49,8 @@ def stats(request):
         scaff_cvterm = Cvterm.objects.get(
             cv__name='sequence', name='assembly')
         scaffs = Feature.objects.filter(type_id=scaff_cvterm.cvterm_id)
+        if current_organism_id is not None:
+            scaffs = scaffs.filter(organism_id=current_organism_id)
         scaffs = scaffs.annotate(key=Concat(
             'organism__genus', Value(' '), 'organism__species'))
         scaffs = scaffs.values('key')
@@ -58,6 +64,8 @@ def stats(request):
         gene_cvterm = Cvterm.objects.get(
             cv__name='sequence', name='gene')
         genes = Feature.objects.filter(type_id=gene_cvterm.cvterm_id)
+        if current_organism_id is not None:
+            genes = genes.filter(organism_id=current_organism_id)
         genes = genes.annotate(key=Concat(
             'organism__genus', Value(' '), 'organism__species'))
         genes = genes.values('key')
@@ -71,6 +79,8 @@ def stats(request):
         protein_cvterm = Cvterm.objects.get(
             cv__name='sequence', name='polypeptide')
         proteins = Feature.objects.filter(type_id=protein_cvterm.cvterm_id)
+        if current_organism_id is not None:
+            proteins = proteins.filter(organism_id=current_organism_id)
         proteins = proteins.annotate(key=Concat(
             'organism__genus', Value(' '), 'organism__species'))
         proteins = proteins.values('key')
