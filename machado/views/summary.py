@@ -6,6 +6,7 @@
 
 """common views."""
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Feature
@@ -24,9 +25,29 @@ def summary(request):
             type_id=so_term_gene.cvterm_id,
             uniquename__contains=request.GET.get('gene_id'))
         genes = genes.values_list('feature_id', flat=True)
+
+    if genes is not None:
+
+        genes = gene_details(genes)
+
+        # pagination
+        paginator = Paginator(genes, 20)
+        page = request.GET.get('page', 1)
+
+        try:
+            genes = paginator.page(page)
+        except PageNotAnInteger:
+            genes = paginator.page(1)
+        except EmptyPage:
+            genes = paginator.page(paginator.num_pages)
+
+        # preserve GET parameters
+        get_copy = request.GET.copy()
+        parameters = get_copy.pop('page', True) and get_copy.urlencode()
+
         return render(request,
                       'summary.html',
-                      {'context': gene_details(genes)})
+                      {'context': genes, 'parameters': parameters, })
     else:
         return render(request, 'query')
 
