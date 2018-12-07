@@ -7,18 +7,21 @@
 """Load RNA-seq expression data from LSTrAP output file exp_matrix.tpm.txt."""
 
 from machado.loaders.common import FileValidator, FieldsValidator
-from machado.loaders.assay import AssayLoader
+from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
+from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
 import re
 
 
 class Command(BaseCommand):
-    """Load RNA-seq expression data from LSTrAP exp_matrix.tpm.txt file."""
+    """Load RNA-seq expression tpm data from LSTrAP exp_matrix.tpm.txt file."""
 
-    help = """Load RNA-seq exp_matrix.tpm file. This file is tabular and has
-    SRR (SRA database) experiment IDs in columns and genes in lines. E.g.:
+    help = """Load RNA-seq exp_matrix.tpm result file. This file is tabular
+    and has SRR (SRA database) experiment IDs in columns and genes in lines.
+    E.g.:
 
     gene    SRR5167848.htseq        SRR2302912.htseq    ...
     AT2G44195.1.TAIR10  0.0 0.6936967934559419  ...
@@ -34,18 +37,44 @@ class Command(BaseCommand):
                             help="'.csv' file with sample and projects info.",
                             required=True,
                             type=str)
-        parser.add_argument("--projectdb",
-                            help="Project database info (e.g.: 'GEO')",
+        parser.add_argument("--organism",
+                            help="Scientific name (e.g.: 'Oryza sativa')",
                             required=True,
                             type=str)
-        parser.add_argument("--biomaterialdb",
-                            help="Biomaterial database info (e.g.: 'GEO')",
+        parser.add_argument("--program",
+                            help="Name of the software (e.g.: 'LSTrAP')",
                             required=True,
+                            type=str)
+        parser.add_argument("--programversion",
+                            help="Version of the software (e.g.: '1.3')",
+                            required=True,
+                            type=str)
+        parser.add_argument("--name",
+                            help="Name",
+                            required=False,
+                            type=str)
+        parser.add_argument("--description",
+                            help="Description",
+                            required=False,
+                            type=str)
+        parser.add_argument("--algorithm",
+                            help="Algorithm",
+                            required=False,
                             type=str)
         parser.add_argument("--assaydb",
                             help="Assay database info (e.g.: 'SRA')",
-                            required=True,
+                            required=False,
                             type=str)
+        parser.add_argument("--timeexecuted",
+                            help="Time software was run. "
+                            "Mandatory format: e.g.: 'Oct-16-2016'",
+                            required=False,
+                            type=str)
+        parser.add_argument("--norm",
+                            help="Normalized data: 1-yes (tpm, fpkm, etc.); "
+                            "0-no (raw counts); default is 1)",
+                            default=1,
+                            type=int)
         parser.add_argument("--cpu",
                             help="Number of threads",
                             default=1,
@@ -53,105 +82,112 @@ class Command(BaseCommand):
 
     def handle(self,
                filename: str,
-               projectdb: str,
-               biomaterialdb: str,
-               assaydb: str,
+               organism: str,
+               program: str,
+               programversion: str,
+               name: str = None,
+               description: str = None,
+               algorithm: str = None,
+               assaydb: str = 'SRA',
+               timeexecuted: str = None,
+               norm: int = 1,
                cpu: int = 1,
                verbosity: int = 0,
                **options):
         """Execute the main function."""
-        nfields = 7
         if verbosity > 0:
             self.stdout.write('Preprocessing')
-        # instantiate project, biomaterial and assay
-        try:
-            project_file = ProjectLoader()
-            biomaterial_file = BiomaterialLoader()
-            assay_file = AssayLoader()
-            treatment_file = TreatmentLoader()
-        except ImportingError as e:
-            raise CommandError(e)
-
         try:
             FileValidator().validate(filename)
         except ImportingError as e:
             raise CommandError(e)
+
+        # start reading file
         try:
             rnaseq_data = open(filename, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
-        # each line is an RNA-seq experiment
-        # e.g:
-        # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
+        header = 1
+        # analysis_list = defaultdict(list)
+        analysis_list = list()
+        # instantiate Loader
+        analysis_file = AnalysisLoader()
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        tasks = list()
         for line in rnaseq_data:
-            fields = re.split(',', line.strip())
+            print(line)
+            fields = re.split('\t', line.rstrip())
+            nfields = len(fields)
+            # validate fields within line
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
                 raise CommandError(e)
-            # get organism - mandatory
+                # read header and instantiate analysis object for each assay
+                # e.g. SRR12345.
+            if header:
+                print(fields)
+                # first element is the string "gene" - need to be removed
+                fields.pop(0)
+                print(fields)
+                for i in range(len(fields)):
+                    # parse field to get SRA ID. e.g.: SRR5167848.htseq
+                    # try to remove ".htseq" part of string
+                    string = re.match(r'(\w+)\.(\w+)', fields[i])
+                    print(string)
+                    try:
+                        assay = string.group(1)
+                    except IntegrityError as e:
+                        raise CommandError(e)
+                    # put index of column into filename
+                    # chado complains of unique constraints here
+                    filename_now = filename + "." + str(i)
+                    # store analysis
+                    try:
+                        analysis = analysis_file.store_analysis(
+                             program=program,
+                             filename=filename_now,
+                             programversion=programversion,
+                             timeexecuted=timeexecuted,
+                             algorithm=algorithm,
+                             name=assay,
+                             description=description)
+                    except ImportingError as e:
+                        raise CommandError(e)
+                    # store each analysis in a list.
+                    analysis_list.insert(i, analysis)
+                    # store quantification
+                    try:
+                        analysis_file.store_quantification(
+                                analysis=analysis,
+                                assayacc=assay)
+                    except ImportingError as e:
+                        raise CommandError(e)
+                header = 0
+            else:
+                # first element is the feature acc. "e.g.: AT2G44195.1.TAIR10"
+                feature_name = fields.pop(0)
+                for i in range(len(fields)):
+                    if norm:
+                        normscore = fields[i]
+                        rawscore = None
+                    else:
+                        normscore = None
+                        rawscore = fields[i]
+                    # store analysis feature for each value
+                    tasks.append(pool.submit(
+                      analysis_file.store_analysisfeature,
+                      analysis_list[i],
+                      feature_name,
+                      organism,
+                      rawscore,
+                      normscore))
+        if verbosity > 0:
+            self.stdout.write('Loading')
+        for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
-                organism = retrieve_organism(organism=fields[0])
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
-            # store project
-            try:
-                # e.g: "GSExxx" from GEO
-                project_model = project_file.store_project(name=fields[1])
-                # project_dbxref is same as project (refers to accession:
-                # e.g: "GSExxx" from GEO)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
-            try:
-                project_file.store_project_dbxref(
-                        db=projectdb,
-                        acc=fields[1],
-                        project=project_model)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
-
-            # store biomaterial (sample)
-            try:
-                # e.g: "GSMxxxx" from GEO
-                biomaterial_model = biomaterial_file.store_biomaterial(
-                                        db=biomaterialdb,
-                                        acc=fields[2],
-                                        organism=organism,
-                                        name=fields[2],
-                                        description=fields[5])
-            except ImportingError as e:
-                raise CommandError(e)
-            # store treatment
-            try:
-                # e.g. "Heat"
-                treatment_model = treatment_file.store_treatment(
-                                            name=fields[4],
-                                            biomaterial=biomaterial_model)
-            except ImportingError as e:
-                raise CommandError(e)
-            try:
-                biomaterial_file.store_biomaterial_treatment(
-                        biomaterial=biomaterial_model,
-                        treatment=treatment_model)
-            except ImportingError as e:
-                raise CommandError(e)
-
-            # store assay (experiment)
-            try:
-                # e.g. "SRRxxxx" from GEO
-                assay_model = assay_file.store_assay(
-                                        db=assaydb,
-                                        acc=fields[3],
-                                        assaydate=fields[6],
-                                        name=fields[3],
-                                        description=fields[3])
-                assay_file.store_assay_project(
-                                        assay=assay_model,
-                                        project=project_model)
-                assay_file.store_assay_biomaterial(
-                                        assay=assay_model,
-                                        biomaterial=biomaterial_model)
+                task.result()
             except ImportingError as e:
                 raise CommandError(e)
         self.stdout.write(self.style.SUCCESS('Done'))

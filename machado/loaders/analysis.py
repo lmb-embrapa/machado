@@ -6,13 +6,15 @@
 
 """Analysis."""
 
+from machado.loaders.common import retrieve_organism, retrieve_feature
 from machado.loaders.exceptions import ImportingError
-from machado.models import Assay, Acquisition, Quantification, Feature
+from machado.models import Assay, Acquisition, Quantification
 from machado.models import Analysis, Analysisfeature
-from machado.models import Db, Dbxref
+from machado.models import Db, Dbxref, Organism
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
+from typing import Union
 
 
 class AnalysisLoader(object):
@@ -20,29 +22,28 @@ class AnalysisLoader(object):
 
     help = 'Load analysis records.'
 
-    def __init__(self,
-                 filename: str,
-                 program: str,
-                 programversion: str,
-                 timeexecuted: str = None,
-                 algorithm: str = None,
-                 name: str = None,
-                 description: str = None) -> None:
-        """Execute the init function."""
-        if timeexecuted:
+    def store_analysis(self,
+                       program: str,
+                       filename: str,
+                       programversion: str,
+                       timeexecuted: str = None,
+                       algorithm: str = None,
+                       name: str = None,
+                       description: str = None) -> Analysis:
+        """Store analysis."""
+        if isinstance(timeexecuted, str):
             # format is mandatory, e.g.: Oct-16-2016)
             # in settings.py set USE_TZ = False
-            date_format = '%b-%d-%Y'
-            timeexecuted = datetime.strptime(timeexecuted, date_format)
+            try:
+                date_format = '%b-%d-%Y'
+                timeexecuted = datetime.strptime(timeexecuted, date_format)
+            except IntegrityError as e:
+                raise ImportingError(e)
         else:
             timeexecuted = datetime.now()
-
         # create assay object
         try:
-            # TODO - implement coexpression analysis
-            # self.so_term_coexpression = retrieve_ontology_term(
-            #         ontology='relationshiop', term='correlated with')
-            self.analysis = Analysis.objects.create(
+            analysis = Analysis.objects.create(
                     algorithm=algorithm,
                     name=name,
                     description=description,
@@ -54,60 +55,66 @@ class AnalysisLoader(object):
             raise ImportingError(e)
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
+        return analysis
 
     def store_quantification(self,
-                             assay_acc: str,
-                             assay_db: str = "SRA") -> None:
+                             analysis: Analysis,
+                             assayacc: str,
+                             assaydb: str = "SRA") -> None:
         """Store quantification to link assay accession to analysis."""
         # first try to get from Assay dbxref (e.g.: "SRR12345" - from SRA/NCBI)
         try:
-            db_assay = Db.objects.get(name=assay_db)
-            dbxref_assay = Dbxref.objects.get(accession=assay_acc,
+            db_assay = Db.objects.get(name=assaydb)
+            dbxref_assay = Dbxref.objects.get(accession=assayacc,
                                               db=db_assay)
             assay = Assay.objects.get(dbxref=dbxref_assay)
         # then searches name
-        except IntegrityError:
-            assay = Assay.objects.get(name=assay_acc)
+        except ObjectDoesNotExist:
+            assay = Assay.objects.get(name=assayacc)
         # then gives up
         except IntegrityError as e:
             raise ImportingError(e)
 
         try:
             acquisition = Acquisition.objects.create(
-                    assay=assay)
+                    assay=assay,
+                    name=assayacc)
         except IntegrityError as e:
             raise ImportingError(e)
         try:
             Quantification.objects.create(
                     acquisition=acquisition,
-                    analysis=self.analysis)
+                    analysis=analysis)
         except IntegrityError as e:
             raise ImportingError(e)
 
     def store_analysisfeature(self,
                               analysis: Analysis,
                               feature_name: str,
-                              feature_db: str = "GFF_SOURCE",
+                              organism: Union[str, Organism],
                               rawscore: float = None,
                               normscore: float = None,
+                              feature_db: str = "GFF_SOURCE",
                               significance: float = None,
                               identity: float = None) -> None:
         """Store analysisfeature (expression counts for a given feature)."""
+        if isinstance(organism, Organism):
+            pass
+        else:
+            try:
+                organism = retrieve_organism(organism)
+            except IntegrityError as e:
+                raise ImportingError(e)
         # get database for assay (e.g.: "SRA" - from NCBI)
         try:
-            db_feature = Db.objects.get(name=feature_db)
-            dbxref_feature = Dbxref.objects.get(accession=feature_name,
-                                                db=db_feature)
-            feature = Feature.objects.get(dbxref=dbxref_feature)
-        except IntegrityError:
-            feature = Feature.objects.get(uniquename=feature_name)
+            feature = retrieve_feature(organism=organism,
+                                       featureacc=feature_name)
         except IntegrityError as e:
             raise ImportingError(e)
-
         try:
             Analysisfeature.objects.create(
                                     feature=feature,
-                                    analysis=self.analysis,
+                                    analysis=analysis,
                                     rawscore=rawscore,
                                     normscore=normscore,
                                     significance=significance,
