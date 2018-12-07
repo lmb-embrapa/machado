@@ -8,10 +8,9 @@
 
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Organism
-from machado.models import Cvterm, Feature
 from django.db.models import Count, F, Value
 from django.db.models.functions import Concat
+from machado.models import Cvterm, Feature, Organism
 
 
 def index(request):
@@ -32,8 +31,11 @@ def index(request):
         request.session['current_organism_id'] = None
         request.session['current_organism_name'] = None
 
-    data = 'Hello, world.'
-    return render(request, 'index.html', {'context': data})
+    if request.session.get('current_organism_id') is None:
+        data = 'Hello, world.'
+        return render(request, 'index.html', {'context': data})
+    else:
+        return render(request, 'query.html')
 
 
 def stats(request):
