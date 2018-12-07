@@ -6,42 +6,43 @@
 
 """common views."""
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
-from machado.models import Feature
+from machado.models import Feature, Featureprop
 from typing import Dict, List
 
 
 def summary(request):
     """Summary."""
     current_organism_id = request.session.get('current_organism_id')
-    so_term_gene = retrieve_ontology_term(ontology='sequence',
-                                          term='gene')
+    so_term_transcript = retrieve_ontology_term(ontology='sequence',
+                                                term='mRNA')
 
-    if request.GET.get('gene_id') is not '':
-        genes = Feature.objects.filter(
+    if request.GET.get('transcript_id') is not '':
+        transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
-            type_id=so_term_gene.cvterm_id,
-            uniquename__contains=request.GET.get('gene_id'))
-        genes = genes.values_list('feature_id', flat=True)
-        if genes is None:
-            genes = 'result not found'
+            type_id=so_term_transcript.cvterm_id,
+            uniquename__icontains=request.GET.get('transcript_id'))
+        transcripts = transcripts.values_list('feature_id', flat=True)
+        if transcripts is None:
+            transcripts = 'result not found'
 
-    if genes is not None:
+    if transcripts is not None:
 
-        genes = gene_details(genes)
+        transcripts = transcript_details(transcripts)
 
         # pagination
-        paginator = Paginator(genes, 20)
+        paginator = Paginator(transcripts, 20)
         page = request.GET.get('page', 1)
 
         try:
-            genes = paginator.page(page)
+            transcripts = paginator.page(page)
         except PageNotAnInteger:
-            genes = paginator.page(1)
+            transcripts = paginator.page(1)
         except EmptyPage:
-            genes = paginator.page(paginator.num_pages)
+            transcripts = paginator.page(paginator.num_pages)
 
         # preserve GET parameters
         get_copy = request.GET.copy()
@@ -49,18 +50,31 @@ def summary(request):
 
         return render(request,
                       'summary.html',
-                      {'context': genes, 'parameters': parameters, })
+                      {'context': transcripts, 'parameters': parameters, })
     else:
         return render(request, 'query')
 
 
-def gene_details(genes: List[int]) -> List[Dict]:
-    """Gene details."""
-    details = Feature.objects.filter(feature_id__in=genes)
-    details = details.values('name', 'uniquename')
-    details = details.order_by('uniquename')
+def transcript_details(transcripts: List[int]) -> List[Dict]:
+    """Transcript details."""
+    cv_term_display = retrieve_ontology_term(ontology='feature_property',
+                                             term='display')
 
-    if len(details) == 0:
-        details = [{'uniquename': 'Not found.'}]
+    transcript_details = Feature.objects.filter(feature_id__in=transcripts)
+    transcript_details = transcript_details.values(
+        'feature_id', 'name', 'uniquename')
+    transcript_details = transcript_details.order_by('uniquename')
 
-    return details
+    for transcript in transcript_details:
+        try:
+            feature_prop = Featureprop.objects.get(
+                type_id=cv_term_display.cvterm_id,
+                feature_id=transcript['feature_id'])
+            transcript['display'] = feature_prop.value
+        except ObjectDoesNotExist:
+            pass
+
+    if len(transcript_details) == 0:
+        transcript_details = [{'uniquename': 'Not found.'}]
+
+    return transcript_details
