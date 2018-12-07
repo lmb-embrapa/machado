@@ -20,14 +20,19 @@ def summary(request):
     so_term_transcript = retrieve_ontology_term(ontology='sequence',
                                                 term='mRNA')
 
-    if request.GET.get('transcript_id') is not '':
+    if request.GET.get('transcript_id') is not None:
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
             type_id=so_term_transcript.cvterm_id,
             uniquename__icontains=request.GET.get('transcript_id'))
         transcripts = transcripts.values_list('feature_id', flat=True)
-        if transcripts is None:
-            transcripts = 'result not found'
+
+    if request.GET.get('transcript_keyword') is not None:
+        transcripts = Feature.objects.filter(
+            organism_id=current_organism_id,
+            type_id=so_term_transcript.cvterm_id,
+            uniquename__icontains=request.GET.get('transcript_keyword'))
+        transcripts = transcripts.values_list('feature_id', flat=True)
 
     if transcripts is not None:
 
