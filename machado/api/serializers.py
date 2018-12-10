@@ -78,12 +78,13 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     def _get_location(self, obj):
         """Get the location."""
         if obj.feature_id not in self._locs:
-            self._locs = {
-                # obj.feature_id: obj.Featureloc_feature_Feature.first()
-                obj.feature_id: Featureloc.objects.get(
+            try:
+                feature_loc = Featureloc.objects.get(
                     feature_id=obj.feature_id,
-                    srcfeature_id=self.context['refseq'])
-            }
+                    srcfeature_id=self.context.get('refseq'))
+                self._locs = {obj.feature_id: feature_loc}
+            except ObjectDoesNotExist:
+                pass
         return self._locs.get(obj.feature_id)
 
     def _get_subfeature(self, feature_id):
@@ -112,15 +113,24 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_start(self, obj):
         """Get the start location."""
-        return self._get_location(obj).fmin
+        if self.context.get('soType'):
+            return self._get_location(obj).fmin
+        else:
+            return 1
 
     def get_end(self, obj):
         """Get the end location."""
-        return self._get_location(obj).fmax
+        if self.context.get('soType'):
+            return self._get_location(obj).fmax
+        else:
+            return obj.seqlen
 
     def get_strand(self, obj):
         """Get the strand."""
-        return self._get_location(obj).strand
+        try:
+            return self._get_location(obj).strand
+        except AttributeError:
+            return None
 
     def get_type(self, obj):
         """Get the type."""

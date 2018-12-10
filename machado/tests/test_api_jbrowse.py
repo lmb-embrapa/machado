@@ -158,6 +158,14 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(response_data['start'], 10)
         self.assertEqual(response_data['end'], 100)
 
+        # Tests features (return refseq - no params)
+        base_url = reverse('jbrowse_features-list', args=['contig1'])
+        response = self.client.get(url, format='json')
+        response_data = response.json()['features'][0]
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_data['start'], 10)
+        self.assertEqual(response_data['end'], 100)
+
         # Tests names
         base_url = reverse('jbrowse_names-list')
         params = "equals=contig1&organism=Mus musculus"
