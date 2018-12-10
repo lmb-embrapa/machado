@@ -41,10 +41,6 @@ class Command(BaseCommand):
                             help="Scientific name (e.g.: 'Oryza sativa')",
                             required=True,
                             type=str)
-        parser.add_argument("--program",
-                            help="Name of the software (e.g.: 'LSTrAP')",
-                            required=True,
-                            type=str)
         parser.add_argument("--programversion",
                             help="Version of the software (e.g.: '1.3')",
                             required=True,
@@ -69,6 +65,10 @@ class Command(BaseCommand):
                             help="Time software was run. "
                             "Mandatory format: e.g.: 'Oct-16-2016'",
                             required=False,
+                            type=str)
+        parser.add_argument("--program",
+                            help="Name of the software (e.g.: 'LSTrAP')",
+                            default="LSTrAP",
                             type=str)
         parser.add_argument("--norm",
                             help="Normalized data: 1-yes (tpm, fpkm, etc.); "
@@ -116,7 +116,6 @@ class Command(BaseCommand):
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for line in rnaseq_data:
-            print(line)
             fields = re.split('\t', line.rstrip())
             nfields = len(fields)
             # validate fields within line
@@ -127,27 +126,21 @@ class Command(BaseCommand):
                 # read header and instantiate analysis object for each assay
                 # e.g. SRR12345.
             if header:
-                print(fields)
                 # first element is the string "gene" - need to be removed
                 fields.pop(0)
-                print(fields)
                 for i in range(len(fields)):
                     # parse field to get SRA ID. e.g.: SRR5167848.htseq
                     # try to remove ".htseq" part of string
                     string = re.match(r'(\w+)\.(\w+)', fields[i])
-                    print(string)
                     try:
                         assay = string.group(1)
                     except IntegrityError as e:
                         raise CommandError(e)
-                    # put index of column into filename
-                    # chado complains of unique constraints here
-                    filename_now = filename + "." + str(i)
                     # store analysis
                     try:
                         analysis = analysis_file.store_analysis(
                              program=program,
-                             filename=filename_now,
+                             sourcename=fields[i],
                              programversion=programversion,
                              timeexecuted=timeexecuted,
                              algorithm=algorithm,
@@ -155,8 +148,13 @@ class Command(BaseCommand):
                              description=description)
                     except ImportingError as e:
                         raise CommandError(e)
-                    # store each analysis in a list.
-                    analysis_list.insert(i, analysis)
+                    # link filename to analysis
+                    try:
+                        analysis_file.store_analysisprop(
+                                analysis=analysis,
+                                value=filename)
+                    except ImportingError as e:
+                        raise CommandError(e)
                     # store quantification
                     try:
                         analysis_file.store_quantification(
@@ -164,6 +162,8 @@ class Command(BaseCommand):
                                 assayacc=assay)
                     except ImportingError as e:
                         raise CommandError(e)
+                    # finally, store each analysis in a list.
+                    analysis_list.insert(i, analysis)
                 header = 0
             else:
                 # first element is the feature acc. "e.g.: AT2G44195.1.TAIR10"

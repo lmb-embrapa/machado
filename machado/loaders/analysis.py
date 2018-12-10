@@ -7,9 +7,10 @@
 """Analysis."""
 
 from machado.loaders.common import retrieve_organism, retrieve_feature
+from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
 from machado.models import Assay, Acquisition, Quantification
-from machado.models import Analysis, Analysisfeature
+from machado.models import Analysis, Analysisfeature, Analysisprop
 from machado.models import Db, Dbxref, Organism
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -24,7 +25,7 @@ class AnalysisLoader(object):
 
     def store_analysis(self,
                        program: str,
-                       filename: str,
+                       sourcename: str,
                        programversion: str,
                        timeexecuted: str = None,
                        algorithm: str = None,
@@ -47,7 +48,7 @@ class AnalysisLoader(object):
                     algorithm=algorithm,
                     name=name,
                     description=description,
-                    sourcename=filename,
+                    sourcename=sourcename,
                     program=program,
                     programversion=programversion,
                     timeexecuted=timeexecuted)
@@ -56,6 +57,23 @@ class AnalysisLoader(object):
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
         return analysis
+
+    def store_analysisprop(self,
+                           analysis: Analysis,
+                           value: str,
+                           rank: int = 0) -> None:
+        """Store analysisprop."""
+        cvterm_contained_in = retrieve_ontology_term(
+                ontology='relationship',
+                term='contained in')
+        try:
+            Analysisprop.objects.create(
+                    analysis=analysis,
+                    type_id=cvterm_contained_in.cvterm_id,
+                    value=value,
+                    rank=rank)
+        except IntegrityError as e:
+            raise ImportingError(e)
 
     def store_quantification(self,
                              analysis: Analysis,
