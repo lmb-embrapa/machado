@@ -31,8 +31,8 @@ class Command(BaseCommand):
 
     def handle(self,
                file: str,
-               cpu: int=1,
-               verbosity: int=1,
+               cpu: int = 1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
         if verbosity > 0:

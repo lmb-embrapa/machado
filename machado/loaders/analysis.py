@@ -11,7 +11,7 @@ from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
 from machado.models import Assay, Acquisition, Quantification
 from machado.models import Analysis, Analysisfeature, Analysisprop
-from machado.models import Db, Dbxref, Organism
+from machado.models import Db, Dbxref, Organism, Feature
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -108,7 +108,7 @@ class AnalysisLoader(object):
 
     def store_analysisfeature(self,
                               analysis: Analysis,
-                              feature_name: str,
+                              feature: Union[str, Feature],
                               organism: Union[str, Organism],
                               rawscore: float = None,
                               normscore: float = None,
@@ -123,12 +123,16 @@ class AnalysisLoader(object):
                 organism = retrieve_organism(organism)
             except IntegrityError as e:
                 raise ImportingError(e)
-        # get database for assay (e.g.: "SRA" - from NCBI)
-        try:
-            feature = retrieve_feature(organism=organism,
-                                       featureacc=feature_name)
-        except IntegrityError as e:
-            raise ImportingError(e)
+        # retrieve feature
+        if isinstance(feature, Feature):
+            pass
+        else:
+            try:
+                feature = retrieve_feature(organism=organism,
+                                           featureacc=feature)
+            except IntegrityError as e:
+                raise ImportingError(e)
+        # finally create analysisfeature
         try:
             Analysisfeature.objects.create(
                                     feature=feature,
