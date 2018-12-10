@@ -37,15 +37,16 @@
           </li>
           <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="organism-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {% if current_organism_id %}
-                {{ current_organism_name }}
+              {% if request.session.current_organism_id %}
+                {{ request.session.current_organism_name }}
               {% else %}
                 Organism
               {% endif %}
             </a>
-            <div class="dropdown-menu" aria-labelledby="organism-dropdown">
-              {% for organism in organism_dict %}
-              <a href="?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
+            <div class="dropdown-menu bg-light" aria-labelledby="organism-dropdown">
+              <a class="nav-link btn-light {% if request.session.current_organism_id == None %}active{% endif %}" href="/machado/?current_organism_id=None">None</a>
+              {% for organism in organism_list %}
+              <a class="nav-link btn-light {% if request.session.current_organism_id == organism.organism_id|safe|escape %}active{% endif %}" href="/machado/?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
               {% endfor %}
             </div>
           </li>
@@ -57,7 +58,6 @@
   </header>
 
   <div class="container" name="content">
-    {{ current_organism_name }}
     {% block content %}
     {% endblock %}
   </div>

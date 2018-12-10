@@ -36,7 +36,7 @@ def patch_templates():
         if template['BACKEND'] == 'django.template.backends.django.'\
            'DjangoTemplates':
             template['OPTIONS']['context_processors'].append(
-                'machado.views.context_processors.organism_processor')
+                'machado.context_processors.organism_processor')
 
 
 def patch_all():
