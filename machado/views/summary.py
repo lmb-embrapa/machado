@@ -14,7 +14,7 @@ from machado.models import Feature, Featureprop
 from typing import Dict, List
 
 
-def summary(request):
+def get_queryset(request):
     """Summary."""
     current_organism_id = request.session.get('current_organism_id')
     so_term_transcript = retrieve_ontology_term(ontology='sequence',

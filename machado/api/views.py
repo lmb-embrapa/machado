@@ -117,57 +117,59 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         cvterm_part_of = retrieve_ontology_term(ontology='sequence',
                                                 term='part_of')
         refseq_feature_id = Feature.objects.get(
-            uniquename=self.kwargs['refseq'])
+            uniquename=self.kwargs.get('refseq'))
+        soType = self.request.query_params.get('soType')
         return {
             'cvterm_display': cvterm_display,
             'cvterm_part_of': cvterm_part_of,
             'refseq': refseq_feature_id,
+            'soType': soType,
         }
 
     def get_queryset(self):
         """Get queryset."""
+        try:
+            refseq = Feature.objects.get(
+                uniquename=self.kwargs.get('refseq'))
+        except ObjectDoesNotExist:
+            return
+
         soType = self.request.query_params.get('soType')
-        try:
-            refseq = Feature.objects.get(uniquename=self.kwargs['refseq'])
-        except ObjectDoesNotExist:
-            return
+        if soType is None:
+            queryset = list()
+            queryset.append(refseq)
+            return queryset
+        else:
+            try:
+                organism = retrieve_organism(
+                    self.request.query_params.get('organism'))
+            except (ObjectDoesNotExist, AttributeError):
+                return
 
-        try:
-            organism = retrieve_organism(
-                self.request.query_params.get('organism'))
-        except (ObjectDoesNotExist, AttributeError):
-            return
+            try:
+                soType = self.request.query_params.get('soType')
+                start = self.request.query_params.get('start') or 1
+                end = self.request.query_params.get('end') or refseq.seqlen
 
-        try:
-            soType = self.request.query_params.get('soType')
-            start = self.request.query_params.get('start') or 1
-            end = self.request.query_params.get('end') or refseq.seqlen
+                transcriptsloc = Featureloc.objects.filter(srcfeature=refseq)
+                if end is not None:
+                    transcriptsloc = transcriptsloc.filter(fmin__lte=end)
+                if start is not None:
+                    transcriptsloc = transcriptsloc.filter(fmax__gte=start)
+                transcript_ids = transcriptsloc.values_list('feature_id',
+                                                            flat=True)
 
-            if soType == "reference":
-                queryset = list()
-                queryset.append(refseq)
+                cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
+
+                queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
+                queryset = queryset.filter(organism=organism)
+                queryset = queryset.filter(is_obsolete=0)
+                queryset = queryset.order_by('uniquename')
+                queryset = queryset.filter(feature_id__in=transcript_ids)
+
                 return queryset
-
-            cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
-
-            queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-            queryset = queryset.filter(organism=organism)
-            queryset = queryset.filter(is_obsolete=0)
-            queryset = queryset.order_by('uniquename')
-
-            transcriptsloc = Featureloc.objects.filter(srcfeature=refseq)
-            if end is not None:
-                transcriptsloc = transcriptsloc.filter(fmin__lte=end)
-            if start is not None:
-                transcriptsloc = transcriptsloc.filter(fmax__gte=start)
-            transcript_ids = transcriptsloc.values_list('feature_id',
-                                                        flat=True)
-
-            queryset = queryset.filter(feature_id__in=transcript_ids)
-        except ObjectDoesNotExist:
-            pass
-
-        return queryset
+            except ObjectDoesNotExist:
+                return None
 
     def list(self, request, *args, **kwargs):
         """Override return the list inside a dict."""

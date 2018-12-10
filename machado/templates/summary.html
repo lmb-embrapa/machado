@@ -12,7 +12,9 @@
 {% for entry in context %}
 <div class="card">
   <div class="card-body">
-    <h4 class="card-title">{{ entry.name }}</h4>
+      <h4 class="card-title">
+        <a href="/machado/transcript/?feature_id={{ entry.feature_id|safe }}">{{ entry.name }}</a>
+      </h4>
     <div class="card-text">
       {{ entry.uniquename }}
       {{ entry.display }}

@@ -38,8 +38,8 @@ def index(request):
         return render(request, 'query.html')
 
 
-def stats(request):
-    """General stats."""
+def data_numbers(request):
+    """General data numbers."""
     data = dict()
     current_organism_id = request.session.get('current_organism_id')
 
@@ -115,4 +115,4 @@ def stats(request):
     except ObjectDoesNotExist:
         pass
 
-    return render(request, 'stats.html', {'context': data})
+    return render(request, 'data-numbers.html', {'context': data})
