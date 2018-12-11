@@ -35,11 +35,15 @@ class Command(BaseCommand):
             self.stdout.write('Deleting {} and every child'
                               'record (CASCADE)'.format(name))
         # get multispecies organism
-        multiorganism, created = Organism.objects.get_or_create(
-                abbreviation='multispecies',
-                genus='multispecies',
-                species='multispecies',
-                common_name='multispecies')
+        try:
+            multiorganism = Organism.objects.get(
+                    abbreviation='multispecies',
+                    genus='multispecies',
+                    species='multispecies',
+                    common_name='multispecies')
+        except ObjectDoesNotExist:
+            raise CommandError('No feature registered as multispecies')
+
         try:
             analysisprop_list = Analysisprop.objects.filter(value=name)
             for analysisprop in analysisprop_list:
