@@ -21,6 +21,18 @@
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Location</h3>
+      <div class="card-text">
+        {% for location in context.locations %}
+          {{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+
 {% else %}
   {{ context.error }}
 {% endif %}
