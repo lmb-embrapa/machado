@@ -9,7 +9,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
-from machado.models import Feature, Featureprop
+from machado.models import Feature, Featureloc, Featureprop
 
 
 def get_queryset(request):
@@ -41,6 +41,17 @@ def get_queryset(request):
             feature['display'] = feature_prop.value
         except ObjectDoesNotExist:
             pass
+
+        locations = Featureloc.objects.filter(feature_id=feature_id)
+        feature['locations'] = list()
+        for location in locations:
+            feature['locations'].append({
+                'start': location.fmin,
+                'end': location.fmax,
+                'strand': location.strand,
+                'ref': Feature.objects.get(
+                    feature_id=location.srcfeature_id).uniquename,
+            })
 
         return render(request,
                       'transcript.html',
