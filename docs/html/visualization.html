@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="4. Diagrams" href="diagrams.html" />
-    <link rel="prev" title="2.1.9. Loading OrthoMCL results" href="load_orthomcl.html" /> 
+    <link rel="prev" title="2.9. Loading OrthoMCL results" href="load_orthomcl.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -151,14 +151,23 @@
             
   <div class="section" id="visualization">
 <h1>3. Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h1>
-<p>The <em>machado</em> API framework</p>
+<div class="section" id="machado">
+<h2>3.1. machado<a class="headerlink" href="#machado" title="Permalink to this headline">¶</a></h2>
+<p>Start the <em>machado</em> server:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
+</pre></div>
+</div>
+<p>Now, open your browser and go to <a class="reference external" href="http://127.0.0.1:8000/machado">http://127.0.0.1:8000/machado</a></p>
+</div>
 <div class="section" id="jbrowse">
-<h2>3.1. JBrowse<a class="headerlink" href="#jbrowse" title="Permalink to this headline">¶</a></h2>
+<h2>3.2. JBrowse<a class="headerlink" href="#jbrowse" title="Permalink to this headline">¶</a></h2>
 <p>The <a class="reference external" href="https://jbrowse.org">JBrowse</a> software renders genomic tracks from Chado using the <em>machado</em> API.</p>
 <p><strong>JBrowse</strong></p>
 <p>Install JBrowse following the <a class="reference external" href="https://jbrowse.org/docs/installation.html">official instructions</a>.</p>
-<p>The <em>machado</em> source contains the directory extras. Copy the file extras/trackList.json.sample to the JBrowse data directory (eg. /var/www/html/jbrowse/data) and rename it to trackList.json</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp extras/trackList.json.sample /var/www/html/jbrowse/data/trackList.json
+<p>The <em>machado</em> source contains the directory extras. Copy the file extras/trackList.json.sample to the JBrowse data directory, inside a subdirectory with the name of the organism (eg. /var/www/html/jbrowse/data/Arabidopsis thaliana) and rename it to trackList.json
+This directory structure will enable machado to embed JBrowse in its pages.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p <span class="s2">&quot;/var/www/html/jbrowse/data/Arabidopsis thaliana&quot;</span>
+cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/data/Arabidopsis thaliana/trackList.json&quot;</span>
 </pre></div>
 </div>
 <p>Edit the file to set the <strong>organism</strong> name you have loaded to the database.</p>
@@ -167,6 +176,15 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
 </pre></div>
 </div>
+<p>Once the server is running, just go to your browser and open your JBrowse instance (eg. <a class="reference external" href="http://localhost/jbrowse/?data=data/Arabidopsis">http://localhost/jbrowse/?data=data/Arabidopsis</a> thaliana)</p>
+<p><strong>machado</strong></p>
+<p>The settings.py file should contain these variables</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_JBROWSE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://localhost/jbrowse&#39;</span>
+<span class="nv">MACHADO_JBROWSE_OFFSET</span> <span class="o">=</span> <span class="m">1200</span>
+</pre></div>
+</div>
+<p>MACHADO_JBROWSE_URL: contains the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)</p>
+<p>MACHADO_OFFSET: the number of bp upstream and downstream of the feature.</p>
 </div>
 </div>
 
@@ -181,7 +199,7 @@
         <a href="diagrams.html" class="btn btn-neutral float-right" title="4. Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_orthomcl.html" class="btn btn-neutral" title="2.1.9. Loading OrthoMCL results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_orthomcl.html" class="btn btn-neutral" title="2.9. Loading OrthoMCL results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
