@@ -30,8 +30,9 @@ class Command(BaseCommand):
 
     Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
 
-    The information about the database related to the project, biomaterial
-    and assay accessions (e.g: "SRA") need to be provided from command line."""
+    The information about the database related to the project (e.g.: "GEO"),
+    biomaterial (e.g.: "GEO") and assay accessions (e.g: "SRA") need to be
+    provided from command line."""
 
     def add_arguments(self, parser):
         """Define the arguments."""

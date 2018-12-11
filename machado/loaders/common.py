@@ -12,8 +12,10 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
+from django.db.utils import IntegrityError
 from machado.models import Cv, Cvterm
 from machado.models import Organism
+from machado.models import Db, Dbxref, Feature
 from django.core.exceptions import ObjectDoesNotExist
 import os
 
@@ -150,3 +152,29 @@ def retrieve_organism(organism: str) -> Organism:
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist('{} not registered.'.format(organism))
     return organism
+
+
+def retrieve_feature(featureacc: str,
+                     organism: Organism,
+                     featuredb: str = "GFF_SOURCE",
+                     cvterm: str = "mRNA",
+                     ontology: str = "sequence",
+                     ) -> Feature:
+    """Retrieve feature object."""
+    # try to retrieve using dbxref first
+    try:
+        cvterm = retrieve_ontology_term(ontology=ontology,
+                                        term=cvterm)
+        db = Db.objects.get(name=featuredb)
+        dbxref = Dbxref.objects.get(db=db,
+                                    accession=featureacc)
+        feature = Feature.objects.get(organism=organism,
+                                      dbxref=dbxref,
+                                      type_id=cvterm.cvterm_id)
+    # otherwise try uniquename
+    except ObjectDoesNotExist:
+        feature = Feature.objects.get(organism=organism,
+                                      uniquename=featureacc)
+    except IntegrityError as e:
+        raise ImportingError(e)
+    return feature

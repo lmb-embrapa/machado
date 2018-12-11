@@ -10,7 +10,7 @@ from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureloc
 from machado.loaders.similarity import SimilarityLoader
-from datetime import datetime, timezone
+from datetime import datetime
 from django.test import TestCase
 from django.core.management import call_command
 
@@ -29,34 +29,45 @@ class SimilarityTest(TestCase):
         """Run Tests - __init__ and store_searchio_blast_record."""
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
+        test_organism2 = Organism.objects.create(
+                    abbreviation='multispecies',
+                    genus='multispecies',
+                    species='multispecies',
+                    common_name='multispecies')
         # creating test SO term
         test_db = Db.objects.create(name='SO')
         test_cv = Cv.objects.create(name='sequence')
+        test_db2 = Db.objects.create(name='RO')
+        test_cv2 = Cv.objects.create(name='relationship')
         test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         test_aa_term = Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='1234567', db=test_db)
+        test_dbxref2 = Dbxref.objects.create(accession='1234567', db=test_db2)
         Cvterm.objects.create(
             name='match_part', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv2, dbxref=test_dbxref2,
+            is_obsolete=0, is_relationshiptype=1)
 
         # creating test features
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(timezone.utc),
-            timelastmodified=datetime.now(timezone.utc))
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
         Feature.objects.create(
             organism=test_organism, uniquename='feat2', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(timezone.utc),
-            timelastmodified=datetime.now(timezone.utc))
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
         test_feat = Feature.objects.create(
-            organism=test_organism, uniquename='feat3', is_analysis=False,
+            organism=test_organism2, uniquename='feat3', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(timezone.utc),
-            timelastmodified=datetime.now(timezone.utc))
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
 
         test_HSPFragment1 = HSPFragment('feat1', 'feat2')
         setattr(test_HSPFragment1, 'alphabet', generic_protein)

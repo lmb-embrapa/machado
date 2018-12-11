@@ -8,38 +8,74 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Analysis, Analysisfeature, Feature, Featureloc
+from machado.models import Analysisprop, Analysis, Analysisfeature
+from machado.models import Feature, Featureloc, Organism
+from machado.models import Quantification, Acquisition
 
 
 class Command(BaseCommand):
     """Remove analysis."""
 
-    help = 'Remove analysis (CASCADE)'
+    help = 'Remove analysis (CASCADE). Also remove related features that are'
+    'multispecies (features that were loaded from the analysis file only).'
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--name", help="analysis.sourcename",
-                            required=True, type=str)
+        parser.add_argument("--name",
+                            help="source filename (analysisprop.value)",
+                            required=True,
+                            type=str)
 
     def handle(self,
                name: str,
-               verbosity: int=1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
+        if verbosity > 0:
+            self.stdout.write('Deleting {} and every child'
+                              'record (CASCADE)'.format(name))
+        # get multispecies organism
         try:
-            if verbosity > 0:
-                self.stdout.write('Deleting {} and every child'
-                                  'record (CASCADE)'.format(name))
+            multiorganism = Organism.objects.get(
+                    abbreviation='multispecies',
+                    genus='multispecies',
+                    species='multispecies',
+                    common_name='multispecies')
+        except ObjectDoesNotExist:
+            raise CommandError('No feature registered as multispecies')
 
-            analysis = Analysis.objects.get(sourcename=name)
-
-            feature_ids = list(Analysisfeature.objects.filter(
-                analysis=analysis).values_list('feature_id', flat=True))
-
-            Featureloc.objects.filter(feature_id__in=feature_ids).delete()
-            Analysisfeature.objects.filter(analysis=analysis).delete()
-            Feature.objects.filter(feature_id__in=feature_ids).delete()
-            analysis.delete()
+        try:
+            analysisprop_list = Analysisprop.objects.filter(value=name)
+            for analysisprop in analysisprop_list:
+                analysis = Analysis.objects.get(
+                        analysis_id=analysisprop.analysis_id)
+                # remove quantification and aquisition if exists...
+                try:
+                    quantification = Quantification.objects.get(
+                        analysis=analysis)
+                    Acquisition.objects.filter(
+                        acquisition_id=quantification.acquisition_id).delete()
+                    quantification.delete()
+                except ObjectDoesNotExist:
+                    pass
+                # remove analysisfeatures and others if exists...
+                try:
+                    analysisfeature_list = Analysisfeature.objects.filter(
+                            analysis=analysis)
+                    for analysisfeature in analysisfeature_list:
+                        feature_ids = list(Feature.objects.filter(
+                                feature_id=analysisfeature.feature_id,
+                                organism=multiorganism).values_list(
+                                    'feature_id', flat=True))
+                        Featureloc.objects.filter(
+                                feature_id__in=feature_ids).delete()
+                        Feature.objects.filter(
+                                feature_id__in=feature_ids).delete()
+                        analysisfeature.delete()
+                except ObjectDoesNotExist:
+                    pass
+                # finally removes analysis...
+                analysis.delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:

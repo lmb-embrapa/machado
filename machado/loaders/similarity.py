@@ -6,10 +6,11 @@
 
 """Load similarity."""
 
-from machado.models import Analysis, Analysisfeature, Feature, Featureloc
+from machado.models import Feature, Featureloc
 from machado.loaders.common import retrieve_ontology_term
+from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
-from datetime import datetime, timezone
+from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from time import time
@@ -28,9 +29,9 @@ class SimilarityLoader(object):
                  programversion: str,
                  so_query: str,
                  so_subject: str,
-                 algorithm: str=None,
-                 name: str=None,
-                 description: str=None) -> None:
+                 algorithm: str = None,
+                 name: str = None,
+                 description: str = None) -> None:
         """Execute the init function."""
         try:
             self.so_term_query = retrieve_ontology_term(
@@ -39,14 +40,18 @@ class SimilarityLoader(object):
                     ontology='sequence', term=so_subject)
             self.so_term_match_part = retrieve_ontology_term(
                     ontology='sequence', term='match_part')
-            self.analysis = Analysis.objects.create(
+            self.analysis_loader = AnalysisLoader()
+            self.analysis = self.analysis_loader.store_analysis(
                     algorithm=algorithm,
                     name=name,
                     description=description,
                     sourcename=filename,
                     program=program,
                     programversion=programversion,
-                    timeexecuted=datetime.now(timezone.utc))
+                    timeexecuted=datetime.now())
+            self.analysis_loader.store_analysisprop(
+                    analysis=self.analysis,
+                    value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         except ObjectDoesNotExist as e:
@@ -104,34 +109,38 @@ class SimilarityLoader(object):
     def store_match_part(self,
                          query_feature: Feature,
                          subject_feature: Feature,
-                         identity: float=None,
-                         rawscore: float=None,
-                         normscore: float=None,
-                         significance: float=None,
-                         query_start: int=None,
-                         query_end: int=None,
-                         subject_start: int=None,
-                         subject_end: int=None) -> None:
+                         identity: float = None,
+                         rawscore: float = None,
+                         normscore: float = None,
+                         significance: float = None,
+                         query_start: int = None,
+                         query_end: int = None,
+                         subject_start: int = None,
+                         subject_end: int = None) -> None:
         """Store bio_blast_hsp record."""
         # set id = auto# for match_part features
         match_part_id = 'match_part_{}{}{}'.format(
             str(time()), query_feature.feature_id, subject_feature.feature_id)
-
-        match_part_feature = Feature.objects.create(
-                organism=query_feature.organism,
-                uniquename=match_part_id,
-                type_id=self.so_term_match_part.cvterm_id,
-                is_analysis=True,
-                is_obsolete=False,
-                timeaccessioned=datetime.now(timezone.utc),
-                timelastmodified=datetime.now(timezone.utc))
-
-        Analysisfeature.objects.create(analysis=self.analysis,
-                                       feature=match_part_feature,
-                                       identity=identity,
-                                       rawscore=rawscore,
-                                       normscore=normscore,
-                                       significance=significance)
+        try:
+            match_part_feature = Feature.objects.create(
+                    organism=query_feature.organism,
+                    uniquename=match_part_id,
+                    type_id=self.so_term_match_part.cvterm_id,
+                    is_analysis=True,
+                    is_obsolete=False,
+                    timeaccessioned=datetime.now(),
+                    timelastmodified=datetime.now())
+            # Analysisfeature.objects.create(analysis=self.analysis,
+            self.analysis_loader.store_analysisfeature(
+                    organism=query_feature.organism,
+                    analysis=self.analysis,
+                    feature=match_part_feature,
+                    identity=identity,
+                    rawscore=rawscore,
+                    normscore=normscore,
+                    significance=significance)
+        except IntegrityError as e:
+            raise ImportingError(e)
 
         if (query_end is not None and
                 query_start is not None and
