@@ -19,7 +19,8 @@ def get_queryset(request):
     current_organism_id = request.session.get('current_organism_id')
     so_term_transcript = retrieve_ontology_term(ontology='sequence',
                                                 term='mRNA')
-
+    cv_term_display = retrieve_ontology_term(ontology='feature_property',
+                                             term='display')
     if request.GET.get('transcript_id') is not None:
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
@@ -31,7 +32,9 @@ def get_queryset(request):
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
             type_id=so_term_transcript.cvterm_id,
-            uniquename__icontains=request.GET.get('transcript_keyword'))
+            Featureprop_feature_Feature__value__icontains=request.GET.get(
+                'transcript_keyword'),
+            Featureprop_feature_Feature__type_id=cv_term_display.cvterm_id)
         transcripts = transcripts.values_list('feature_id', flat=True)
 
     if transcripts is not None:
