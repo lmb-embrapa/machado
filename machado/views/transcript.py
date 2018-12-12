@@ -10,7 +10,8 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
-from machado.models import Feature, Featureloc, Featureprop
+from machado.models import Feature, FeatureDbxref, Featureloc, Featureprop
+from typing import Dict, List
 
 
 def get_queryset(request):
@@ -44,37 +45,72 @@ def get_queryset(request):
         except ObjectDoesNotExist:
             pass
 
-        locations = Featureloc.objects.filter(feature_id=feature_id)
-        feature['locations'] = list()
-        for location in locations:
-            jbrowse_url = None
-            if hasattr(settings, 'MACHADO_JBROWSE_URL'):
-                if hasattr(settings, 'MACHADO_JBROWSE_OFFSET'):
-                    offset = settings.MACHADO_JBROWSE_OFFSET
-                else:
-                    offset = 1000
-                loc = '{}:{}..{}'.format(
-                    Feature.objects.get(
-                        feature_id=location.srcfeature_id).uniquename,
-                    location.fmin - offset,
-                    location.fmax + offset,
-                )
-                jbrowse_url = '{}/?data=data/{}&loc={}'\
-                              '&tracklist=0&nav=0&overview=0'.format(
-                                  settings.MACHADO_JBROWSE_URL,
-                                  request.session.get('current_organism_name'),
-                                  loc)
-            feature['locations'].append({
-                'start': location.fmin,
-                'end': location.fmax,
-                'strand': location.strand,
-                'ref': Feature.objects.get(
-                    feature_id=location.srcfeature_id).uniquename,
-                'jbrowse_url': jbrowse_url,
-            })
+        feature['locations'] = retrieve_feature_locations(
+            feature_id=feature_id,
+            organism=request.session.get('current_organism_name'))
+
+        # feature['dbxrefs'] = retrieve_feature_dbxrefs(feature_id=feature_id)
+        # feature['cvterms'] = retrieve_feature_cvterms(feature_id=feature_id)
 
         return render(request,
                       'transcript.html',
                       {'context': feature})
     else:
         feature = [{'error': 'Not found.'}]
+
+
+def retrieve_feature_locations(feature_id: int, organism: str) -> List[Dict]:
+    """Retrieve feature locations."""
+    locations = Featureloc.objects.filter(feature_id=feature_id)
+    result = list()
+    for location in locations:
+        jbrowse_url = None
+        if hasattr(settings, 'MACHADO_JBROWSE_URL'):
+            if hasattr(settings, 'MACHADO_JBROWSE_OFFSET'):
+                offset = settings.MACHADO_JBROWSE_OFFSET
+            else:
+                offset = 1000
+            loc = '{}:{}..{}'.format(
+                Feature.objects.get(
+                    feature_id=location.srcfeature_id).uniquename,
+                location.fmin - offset,
+                location.fmax + offset,
+            )
+            jbrowse_url = '{}/?data=data/{}&loc={}'\
+                          '&tracklist=0&nav=0&overview=0'.format(
+                              settings.MACHADO_JBROWSE_URL, organism, loc)
+        result.append({
+            'start': location.fmin,
+            'end': location.fmax,
+            'strand': location.strand,
+            'ref': Feature.objects.get(
+                feature_id=location.srcfeature_id).uniquename,
+            'jbrowse_url': jbrowse_url,
+        })
+
+    return result
+
+
+def retrieve_feature_dbxrefs(feature_id: int) -> List[Dict]:
+    """Retrieve feature dbxrefs."""
+    feature_dbxrefs = FeatureDbxref.objects.filter(feature_id=feature_id)
+    result = list()
+    for feature_dbxref in feature_dbxrefs:
+        result.append({
+            'dbxref': feature_dbxref.dbxref.accession,
+            'db': feature_dbxref.dbxref.db.name,
+        })
+    return result
+
+
+def retrieve_feature_cvterms(feature_id: int) -> List[Dict]:
+    """Retrieve feature cvterms."""
+    feature_cvterms = FeatureDbxref.objects.filter(feature_id=feature_id)
+    result = list()
+    for feature_cvterm in feature_cvterms:
+        result.append({
+            'cvterm': feature_cvterm.cvterm.name,
+            'cvterm_definition': feature_cvterm.cvterm.definition,
+            'cv': feature_cvterm.cvterm.cv.name,
+        })
+    return result

@@ -15,8 +15,8 @@
     <div class="card-body">
       <h3 class="card-title">{{ context.name }}</h3>
       <div class="card-text">
-        {{ context.uniquename }}
-        {{ context.display }}
+      <p>ID: {{ context.uniquename }}</p>
+      <p>Display: {{ context.display }}</p>
       </div>
     </div>
   </div>
@@ -33,8 +33,7 @@
         {% endfor %}
       </div>
     </div>
-  </div>
-
+</div>
 
 {% else %}
   {{ context.error }}
