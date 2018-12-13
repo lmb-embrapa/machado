@@ -12,7 +12,7 @@ from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Cvterm
 from machado.models import Feature, Featureloc, Featureprop
-from machado.models import FeatureRelationship
+from machado.models import FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
 
 VALID_TYPES = ['mRNA', 'polypeptide']
@@ -46,6 +46,7 @@ def get_queryset(request):
 
     transcript = dict()
     protein = dict()
+
     if feature['type'] == 'mRNA':
         transcript = retrieve_feature_data(request=request,
                                            feature_obj=feature_obj)
@@ -72,21 +73,26 @@ def get_queryset(request):
 
 
 def retrieve_feature_data(request, feature_obj: Feature) -> Dict:
-    """Retrieve transcript data."""
-    transcript = {
+    """Retrieve feature data."""
+    result = {
         'feature_id': feature_obj.feature_id,
         'name': feature_obj.name,
         'uniquename': feature_obj.uniquename,
     }
 
-    transcript['display'] = retrieve_feature_prop(
+    result['display'] = retrieve_feature_prop(
         feature_id=feature_obj.feature_id, prop='display')
 
-    transcript['locations'] = retrieve_feature_locations(
+    result['locations'] = retrieve_feature_locations(
         feature_id=feature_obj.feature_id,
         organism=request.session.get('current_organism_name'))
 
-    return transcript
+    result['dbxrefs'] = retrieve_feature_dbxrefs(
+        feature_id=feature_obj.feature_id)
+    result['cvterms'] = retrieve_feature_cvterms(
+        feature_id=feature_obj.feature_id)
+
+    return result
 
 
 def retrieve_feature_prop(feature_id: int, prop: str) -> Optional[str]:
@@ -133,4 +139,29 @@ def retrieve_feature_locations(feature_id: int, organism: str) -> List[Dict]:
             'jbrowse_url': jbrowse_url,
         })
 
+    return result
+
+
+def retrieve_feature_dbxrefs(feature_id: int) -> List[Dict]:
+    """Retrieve feature dbxrefs."""
+    feature_dbxrefs = FeatureDbxref.objects.filter(feature_id=feature_id)
+    result = list()
+    for feature_dbxref in feature_dbxrefs:
+        result.append({
+            'dbxref': feature_dbxref.dbxref.accession,
+            'db': feature_dbxref.dbxref.db.name,
+        })
+    return result
+
+
+def retrieve_feature_cvterms(feature_id: int) -> List[Dict]:
+    """Retrieve feature cvterms."""
+    feature_cvterms = FeatureDbxref.objects.filter(feature_id=feature_id)
+    result = list()
+    for feature_cvterm in feature_cvterms:
+        result.append({
+            'cvterm': feature_cvterm.cvterm.name,
+            'cvterm_definition': feature_cvterm.cvterm.definition,
+            'cv': feature_cvterm.cvterm.cv.name,
+        })
     return result
