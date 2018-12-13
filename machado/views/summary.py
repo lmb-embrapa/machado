@@ -38,7 +38,6 @@ def get_queryset(request):
         transcripts = transcripts.values_list('feature_id', flat=True)
 
     if transcripts is not None:
-
         transcripts = transcript_details(transcripts)
 
         # pagination
