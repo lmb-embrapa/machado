@@ -6,9 +6,9 @@
 
 """Remove orthology."""
 
-from machado.models import Cv, Cvterm
-from machado.models import Feature, FeatureRelationship
-from machado.models import Dbxref
+from machado.models import FeatureRelationship, FeatureRelationshipprop
+from machado.loaders.common import retrieve_ontology_term
+from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -28,15 +28,32 @@ class Command(BaseCommand):
 
     def handle(self,
                name: str,
-               verbosity: int=1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
+        # get cvterm for contained in
         try:
-            frs = FeatureRelationship.objects.filter(value=name)
+            cvterm_contained_in = retrieve_ontology_term(
+                ontology='relationship', term='contained in')
+        except IntegrityError as e:
+            raise ImportingError(e)
+        frs = list()
+        try:
+            frps = FeatureRelationshipprop.objects.filter(
+                    value=name,
+                    type_id=cvterm_contained_in.cvterm_id)
             if verbosity > 0:
                 self.stdout.write(
                         'Deleting every orthology relations from {}'
                         .format(name))
+            # get all feature_relationship_id and
+            # remove all feature_relationship_prop
+            for frp in frps:
+                fr = FeatureRelationship.objects.get(
+                        feature_relationship_id=frp.feature_relationship_id)
+                frs.append(fr)
+                frp.delete()
+            # remove all feature_relationships
             for fr in frs:
                 fr.delete()
             if verbosity > 0:

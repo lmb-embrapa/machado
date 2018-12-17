@@ -43,7 +43,7 @@ class FeatureLoader(object):
                  source: str,
                  filename: str,
                  organism: Union[str, Organism],
-                 doi: str=None) -> None:
+                 doi: str = None) -> None:
         """Execute the init function."""
         if isinstance(organism, Organism):
             self.organism = organism
@@ -291,6 +291,43 @@ class FeatureLoader(object):
                                                type=translation_of,
                                                rank=0)
 
+    def store_feature_relationship_group(
+                               self,
+                               group: list,
+                               term:  Union[str, Cvterm],
+                               ontology: Union[str, Cv] = 'relationship',
+                               ) -> None:
+        """Store Feature Relationship."""
+        # check if retrieving cvterm is needed
+        if isinstance(term, Cvterm):
+            cvterm = term
+        else:
+            if isinstance(ontology, Cv):
+                cv = ontology
+            else:
+                try:
+                    cv = Cv.objects.get(name=ontology)
+                except ObjectDoesNotExist as e:
+                    raise ImportingError(e)
+            try:
+                cvterm = retrieve_ontology_term(
+                        ontology=cv, term=term)
+            except IntegrityError as e:
+                raise ImportingError(e)
+        for member in group:
+            tempgroup = group.copy()
+            tempgroup.remove(member)
+            for othermember in tempgroup:
+                try:
+                    FeatureRelationship.objects.create(
+                                            subject_id=member.feature_id,
+                                            object_id=othermember.feature_id,
+                                            type_id=cvterm.cvterm_id,
+                                            value=self.filename,
+                                            rank=0)
+                except IntegrityError as e:
+                    raise ImportingError(e)
+
     def store_relationships(self) -> None:
         """Store the relationships."""
         part_of = retrieve_ontology_term(ontology='sequence',
@@ -310,7 +347,7 @@ class FeatureLoader(object):
                     object_id=object.feature_id,
                     type_id=part_of.cvterm_id,
                     rank=0))
-            except ObjectDoesNotExist as e:
+            except ObjectDoesNotExist:
                 print('Parent/Feature ({}/{}) not registered.'
                       .format(item['object_id'], item['subject_id']))
 
