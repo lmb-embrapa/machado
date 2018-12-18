@@ -8,7 +8,8 @@
 
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop
 from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
-from machado.models import Featureprop, FeatureSynonym, FeatureRelationship
+from machado.models import Featureprop, FeatureSynonym
+from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Organism, Pub, PubDbxref, FeaturePub, Synonym
 from machado.loaders.common import retrieve_ontology_term, retrieve_organism
 from machado.loaders.exceptions import ImportingError
@@ -56,7 +57,6 @@ class FeatureLoader(object):
         try:
             self.db, created = Db.objects.get_or_create(name=source.upper())
             self.filename = filename
-
         except IntegrityError as e:
             raise ImportingError(e)
 
@@ -291,43 +291,6 @@ class FeatureLoader(object):
                                                type=translation_of,
                                                rank=0)
 
-    def store_feature_relationship_group(
-                               self,
-                               group: list,
-                               term:  Union[str, Cvterm],
-                               ontology: Union[str, Cv] = 'relationship',
-                               ) -> None:
-        """Store Feature Relationship."""
-        # check if retrieving cvterm is needed
-        if isinstance(term, Cvterm):
-            cvterm = term
-        else:
-            if isinstance(ontology, Cv):
-                cv = ontology
-            else:
-                try:
-                    cv = Cv.objects.get(name=ontology)
-                except ObjectDoesNotExist as e:
-                    raise ImportingError(e)
-            try:
-                cvterm = retrieve_ontology_term(
-                        ontology=cv, term=term)
-            except IntegrityError as e:
-                raise ImportingError(e)
-        for member in group:
-            tempgroup = group.copy()
-            tempgroup.remove(member)
-            for othermember in tempgroup:
-                try:
-                    FeatureRelationship.objects.create(
-                                            subject_id=member.feature_id,
-                                            object_id=othermember.feature_id,
-                                            type_id=cvterm.cvterm_id,
-                                            value=self.filename,
-                                            rank=0)
-                except IntegrityError as e:
-                    raise ImportingError(e)
-
     def store_relationships(self) -> None:
         """Store the relationships."""
         part_of = retrieve_ontology_term(ontology='sequence',
@@ -415,3 +378,49 @@ class FeatureLoader(object):
 
         for feature_obj in features:
             self.process_attributes(feature_obj, attrs)
+
+    def store_feature_relationships_fromfile(
+                               self,
+                               group: list,
+                               term:  Union[str, Cvterm],
+                               value: str = None,
+                               ontology: Union[str, Cv] = 'relationship',
+                               ) -> None:
+        """Store Feature Relationship."""
+        # check if retrieving cvterm is needed
+        if isinstance(term, Cvterm):
+            cvterm = term
+        else:
+            if isinstance(ontology, Cv):
+                cv = ontology
+            else:
+                try:
+                    cv = Cv.objects.get(name=ontology)
+                except ObjectDoesNotExist as e:
+                    raise ImportingError(e)
+            try:
+                cvterm = retrieve_ontology_term(
+                        ontology=cv, term=term)
+            except IntegrityError as e:
+                raise ImportingError(e)
+        for member in group:
+            tempgroup = group.copy()
+            tempgroup.remove(member)
+            for othermember in tempgroup:
+                try:
+                    feature_relationship = FeatureRelationship.objects.create(
+                                            subject_id=member.feature_id,
+                                            object_id=othermember.feature_id,
+                                            type_id=cvterm.cvterm_id,
+                                            value=value,
+                                            rank=0)
+                except IntegrityError as e:
+                    raise ImportingError(e)
+                try:
+                    FeatureRelationshipprop.objects.create(
+                                feature_relationship=feature_relationship,
+                                type_id=self.cvterm_contained_in.cvterm_id,
+                                value=self.filename,
+                                rank=0)
+                except IntegrityError as e:
+                    raise ImportingError(e)

@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         'Deleting every orthology relations from {}'
                         .format(name))
             # get all feature_relationship_id and
-            # remove all feature_relationship_prop
+            # remove all feature_relationshipprop
             for frp in frps:
                 fr = FeatureRelationship.objects.get(
                         feature_relationship_id=frp.feature_relationship_id)

@@ -26,6 +26,7 @@ class OrthologyTest(TestCase):
         ro_db = Db.objects.create(name='RO')
         Db.objects.create(name='FASTA_source')
         so_dbxref = Dbxref.objects.create(accession='00001', db=so_db)
+        so2_dbxref = Dbxref.objects.create(accession='00002', db=so_db)
         sequence_cv = Cv.objects.create(
                 name='sequence',
                 definition="so-xp/releases/2015-11-24/so-xp.owl")
@@ -33,11 +34,15 @@ class OrthologyTest(TestCase):
                 name='assembly',
                 cv=sequence_cv, dbxref=so_dbxref, is_obsolete=0,
                 is_relationshiptype=0)
-        ro_dbxref = Dbxref.objects.create(accession='00002', db=ro_db)
+        Cvterm.objects.create(
+                name='protein_match',
+                cv=sequence_cv, dbxref=so2_dbxref, is_obsolete=0,
+                is_relationshiptype=0)
+        ro_dbxref = Dbxref.objects.create(accession='00003', db=ro_db)
         ro_cv = Cv.objects.create(name='relationship')
         cvterm_contained_in = Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
-            is_obsolete=0, is_relationshiptype=0)
+            is_obsolete=0, is_relationshiptype=1)
         ortho_dbxref = Dbxref.objects.create(
                 accession='in orthology relationship with',
                 db=ro_db)
