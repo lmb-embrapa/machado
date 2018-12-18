@@ -12,7 +12,6 @@ from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class CoexpressionLoader(object):
@@ -58,20 +57,22 @@ class CoexpressionLoader(object):
         try:
             for ident in members:
                 # check features for id
-                try:
-                    feature = retrieve_feature(
-                            featureacc=ident,
-                            organism=self.organism)
+                feature = retrieve_feature(
+                        featureacc=ident,
+                        organism=self.organism)
+                if feature is not None:
                     self.included.append(feature)
-                except ObjectDoesNotExist:
-                    # feature does not exist
+                else:
                     self.excluded.append(ident)
         except IntegrityError as e:
             raise ImportingError(e)
 
         if len(self.included) > 1:
             try:
-                self.store_feature_relationship_group(self.included)
+                self.featureloader.store_feature_relationships_fromfile(
+                        self.included,
+                        term=self.cvterm_cluster,
+                        value=self.value)
             except IntegrityError as e:
                 raise ImportingError(e)
 
@@ -81,13 +82,12 @@ class CoexpressionLoader(object):
         try:
             for ident in members:
                 # check features for id
-                try:
-                    feature = retrieve_feature(
-                            featureacc=ident,
-                            organism=self.organism)
+                feature = retrieve_feature(
+                        featureacc=ident,
+                        organism=self.organism)
+                if feature is not None:
                     self.included.append(feature)
-                except ObjectDoesNotExist:
-                    # feature does not exist
+                else:
                     self.excluded.append(ident)
         except IntegrityError as e:
             raise ImportingError(e)

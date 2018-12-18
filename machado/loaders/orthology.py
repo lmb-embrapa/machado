@@ -7,11 +7,10 @@
 """Orthology."""
 
 from machado.loaders.exceptions import ImportingError
-from machado.models import Feature, Organism
+from machado.models import Organism
 from machado.loaders.common import retrieve_ontology_term, retrieve_feature
 from machado.loaders.feature import FeatureLoader
 from django.db.utils import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class OrthologyLoader(object):
@@ -57,11 +56,13 @@ class OrthologyLoader(object):
         try:
             for ident in members:
                 # check if features are registered
-                try:
-                    feature = retrieve_feature(featureacc=ident)
+                feature = retrieve_feature(
+                        featureacc=ident,
+                        cvterm="polypeptide",
+                        ontology="sequence")
+                if feature is not None:
                     self.included.append(feature)
-                except ObjectDoesNotExist:
-                    # feature does not exist
+                else:
                     self.excluded.append(ident)
         except IntegrityError as e:
             raise ImportingError(e)
