@@ -127,11 +127,8 @@ class AnalysisLoader(object):
         if isinstance(feature, Feature):
             pass
         else:
-            try:
-                feature = retrieve_feature(organism=organism,
-                                           featureacc=feature)
-            except IntegrityError as e:
-                raise ImportingError(e)
+            feature = retrieve_feature(organism=organism,
+                                       featureacc=feature)
         # finally create analysisfeature
         try:
             Analysisfeature.objects.create(

@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Remove orthology."""
+"""Remove relationship."""
 
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.common import retrieve_ontology_term
@@ -15,19 +15,19 @@ from django.db.utils import IntegrityError
 
 
 class Command(BaseCommand):
-    """Remove orthology."""
+    """Remove relationship."""
 
-    help = 'Remove Orthology'
+    help = 'Remove relationship'
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--name",
-                            help="groups.txt",
+        parser.add_argument("--filename",
+                            help="name of the file (e.g.: groups.txt",
                             required=True,
                             type=str)
 
     def handle(self,
-               name: str,
+               filename: str,
                verbosity: int = 1,
                **options):
         """Execute the main function."""
@@ -40,12 +40,12 @@ class Command(BaseCommand):
         frs = list()
         try:
             frps = FeatureRelationshipprop.objects.filter(
-                    value=name,
+                    value=filename,
                     type_id=cvterm_contained_in.cvterm_id)
             if verbosity > 0:
                 self.stdout.write(
-                        'Deleting every orthology relations from {}'
-                        .format(name))
+                        'Deleting every relationship relations from {}'
+                        .format(filename))
             # get all feature_relationship_id and
             # remove all feature_relationshipprop
             for frp in frps:
@@ -61,8 +61,8 @@ class Command(BaseCommand):
         except IntegrityError as e:
             raise CommandError(
                     'It\'s not possible to delete every record. You must '
-                    'delete orthologies loaded after \'{}\' that might depend '
-                    'on it. {}'.format(name, e))
+                    'delete relationships loaded after \'{}\' that might '
+                    'depend on it. {}'.format(filename, e))
         except ObjectDoesNotExist:
             raise CommandError(
-                    'Cannot remove \'{}\' (not registered)'.format(name))
+                    'Cannot remove \'{}\' (not registered)'.format(filename))

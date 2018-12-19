@@ -56,6 +56,8 @@ class OrthologyLoader(object):
         try:
             for ident in members:
                 # check if features are registered
+                # need to use cvterm 'polypeptide' as orthology is derived from
+                # protein sequences.
                 feature = retrieve_feature(
                         featureacc=ident,
                         cvterm="polypeptide",

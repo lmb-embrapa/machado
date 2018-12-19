@@ -51,15 +51,14 @@ class CoexpressionLoader(object):
                 filename=self.filename,
                 organism=self.organism)
 
-    def store_coexpression_cluster(self,
-                                   members: list) -> None:
+    def store_coexpression_clusters(self,
+                                    members: list) -> None:
         """Retrieve Feature objects and store in list and then store group."""
         try:
             for ident in members:
                 # check features for id
-                feature = retrieve_feature(
-                        featureacc=ident,
-                        organism=self.organism)
+                feature = retrieve_feature(featureacc=ident,
+                                           organism=self.organism)
                 if feature is not None:
                     self.included.append(feature)
                 else:
