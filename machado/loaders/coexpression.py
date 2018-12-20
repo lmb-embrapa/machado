@@ -25,7 +25,6 @@ class CoexpressionLoader(object):
                  source: str = "LSTRAP_SOURCE",
                  value: str = None) -> None:
         """Execute the init function."""
-        self.cluster = list()
         self.filename = filename
         self.value = value
         self.excluded = list()
