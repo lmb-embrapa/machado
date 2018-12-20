@@ -7,9 +7,10 @@
 """Tests orthology loaders."""
 
 from machado.models import Cv, Cvterm, Organism
-from machado.models import Db, Dbxref
-from machado.models import Feature, FeatureRelationship
+from machado.models import Db, Dbxref, Feature
+from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.orthology import OrthologyLoader
+from django.core.management import call_command
 from django.test import TestCase
 from datetime import datetime, timezone
 
@@ -20,11 +21,13 @@ class OrthologyTest(TestCase):
     def test_orthology(self):
         """Tests - __init__."""
         filename = 'groups.txt'
-        global_db = Db.objects.create(name='_global')
+        # global_db = Db.objects.create(name='_global')
         so_db = Db.objects.create(name='SO')
         ro_db = Db.objects.create(name='RO')
         Db.objects.create(name='FASTA_source')
         so_dbxref = Dbxref.objects.create(accession='00001', db=so_db)
+        so2_dbxref = Dbxref.objects.create(accession='00002', db=so_db)
+        # so3_dbxref = Dbxref.objects.create(accession='00003', db=so_db)
         sequence_cv = Cv.objects.create(
                 name='sequence',
                 definition="so-xp/releases/2015-11-24/so-xp.owl")
@@ -32,19 +35,27 @@ class OrthologyTest(TestCase):
                 name='assembly',
                 cv=sequence_cv, dbxref=so_dbxref, is_obsolete=0,
                 is_relationshiptype=0)
-        ro_dbxref = Dbxref.objects.create(accession='00002', db=ro_db)
-        ro_cv = Cv.objects.create(name='relationship')
         Cvterm.objects.create(
+                name='protein_match',
+                cv=sequence_cv, dbxref=so2_dbxref, is_obsolete=0,
+                is_relationshiptype=0)
+        # Cvterm.objects.create(
+        #         name='mRNA',
+        #         cv=sequence_cv, dbxref=so2_dbxref, is_obsolete=0,
+        #         is_relationshiptype=0)
+        ro_dbxref = Dbxref.objects.create(accession='00003', db=ro_db)
+        ro_cv = Cv.objects.create(name='relationship')
+        cvterm_contained_in = Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
-            is_obsolete=0, is_relationshiptype=0)
+            is_obsolete=0, is_relationshiptype=1)
         ortho_dbxref = Dbxref.objects.create(
-                accession='orthologous_to',
-                db=global_db)
+                accession='in orthology relationship with',
+                db=ro_db)
         poly_dbxref = Dbxref.objects.create(
                 accession='0000104',
                 db=so_db)
         Cvterm.objects.create(
-                name='orthologous_to', cv=sequence_cv,
+                name='in orthology relationship with', cv=ro_cv,
                 dbxref=ortho_dbxref, is_obsolete=0,
                 is_relationshiptype=1)
         poly_cvterm = Cvterm.objects.create(
@@ -352,14 +363,39 @@ class OrthologyTest(TestCase):
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=feature9.feature_id,
                            object_id=feature1.feature_id).exists())
+        frelationship9 = FeatureRelationship.objects.get(
+                           subject_id=feature9.feature_id,
+                           object_id=feature1.feature_id)
+        self.assertTrue(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship9,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())
         # same but in reverse
         self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id).exists())
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id).exists())
+        frelationship1 = FeatureRelationship.objects.get(
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id)
+        self.assertTrue(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship1,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())
         # another example:
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=feature10.feature_id,
                            object_id=feature17.feature_id).exists())
+        frelationship10 = FeatureRelationship.objects.get(
+                           subject_id=feature10.feature_id,
+                           object_id=feature17.feature_id)
+        self.assertTrue(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship10,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())
+        # another example:
         # ###check if a relationship does not exist###
         # between features from different groups (machado0004 and machado0003)
         self.assertFalse(FeatureRelationship.objects.filter(
@@ -369,9 +405,9 @@ class OrthologyTest(TestCase):
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature16.feature_id).exists())
         # removing all relationships
-        frs = FeatureRelationship.objects.filter(value=filename)
-        for fr in frs:
-            fr.delete()
+        call_command("remove_relationship",
+                     "--filename=groups.txt",
+                     "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature9.feature_id,
                            object_id=feature1.feature_id).exists())
@@ -381,3 +417,18 @@ class OrthologyTest(TestCase):
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature10.feature_id,
                            object_id=feature17.feature_id).exists())
+        self.assertFalse(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship9,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())
+        self.assertFalse(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship1,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())
+        self.assertFalse(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=frelationship10,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=filename,
+                           rank=0).exists())

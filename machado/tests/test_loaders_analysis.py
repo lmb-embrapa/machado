@@ -42,11 +42,15 @@ class AnalysisTest(TestCase):
         test_db2 = Db.objects.create(name='RO')
         test_cv2 = Cv.objects.create(name='relationship')
 
-        test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
+        # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         test_dbxref2 = Dbxref.objects.create(accession='789', db=test_db2)
-        test_aa_term = Cvterm.objects.create(
-            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
+        test_dbxref3 = Dbxref.objects.create(accession='135', db=test_db)
+        test_term = Cvterm.objects.create(
+            name='mRNA', cv=test_cv, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=0)
+        # Cvterm.objects.create(
+        #     name='polypeptide', cv=test_cv, dbxref=test_dbxref,
+        #    is_obsolete=0, is_relationshiptype=0)
         # register features.
         Cvterm.objects.create(
             name='contained in', cv=test_cv2, dbxref=test_dbxref2,
@@ -59,7 +63,7 @@ class AnalysisTest(TestCase):
             organism=test_organism,
             uniquename=test_featurename1,
             is_analysis=False,
-            type_id=test_aa_term.cvterm_id,
+            type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
@@ -67,7 +71,7 @@ class AnalysisTest(TestCase):
             organism=test_organism,
             uniquename=test_featurename2,
             is_analysis=False,
-            type_id=test_aa_term.cvterm_id,
+            type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())

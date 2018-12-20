@@ -66,7 +66,8 @@ The feature members need to be loaded previously."""
             if re.search(r'^(\w+)\:', fields[0]):
                 group_field = re.match(r'^(\w+)\:', fields[0])
                 name = group_field.group(1)
-                group = OrthologyLoader(name, filename)
+                group = OrthologyLoader(name=name,
+                                        filename=filename)
                 fields.pop(0)
                 for field in fields:
                     if re.search(r'^(\w+)\|(\S+)', field):

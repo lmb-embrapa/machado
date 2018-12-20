@@ -15,8 +15,8 @@ from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
 from machado.models import Cv, Cvterm
 from machado.models import Organism
-from machado.models import Db, Dbxref, Feature
-from django.core.exceptions import ObjectDoesNotExist
+from machado.models import Feature
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
 
 
@@ -155,26 +155,26 @@ def retrieve_organism(organism: str) -> Organism:
 
 
 def retrieve_feature(featureacc: str,
-                     organism: Organism,
-                     featuredb: str = "GFF_SOURCE",
+                     organism: Organism = None,
                      cvterm: str = "mRNA",
                      ontology: str = "sequence",
                      ) -> Feature:
     """Retrieve feature object."""
-    # try to retrieve using dbxref first
+    # cvterm is mandatory
     try:
         cvterm = retrieve_ontology_term(ontology=ontology,
                                         term=cvterm)
-        db = Db.objects.get(name=featuredb)
-        dbxref = Dbxref.objects.get(db=db,
-                                    accession=featureacc)
-        feature = Feature.objects.get(organism=organism,
-                                      dbxref=dbxref,
+    except ObjectDoesNotExist as e:
+        raise ImportingError(e)
+    try:
+        feature = Feature.objects.get(uniquename=featureacc,
                                       type_id=cvterm.cvterm_id)
-    # otherwise try uniquename
+    except MultipleObjectsReturned:
+        feature = Feature.objects.get(uniquename=featureacc,
+                                      type_id=cvterm.cvterm_id,
+                                      organism=organism)
     except ObjectDoesNotExist:
-        feature = Feature.objects.get(organism=organism,
-                                      uniquename=featureacc)
+        feature = None
     except IntegrityError as e:
         raise ImportingError(e)
     return feature
