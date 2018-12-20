@@ -346,6 +346,35 @@ class CoexpressionTest(TestCase):
                            feature_relationship=fr3,
                            type_id=cvterm_contained_in.cvterm_id,
                            value=test_filename).exists())
+        # check cluster2 relationships in reverse
+        self.assertTrue(FeatureRelationship.objects.filter(
+                           subject_id=test_feature5.feature_id,
+                           object_id=test_feature4.feature_id,
+                           value=test_value).exists())
+        self.assertTrue(FeatureRelationship.objects.filter(
+                           subject_id=test_feature4.feature_id,
+                           object_id=test_feature5.feature_id,
+                           value=test_value).exists())
+        fr4 = FeatureRelationship.objects.get(
+                           subject_id=test_feature4.feature_id,
+                           object_id=test_feature5.feature_id,
+                           value=test_value)
+        fr5 = FeatureRelationship.objects.get(
+                           subject_id=test_feature5.feature_id,
+                           object_id=test_feature4.feature_id,
+                           value=test_value)
+        self.assertTrue(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=fr4,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=test_filename).exists())
+        self.assertTrue(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=fr5,
+                           type_id=cvterm_contained_in.cvterm_id,
+                           value=test_filename).exists())
+        # cluster3 is not supposed to generate any relationships
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=test_feature6.feature_id,
+                           value=test_value).exists())
         call_command("remove_relationship",
                      "--filename=mcl.clusters.dummy.txt",
                      "--verbosity=0")
@@ -361,6 +390,14 @@ class CoexpressionTest(TestCase):
                            subject_id=test_feature2.feature_id,
                            object_id=test_feature3.feature_id,
                            value=test_value).exists())
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=test_feature4.feature_id,
+                           object_id=test_feature5.feature_id,
+                           value=test_value).exists())
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=test_feature5.feature_id,
+                           object_id=test_feature4.feature_id,
+                           value=test_value).exists())
         self.assertFalse(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr1,
                            value=test_filename).exists())
@@ -369,4 +406,10 @@ class CoexpressionTest(TestCase):
                            value=test_filename).exists())
         self.assertFalse(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr3,
+                           value=test_filename).exists())
+        self.assertFalse(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=fr4,
+                           value=test_filename).exists())
+        self.assertFalse(FeatureRelationshipprop.objects.filter(
+                           feature_relationship=fr5,
                            value=test_filename).exists())
