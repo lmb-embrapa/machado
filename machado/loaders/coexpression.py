@@ -22,6 +22,7 @@ class CoexpressionLoader(object):
     def __init__(self,
                  filename: str,
                  organism: Organism,
+                 source: str = "LSTRAP_SOURCE",
                  value: str = None) -> None:
         """Execute the init function."""
         self.cluster = list()
@@ -32,20 +33,12 @@ class CoexpressionLoader(object):
         self.organism = organism
 
         # get cvterm for correlation
-        try:
-            self.cvterm_corel = retrieve_ontology_term(
-                ontology='relationship',
-                term='correlated with')
-        except IntegrityError as e:
-            raise ImportingError(e)
-        try:
-            self.cvterm_cluster = retrieve_ontology_term(
-                ontology='relationship',
-                term='in branching relationship with')
-        except IntegrityError as e:
-            raise ImportingError(e)
-
-        source = 'GFF_SOURCE'
+        self.cvterm_corel = retrieve_ontology_term(
+            ontology='relationship',
+            term='correlated with')
+        self.cvterm_cluster = retrieve_ontology_term(
+            ontology='relationship',
+            term='in branching relationship with')
         self.featureloader = FeatureLoader(
                 source=source,
                 filename=self.filename,
@@ -68,7 +61,7 @@ class CoexpressionLoader(object):
 
         if len(self.included) > 1:
             try:
-                self.featureloader.store_feature_relationships_fromfile(
+                self.featureloader.store_feature_relationships_group(
                         self.included,
                         term=self.cvterm_cluster,
                         value=self.value)
@@ -93,7 +86,7 @@ class CoexpressionLoader(object):
 
         if len(self.included) > 1:
             try:
-                self.featureloader.store_feature_relationships_fromfile(
+                self.featureloader.store_feature_relationships_group(
                         group=self.included,
                         term=self.cvterm_corel,
                         value=self.value)

@@ -159,7 +159,7 @@ def retrieve_feature(featureacc: str,
                      cvterm: str = "mRNA",
                      ontology: str = "sequence",
                      ) -> Feature:
-    """Retrieve feature object. Expects feature source to be 'GFF_SOURCE'."""
+    """Retrieve feature object."""
     # cvterm is mandatory
     try:
         cvterm = retrieve_ontology_term(ontology=ontology,
@@ -173,7 +173,6 @@ def retrieve_feature(featureacc: str,
         feature = Feature.objects.get(uniquename=featureacc,
                                       type_id=cvterm.cvterm_id,
                                       organism=organism)
-    # this will make the function return ObjectDoesNotExist!
     except ObjectDoesNotExist:
         feature = None
     except IntegrityError as e:

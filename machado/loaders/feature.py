@@ -379,7 +379,7 @@ class FeatureLoader(object):
         for feature_obj in features:
             self.process_attributes(feature_obj, attrs)
 
-    def store_feature_relationships_fromfile(
+    def store_feature_relationships_group(
                                self,
                                group: list,
                                term:  Union[str, Cvterm],

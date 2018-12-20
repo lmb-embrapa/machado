@@ -71,7 +71,7 @@ class OrthologyLoader(object):
         if len(self.included) > 1:
             try:
                 # self.store_feature_relationship(group=self.included)
-                self.featureloader.store_feature_relationships_fromfile(
+                self.featureloader.store_feature_relationships_group(
                         group=self.included,
                         term=self.cvterm_orthology,
                         value=self.name)

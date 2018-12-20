@@ -45,7 +45,7 @@ class AnalysisTest(TestCase):
         # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         test_dbxref2 = Dbxref.objects.create(accession='789', db=test_db2)
         test_dbxref3 = Dbxref.objects.create(accession='135', db=test_db)
-        test_aa_term = Cvterm.objects.create(
+        test_term = Cvterm.objects.create(
             name='mRNA', cv=test_cv, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=0)
         # Cvterm.objects.create(
@@ -63,7 +63,7 @@ class AnalysisTest(TestCase):
             organism=test_organism,
             uniquename=test_featurename1,
             is_analysis=False,
-            type_id=test_aa_term.cvterm_id,
+            type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
@@ -71,7 +71,7 @@ class AnalysisTest(TestCase):
             organism=test_organism,
             uniquename=test_featurename2,
             is_analysis=False,
-            type_id=test_aa_term.cvterm_id,
+            type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
