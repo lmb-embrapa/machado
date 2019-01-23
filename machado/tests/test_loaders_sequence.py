@@ -42,8 +42,8 @@ class SequenceTest(TestCase):
                                  id='chr1',
                                  description='chromosome 1')
         test_seq_file.store_biopython_seq_record(test_seq_obj)
-        test_feature = Feature.objects.get(uniquename='chr1')
-        self.assertEqual('chromosome 1', test_feature.name)
+        test_feature = Feature.objects.get(uniquename='chromosome 1')
+        self.assertEqual('chromosome 1', test_feature.uniquename)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
 
@@ -100,9 +100,9 @@ class SequenceTest(TestCase):
                                  id='chr2',
                                  description='chromosome 2')
         test_seq_file_pub.store_biopython_seq_record(test_seq_obj_pub)
-        test_feature_doi = Feature.objects.get(uniquename='chr2')
+        test_feature_doi = Feature.objects.get(uniquename='chromosome 2')
 
-        self.assertEqual('chromosome 2', test_feature_doi.name)
+        self.assertEqual('chromosome 2', test_feature_doi.uniquename)
         test_feature_pub_doi = FeaturePub.objects.get(
                 pub_id=test_bibtex3.pub_id)
         test_pub_dbxref_doi = PubDbxref.objects.get(

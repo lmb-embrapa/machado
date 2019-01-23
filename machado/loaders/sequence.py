@@ -83,11 +83,15 @@ class SequenceLoader(object):
             if ignore_residues is True:
                 residues = ''
 
+            if seq_obj.description:
+                uniquename = seq_obj.description
+            else:
+                uniquename = seq_obj.id
+
             # storing feature
             feature = Feature(dbxref=dbxref,
                               organism=self.organism,
-                              name=seq_obj.description,
-                              uniquename=seq_obj.id,
+                              uniquename=uniquename,
                               residues=residues,
                               seqlen=len(seq_obj.seq),
                               md5checksum=m,
