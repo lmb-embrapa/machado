@@ -220,8 +220,11 @@ class FeatureLoader(object):
                 raise ImportingError(e)
 
         try:
+            srcdb = Db.objects.get(name="FASTA_source")
+            srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
+                                           db=srcdb)
             srcfeature = Feature.objects.get(
-                uniquename=tabix_feature.contig, organism=self.organism)
+                dbxref=srcdbxref, organism=self.organism)
         except ObjectDoesNotExist:
             raise ImportingError(
                 "Parent not found: {}. It's required to load "

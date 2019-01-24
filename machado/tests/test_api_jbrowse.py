@@ -90,9 +90,9 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
         # creates a srcfeature
-        test_db = Db.objects.create(name='test_db')
+        test_db = Db.objects.create(name='FASTA_source')
         test_dbxref = Dbxref.objects.create(
-                accession='test_dbxref', db=test_db)
+                accession='contig1', db=test_db)
         Feature.objects.create(
                     dbxref=test_dbxref, organism=test_organism, name='contig1',
                     type=test_cvterm_assembly, uniquename='contig1',
@@ -102,6 +102,8 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
 
         # creates features gene and exon
         class TabixFeature(object):
+            """mock parent features"""
+
             """mock tabix feature."""
 
         test_feature1 = TabixFeature()
