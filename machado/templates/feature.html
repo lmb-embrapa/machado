@@ -23,12 +23,12 @@
   </div>
   {% endif%}
 
-  {% if transcript.locations %}
+  {% if transcript.location %}
   <div class="card">
     <div class="card-body">
       <h3 class="card-title">Location</h3>
       <div class="card-text">
-        {% for location in transcript.locations %}
+        {% for location in transcript.location %}
         <p>{{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}</p>
           {% if location.jbrowse_url %}
             <iframe style='border:0' width='600' height='300' src="{{ location.jbrowse_url }}"></iframe>
@@ -38,6 +38,38 @@
     </div>
   </div>
   {% endif %}
+
+  {% if transcript.similarity %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Similarity</h3>
+      <div class="card-text">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Program</th>
+              <th scope="col">Hit</th>
+              <th scope="col">Score</th>
+              <th scope="col">Evalue</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for hit in transcript.similarity %}
+            <tr>
+              <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
+              <td>{{ hit.hit_id|safe }}</td>
+              <td>{{ hit.score|safe }}</td>
+              <td>{{ hit.evalue|safe }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <br />
 
   {% if protein %}
   <div class="card">
@@ -54,6 +86,37 @@
     </div>
   </div>
   {% endif %}
+
+  {% if protein.similarity %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Similarity</h3>
+      <div class="card-text">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Program</th>
+              <th scope="col">Hit</th>
+              <th scope="col">Score</th>
+              <th scope="col">Evalue</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for hit in protein.similarity %}
+            <tr>
+              <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
+              <td>{{ hit.hit_id|safe }}</td>
+              <td>{{ hit.score|safe }}</td>
+              <td>{{ hit.evalue|safe }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
 
 {% else %}
   {{ feature.error }}

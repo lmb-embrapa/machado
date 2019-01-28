@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
+from machado.models import Analysis, Analysisfeature
 from machado.models import Cvterm
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureDbxref, FeatureRelationship
@@ -83,15 +84,16 @@ def retrieve_feature_data(request, feature_obj: Feature) -> Dict:
     result['display'] = retrieve_feature_prop(
         feature_id=feature_obj.feature_id, prop='display')
 
-    result['locations'] = retrieve_feature_locations(
+    result['location'] = retrieve_feature_location(
         feature_id=feature_obj.feature_id,
         organism=request.session.get('current_organism_name'))
 
-    result['dbxrefs'] = retrieve_feature_dbxrefs(
+    result['dbxref'] = retrieve_feature_dbxref(
         feature_id=feature_obj.feature_id)
-    result['cvterms'] = retrieve_feature_cvterms(
+    result['cvterm'] = retrieve_feature_cvterm(
         feature_id=feature_obj.feature_id)
-
+    result['similarity'] = retrieve_feature_similarity(
+        feature_id=feature_obj.feature_id)
     return result
 
 
@@ -110,11 +112,10 @@ def retrieve_feature_prop(feature_id: int, prop: str) -> Optional[str]:
         return None
 
 
-def retrieve_feature_locations(feature_id: int, organism: str) -> List[Dict]:
+def retrieve_feature_location(feature_id: int, organism: str) -> List[Dict]:
     """Retrieve feature locations."""
-    locations = Featureloc.objects.filter(feature_id=feature_id)
     result = list()
-    for location in locations:
+    for location in Featureloc.objects.filter(feature_id=feature_id):
         jbrowse_url = None
         if hasattr(settings, 'MACHADO_JBROWSE_URL'):
             if hasattr(settings, 'MACHADO_JBROWSE_OFFSET'):
@@ -138,15 +139,14 @@ def retrieve_feature_locations(feature_id: int, organism: str) -> List[Dict]:
                 feature_id=location.srcfeature_id).uniquename,
             'jbrowse_url': jbrowse_url,
         })
-
     return result
 
 
-def retrieve_feature_dbxrefs(feature_id: int) -> List[Dict]:
+def retrieve_feature_dbxref(feature_id: int) -> List[Dict]:
     """Retrieve feature dbxrefs."""
-    feature_dbxrefs = FeatureDbxref.objects.filter(feature_id=feature_id)
+    feature_dbxref = FeatureDbxref.objects.filter(feature_id=feature_id)
     result = list()
-    for feature_dbxref in feature_dbxrefs:
+    for feature_dbxref in feature_dbxref:
         result.append({
             'dbxref': feature_dbxref.dbxref.accession,
             'db': feature_dbxref.dbxref.db.name,
@@ -154,14 +154,42 @@ def retrieve_feature_dbxrefs(feature_id: int) -> List[Dict]:
     return result
 
 
-def retrieve_feature_cvterms(feature_id: int) -> List[Dict]:
+def retrieve_feature_cvterm(feature_id: int) -> List[Dict]:
     """Retrieve feature cvterms."""
-    feature_cvterms = FeatureDbxref.objects.filter(feature_id=feature_id)
+    feature_cvterm = FeatureDbxref.objects.filter(feature_id=feature_id)
     result = list()
-    for feature_cvterm in feature_cvterms:
+    for feature_cvterm in feature_cvterm:
         result.append({
             'cvterm': feature_cvterm.cvterm.name,
             'cvterm_definition': feature_cvterm.cvterm.definition,
             'cv': feature_cvterm.cvterm.cv.name,
         })
+    return result
+
+
+def retrieve_feature_similarity(feature_id: int) -> Optional[List[Dict]]:
+    """Retrieve feature locations."""
+    result = list()
+    try:
+        match_parts_ids = Featureloc.objects.filter(
+            srcfeature_id=feature_id).values_list('feature_id')
+    except ObjectDoesNotExist:
+        return None
+
+    for match_part_id in match_parts_ids:
+        analysis_feature = Analysisfeature.objects.get(
+            feature_id=match_part_id)
+        analysis = Analysis.objects.get(
+            analysis_id=analysis_feature.analysis_id)
+        hits = Featureloc.objects.filter(feature_id=match_part_id)
+        hit = hits.exclude(srcfeature_id=feature_id).first()
+        hit_feat = Feature.objects.get(feature_id=hit.srcfeature_id)
+        result.append({
+            'program': analysis.program,
+            'version': analysis.programversion,
+            'hit_id': hit_feat.name,
+            'score': analysis_feature.rawscore,
+            'evalue': analysis_feature.significance,
+        })
+
     return result
