@@ -59,7 +59,12 @@
           {% for hit in transcript.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
+              <td>
+                  {{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}
+                  {% for ontology in hit.feature_cvterm %}
+                    <br />{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}
+                  {% endfor%}
+              </td>
               <td>{{ hit.start|default_if_none:''|safe }}</td>
               <td>{{ hit.end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>
@@ -111,7 +116,12 @@
           {% for hit in protein.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
+              <td>
+                  {{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}
+                  {% for ontology in hit.feature_cvterm %}
+                    <br />{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}
+                  {% endfor%}
+              </td>
               <td>{{ hit.start|default_if_none:''|safe }}</td>
               <td>{{ hit.end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>

@@ -13,7 +13,7 @@ from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cvterm, Db
 from machado.models import Feature, Featureloc, Featureprop
-from machado.models import FeatureDbxref, FeatureRelationship
+from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
 
 VALID_TYPES = ['mRNA', 'polypeptide']
@@ -156,13 +156,15 @@ def retrieve_feature_dbxref(feature_id: int) -> List[Dict]:
 
 def retrieve_feature_cvterm(feature_id: int) -> List[Dict]:
     """Retrieve feature cvterms."""
-    feature_cvterm = FeatureDbxref.objects.filter(feature_id=feature_id)
+    feature_cvterm = FeatureCvterm.objects.filter(feature_id=feature_id)
     result = list()
     for feature_cvterm in feature_cvterm:
         result.append({
             'cvterm': feature_cvterm.cvterm.name,
             'cvterm_definition': feature_cvterm.cvterm.definition,
             'cv': feature_cvterm.cvterm.cv.name,
+            'db': feature_cvterm.cvterm.dbxref.db.name,
+            'dbxref': feature_cvterm.cvterm.dbxref.accession,
         })
     return result
 
@@ -186,11 +188,16 @@ def retrieve_feature_similarity(feature_id: int) -> Optional[List[Dict]]:
         hit_feat = Feature.objects.get(feature_id=hit.srcfeature_id)
         display = retrieve_feature_prop(feature_id=hit_feat.feature_id,
                                         prop='display')
+
         db = Db.objects.get(Dbxref_db_Db__dbxref_id=hit_feat.dbxref_id)
         if db.name == 'GFF_SOURCE':
             db_name = None
         else:
             db_name = db.name
+
+        feature_cvterm = retrieve_feature_cvterm(
+            feature_id=hit_feat.feature_id)
+
         result.append({
             'program': analysis.program,
             'programversion': analysis.programversion,
@@ -202,6 +209,7 @@ def retrieve_feature_similarity(feature_id: int) -> Optional[List[Dict]]:
             'end': hit.fmax,
             'score': analysis_feature.rawscore,
             'evalue': analysis_feature.significance,
+            'feature_cvterm': feature_cvterm,
         })
 
     return result
