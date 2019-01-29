@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cvterm
+from machado.models import Cvterm, Db
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
@@ -184,10 +184,22 @@ def retrieve_feature_similarity(feature_id: int) -> Optional[List[Dict]]:
         hits = Featureloc.objects.filter(feature_id=match_part_id)
         hit = hits.exclude(srcfeature_id=feature_id).first()
         hit_feat = Feature.objects.get(feature_id=hit.srcfeature_id)
+        display = retrieve_feature_prop(feature_id=hit_feat.feature_id,
+                                        prop='display')
+        db = Db.objects.get(Dbxref_db_Db__dbxref_id=hit_feat.dbxref_id)
+        if db.name == 'GFF_SOURCE':
+            db_name = None
+        else:
+            db_name = db.name
         result.append({
             'program': analysis.program,
-            'version': analysis.programversion,
-            'hit_id': hit_feat.name,
+            'programversion': analysis.programversion,
+            'db_name': db_name,
+            'hit_id': hit_feat.uniquename,
+            'hit_name': hit_feat.name,
+            'display': display,
+            'start': hit.fmin,
+            'end': hit.fmax,
             'score': analysis_feature.rawscore,
             'evalue': analysis_feature.significance,
         })
