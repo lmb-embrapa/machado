@@ -17,7 +17,7 @@
       <h2 class="card-title">Transcript: {{ transcript.name }}</h2>
       <div class="card-text">
       <p>ID: {{ transcript.uniquename }}</p>
-      <p>Display: {{ transcript.display }}</p>
+      <p>Display: {{ transcript.display|default_if_none:'' }}</p>
       </div>
     </div>
   </div>
@@ -49,6 +49,8 @@
             <tr>
               <th scope="col">Program</th>
               <th scope="col">Hit</th>
+              <th scope="col">Start</th>
+              <th scope="col">End</th>
               <th scope="col">Score</th>
               <th scope="col">Evalue</th>
             </tr>
@@ -57,9 +59,11 @@
           {% for hit in transcript.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.hit_id|safe }}</td>
-              <td>{{ hit.score|safe }}</td>
-              <td>{{ hit.evalue|safe }}</td>
+              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
+              <td>{{ hit.start|default_if_none:''|safe }}</td>
+              <td>{{ hit.end|default_if_none:''|safe }}</td>
+              <td>{{ hit.score|default_if_none:''|safe }}</td>
+              <td>{{ hit.evalue|default_if_none:''|safe }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -81,7 +85,7 @@
       {% else %}
         <p>ID: <a href="/machado/feature/?feature_id={{ protein.feature_id|safe }}">{{ protein.uniquename }}</a></p>
       {% endif %}
-      <p>Display: {{ protein.display }}</p>
+      <p>Display: {{ protein.display|default_if_none:'' }}</p>
       </div>
     </div>
   </div>
@@ -97,6 +101,8 @@
             <tr>
               <th scope="col">Program</th>
               <th scope="col">Hit</th>
+              <th scope="col">Start</th>
+              <th scope="col">End</th>
               <th scope="col">Score</th>
               <th scope="col">Evalue</th>
             </tr>
@@ -105,9 +111,11 @@
           {% for hit in protein.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.hit_id|safe }}</td>
-              <td>{{ hit.score|safe }}</td>
-              <td>{{ hit.evalue|safe }}</td>
+              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
+              <td>{{ hit.start|default_if_none:''|safe }}</td>
+              <td>{{ hit.end|default_if_none:''|safe }}</td>
+              <td>{{ hit.score|default_if_none:''|safe }}</td>
+              <td>{{ hit.evalue|default_if_none:''|safe }}</td>
             </tr>
           {% endfor %}
         </tbody>
