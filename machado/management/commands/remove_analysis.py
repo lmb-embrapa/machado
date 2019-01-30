@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Analysisprop, Analysis, Analysisfeature
-from machado.models import Feature, Featureloc, Organism
+from machado.models import Feature, Featureloc
 from machado.models import Quantification, Acquisition
 
 
@@ -34,15 +34,6 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Deleting {} and every child'
                               'record (CASCADE)'.format(name))
-        # get multispecies organism
-        try:
-            multiorganism = Organism.objects.get(
-                    abbreviation='multispecies',
-                    genus='multispecies',
-                    species='multispecies',
-                    common_name='multispecies')
-        except ObjectDoesNotExist:
-            raise CommandError('No feature registered as multispecies')
 
         try:
             analysisprop_list = Analysisprop.objects.filter(value=name)
@@ -60,18 +51,14 @@ class Command(BaseCommand):
                     pass
                 # remove analysisfeatures and others if exists...
                 try:
-                    analysisfeature_list = Analysisfeature.objects.filter(
-                            analysis=analysis)
-                    for analysisfeature in analysisfeature_list:
-                        feature_ids = list(Feature.objects.filter(
-                                feature_id=analysisfeature.feature_id,
-                                organism=multiorganism).values_list(
-                                    'feature_id', flat=True))
-                        Featureloc.objects.filter(
-                                feature_id__in=feature_ids).delete()
-                        Feature.objects.filter(
-                                feature_id__in=feature_ids).delete()
-                        analysisfeature.delete()
+                    feature_ids = list(Analysisfeature.objects.filter(
+                            analysis=analysis).values_list(
+                                'feature_id', flat=True))
+                    Featureloc.objects.filter(
+                        feature_id__in=feature_ids).delete()
+                    Feature.objects.filter(
+                        feature_id__in=feature_ids).delete()
+                    Analysisfeature.objects.filter(analysis=analysis).delete()
                 except ObjectDoesNotExist:
                     pass
                 # finally removes analysis...

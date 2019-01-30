@@ -49,8 +49,8 @@
             <tr>
               <th scope="col">Program</th>
               <th scope="col">Hit</th>
-              <th scope="col">Start</th>
-              <th scope="col">End</th>
+              <th scope="col">Query start</th>
+              <th scope="col">Query end</th>
               <th scope="col">Score</th>
               <th scope="col">Evalue</th>
             </tr>
@@ -59,9 +59,14 @@
           {% for hit in transcript.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
-              <td>{{ hit.start|default_if_none:''|safe }}</td>
-              <td>{{ hit.end|default_if_none:''|safe }}</td>
+              <td>
+                  {{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.display|default_if_none:'' }}
+                  {% for ontology in hit.feature_cvterm %}
+                  <br /><small>{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}</small>
+                  {% endfor%}
+              </td>
+              <td>{{ hit.query_start|default_if_none:''|safe }}</td>
+              <td>{{ hit.query_end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>
               <td>{{ hit.evalue|default_if_none:''|safe }}</td>
             </tr>
@@ -101,8 +106,8 @@
             <tr>
               <th scope="col">Program</th>
               <th scope="col">Hit</th>
-              <th scope="col">Start</th>
-              <th scope="col">End</th>
+              <th scope="col">Query start</th>
+              <th scope="col">Query end</th>
               <th scope="col">Score</th>
               <th scope="col">Evalue</th>
             </tr>
@@ -111,9 +116,14 @@
           {% for hit in protein.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.hit_id|safe }} {{ hit.display|default_if_none:'' }}</td>
-              <td>{{ hit.start|default_if_none:''|safe }}</td>
-              <td>{{ hit.end|default_if_none:''|safe }}</td>
+              <td>
+                  {{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.display|default_if_none:'' }}
+                  {% for ontology in hit.feature_cvterm %}
+                  <br /><small>{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}</small>
+                  {% endfor%}
+              </td>
+              <td>{{ hit.query_start|default_if_none:''|safe }}</td>
+              <td>{{ hit.query_end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>
               <td>{{ hit.evalue|default_if_none:''|safe }}</td>
             </tr>
