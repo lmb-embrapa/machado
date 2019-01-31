@@ -108,19 +108,15 @@ class AnalysisTest(TestCase):
                 programversion=test_programversion,
                 sourcename=test_sourcename1,
                 timeexecuted=timeexecuted,
-                name=test_assayacc1)
+                name=test_assayacc1,
+                filename=test_filename)
         test_analysis2 = test_analysis_loader.store_analysis(
                 program=test_program,
                 programversion=test_programversion,
                 sourcename=test_sourcename2,
                 timeexecuted=timeexecuted,
-                name=test_assayacc2)
-        test_analysis_loader.store_analysisprop(
-                analysis=test_analysis1,
-                value=test_filename)
-        test_analysis_loader.store_analysisprop(
-                analysis=test_analysis2,
-                value=test_filename)
+                name=test_assayacc2,
+                filename=test_filename)
         test_analysis_loader.store_quantification(
                 analysis=test_analysis1,
                 assayacc=test_assayacc1)

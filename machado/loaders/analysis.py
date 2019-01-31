@@ -23,10 +23,16 @@ class AnalysisLoader(object):
 
     help = 'Load analysis records.'
 
+    def __init__(self) -> None:
+        """Execute the init function."""
+        self.cvterm_contained_in = retrieve_ontology_term(
+            ontology='relationship', term='contained in')
+
     def store_analysis(self,
                        program: str,
                        sourcename: str,
                        programversion: str,
+                       filename: str,
                        timeexecuted: str = None,
                        algorithm: str = None,
                        name: str = None,
@@ -52,6 +58,11 @@ class AnalysisLoader(object):
                     program=program,
                     programversion=programversion,
                     timeexecuted=timeexecuted)
+
+            self.store_analysisprop(analysis=analysis,
+                                    type_id=self.cvterm_contained_in.cvterm_id,
+                                    value=filename)
+
         except IntegrityError as e:
             raise ImportingError(e)
         except ObjectDoesNotExist as e:
@@ -60,16 +71,14 @@ class AnalysisLoader(object):
 
     def store_analysisprop(self,
                            analysis: Analysis,
+                           type_id: int,
                            value: str,
                            rank: int = 0) -> None:
         """Store analysisprop."""
-        cvterm_contained_in = retrieve_ontology_term(
-                ontology='relationship',
-                term='contained in')
         try:
             Analysisprop.objects.create(
                     analysis=analysis,
-                    type_id=cvterm_contained_in.cvterm_id,
+                    type_id=type_id,
                     value=value,
                     rank=rank)
         except IntegrityError as e:
