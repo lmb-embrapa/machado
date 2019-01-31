@@ -13,7 +13,7 @@ from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cvterm, Db
 from machado.models import Feature, Featureloc, Featureprop
-from machado.models import FeatureDbxref, FeatureRelationship
+from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
 
 VALID_TYPES = ['mRNA', 'polypeptide']
@@ -129,7 +129,8 @@ def retrieve_feature_location(feature_id: int, organism: str) -> List[Dict]:
                 location.fmax + offset,
             )
             jbrowse_url = '{}/?data=data/{}&loc={}'\
-                          '&tracklist=0&nav=0&overview=0'.format(
+                          '&tracklist=0&nav=0&overview=0'\
+                          '&tracks=ref_seq,gene,transcripts,CDS'.format(
                               settings.MACHADO_JBROWSE_URL, organism, loc)
         result.append({
             'start': location.fmin,
@@ -156,52 +157,77 @@ def retrieve_feature_dbxref(feature_id: int) -> List[Dict]:
 
 def retrieve_feature_cvterm(feature_id: int) -> List[Dict]:
     """Retrieve feature cvterms."""
-    feature_cvterm = FeatureDbxref.objects.filter(feature_id=feature_id)
+    feature_cvterm = FeatureCvterm.objects.filter(feature_id=feature_id)
     result = list()
     for feature_cvterm in feature_cvterm:
         result.append({
             'cvterm': feature_cvterm.cvterm.name,
             'cvterm_definition': feature_cvterm.cvterm.definition,
             'cv': feature_cvterm.cvterm.cv.name,
+            'db': feature_cvterm.cvterm.dbxref.db.name,
+            'dbxref': feature_cvterm.cvterm.dbxref.accession,
         })
     return result
 
 
-def retrieve_feature_similarity(feature_id: int) -> Optional[List[Dict]]:
+def retrieve_feature_similarity(feature_id: int) -> List:
     """Retrieve feature locations."""
     result = list()
     try:
         match_parts_ids = Featureloc.objects.filter(
             srcfeature_id=feature_id).values_list('feature_id')
     except ObjectDoesNotExist:
-        return None
+        return list()
 
     for match_part_id in match_parts_ids:
         analysis_feature = Analysisfeature.objects.get(
             feature_id=match_part_id)
         analysis = Analysis.objects.get(
             analysis_id=analysis_feature.analysis_id)
-        hits = Featureloc.objects.filter(feature_id=match_part_id)
-        hit = hits.exclude(srcfeature_id=feature_id).first()
-        hit_feat = Feature.objects.get(feature_id=hit.srcfeature_id)
-        display = retrieve_feature_prop(feature_id=hit_feat.feature_id,
-                                        prop='display')
-        db = Db.objects.get(Dbxref_db_Db__dbxref_id=hit_feat.dbxref_id)
-        if db.name == 'GFF_SOURCE':
-            db_name = None
+        if analysis_feature.normscore is not None:
+            score = analysis_feature.normscore
         else:
-            db_name = db.name
+            score = analysis_feature.rawscore
+
+        # it should have 2 records (query and hit)
+        matches = Featureloc.objects.filter(feature_id=match_part_id)
+        for match in matches:
+            # query
+            if match.srcfeature_id == feature_id:
+                query_start = match.fmin
+                query_end = match.fmax
+            # hit
+            else:
+                match_feat = Feature.objects.get(
+                    feature_id=match.srcfeature_id)
+                display = retrieve_feature_prop(
+                    feature_id=match_feat.feature_id, prop='display')
+
+                db = Db.objects.get(
+                     Dbxref_db_Db__dbxref_id=match_feat.dbxref_id)
+                if db.name == 'GFF_SOURCE':
+                    db_name = None
+                else:
+                    db_name = db.name
+
+                feature_cvterm = retrieve_feature_cvterm(
+                    feature_id=match_feat.feature_id)
+
+        feature_cvterm = retrieve_feature_cvterm(
+            feature_id=match_feat.feature_id)
+
         result.append({
             'program': analysis.program,
             'programversion': analysis.programversion,
             'db_name': db_name,
-            'hit_id': hit_feat.uniquename,
-            'hit_name': hit_feat.name,
+            'unique': match_feat.uniquename,
+            'name': match_feat.name,
             'display': display,
-            'start': hit.fmin,
-            'end': hit.fmax,
-            'score': analysis_feature.rawscore,
+            'query_start': query_start,
+            'query_end': query_end,
+            'score': score,
             'evalue': analysis_feature.significance,
+            'feature_cvterm': feature_cvterm,
         })
 
     return result

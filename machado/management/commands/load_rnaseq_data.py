@@ -145,14 +145,8 @@ class Command(BaseCommand):
                              timeexecuted=timeexecuted,
                              algorithm=algorithm,
                              name=assay,
-                             description=description)
-                    except ImportingError as e:
-                        raise CommandError(e)
-                    # link filename to analysis
-                    try:
-                        analysis_file.store_analysisprop(
-                                analysis=analysis,
-                                value=filename)
+                             description=description,
+                             filename=filename)
                     except ImportingError as e:
                         raise CommandError(e)
                     # store quantification
