@@ -51,12 +51,10 @@ class SimilarityLoader(object):
                     name=name,
                     description=description,
                     sourcename=filename,
+                    filename=filename,
                     program=program,
                     programversion=programversion,
                     timeexecuted=datetime.now())
-            self.analysis_loader.store_analysisprop(
-                    analysis=self.analysis,
-                    value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         except ObjectDoesNotExist as e:
