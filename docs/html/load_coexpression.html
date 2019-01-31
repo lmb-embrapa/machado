@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2.11. Loading OrthoMCL results &mdash; machado 0.1.0 documentation</title>
+  <title>2.11. Loading Coexpression analyzes &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3. Visualization" href="visualization.html" />
-    <link rel="prev" title="2.10. Loading OrthoMCL results" href="load_rnaseq.html" /> 
+    <link rel="prev" title="2.10. Loading RNA-seq data" href="load_rnaseq.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -144,7 +144,7 @@
         
           <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>2.11. Loading OrthoMCL results</li>
+      <li>2.11. Loading Coexpression analyzes</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -163,17 +163,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="loading-orthomcl-results">
-<h1>2.11. Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="load-orthomcl">
-<h2>2.11.1. Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --filename groups.txt
+  <div class="section" id="loading-coexpression-analyzes">
+<h1>2.11. Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-coexpression-correlated-pairs-of-features">
+<h2>2.11.1. Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this headline">¶</a></h2>
+<p>Coexpression analyzes usually generate correlation statistics regarding gene sets in a pairwise manner.
+For example, LSTrAP can generate a table with the Pearson correlation coefficient for every pair of genes in
+a RNA-seq experiment.</p>
+<p>To load such a table into Machado, the file must be headless and tab separated, with the two first columns
+containing the correlated pair of IDs for the genes/features and the third column must contain the correlation
+coefficient among them. In the case of the output of the LSTrAP software, the coefficient is subtracted by 0.7
+for normalization sakes.</p>
+<p>A two line sample from such a table is showed below:</p>
+<p>AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      0.18189286870895194
+AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      0.1715779378273995</p>
+<p>Note: The feature pairs from columns 1 and 2 need to be loaded previously.</p>
+<p>To load such a table, one can run the command below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --filename pcc.mcl.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --help
 </pre></div>
 </div>
 <table border="1" class="docutils">
@@ -183,24 +195,79 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>–filename</td>
-<td>groups.txt file *</td>
+<td>‘pcc.mcl.txt’ File *</td>
 </tr>
-<tr class="row-even"><td>–cpu</td>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
+</tr>
+<tr class="row-odd"><td>–cpu</td>
 <td>Number of threads</td>
 </tr>
 </tbody>
 </table>
-<p>* output result from OrthoMCL software. Mandatory.</p>
+<p>* example output file from LSTrAP software.</p>
 </div>
-<div class="section" id="remove-orthology">
-<h2>2.11.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_orthology –name</em>. <strong>Every orthologous relations from filename (e.g. ‘groups.txt’ from OrthoMCL) will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_orthology --help
+<div class="section" id="load-coexpression-clusters">
+<h2>2.11.2. Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+<p>Other type of coexpression analyzes involve clustering features using its correlation values.
+LSTrAP does that using the ‘mcl’ software. To load data from such analyzes, the input file must be
+headless and fields tab separated, with each line representing one cluster, and each column representing
+one gene/feature from that cluster. Three-cluster sample from such a file is shown below, the first line
+represents a cluster with three individuals, the second line a cluster with two, and the third line an
+orphaned cluster with only one individual:</p>
+<p>AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+AT5G24750.1.TAIR10</p>
+<p>Note: The genes/features from each column must be loaded previously.</p>
+<p>To load such a file, one can run the command below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --filename mcl.clusters.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>This command requires the file name ‘groups.txt’ used before as input to load orthologies.</li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>‘mcl.clusters.txt’ file *</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
+</tr>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* example output file from LSTrAP software.</p>
+</div>
+<div class="section" id="remove-coexpression">
+<h2>2.11.3. Remove coexpression<a class="headerlink" href="#remove-coexpression" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove coexpression analyzes, from pairs or clusters, all you need to do is pass
+the filename used to load the analyzes to the remove_relationships command: remove_relationship –filename &lt;coexpression_file&gt;’
+<strong>Every coexpression relations from coexpression_file (e.g. ‘pcc.mcl.txt’ or ‘mcl.clusters.txt’ from LSTrAP) will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>‘mcl.clusters.txt’ file *</td>
+</tr>
+</tbody>
+</table>
+<p>* example output file from LSTrAP software.</p>
 </div>
 </div>
 
@@ -215,7 +282,7 @@
         <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_rnaseq.html" class="btn btn-neutral" title="2.10. Loading OrthoMCL results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_rnaseq.html" class="btn btn-neutral" title="2.10. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
