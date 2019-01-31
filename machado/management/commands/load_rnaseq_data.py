@@ -34,7 +34,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Define the arguments."""
         parser.add_argument("--filename",
-                            help="'.csv' file with sample and projects info.",
+                            help="tabular text file with gene counts",
                             required=True,
                             type=str)
         parser.add_argument("--organism",

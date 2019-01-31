@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2.10. Loading RNA-seq data &mdash; machado 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="2.11. Loading Coexpression analyzes" href="load_coexpression.html" />
+    <link rel="prev" title="2.9. Loading OrthoMCL results" href="load_orthomcl.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> machado
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.8. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.10. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.11. Coexpression</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">machado</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+        
+      <li>2.10. Loading RNA-seq data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/load_rnaseq.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="loading-rna-seq-data">
+<h1>2.10. Loading RNA-seq data<a class="headerlink" href="#loading-rna-seq-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-rna-seq-information">
+<h2>2.10.1. Load RNA-seq information<a class="headerlink" href="#load-rna-seq-information" title="Permalink to this headline">¶</a></h2>
+<p>Before inserting RNA-seq count tables, it is needed to input information about the experiments and
+samples from which the data was generated.
+In Machado we will focus on the GEO/NCBI database as a source for RNA-seq experiments information and data.
+From the GEO/NCBI database we are supposed to get identifiers for different <em>series</em> (e.g.: GSE85653) that
+describe the studies/projects as a whole. From the GEO series we can get identifiers for biosamples or, in CHADO
+lingo, biomaterials (e.g.: GSM2280286). From the GEO biosamples we get identifiers for RNA-seq experiments
+(or assays), usually from the SRA database (e.g.: SRR4033018). SRA identifiers have links for the
+raw data one can be interested to analyse.</p>
+<p>In Machado, it is necessary to input a .csv file with information for all SRA datafile regarding RNA-seq assays
+that will be input.</p>
+<p>This file must have the following fields in each line:</p>
+<p>“Organism specific name (e.g.: ‘Orysa sativa’)”, “GEO series identifier (e.g: GSE85653)”,
+“GEO sample identifier (e.g: GSM2280286)”, “SRA identifier (e.g: SRR4033018)”,
+“Experiment description (e.g: ‘Heat’)”, “Sample description (e.g.: ‘leaf’)”,
+“Date (in format ‘%b-%d-%Y’: e.g.: Oct-16-2016)”.</p>
+<p>A sample line for such a file can be seen below:</p>
+<p>Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018</p>
+<p>To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_information --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+</pre></div>
+</div>
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="85%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>.csv file *</td>
+</tr>
+<tr class="row-even"><td>–projectdb</td>
+<td>Project database info (e.g.: ‘GEO’)</td>
+</tr>
+<tr class="row-odd"><td>–biomaterialdb</td>
+<td>Biomaterial database info (e.g.: ‘GEO’)</td>
+</tr>
+<tr class="row-even"><td>–assaydb</td>
+<td>Assay database info (e.g.: ‘SRA’)</td>
+</tr>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* Any text editor can be used to make such a file.</p>
+</div>
+<div class="section" id="remove-rna-seq-information">
+<h2>2.10.2. Remove RNA-seq information<a class="headerlink" href="#remove-rna-seq-information" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+</div>
+<div class="section" id="load-rna-seq-data">
+<h2>2.10.3. Load RNA-seq data<a class="headerlink" href="#load-rna-seq-data" title="Permalink to this headline">¶</a></h2>
+<p>To load expression count tables for RNA-seq data, a tabular file should be loaded, that can contain data
+from several RNA-seq experiments, or assays, per column. This file should have the following header:</p>
+<p>“Gene identifier” “SRA Identifier 1” “SRA Identifier 2”  … “SRA Identifier n”</p>
+<p>Example of a header for such a sample file, that contains two assays/experiments:</p>
+<p>“gene    SRR5167848.htseq        SRR2302912.htseq”</p>
+<p>The body of the table is composed of the gene identifier followed by the counts for each gene, in each experiment.</p>
+<p>Example of a line of sucha a sample file:</p>
+<p>AT2G44195.1.TAIR10     0.0     0.6936967934559419</p>
+<p>Note that the count fields can have floats or integers, depending on the normalization used (usually TPM, FPKM or raw counts).</p>
+<p>The gene identifier is supposed to already be loaded as a feature, usually from the organism’s genome annotation .gff file.</p>
+<p>We used the output of the LSTrAP program as standard format for this file.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_data --filename file.tab --organism <span class="s1">&#39;Oryza sativa&#39;</span> --programversion <span class="m">1</span>.3 --assaydb SRA
+</pre></div>
+</div>
+<ul class="simple">
+<li>As default the program name is ‘LSTrAP’ but can be changed with –program</li>
+<li>The data is by default taken as normalized (TPM, FPKM, etc.) but can be changed with –norm</li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_data --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>tabular text file with gene counts per line.</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Oryza sativa’)</td>
+</tr>
+<tr class="row-odd"><td>–programversion</td>
+<td>Version of the software (e.g.: ‘1.3’) (string)</td>
+</tr>
+<tr class="row-even"><td>–name</td>
+<td>Optional name (string)</td>
+</tr>
+<tr class="row-odd"><td>–description</td>
+<td>Optional description (string)</td>
+</tr>
+<tr class="row-even"><td>–algorithm</td>
+<td>Optional algorithm description (string)</td>
+</tr>
+<tr class="row-odd"><td>–assaydb</td>
+<td>Optional assay database info (e.g.: ‘SRA’) (string)</td>
+</tr>
+<tr class="row-even"><td>–timeexecuted</td>
+<td><dl class="first last docutils">
+<dt>Optional Date software was run. Mandatory format: e.g.:</dt>
+<dd>‘Oct-16-2016’ (string)</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-odd"><td>–program</td>
+<td>Optional Name of the software (default: ‘LSTrAP’) (string)</td>
+</tr>
+<tr class="row-even"><td>–norm</td>
+<td><dl class="first last docutils">
+<dt>Optional Normalized data: 1-yes (tpm, fpkm, etc.); 0-no (raw</dt>
+<dd>counts); default is 1) (integer)</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="remove-rna-seq-data">
+<h2>2.10.4. Remove RNA-seq data<a class="headerlink" href="#remove-rna-seq-data" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="load_coexpression.html" class="btn btn-neutral float-right" title="2.11. Loading Coexpression analyzes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="load_orthomcl.html" class="btn btn-neutral" title="2.9. Loading OrthoMCL results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Embrapa
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
