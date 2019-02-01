@@ -38,10 +38,10 @@ def patch_root_urlconf():
 def patch_templates():
     """Include dependencies to TEMPLATE."""
     for template in settings.TEMPLATES:
-        if template['BACKEND'] == 'django.template.backends.django.'\
-           'DjangoTemplates':
-            template['OPTIONS']['context_processors'].append(
-                'machado.context_processors.organism_processor')
+        template['BACKEND'] == 'django.template.backends.django.'\
+           'DjangoTemplates'
+        template['OPTIONS']['context_processors'].append(
+            'machado.context_processors.organism_processor')
 
 
 def patch_all():
