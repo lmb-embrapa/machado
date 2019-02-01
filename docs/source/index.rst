@@ -8,7 +8,7 @@ machado's documentation
 
 `machado` is a `Django <https://www.djangoproject.com/>`_ framework for `Chado <http://gmod.org/wiki/Chado_-_Getting_Started>`_.
 
-Contents
+Content
 ========
 
 .. toctree::

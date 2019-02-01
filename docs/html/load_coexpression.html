@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2.11. Loading Coexpression analyzes &mdash; machado 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Visualization" href="visualization.html" />
+    <link rel="prev" title="2.10. Loading RNA-seq data" href="load_rnaseq.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> machado
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.7. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.8. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.9. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.10. RNA-seq</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.11. Coexpression</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">machado</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+        
+      <li>2.11. Loading Coexpression analyzes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/load_coexpression.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="loading-coexpression-analyzes">
+<h1>2.11. Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-coexpression-correlated-pairs-of-features">
+<h2>2.11.1. Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this headline">¶</a></h2>
+<p>Coexpression analyzes usually generate correlation statistics regarding gene sets in a pairwise manner.
+For example, LSTrAP can generate a table with the Pearson correlation coefficient for every pair of genes in
+a RNA-seq experiment.</p>
+<p>To load such a table into Machado, the file must be headless and tab separated, with the two first columns
+containing the correlated pair of IDs for the genes/features and the third column must contain the correlation
+coefficient among them. In the case of the output of the LSTrAP software, the coefficient is subtracted by 0.7
+for normalization sakes.</p>
+<p>A two line sample from such a table is showed below:</p>
+<p>AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      0.18189286870895194
+AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      0.1715779378273995</p>
+<p>Note: The feature pairs from columns 1 and 2 need to be loaded previously.</p>
+<p>To load such a table, one can run the command below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --filename pcc.mcl.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>‘pcc.mcl.txt’ File *</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
+</tr>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* example output file from LSTrAP software.</p>
+</div>
+<div class="section" id="load-coexpression-clusters">
+<h2>2.11.2. Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+<p>Other type of coexpression analyzes involve clustering features using its correlation values.
+LSTrAP does that using the ‘mcl’ software. To load data from such analyzes, the input file must be
+headless and fields tab separated, with each line representing one cluster, and each column representing
+one gene/feature from that cluster. Three-cluster sample from such a file is shown below, the first line
+represents a cluster with three individuals, the second line a cluster with two, and the third line an
+orphaned cluster with only one individual:</p>
+<p>AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+AT5G24750.1.TAIR10</p>
+<p>Note: The genes/features from each column must be loaded previously.</p>
+<p>To load such a file, one can run the command below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --filename mcl.clusters.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>‘mcl.clusters.txt’ file *</td>
+</tr>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
+</tr>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
+</tr>
+</tbody>
+</table>
+<p>* example output file from LSTrAP software.</p>
+</div>
+<div class="section" id="remove-coexpression">
+<h2>2.11.3. Remove coexpression<a class="headerlink" href="#remove-coexpression" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove coexpression analyzes, from pairs or clusters, all you need to do is pass
+the filename used to load the analyzes to the remove_relationships command: remove_relationship –filename &lt;coexpression_file&gt;’
+<strong>Every coexpression relations from coexpression_file (e.g. ‘pcc.mcl.txt’ or ‘mcl.clusters.txt’ from LSTrAP) will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>–filename</td>
+<td>‘mcl.clusters.txt’ file *</td>
+</tr>
+</tbody>
+</table>
+<p>* example output file from LSTrAP software.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="load_rnaseq.html" class="btn btn-neutral" title="2.10. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Embrapa
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

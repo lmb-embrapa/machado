@@ -17,3 +17,5 @@ The data files must be loaded in a particular order, taking into account their `
    Blast <load_blast>
    InterproScan <load_interproscan>
    OrthoMCL <load_orthomcl>
+   RNA-seq <load_rnaseq>
+   Coexpression <load_coexpression>
