@@ -11,7 +11,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cvterm, Db
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
@@ -38,7 +37,7 @@ def get_queryset(request):
                       'error.html',
                       {'context': error})
 
-    feature['type'] = Cvterm.objects.get(cvterm_id=feature_obj.type_id).name
+    feature['type'] = feature_obj.type.name
     if feature['type'] not in VALID_TYPES:
         error = {'error': 'Invalid feature type.'}
         return render(request,
@@ -213,12 +212,10 @@ def retrieve_feature_similarity(feature_id: int,
                 display = retrieve_feature_prop(
                     feature_id=match_feat.feature_id, prop='display')
 
-                db = Db.objects.get(
-                     Dbxref_db_Db__dbxref_id=match_feat.dbxref_id)
-                if db.name == 'GFF_SOURCE':
+                if match_feat.dbxref.db.name == 'GFF_SOURCE':
                     db_name = None
                 else:
-                    db_name = db.name
+                    db_name = match_feat.dbxref.db.name
 
                 feature_cvterm = retrieve_feature_cvterm(
                     feature_id=match_feat.feature_id)
