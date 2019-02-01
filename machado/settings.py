@@ -17,7 +17,14 @@ def patch_installed_apps():
 
 def patch_middleware():
     """Include dependencies to MIDDLEWARE."""
-    settings.MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
+    settings.MIDDLEWARE.append(
+        'corsheaders.middleware.CorsMiddleware')
+    settings.MIDDLEWARE.append(
+        'django.contrib.sessions.middleware.SessionMiddleware')
+    settings.MIDDLEWARE.append(
+        'django.contrib.auth.middleware.AuthenticationMiddleware')
+    settings.MIDDLEWARE.append(
+        'django.contrib.messages.middleware.MessageMiddleware')
 
 
 def patch_root_urlconf():
@@ -32,11 +39,22 @@ def patch_root_urlconf():
 
 def patch_templates():
     """Include dependencies to TEMPLATE."""
-    for template in settings.TEMPLATES:
-        if template['BACKEND'] == 'django.template.backends.django.'\
-           'DjangoTemplates':
-            template['OPTIONS']['context_processors'].append(
-                'machado.context_processors.organism_processor')
+    settings.TEMPLATES.append(
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                    'machado.context_processors.organism_processor'
+                ]
+            }
+        }
+    )
 
 
 def patch_all():

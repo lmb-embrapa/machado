@@ -71,7 +71,7 @@ class SequenceLoader(object):
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
-            feature = Feature.objects.get(uniquename=seq_obj.id,
+            feature = Feature.objects.get(dbxref__accession=seq_obj.id,
                                           organism=self.organism)
             if feature is not None:
                 raise ImportingError('The sequence {} is already '
