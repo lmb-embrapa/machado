@@ -17,7 +17,12 @@ def patch_installed_apps():
 
 def patch_middleware():
     """Include dependencies to MIDDLEWARE."""
-    settings.MIDDLEWARE.append('corsheaders.middleware.CorsMiddleware')
+    settings.MIDDLEWARE.append(
+        'corsheaders.middleware.CorsMiddleware')
+    settings.MIDDLEWARE.append(
+        'django.contrib.auth.middleware.AuthenticationMiddleware')
+    settings.MIDDLEWARE.append(
+        'django.contrib.messages.middleware.MessageMiddleware')
 
 
 def patch_root_urlconf():
