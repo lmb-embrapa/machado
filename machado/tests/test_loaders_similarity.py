@@ -43,30 +43,37 @@ class SimilarityTest(TestCase):
         test_aa_term = Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-        test_dbxref = Dbxref.objects.create(accession='1234567', db=test_db)
-        test_dbxref2 = Dbxref.objects.create(accession='1234567', db=test_db2)
+        test_dbxref2 = Dbxref.objects.create(accession='1234567', db=test_db)
         Cvterm.objects.create(
-            name='match_part', cv=test_cv, dbxref=test_dbxref,
+            name='match_part', cv=test_cv, dbxref=test_dbxref2,
             is_obsolete=0, is_relationshiptype=0)
+        test_dbxref3 = Dbxref.objects.create(accession='12345678', db=test_db2)
         Cvterm.objects.create(
-            name='contained in', cv=test_cv2, dbxref=test_dbxref2,
+            name='contained in', cv=test_cv2, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=1)
 
         # creating test features
+        feature_db = Db.objects.create(name='FASTA_source')
+        feature_dbxref1 = Dbxref.objects.create(
+            db=feature_db, accession='feat1')
+        feature_dbxref2 = Dbxref.objects.create(
+            db=feature_db, accession='feat2')
+        feature_dbxref3 = Dbxref.objects.create(
+            db=feature_db, accession='feat3')
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(),
+            dbxref=feature_dbxref1, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         Feature.objects.create(
             organism=test_organism, uniquename='feat2', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(),
+            dbxref=feature_dbxref2, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         test_feat = Feature.objects.create(
             organism=test_organism2, uniquename='feat3', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
-            timeaccessioned=datetime.now(),
+            dbxref=feature_dbxref3, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
 
         test_HSPFragment1 = HSPFragment('feat1', 'feat2')
