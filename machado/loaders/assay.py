@@ -7,7 +7,8 @@
 """Assay."""
 
 from machado.loaders.exceptions import ImportingError
-from machado.models import Assay, AssayBiomaterial, AssayProject
+from machado.loaders.common import retrieve_ontology_term
+from machado.models import Assay, AssayBiomaterial, AssayProject, Assayprop
 from machado.models import Biomaterial, Db, Dbxref
 from machado.models import Arraydesign, Contact
 from machado.models import Cv, Cvterm, Project
@@ -41,9 +42,12 @@ class AssayLoader(object):
             manufacturer_id=self.contact_null.contact_id,
             platformtype_id=cvterm_null.cvterm_id,
             name="Null")
+        self.cvterm_contained_in = retrieve_ontology_term(
+            ontology='relationship', term='contained in')
 
     def store_assay(self,
                     name: str,
+                    filename: str,
                     db: str = None,
                     acc: str = None,
                     assaydate: str = None,
@@ -81,6 +85,9 @@ class AssayLoader(object):
                                         'arraybatchidentifier': None,
                                         }
                                     )
+            self.store_assayprop(assay=assay,
+                                 type_id=self.cvterm_contained_in.cvterm_id,
+                                 value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         return assay
@@ -110,5 +117,20 @@ class AssayLoader(object):
                     defaults={
                         'channel_id': None}
                     )
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+    def store_assayprop(self,
+                        assay: Assay,
+                        type_id: int,
+                        value: str,
+                        rank: int = 0) -> None:
+        """Store analysisprop."""
+        try:
+            Assayprop.objects.create(
+                                     assay=assay,
+                                     type_id=type_id,
+                                     value=value,
+                                     rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)
