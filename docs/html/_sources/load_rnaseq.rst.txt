@@ -30,7 +30,7 @@ To load such a file an example command can be seen below. The databases for the 
 
 .. code-block:: bash
 
-    python manage.py load_rnaseq_information --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+    python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -52,7 +52,13 @@ To load such a file an example command can be seen below. The databases for the 
 Remove RNA-seq information
 ---------------------------
 
-TODO
+If, by any reason, you need to remove RNA-seq information relationships, you should use the command *remove_file --name*. **Every relations from filename (e.g. 'file.csv') will be deleted on cascade**.
+
+.. code-block:: bash
+
+    python manage.py remove_file --help
+
+* This command requires the file name 'file.csv.txt' used before as input to load RNA-seq information.
 
 Load RNA-seq data
 ------------------------
@@ -108,4 +114,10 @@ We used the output of the LSTrAP program as standard format for this file.
 Remove RNA-seq data
 ---------------------------
 
-TODO
+If, by any reason, you need to remove RNA-seq data relationships, you should use the command *remove_file --name*. **Every relations from filename (e.g. 'file.tab') will be deleted on cascade**.
+
+.. code-block:: bash
+
+    python manage.py remove_file --help
+
+* This command requires the file name 'file.tab' used before as input to load RNA-seq information.

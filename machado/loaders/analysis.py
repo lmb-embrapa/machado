@@ -58,7 +58,6 @@ class AnalysisLoader(object):
                     program=program,
                     programversion=programversion,
                     timeexecuted=timeexecuted)
-
             self.store_analysisprop(
                 analysis=analysis,
                 type_id=self.cvterm_contained_in.cvterm_id,

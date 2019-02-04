@@ -12,7 +12,7 @@ Load Feature Annotation
 
 .. code-block:: bash
 
-    python manage.py load_fasta --help
+    python manage.py load_feature_annotation --help
 
 =============   ==========================================================================================
 --file 			Two-column tab separated file (feature.accession\tannotation text). *

@@ -203,7 +203,7 @@ class AnalysisTest(TestCase):
             analysis=test_analysis2,
             value='exp.matrix.dummy.txt').exists())
 
-        call_command("remove_analysis",
+        call_command("remove_file",
                      "--name=exp.matrix.dummy.txt",
                      "--verbosity=0")
 
