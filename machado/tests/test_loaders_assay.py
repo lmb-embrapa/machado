@@ -6,13 +6,13 @@
 
 """Tests Assay loader."""
 
-from machado.models import Assay, AssayBiomaterial, AssayProject
-from machado.models import Db, Dbxref, Organism
+from machado.models import Assay, AssayBiomaterial, AssayProject, Assayprop
+from machado.models import Db, Dbxref, Organism, Cv, Cvterm
 from machado.models import Project
 from machado.loaders.assay import AssayLoader
 from machado.loaders.biomaterial import BiomaterialLoader
 from django.test import TestCase
-from datetime import datetime
+from django.core.management import call_command
 
 
 class AssayTest(TestCase):
@@ -20,9 +20,15 @@ class AssayTest(TestCase):
 
     def test_store_assay(self):
         """Tests - assay."""
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         # assay
         # will not use arraydesign nor operator
-        test_assaydate = 'Oct-16-2016'
+        test_filename = 'test_filename.txt'
         test_assaynamedb = "SRA"
         test_assayacc = "SRR123456"
         test_assayname = test_assayacc
@@ -31,7 +37,7 @@ class AssayTest(TestCase):
                 name=test_assayname,
                 db=test_assaynamedb,
                 acc=test_assayacc,
-                assaydate=test_assaydate
+                filename=test_filename
                 )
         self.assertEqual(True, Db.objects.filter(
             name=test_assaynamedb
@@ -42,12 +48,13 @@ class AssayTest(TestCase):
             db=test_db
             ).exists())
         test_dbxref = Dbxref.objects.get(db=test_db, accession=test_assayacc)
-        date_format = '%b-%d-%Y'
-        test_assaydate_format = datetime.strptime(test_assaydate, date_format)
         self.assertEqual(True, Assay.objects.filter(
-            assaydate=test_assaydate_format,
             name=test_assayname,
             dbxref=test_dbxref
+            ).exists())
+        self.assertEqual(True, Assayprop.objects.filter(
+            assay=test_assay,
+            value=test_filename,
             ).exists())
 
         # assay_biomaterial
@@ -63,6 +70,7 @@ class AssayTest(TestCase):
         test_biomaterial_file = BiomaterialLoader()
         test_biomaterial = test_biomaterial_file.store_biomaterial(
                 name=biomaterial_name,
+                filename=test_filename,
                 organism=test_organism,
                 db=test_bionamedb,
                 acc=test_acc)
@@ -76,13 +84,31 @@ class AssayTest(TestCase):
             ).exists())
 
         # assay_project
-        test_projectname = "Title"
+        test_projectname = "GSE12345"
         test_project, created = Project.objects.get_or_create(
                 name=test_projectname)
+        self.assertEqual(True, Project.objects.filter(
+            name=test_projectname).exists())
         test_assay_file.store_assay_project(
                 assay=test_assay,
                 project=test_project)
         self.assertEqual(True, AssayProject.objects.filter(
             assay=test_assay,
-            project=test_project
+            project=test_project).exists())
+        call_command("remove_file",
+                     "--name=test_filename.txt",
+                     "--verbosity=0")
+        self.assertEqual(False, Assay.objects.filter(
+            name=test_assayname,
+            dbxref=test_dbxref
+            ).exists())
+        self.assertEqual(False, Assayprop.objects.filter(
+            assay=test_assay.assay_id,
+            value=test_filename,
+            ).exists())
+        self.assertEqual(False, AssayBiomaterial.objects.filter(
+            assay=test_assay,
+            ).exists())
+        self.assertEqual(False, AssayProject.objects.filter(
+            assay=test_assay
             ).exists())

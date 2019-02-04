@@ -8,8 +8,8 @@
 
 from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
-from machado.models import Biomaterial, Db, Dbxref, Organism
-from machado.models import Treatment, BiomaterialTreatment
+from machado.models import Biomaterial, Cvterm, Db, Dbxref, Organism
+from machado.models import Treatment, BiomaterialTreatment, Biomaterialprop
 from django.db.utils import IntegrityError
 from typing import Union
 
@@ -19,8 +19,14 @@ class BiomaterialLoader(object):
 
     help = 'Load biomaterial record.'
 
+    def __init__(self) -> None:
+        """Execute the init function."""
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
+
     def store_biomaterial(self,
                           name: str,
+                          filename: str,
                           db: str = None,
                           acc: str = None,
                           organism: Union[str, Organism] = None,
@@ -64,6 +70,10 @@ class BiomaterialLoader(object):
                                             'biosourceprovider_id': None,
                                             }
                                         )
+            self.store_biomaterialprop(
+                biomaterial=biomaterial,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         return biomaterial
@@ -80,5 +90,20 @@ class BiomaterialLoader(object):
                                 biomaterial=biomaterial,
                                 treatment=treatment,
                                 rank=rank)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+    def store_biomaterialprop(self,
+                              biomaterial: Biomaterial,
+                              type_id: int,
+                              value: str,
+                              rank: int = 0) -> None:
+        """Store analysisprop."""
+        try:
+            Biomaterialprop.objects.create(
+                                       biomaterial=biomaterial,
+                                       type_id=type_id,
+                                       value=value,
+                                       rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

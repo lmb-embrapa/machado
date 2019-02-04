@@ -15,6 +15,7 @@ from machado.loaders.treatment import TreatmentLoader
 from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+import os
 import re
 
 
@@ -40,10 +41,6 @@ class Command(BaseCommand):
                             help="'.csv' file with sample and projects info.",
                             required=True,
                             type=str)
-        parser.add_argument("--projectdb",
-                            help="Project database info (e.g.: 'GEO')",
-                            required=True,
-                            type=str)
         parser.add_argument("--biomaterialdb",
                             help="Biomaterial database info (e.g.: 'GEO')",
                             required=True,
@@ -59,7 +56,6 @@ class Command(BaseCommand):
 
     def handle(self,
                filename: str,
-               projectdb: str,
                biomaterialdb: str,
                assaydb: str,
                cpu: int = 1,
@@ -87,33 +83,28 @@ class Command(BaseCommand):
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
+        base_filename = os.path.basename(filename)
         # each line is an RNA-seq experiment
         # e.g:
         # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
         for line in rnaseq_data:
             fields = re.split(',', line.strip())
+            organism_name = fields[0]
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
                 raise CommandError(e)
             # get organism - mandatory
             try:
-                organism = retrieve_organism(organism=fields[0])
+                organism = retrieve_organism(organism=organism_name)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
             # store project
             try:
                 # e.g: "GSExxx" from GEO
-                project_model = project_file.store_project(name=fields[1])
-                # project_dbxref is same as project (refers to accession:
-                # e.g: "GSExxx" from GEO)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
-            try:
-                project_file.store_project_dbxref(
-                        db=projectdb,
-                        acc=fields[1],
-                        project=project_model)
+                project_model = project_file.store_project(
+                    name=fields[1],
+                    filename=base_filename)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
@@ -125,6 +116,7 @@ class Command(BaseCommand):
                                         acc=fields[2],
                                         organism=organism,
                                         name=fields[2],
+                                        filename=base_filename,
                                         description=fields[5])
             except ImportingError as e:
                 raise CommandError(e)
@@ -151,6 +143,7 @@ class Command(BaseCommand):
                                         acc=fields[3],
                                         assaydate=fields[6],
                                         name=fields[3],
+                                        filename=base_filename,
                                         description=fields[3])
                 assay_file.store_assay_project(
                                         assay=assay_model,

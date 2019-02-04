@@ -7,8 +7,7 @@
 """Project."""
 
 from machado.loaders.exceptions import ImportingError
-from machado.models import Db, Dbxref
-from machado.models import Project, ProjectDbxref
+from machado.models import Cvterm, Project, Projectprop
 from django.db.utils import IntegrityError
 
 
@@ -17,37 +16,36 @@ class ProjectLoader(object):
 
     help = 'Load project record.'
 
+    def __init__(self) -> None:
+        """Execute the init function."""
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
+
     def store_project(self,
-                      name: str) -> Project:
+                      name: str,
+                      filename: str) -> Project:
         """Store project."""
         try:
             project, created = Project.objects.get_or_create(name=name)
+            self.store_projectprop(
+                project=project,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         return project
 
-    def store_project_dbxref(self,
-                             project: Project,
-                             acc: str,
-                             db: str,
-                             is_current: bool = True) -> None:
-        """Store project_dbxref."""
-        # db is mandatory
+    def store_projectprop(self,
+                          project: Project,
+                          type_id: int,
+                          value: str,
+                          rank: int = 0) -> None:
+        """Store analysisprop."""
         try:
-            projectdb, created = Db.objects.get_or_create(name=db)
-        except IntegrityError as e:
-            raise ImportingError(e)
-        try:
-            # for example, acc is the "GSExxxx" sample accession from GEO
-            dbxref, created = Dbxref.objects.get_or_create(
-                                                           accession=acc,
-                                                           db=projectdb)
-        except IntegrityError as e:
-            raise ImportingError(e)
-        try:
-            project_dbxref, created = ProjectDbxref.objects.get_or_create(
+            Projectprop.objects.create(
                                        project=project,
-                                       dbxref=dbxref,
-                                       is_current=is_current)
+                                       type_id=type_id,
+                                       value=value,
+                                       rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

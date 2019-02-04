@@ -30,7 +30,7 @@ To load such a file an example command can be seen below. The databases for the 
 
 .. code-block:: bash
 
-    python manage.py load_rnaseq_information --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+    python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 

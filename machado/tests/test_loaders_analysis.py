@@ -82,15 +82,18 @@ class AnalysisTest(TestCase):
         test_assayacc2 = "SRR2302912"
         test_assayname1 = test_assayacc1
         test_assayname2 = test_assayacc2
+        test_filename = 'exp.matrix.dummy.txt'
         # register Assays
         test_assay_file = AssayLoader()
         test_assay1 = test_assay_file.store_assay(
                 name=test_assayname1,
+                filename=test_filename,
                 db=test_assaynamedb,
                 acc=test_assayacc1,
                 assaydate=test_assaydate)
         test_assay2 = test_assay_file.store_assay(
                 name=test_assayname2,
+                filename=test_filename,
                 db=test_assaynamedb,
                 acc=test_assayacc2,
                 assaydate=test_assaydate)
@@ -100,7 +103,6 @@ class AnalysisTest(TestCase):
         test_sourcename1 = test_assayacc1 + '.deSEQ2'
         test_sourcename2 = test_assayacc2 + '.deSEQ2'
         timeexecuted = test_assaydate
-        test_filename = 'exp.matrix.dummy.txt'
 
         test_analysis_loader = AnalysisLoader()
         test_analysis1 = test_analysis_loader.store_analysis(

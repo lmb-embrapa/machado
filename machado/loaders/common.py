@@ -114,24 +114,23 @@ def retrieve_organism(organism: str) -> Organism:
         aux = organism.split(' ')
         genus = aux[0]
         species = 'spp.'
-        infraspecific = None
+        infraspecific_name = None
         if len(aux) == 2:
             species = aux[1]
         elif len(aux) > 2:
             species = aux[1]
-            infraspecific = ' '.join(aux[2:])
-
+            infraspecific_name = ' '.join(aux[2:])
     except ValueError:
         raise ValueError('The organism genus and species should be '
                          'separated by a single space')
-
     try:
-        organism = Organism.objects.get(species=species,
-                                        genus=genus,
-                                        infraspecific_name=infraspecific)
+        organism_obj = Organism.objects.get(
+            genus=genus,
+            species=species,
+            infraspecific_name=infraspecific_name)
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist('{} not registered.'.format(organism))
-    return organism
+    return organism_obj
 
 
 def retrieve_feature(featureacc: str,
