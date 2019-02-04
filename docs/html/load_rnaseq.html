@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -187,7 +186,7 @@ that will be input.</p>
 <p>A sample line for such a file can be seen below:</p>
 <p>Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018</p>
 <p>To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_information --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
 </pre></div>
 </div>
 <ul class="simple">
@@ -223,7 +222,13 @@ that will be input.</p>
 </div>
 <div class="section" id="remove-rna-seq-information">
 <h2>2.11.2. Remove RNA-seq information<a class="headerlink" href="#remove-rna-seq-information" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<p>If, by any reason, you need to remove RNA-seq information relationships, you should use the command <em>remove_file –name</em>. <strong>Every relations from filename (e.g. ‘file.csv’) will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>This command requires the file name ‘file.csv.txt’ used before as input to load RNA-seq information.</li>
+</ul>
 </div>
 <div class="section" id="load-rna-seq-data">
 <h2>2.11.3. Load RNA-seq data<a class="headerlink" href="#load-rna-seq-data" title="Permalink to this headline">¶</a></h2>
@@ -298,7 +303,13 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 </div>
 <div class="section" id="remove-rna-seq-data">
 <h2>2.11.4. Remove RNA-seq data<a class="headerlink" href="#remove-rna-seq-data" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<p>If, by any reason, you need to remove RNA-seq data relationships, you should use the command <em>remove_file –name</em>. <strong>Every relations from filename (e.g. ‘file.tab’) will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+</pre></div>
+</div>
+<ul class="simple">
+<li>This command requires the file name ‘file.tab’ used before as input to load RNA-seq information.</li>
+</ul>
 </div>
 </div>
 
@@ -322,7 +333,7 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -341,27 +352,18 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
