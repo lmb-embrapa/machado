@@ -87,7 +87,8 @@ class Command(BaseCommand):
                     name=name,
                     description=description,
                     program=program,
-                    programversion=programversion)
+                    programversion=programversion,
+                    input_format=format)
         except ImportingError as e:
             raise CommandError(e)
 
