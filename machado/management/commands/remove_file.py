@@ -12,6 +12,7 @@ from machado.models import Dbxref, Dbxrefprop
 from machado.models import Project, Projectprop
 from machado.models import Biomaterial, Biomaterialprop
 from machado.models import Assay, Assayprop, AssayProject
+from machado.models import Analysis, Analysisprop
 from machado.models import Feature, Featureloc, FeatureDbxref
 from machado.models import Featureprop, FeatureRelationship, FeatureSynonym
 from machado.models import FeatureCvterm
@@ -112,3 +113,18 @@ class Command(BaseCommand):
         except ObjectDoesNotExist:
             raise CommandError(
                 'Assays: cannot remove {} (not registered)'.format(name))
+        # Handling Analysis
+        try:
+            if verbosity > 0:
+                self.stdout.write('Analysis: deleting {} and every '
+                                  'child record (CASCADE)'
+                                  .format(name))
+            analysis_ids = list(Analysisprop.objects.filter(
+                value=name).values_list('analysis_id', flat=True))
+            Analysis.objects.filter(
+                analysis_id__in=analysis_ids).delete()
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS('Done'))
+        except ObjectDoesNotExist:
+            raise CommandError(
+                'Analysis: cannot remove {} (not registered)'.format(name))
