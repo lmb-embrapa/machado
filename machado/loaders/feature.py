@@ -374,7 +374,9 @@ class FeatureLoader(object):
             if key not in VALID_ATTRS:
                 self.ignored_attrs.add(key)
 
-        features = Feature.objects.filter(name=feature)
+        features = Feature.objects.filter(dbxref__accession=feature)
+        if len(features) == 0:
+            features = Feature.objects.filter(name=feature)
 
         if len(features) == 0:
             raise ImportingError('{} not found.'.format(feature))
