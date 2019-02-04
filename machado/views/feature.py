@@ -11,7 +11,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from machado.loaders.common import retrieve_ontology_term
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cvterm, Db
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
@@ -38,7 +37,7 @@ def get_queryset(request):
                       'error.html',
                       {'context': error})
 
-    feature['type'] = Cvterm.objects.get(cvterm_id=feature_obj.type_id).name
+    feature['type'] = feature_obj.type.name
     if feature['type'] not in VALID_TYPES:
         error = {'error': 'Invalid feature type.'}
         return render(request,
@@ -49,8 +48,10 @@ def get_queryset(request):
     protein = dict()
 
     if feature['type'] == 'mRNA':
-        transcript = retrieve_feature_data(request=request,
-                                           feature_obj=feature_obj)
+        transcript = retrieve_feature_data(
+            request=request,
+            feature_obj=feature_obj,
+            current_organism_id=current_organism_id)
         try:
             cvterm_translation_of = retrieve_ontology_term(
                 ontology='sequence', term='translation_of')
@@ -58,14 +59,18 @@ def get_queryset(request):
                 subject_id=feature_obj.feature_id,
                 type_id=cvterm_translation_of.cvterm_id).object_id
             protein_obj = Feature.objects.get(feature_id=protein_id)
-            protein = retrieve_feature_data(request=request,
-                                            feature_obj=protein_obj)
+            protein = retrieve_feature_data(
+                request=request,
+                feature_obj=protein_obj,
+                current_organism_id=current_organism_id)
         except ObjectDoesNotExist:
             pass
 
     if feature['type'] == 'polypeptide':
-        protein = retrieve_feature_data(request=request,
-                                        feature_obj=feature_obj)
+        protein = retrieve_feature_data(
+            request=request,
+            feature_obj=feature_obj,
+            current_organism_id=current_organism_id)
     return render(request,
                   'feature.html',
                   {'feature': feature,
@@ -73,7 +78,8 @@ def get_queryset(request):
                    'protein': protein})
 
 
-def retrieve_feature_data(request, feature_obj: Feature) -> Dict:
+def retrieve_feature_data(request, feature_obj: Feature,
+                          current_organism_id: int) -> Dict:
     """Retrieve feature data."""
     result = {
         'feature_id': feature_obj.feature_id,
@@ -93,7 +99,8 @@ def retrieve_feature_data(request, feature_obj: Feature) -> Dict:
     result['cvterm'] = retrieve_feature_cvterm(
         feature_id=feature_obj.feature_id)
     result['similarity'] = retrieve_feature_similarity(
-        feature_id=feature_obj.feature_id)
+        feature_id=feature_obj.feature_id,
+        current_organism_id=current_organism_id)
     return result
 
 
@@ -170,12 +177,14 @@ def retrieve_feature_cvterm(feature_id: int) -> List[Dict]:
     return result
 
 
-def retrieve_feature_similarity(feature_id: int) -> List:
+def retrieve_feature_similarity(feature_id: int,
+                                current_organism_id: int) -> List:
     """Retrieve feature locations."""
     result = list()
     try:
         match_parts_ids = Featureloc.objects.filter(
-            srcfeature_id=feature_id).values_list('feature_id')
+            srcfeature_id=feature_id).filter(
+            feature__organism_id=current_organism_id).values_list('feature_id')
     except ObjectDoesNotExist:
         return list()
 
@@ -203,12 +212,10 @@ def retrieve_feature_similarity(feature_id: int) -> List:
                 display = retrieve_feature_prop(
                     feature_id=match_feat.feature_id, prop='display')
 
-                db = Db.objects.get(
-                     Dbxref_db_Db__dbxref_id=match_feat.dbxref_id)
-                if db.name == 'GFF_SOURCE':
+                if match_feat.dbxref.db.name == 'GFF_SOURCE':
                     db_name = None
                 else:
-                    db_name = db.name
+                    db_name = match_feat.dbxref.db.name
 
                 feature_cvterm = retrieve_feature_cvterm(
                     feature_id=match_feat.feature_id)
