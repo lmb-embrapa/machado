@@ -11,7 +11,7 @@ from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from machado.models import Featureprop, FeatureSynonym
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Organism, Pub, PubDbxref, FeaturePub, Synonym
-from machado.loaders.common import retrieve_ontology_term, retrieve_organism
+from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -77,13 +77,12 @@ class FeatureLoader(object):
             type_id=null_cvterm.cvterm_id,
             is_obsolete=False)
 
-        self.cvterm_contained_in = retrieve_ontology_term(
-            ontology='relationship', term='contained in')
-        self.aa_cvterm = retrieve_ontology_term(
-            ontology='sequence', term='polypeptide')
-
-        self.so_term_protein_match = retrieve_ontology_term(
-                ontology='sequence', term='protein_match')
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
+        self.aa_cvterm = Cvterm.objects.get(
+            name='polypeptide', cv__name='sequence')
+        self.so_term_protein_match = Cvterm.objects.get(
+            name='protein_match', cv__name='sequence')
         # Retrieve DOI's Dbxref
         dbxref_doi = None
         self.pub_dbxref_doi = None
@@ -111,7 +110,8 @@ class FeatureLoader(object):
                            attrs: Dict[str, str]) -> None:
         """Process the VALID_ATTRS attributes."""
         try:
-            cvterm_exact = retrieve_ontology_term('synonym_type', 'exact')
+            cvterm_exact = Cvterm.objects.get(
+                name='exact', cv__name='synonym_type')
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
 
@@ -183,8 +183,8 @@ class FeatureLoader(object):
             if key not in VALID_ATTRS and key not in ['id', 'name', 'parent']:
                 self.ignored_attrs.add(key)
 
-        cvterm = retrieve_ontology_term(ontology='sequence',
-                                        term=tabix_feature.feature)
+        cvterm = Cvterm.objects.get(
+            name=tabix_feature.feature, cv__name='sequence')
 
         # set id = auto# for features that lack it
         if attrs.get('id') is None:
@@ -277,8 +277,8 @@ class FeatureLoader(object):
 
         # Additional protrein record for each mRNA with the exact same ID
         if tabix_feature.feature == 'mRNA':
-            translation_of = retrieve_ontology_term(ontology='sequence',
-                                                    term='translation_of')
+            translation_of = Cvterm.objects.get(
+                name='translation_of', cv__name='sequence')
             feature_mRNA_translation = Feature.objects.create(
                     organism=self.organism,
                     uniquename=attrs.get('id'),
@@ -296,8 +296,7 @@ class FeatureLoader(object):
 
     def store_relationships(self) -> None:
         """Store the relationships."""
-        part_of = retrieve_ontology_term(ontology='sequence',
-                                         term='part_of')
+        part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
         features = Feature.objects.exclude(type=self.aa_cvterm)
         for item in self.relationships:
@@ -396,18 +395,7 @@ class FeatureLoader(object):
         if isinstance(term, Cvterm):
             cvterm = term
         else:
-            if isinstance(ontology, Cv):
-                cv = ontology
-            else:
-                try:
-                    cv = Cv.objects.get(name=ontology)
-                except ObjectDoesNotExist as e:
-                    raise ImportingError(e)
-            try:
-                cvterm = retrieve_ontology_term(
-                        ontology=cv, term=term)
-            except IntegrityError as e:
-                raise ImportingError(e)
+            cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
         for member in group:
             tempgroup = group.copy()
             tempgroup.remove(member)

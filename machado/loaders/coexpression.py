@@ -6,9 +6,8 @@
 
 """Coexpression."""
 
-from machado.models import Organism
+from machado.models import Cvterm, Organism
 from machado.loaders.common import retrieve_feature
-from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
@@ -32,12 +31,10 @@ class CoexpressionLoader(object):
         self.organism = organism
 
         # get cvterm for correlation
-        self.cvterm_corel = retrieve_ontology_term(
-            ontology='relationship',
-            term='correlated with')
-        self.cvterm_cluster = retrieve_ontology_term(
-            ontology='relationship',
-            term='in branching relationship with')
+        self.cvterm_corel = Cvterm.objects.get(
+            name='correlated with', cv__name='relationship')
+        self.cvterm_cluster = Cvterm.objects.get(
+            name='in branching relationship with', cv__name='relationship')
         self.featureloader = FeatureLoader(
                 source=source,
                 filename=self.filename,

@@ -6,7 +6,7 @@
 
 """Views."""
 
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
+from machado.loaders.common import retrieve_organism
 from machado.models import Cvterm, Feature, Featureloc
 from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseNamesSerializer
@@ -112,10 +112,10 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
-        cvterm_display = retrieve_ontology_term(ontology='feature_property',
-                                                term='display')
-        cvterm_part_of = retrieve_ontology_term(ontology='sequence',
-                                                term='part_of')
+        cvterm_display = Cvterm.objects.get(cv__name='feature_property',
+                                            name='display')
+        cvterm_part_of = Cvterm.objects.get(cv__name='sequence',
+                                            name='part_of')
         refseq_feature_id = Feature.objects.get(
             uniquename=self.kwargs.get('refseq'))
         soType = self.request.query_params.get('soType')

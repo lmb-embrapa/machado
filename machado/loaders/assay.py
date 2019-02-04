@@ -7,7 +7,6 @@
 """Assay."""
 
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.common import retrieve_ontology_term
 from machado.models import Assay, AssayBiomaterial, AssayProject, Assayprop
 from machado.models import Biomaterial, Db, Dbxref
 from machado.models import Arraydesign, Contact
@@ -42,8 +41,8 @@ class AssayLoader(object):
             manufacturer_id=self.contact_null.contact_id,
             platformtype_id=cvterm_null.cvterm_id,
             name="Null")
-        self.cvterm_contained_in = retrieve_ontology_term(
-            ontology='relationship', term='contained in')
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
 
     def store_assay(self,
                     name: str,

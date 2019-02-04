@@ -7,9 +7,8 @@
 """Biomaterial."""
 
 from machado.loaders.common import retrieve_organism
-from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
-from machado.models import Biomaterial, Db, Dbxref, Organism
+from machado.models import Biomaterial, Cvterm, Db, Dbxref, Organism
 from machado.models import Treatment, BiomaterialTreatment, Biomaterialprop
 from django.db.utils import IntegrityError
 from typing import Union
@@ -22,8 +21,8 @@ class BiomaterialLoader(object):
 
     def __init__(self) -> None:
         """Execute the init function."""
-        self.cvterm_contained_in = retrieve_ontology_term(
-            ontology='relationship', term='contained in')
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
 
     def store_biomaterial(self,
                           name: str,

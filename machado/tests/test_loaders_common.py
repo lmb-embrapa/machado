@@ -7,8 +7,6 @@
 """Tests Loaders - Common."""
 
 from machado.loaders.common import insert_organism, retrieve_organism
-from machado.loaders.common import retrieve_ontology_term
-from machado.loaders.common import FieldsValidator
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
 
@@ -62,16 +60,3 @@ class CommonTest(TestCase):
         self.assertEqual('taurus', test_organism.species)
         test_organism = retrieve_organism("Bos taurus indicus")
         self.assertEqual('indicus', test_organism.infraspecific_name)
-
-    def test_retrieve_ontology_term(self):
-        """Tests - retrieve ontology term."""
-        test_db = Db.objects.create(name='sequence')
-        test_dbxref = Dbxref.objects.create(db=test_db, accession='nucleotide')
-        test_cv = Cv.objects.create(name='sequence')
-        Cvterm.objects.create(
-            cv=test_cv, dbxref=test_dbxref, name='nucleotide',
-            is_obsolete=0, is_relationshiptype=0)
-        test_ontology_cvterm = retrieve_ontology_term('sequence', 'nucleotide')
-        test_ontology_cv = Cv.objects.get(cv_id=test_ontology_cvterm.cv_id)
-        self.assertEqual('sequence', test_ontology_cv.name)
-        self.assertEqual('nucleotide', test_ontology_cvterm.name)

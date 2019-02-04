@@ -7,8 +7,8 @@
 """Orthology."""
 
 from machado.loaders.exceptions import ImportingError
-from machado.models import Organism
-from machado.loaders.common import retrieve_ontology_term, retrieve_feature
+from machado.models import Cvterm, Organism
+from machado.loaders.common import retrieve_feature
 from machado.loaders.feature import FeatureLoader
 from django.db.utils import IntegrityError
 
@@ -29,9 +29,8 @@ class OrthologyLoader(object):
 
         # get cvterm for orthology
         try:
-            self.cvterm_orthology = retrieve_ontology_term(
-                ontology='relationship',
-                term="in orthology relationship with")
+            self.cvterm_orthology = Cvterm.objects.get(
+                cv__name='relationship', name='in orthology relationship with')
         except IntegrityError as e:
             raise ImportingError(e)
 

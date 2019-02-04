@@ -13,9 +13,7 @@
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
-from machado.models import Cv, Cvterm
-from machado.models import Organism
-from machado.models import Feature
+from machado.models import Cvterm, Feature, Organism
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
 
@@ -69,24 +67,6 @@ class FieldsValidator(object):
                 raise ImportingError("Found null or empty field in position {}"
                                      .format(counter))
             counter += 1
-
-
-def retrieve_ontology_term(ontology: str, term: str) -> Cvterm:
-    """Retrieve ontology term."""
-    # Retrieve sequence ontology object
-    try:
-        cv = Cv.objects.get(name=ontology)
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(
-            'Ontology not loaded ({}).'.format(ontology))
-
-    # Retrieve sequence ontology term object
-    try:
-        cvterm = Cvterm.objects.get(cv=cv, name=term)
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(
-            'Ontology term not found ({}).'.format(term))
-    return cvterm
 
 
 def insert_organism(genus: str,
@@ -160,17 +140,13 @@ def retrieve_feature(featureacc: str,
                      ) -> Feature:
     """Retrieve feature object."""
     # cvterm is mandatory
-    try:
-        cvterm = retrieve_ontology_term(ontology=ontology,
-                                        term=cvterm)
-    except ObjectDoesNotExist as e:
-        raise ImportingError(e)
+    cvterm_obj = Cvterm.objects.get(name=cvterm, cv__name=ontology)
     try:
         feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm.cvterm_id)
+                                      type_id=cvterm_obj.cvterm_id)
     except MultipleObjectsReturned:
         feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm.cvterm_id,
+                                      type_id=cvterm_obj.cvterm_id,
                                       organism=organism)
     except ObjectDoesNotExist:
         feature = None

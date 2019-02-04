@@ -9,8 +9,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-from machado.loaders.common import retrieve_ontology_term
-from machado.models import Analysis, Analysisfeature
+from machado.models import Analysis, Analysisfeature, Cvterm
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List, Optional
@@ -53,8 +52,8 @@ def get_queryset(request):
             feature_obj=feature_obj,
             current_organism_id=current_organism_id)
         try:
-            cvterm_translation_of = retrieve_ontology_term(
-                ontology='sequence', term='translation_of')
+            cvterm_translation_of = Cvterm.objects.get(
+                name='translation_of', cv__name='sequence')
             protein_id = FeatureRelationship.objects.get(
                 subject_id=feature_obj.feature_id,
                 type_id=cvterm_translation_of.cvterm_id).object_id
@@ -106,11 +105,8 @@ def retrieve_feature_data(request, feature_obj: Feature,
 
 def retrieve_feature_prop(feature_id: int, prop: str) -> Optional[str]:
     """Retrieve feature general info."""
-    cvterm = retrieve_ontology_term(
-        ontology='feature_property', term=prop)
     try:
-        cvterm = retrieve_ontology_term(
-            ontology='feature_property', term=prop)
+        cvterm = Cvterm.objects.get(name=prop, cv__name='feature_property')
         feature_prop = Featureprop.objects.get(
             type_id=cvterm.cvterm_id,
             feature_id=feature_id)

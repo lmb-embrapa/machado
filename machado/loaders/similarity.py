@@ -6,8 +6,7 @@
 
 """Load similarity."""
 
-from machado.models import Feature, Featureloc
-from machado.loaders.common import retrieve_ontology_term
+from machado.models import Cvterm, Feature, Featureloc
 from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime
@@ -34,17 +33,19 @@ class SimilarityLoader(object):
                  programversion: str,
                  so_query: str,
                  so_subject: str,
+                 input_format: str,
                  algorithm: str = None,
                  name: str = None,
                  description: str = None) -> None:
         """Execute the init function."""
         try:
-            self.so_term_query = retrieve_ontology_term(
-                    ontology='sequence', term=so_query)
-            self.so_term_subject = retrieve_ontology_term(
-                    ontology='sequence', term=so_subject)
-            self.so_term_match_part = retrieve_ontology_term(
-                    ontology='sequence', term='match_part')
+            self.input_format = input_format
+            self.so_term_query = Cvterm.objects.get(
+                name=so_query, cv__name='sequence')
+            self.so_term_subject = Cvterm.objects.get(
+                name=so_subject, cv__name='sequence')
+            self.so_term_match_part = Cvterm.objects.get(
+                name='match_part', cv__name='sequence')
             self.analysis_loader = AnalysisLoader()
             self.analysis = self.analysis_loader.store_analysis(
                     algorithm=algorithm,
