@@ -32,7 +32,7 @@ class AnalysisLoader(object):
                        program: str,
                        sourcename: str,
                        programversion: str,
-                       filename: str,
+                       filename: str = None,
                        timeexecuted: str = None,
                        algorithm: str = None,
                        name: str = None,
@@ -59,10 +59,10 @@ class AnalysisLoader(object):
                     programversion=programversion,
                     timeexecuted=timeexecuted)
 
-            self.store_analysisprop(analysis=analysis,
-                                    type_id=self.cvterm_contained_in.cvterm_id,
-                                    value=filename)
-
+            self.store_analysisprop(
+                analysis=analysis,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=filename)
         except IntegrityError as e:
             raise ImportingError(e)
         except ObjectDoesNotExist as e:
