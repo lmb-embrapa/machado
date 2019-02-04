@@ -6,12 +6,11 @@
 
 """Tests project loader."""
 
-from machado.models import Biomaterial, Db, Dbxref
-from machado.models import Cv, Cvterm, Project, Projectprop, ProjectDbxref
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
+from machado.models import Db, Dbxref
+from machado.models import ProjectDbxref
 from machado.loaders.project import ProjectLoader
 from django.test import TestCase
-from datetime import datetime, timezone
+
 
 class ProjectTest(TestCase):
     """Tests Loaders - ProjectLoader."""

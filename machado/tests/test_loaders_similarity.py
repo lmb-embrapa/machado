@@ -128,6 +128,7 @@ class SimilarityTest(TestCase):
                 algorithm='smith-waterman',
                 description='command-line example',
                 program='blastp',
+                input_format='blast-xml',
                 programversion='2.2.31+',
                 so_query='polypeptide',
                 so_subject='polypeptide')

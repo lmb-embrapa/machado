@@ -7,9 +7,9 @@
 """Sequence."""
 
 from Bio.SeqRecord import SeqRecord
-from machado.loaders.common import retrieve_organism, retrieve_ontology_term
+from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
-from machado.models import Db, Dbxref, Dbxrefprop, Feature, FeaturePub
+from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
 from machado.models import PubDbxref
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -43,10 +43,9 @@ class SequenceLoader(object):
             raise ImportingError(e)
 
         # Retrieve sequence ontology object
-        self.soterm = retrieve_ontology_term(ontology='sequence',
-                                             term=soterm)
-        self.cvterm_contained_in = retrieve_ontology_term(
-            ontology='relationship', term='contained in')
+        self.soterm = Cvterm.objects.get(name=soterm, cv__name='sequence')
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
 
         # Retrieve DOI's Dbxref
         dbxref_doi = None

@@ -7,11 +7,10 @@
 """Analysis."""
 
 from machado.loaders.common import retrieve_organism, retrieve_feature
-from machado.loaders.common import retrieve_ontology_term
 from machado.loaders.exceptions import ImportingError
 from machado.models import Assay, Acquisition, Quantification
 from machado.models import Analysis, Analysisfeature, Analysisprop
-from machado.models import Db, Dbxref, Organism, Feature
+from machado.models import Cvterm, Db, Dbxref, Organism, Feature
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -25,8 +24,8 @@ class AnalysisLoader(object):
 
     def __init__(self) -> None:
         """Execute the init function."""
-        self.cvterm_contained_in = retrieve_ontology_term(
-            ontology='relationship', term='contained in')
+        self.cvterm_contained_in = Cvterm.objects.get(
+            name='contained in', cv__name='relationship')
 
     def store_analysis(self,
                        program: str,

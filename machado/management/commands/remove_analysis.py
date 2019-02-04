@@ -9,9 +9,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Analysisprop, Analysis, Analysisfeature
-from machado.models import Feature, Featureloc
+from machado.models import Cvterm, Feature, Featureloc
 from machado.models import Quantification, Acquisition
-from machado.loaders.common import retrieve_ontology_term
 
 
 class Command(BaseCommand):
@@ -37,8 +36,8 @@ class Command(BaseCommand):
                               'record (CASCADE)'.format(name))
 
         try:
-            cvterm_contained_in = retrieve_ontology_term(
-                ontology='relationship', term='contained in')
+            cvterm_contained_in = Cvterm.objects.get(
+                name='contained in', cv__name='relationship')
             analysisprop_list = Analysisprop.objects.filter(
                 value=name, type_id=cvterm_contained_in.cvterm_id)
 

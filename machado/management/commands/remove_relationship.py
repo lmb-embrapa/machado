@@ -6,8 +6,7 @@
 
 """Remove relationship."""
 
-from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.loaders.common import retrieve_ontology_term
+from machado.models import Cvterm, FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,8 +32,8 @@ class Command(BaseCommand):
         """Execute the main function."""
         # get cvterm for contained in
         try:
-            cvterm_contained_in = retrieve_ontology_term(
-                ontology='relationship', term='contained in')
+            cvterm_contained_in = Cvterm.objects.get(
+                name='contained in', cv__name='relationship')
         except IntegrityError as e:
             raise ImportingError(e)
         frs = list()

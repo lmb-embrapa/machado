@@ -9,18 +9,17 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
-from machado.loaders.common import retrieve_ontology_term
-from machado.models import Feature, Featureprop
+from machado.models import Cvterm, Feature, Featureprop
 from typing import Dict, List
 
 
 def get_queryset(request):
     """Summary."""
     current_organism_id = request.session.get('current_organism_id')
-    so_term_transcript = retrieve_ontology_term(ontology='sequence',
-                                                term='mRNA')
-    cv_term_display = retrieve_ontology_term(ontology='feature_property',
-                                             term='display')
+    so_term_transcript = Cvterm.objects.get(
+        name='mRNA', cv__name='sequence')
+    cv_term_display = Cvterm.objects.get(
+        name='display', cv__name='feature_property')
     if request.GET.get('transcript_id') is not None:
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
@@ -64,8 +63,8 @@ def get_queryset(request):
 
 def transcript_details(transcripts: List[int]) -> List[Dict]:
     """Transcript details."""
-    cv_term_display = retrieve_ontology_term(ontology='feature_property',
-                                             term='display')
+    cv_term_display = Cvterm.objects.get(
+        name='display', cv__name='feature_property')
 
     transcript_details = Feature.objects.filter(feature_id__in=transcripts)
     transcript_details = transcript_details.values(
