@@ -12,10 +12,12 @@ containing the correlated pair of IDs for the genes/features and the third colum
 coefficient among them. In the case of the output of the LSTrAP software, the coefficient is subtracted by 0.7
 for normalization sakes.
 
-A two line sample from such a table is showed below:
+A one line sample from such a table is showed below:
 
-AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      0.18189286870895194
-AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      0.1715779378273995
+.. code-block:: bash
+
+    AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      0.18189286870895194
+    AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      0.1715779378273995
 
 Note: The feature pairs from columns 1 and 2 need to be loaded previously.
 
@@ -49,9 +51,11 @@ one gene/feature from that cluster. Three-cluster sample from such a file is sho
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
 orphaned cluster with only one individual:
 
-AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
-AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-AT5G24750.1.TAIR10
+.. code-block:: bash
+
+    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+    AT5G24750.1.TAIR10
 
 Note: The genes/features from each column must be loaded previously.
 

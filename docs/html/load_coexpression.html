@@ -175,9 +175,11 @@ a RNA-seq experiment.</p>
 containing the correlated pair of IDs for the genes/features and the third column must contain the correlation
 coefficient among them. In the case of the output of the LSTrAP software, the coefficient is subtracted by 0.7
 for normalization sakes.</p>
-<p>A two line sample from such a table is showed below:</p>
-<p>AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      0.18189286870895194
-AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      0.1715779378273995</p>
+<p>A one line sample from such a table is showed below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      <span class="m">0</span>.18189286870895194
+AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779378273995
+</pre></div>
+</div>
 <p>Note: The feature pairs from columns 1 and 2 need to be loaded previously.</p>
 <p>To load such a table, one can run the command below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --filename pcc.mcl.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
@@ -216,9 +218,11 @@ headless and fields tab separated, with each line representing one cluster, and 
 one gene/feature from that cluster. Three-cluster sample from such a file is shown below, the first line
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
 orphaned cluster with only one individual:</p>
-<p>AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
 AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-AT5G24750.1.TAIR10</p>
+AT5G24750.1.TAIR10
+</pre></div>
+</div>
 <p>Note: The genes/features from each column must be loaded previously.</p>
 <p>To load such a file, one can run the command below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --filename mcl.clusters.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>

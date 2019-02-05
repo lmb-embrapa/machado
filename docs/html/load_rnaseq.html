@@ -179,12 +179,14 @@ raw data one can be interested to analyse.</p>
 <p>In Machado, it is necessary to input a .csv file with information for all SRA datafile regarding RNA-seq assays
 that will be input.</p>
 <p>This file must have the following fields in each line:</p>
-<p>“Organism specific name (e.g.: ‘Orysa sativa’)”, “GEO series identifier (e.g: GSE85653)”,
+<p>“Organism specific name (e.g.: ‘Oryza sativa’)”, “GEO series identifier (e.g: GSE85653)”,
 “GEO sample identifier (e.g: GSM2280286)”, “SRA identifier (e.g: SRR4033018)”,
 “Experiment description (e.g: ‘Heat’)”, “Sample description (e.g.: ‘leaf’)”,
 “Date (in format ‘%b-%d-%Y’: e.g.: Oct-16-2016)”.</p>
 <p>A sample line for such a file can be seen below:</p>
-<p>Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+</pre></div>
+</div>
 <p>To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
 </pre></div>
@@ -236,10 +238,14 @@ that will be input.</p>
 from several RNA-seq experiments, or assays, per column. This file should have the following header:</p>
 <p>“Gene identifier” “SRA Identifier 1” “SRA Identifier 2”  … “SRA Identifier n”</p>
 <p>Example of a header for such a sample file, that contains two assays/experiments:</p>
-<p>“gene    SRR5167848.htseq        SRR2302912.htseq”</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gene    SRR5167848.htseq        SRR2302912.htseq
+</pre></div>
+</div>
 <p>The body of the table is composed of the gene identifier followed by the counts for each gene, in each experiment.</p>
 <p>Example of a line of sucha a sample file:</p>
-<p>AT2G44195.1.TAIR10     0.0     0.6936967934559419</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AT2G44195.1.TAIR10     <span class="m">0</span>.0     <span class="m">0</span>.6936967934559419
+</pre></div>
+</div>
 <p>Note that the count fields can have floats or integers, depending on the normalization used (usually TPM, FPKM or raw counts).</p>
 <p>The gene identifier is supposed to already be loaded as a feature, usually from the organism’s genome annotation .gff file.</p>
 <p>We used the output of the LSTrAP program as standard format for this file.</p>

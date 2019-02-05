@@ -17,14 +17,16 @@ that will be input.
 
 This file must have the following fields in each line:
 
-"Organism specific name (e.g.: 'Orysa sativa')", "GEO series identifier (e.g: GSE85653)",
+"Organism specific name (e.g.: 'Oryza sativa')", "GEO series identifier (e.g: GSE85653)",
 "GEO sample identifier (e.g: GSM2280286)", "SRA identifier (e.g: SRR4033018)",
 "Experiment description (e.g: 'Heat')", "Sample description (e.g.: 'leaf')",
 "Date (in format '%b-%d-%Y': e.g.: Oct-16-2016)".
 
 A sample line for such a file can be seen below:
 
-Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+.. code-block:: bash
+
+    Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
 
 To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:
 
@@ -70,13 +72,17 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 
 Example of a header for such a sample file, that contains two assays/experiments:
 
-"gene    SRR5167848.htseq        SRR2302912.htseq"
+.. code-block:: bash
+
+    gene    SRR5167848.htseq        SRR2302912.htseq
 
 The body of the table is composed of the gene identifier followed by the counts for each gene, in each experiment.
 
 Example of a line of sucha a sample file:
 
-AT2G44195.1.TAIR10     0.0     0.6936967934559419
+.. code-block:: bash
+
+    AT2G44195.1.TAIR10     0.0     0.6936967934559419
 
 Note that the count fields can have floats or integers, depending on the normalization used (usually TPM, FPKM or raw counts).
 
