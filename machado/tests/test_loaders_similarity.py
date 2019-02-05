@@ -51,6 +51,10 @@ class SimilarityTest(TestCase):
         Cvterm.objects.create(
             name='contained in', cv=test_cv2, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=1)
+        test_dbxref4 = Dbxref.objects.create(accession='12345679', db=test_db2)
+        Cvterm.objects.create(
+            name='in similarity relationship with', cv=test_cv2,
+            dbxref=test_dbxref4, is_obsolete=0, is_relationshiptype=1)
 
         # creating test features
         feature_db = Db.objects.create(name='FASTA_source')

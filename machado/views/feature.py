@@ -52,11 +52,11 @@ def get_queryset(request):
             feature_obj=feature_obj,
             current_organism_id=current_organism_id)
         try:
-            cvterm_translation_of = Cvterm.objects.get(
-                name='translation_of', cv__name='sequence')
             protein_id = FeatureRelationship.objects.get(
                 subject_id=feature_obj.feature_id,
-                type_id=cvterm_translation_of.cvterm_id).object_id
+                type__name='translation_of',
+                type__cv__name='sequence'
+            ).object_id
             protein_obj = Feature.objects.get(feature_id=protein_id)
             protein = retrieve_feature_data(
                 request=request,
@@ -96,6 +96,8 @@ def retrieve_feature_data(request, feature_obj: Feature,
     result['dbxref'] = retrieve_feature_dbxref(
         feature_id=feature_obj.feature_id)
     result['cvterm'] = retrieve_feature_cvterm(
+        feature_id=feature_obj.feature_id)
+    result['relationship'] = retrieve_feature_relationship(
         feature_id=feature_obj.feature_id)
     result['similarity'] = retrieve_feature_similarity(
         feature_id=feature_obj.feature_id,
@@ -169,6 +171,22 @@ def retrieve_feature_cvterm(feature_id: int) -> List[Dict]:
             'cv': feature_cvterm.cvterm.cv.name,
             'db': feature_cvterm.cvterm.dbxref.db.name,
             'dbxref': feature_cvterm.cvterm.dbxref.accession,
+        })
+    return result
+
+
+def retrieve_feature_relationship(feature_id: int) -> List[Dict]:
+    """Retrieve feature relationships."""
+    feature_relationships = FeatureRelationship.objects.filter(
+        object_id=feature_id,
+        subject__type__name='protein_match',
+        subject__type__cv__name='sequence')
+    result = list()
+    for feature_relationship in feature_relationships:
+        result.append({
+            'subject': feature_relationship.subject.uniquename,
+            'db': feature_relationship.subject.dbxref.db.name,
+            'dbxref': feature_relationship.subject.dbxref.accession,
         })
     return result
 
