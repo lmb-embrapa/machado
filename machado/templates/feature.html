@@ -39,6 +39,35 @@
   </div>
   {% endif %}
 
+  {% if transcript.cvterm %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Functional annotation</h3>
+      <div class="card-text">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Ontology</th>
+              <th scope="col">ID</th>
+              <th scope="col">Term</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for cvterm in transcript.cvterm %}
+            <tr>
+              <td>{{ cvterm.cv|safe }}</td>
+              <td>{{ cvterm.db }}:{{ cvterm.dbxref }}</td>
+              <td>{{ cvterm.cvterm|safe }}
+            </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if transcript.similarity %}
   <div class="card">
     <div class="card-body">
@@ -96,6 +125,61 @@
   </div>
   {% endif %}
 
+  {% if protein.cvterm or protein.relationship %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Functional annotation</h3>
+      <div class="card-text">
+
+
+        {% if protein.cvterm %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Ontology</th>
+              <th scope="col">ID</th>
+              <th scope="col">Term</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for cvterm in protein.cvterm %}
+            <tr>
+              <td>{{ cvterm.cv|safe }}</td>
+              <td>{{ cvterm.db }}:{{ cvterm.dbxref }}</td>
+              <td>{{ cvterm.cvterm|safe }}
+            </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+        {% if protein.relationship %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Protein database</th>
+              <th scope="col">Protein domain</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for domain in protein.relationship %}
+            <tr>
+              <td>{{ domain.db|safe }}</td>
+              <td>{{ domain.subject|safe }}
+            </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if protein.similarity %}
   <div class="card">
     <div class="card-body">
@@ -116,12 +200,7 @@
           {% for hit in protein.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>
-                  {{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}
-                  {% for ontology in hit.feature_cvterm %}
-                  <br /><small>{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}</small>
-                  {% endfor%}
-              </td>
+              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
               <td>{{ hit.query_start|default_if_none:''|safe }}</td>
               <td>{{ hit.query_end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>
