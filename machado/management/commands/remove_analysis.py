@@ -10,6 +10,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Analysisprop, Analysis, Analysisfeature
 from machado.models import Cvterm, Feature, Featureloc
+from machado.models import FeatureCvterm, FeatureCvtermprop
+from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Quantification, Acquisition
 
 
@@ -55,6 +57,20 @@ class Command(BaseCommand):
                     pass
                 # remove analysisfeatures and others if exists...
                 try:
+                    cr_ids = list(FeatureCvtermprop.objects.filter(
+                        type=cvterm_contained_in,
+                        value=analysis.sourcename).values_list(
+                            'feature_cvterm_id', flat=True))
+                    FeatureCvterm.objects.filter(
+                        feature_cvterm_id__in=cr_ids).delete()
+
+                    fr_ids = list(FeatureRelationshipprop.objects.filter(
+                        type=cvterm_contained_in,
+                        value=analysis.sourcename).values_list(
+                            'feature_relationship_id', flat=True))
+                    FeatureRelationship.objects.filter(
+                        feature_relationship_id__in=fr_ids).delete()
+
                     feature_ids = list(Analysisfeature.objects.filter(
                             analysis=analysis).values_list(
                                 'feature_id', flat=True))

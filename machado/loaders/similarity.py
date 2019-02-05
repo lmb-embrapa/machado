@@ -7,6 +7,8 @@
 """Load similarity."""
 
 from machado.models import Cvterm, Feature, Featureloc
+from machado.models import FeatureCvterm, FeatureCvtermprop
+from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime
@@ -46,6 +48,11 @@ class SimilarityLoader(object):
                 name=so_subject, cv__name='sequence')
             self.so_term_match_part = Cvterm.objects.get(
                 name='match_part', cv__name='sequence')
+            self.ro_term_similarity = Cvterm.objects.get(
+                name='in similarity relationship with',
+                cv__name='relationship')
+            self.cvterm_contained_in = Cvterm.objects.get(
+                name='contained in', cv__name='relationship')
             self.analysis_loader = AnalysisLoader()
             self.analysis = self.analysis_loader.store_analysis(
                     algorithm=algorithm,
@@ -172,6 +179,35 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=1)
 
+    def store_feature_relationship(self, query_feature: Feature,
+                                   subject_feature: Feature) -> None:
+        """Store feature_relationship."""
+        feature_relation, create = FeatureRelationship.objects.get_or_create(
+            object=query_feature, subject=subject_feature,
+            type=self.ro_term_similarity,
+            defaults={'rank': 0})
+        FeatureRelationshipprop.objects.get_or_create(
+            feature_relationship=feature_relation,
+            type=self.cvterm_contained_in,
+            value=self.analysis.sourcename,
+            defaults={'rank': 0})
+
+        # ontology terms
+        subject_feature_cvterms = FeatureCvterm.objects.filter(
+            feature=subject_feature)
+        for subject_feature_cvterm in subject_feature_cvterms:
+            query_feature_cvterm, c = FeatureCvterm.objects.get_or_create(
+                feature=query_feature,
+                cvterm=subject_feature_cvterm.cvterm,
+                pub=subject_feature_cvterm.pub,
+                is_not=subject_feature_cvterm.is_not,
+                rank=subject_feature_cvterm.rank)
+            FeatureCvtermprop.objects.get_or_create(
+                feature_cvterm=query_feature_cvterm,
+                type=self.cvterm_contained_in,
+                value=self.analysis.sourcename,
+                defaults={'rank': 0})
+
     def store_bio_searchio_query_result(
             self, query_result: query.QueryResult) -> None:
         """Store bio_searchio_query_result."""
@@ -196,3 +232,7 @@ class SimilarityLoader(object):
                                   query_end=hsp_item.query_end,
                                   subject_start=hsp_item.hit_start,
                                   subject_end=hsp_item.hit_end)
+            if self.input_format == 'interproscan-xml':
+                self.store_feature_relationship(
+                    query_feature=query_feature,
+                    subject_feature=subject_feature)
