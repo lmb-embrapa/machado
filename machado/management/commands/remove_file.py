@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
     def handle(self,
                name: str,
-               verbosity: int = 0,
+               verbosity: int,
                **options):
         """Execute the main function."""
         # Handling Features
