@@ -27,7 +27,6 @@ class FileValidator(object):
         self._exists(file_path)
         self._is_file(file_path)
         self._is_readable(file_path)
-        print("Done.")
 
     def _exists(self, file_path: str) -> None:
         """Check whether a file exists."""
