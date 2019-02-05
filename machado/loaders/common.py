@@ -23,7 +23,6 @@ class FileValidator(object):
 
     def validate(self, file_path: str) -> None:
         """Invoke all validations."""
-        print("Validating file: {}".format(os.path.basename(file_path)))
         self._exists(file_path)
         self._is_file(file_path)
         self._is_readable(file_path)

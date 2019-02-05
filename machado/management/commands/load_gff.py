@@ -47,23 +47,23 @@ class Command(BaseCommand):
     def handle(self,
                file: str,
                organism: str,
-               doi: str=None,
-               ignore: str=None,
-               cpu: int=1,
-               verbosity: int=1,
+               doi: str = None,
+               ignore: str = None,
+               cpu: int = 1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
+
+        # retrieve only the file name
+        filename = os.path.basename(file)
+
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
 
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
-
-        # retrieve only the file name
-        filename = os.path.basename(file)
-
         try:
             feature_file = FeatureLoader(
                 filename=filename,
@@ -105,4 +105,4 @@ class Command(BaseCommand):
                 self.style.WARNING('Ignored attrs: {}'.format(
                     feature_file.ignored_attrs)))
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
