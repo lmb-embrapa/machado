@@ -35,20 +35,19 @@ class Command(BaseCommand):
                verbosity: int = 1,
                **options):
         """Execute the main function."""
-        if verbosity > 0:
-            self.stdout.write('Preprocessing')
-
+        # retrieve only the file name
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
-        filename = os.path.basename(file)
-
         organism, created = Organism.objects.get_or_create(
             abbreviation='multispecies', genus='multispecies',
             species='multispecies', common_name='multispecies')
 
+        filename = os.path.basename(file)
+        if verbosity > 0:
+            self.stdout.write('Processing file: {}'.format(filename))
         try:
             feature_file = FeatureLoader(
                 filename=filename,
@@ -82,4 +81,4 @@ class Command(BaseCommand):
                 self.style.WARNING('Ignored GO terms: {}'.format(
                     feature_file.ignored_goterms)))
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
