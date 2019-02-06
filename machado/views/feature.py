@@ -184,7 +184,8 @@ def retrieve_feature_relationship(feature_id: int) -> List[Dict]:
     result = list()
     for feature_relationship in feature_relationships:
         result.append({
-            'subject': feature_relationship.subject.uniquename,
+            'subject_id': feature_relationship.subject.uniquename,
+            'subject_desc': feature_relationship.subject.name,
             'db': feature_relationship.subject.dbxref.db.name,
             'dbxref': feature_relationship.subject.dbxref.accession,
         })
