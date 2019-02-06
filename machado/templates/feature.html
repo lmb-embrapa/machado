@@ -166,7 +166,7 @@
           {% for domain in protein.relationship %}
             <tr>
               <td>{{ domain.db|safe }}</td>
-              <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|safe }}
+              <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|default_if_none:'' }}
             </td>
             </tr>
           {% endfor %}
