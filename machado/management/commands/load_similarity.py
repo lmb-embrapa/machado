@@ -57,26 +57,25 @@ class Command(BaseCommand):
                so_subject: str,
                program: str,
                programversion: str,
-               name: str=None,
-               description: str=None,
-               algorithm: str=None,
-               cpu: int=1,
-               verbosity: int=1,
+               name: str = None,
+               description: str = None,
+               algorithm: str = None,
+               cpu: int = 1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
+        filename = os.path.basename(file)
+
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
 
         if format not in VALID_FORMAT:
             raise CommandError('The format is not valid. Please choose: '
                                '{}'.format(VALID_FORMAT))
-
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
-
-        filename = os.path.basename(file)
 
         try:
             similarity_file = SimilarityLoader(
@@ -111,4 +110,4 @@ class Command(BaseCommand):
             except ImportingError as e:
                 raise CommandError(e)
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
