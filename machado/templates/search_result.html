@@ -1,0 +1,43 @@
+<!--
+ Copyright 2018 by Embrapa.  All rights reserved.
+
+ This code is part of the machado distribution and governed by its
+ license. Please see the LICENSE.txt and README.md files that should
+ have been included as part of this package for licensing information.
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+        <h3>Results</h3>
+        {% if object_list %}
+            <table>
+            {% for result in page_obj.object_list %}
+                <tr>
+                    <td>
+                        {{ result.object.type.name }}
+                    </td>
+                    <td>
+                        <a href="/machado/feature/?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <p>No results found.</p>
+            {% endfor %}
+            </table>
+
+            {% if page_obj.has_previous or page_obj.has_next %}
+                <div>
+                    {% if page_obj.has_previous %}<a href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}">{% endif %}&laquo; Previous{% if page_obj.has_previous %}</a>{% endif %}
+                    |
+                    {% if page_obj.has_next %}<a href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}">{% endif %}Next &raquo;{% if page_obj.has_next %}</a>{% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+        Not found.
+        {# Show some example queries to run, maybe query syntax, something else? #}
+
+        {% endif %}
+
+{% endblock %}
