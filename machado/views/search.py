@@ -6,21 +6,22 @@
 
 """Search views."""
 
-from haystack.generic_views import SearchView
+from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 
 
-class FeatureSearchView(SearchView):
+class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
     form_class = FeatureSearchForm
+    facet_fields = ['organism', 'so_term']
     template_name = 'search_result.html'
-    paginate_by = 10
+    paginate_by = 20
     context_object_name = 'object_list'
 
     def get_context_data(self, *args, **kwargs):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args,
                                                                   **kwargs)
-        print(context)
+        # print(context)
         return context
