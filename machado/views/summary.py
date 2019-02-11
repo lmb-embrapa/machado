@@ -16,24 +16,23 @@ from typing import Dict, List
 def get_queryset(request):
     """Summary."""
     current_organism_id = request.session.get('current_organism_id')
-    so_term_transcript = Cvterm.objects.get(
-        name='mRNA', cv__name='sequence')
-    cv_term_display = Cvterm.objects.get(
-        name='display', cv__name='feature_property')
     if request.GET.get('transcript_id') is not None:
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
-            type_id=so_term_transcript.cvterm_id,
+            type__name='mRNA',
+            type__cv__name='sequence',
             uniquename__icontains=request.GET.get('transcript_id'))
         transcripts = transcripts.values_list('feature_id', flat=True)
 
     if request.GET.get('transcript_keyword') is not None:
         transcripts = Feature.objects.filter(
             organism_id=current_organism_id,
-            type_id=so_term_transcript.cvterm_id,
+            type__name='mRNA',
+            type__cv__name='sequence',
+            Featureprop_feature_Feature__type__name='display',
+            Featureprop_feature_Feature__type__cv__name='feature_property',
             Featureprop_feature_Feature__value__icontains=request.GET.get(
-                'transcript_keyword'),
-            Featureprop_feature_Feature__type_id=cv_term_display.cvterm_id)
+                'transcript_keyword'))
         transcripts = transcripts.values_list('feature_id', flat=True)
 
     if transcripts is not None:

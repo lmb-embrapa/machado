@@ -33,22 +33,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/machado/data-numbers">Data summary</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="organism-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {% if request.session.current_organism_id %}
-                {{ request.session.current_organism_name }}
-              {% else %}
-                Organism
-              {% endif %}
-            </a>
-            <div class="dropdown-menu bg-light" aria-labelledby="organism-dropdown">
-              <a class="nav-link btn-light {% if request.session.current_organism_id == None %}active{% endif %}" href="/machado/?current_organism_id=None">None</a>
-              {% for organism in organism_list %}
-              <a class="nav-link btn-light {% if request.session.current_organism_id == organism.organism_id|safe|escape %}active{% endif %}" href="/machado/?current_organism_id={{ organism.organism_id|safe|escape }}">{{ organism.genus }} {{ organism.species }}</a>
-              {% endfor %}
-            </div>
+            <a class="nav-link" href="/machado/data/">Data summary</a>
           </li>
         </ul>
       </div>
