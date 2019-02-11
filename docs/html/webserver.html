@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2.3. Inserting a new organism &mdash; machado 0.1.0 documentation</title>
+  <title>3.3. Web server &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2.4. Loading publication files" href="load_publication.html" />
-    <link rel="prev" title="2.2. Loading taxonomy" href="load_taxonomy.html" /> 
+    <link rel="next" title="4. Diagrams" href="diagrams.html" />
+    <link rel="prev" title="3.2. JBrowse" href="jbrowse.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,22 +81,13 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.3. Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataload.html">2. Data loading</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="visualization.html">3. Visualization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index_search.html">3.1. Index and search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jbrowse.html">3.2. JBrowse</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.3. Web server</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
@@ -144,15 +135,15 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+          <li><a href="visualization.html">3. Visualization</a> &raquo;</li>
         
-      <li>2.3. Inserting a new organism</li>
+      <li>3.3. Web server</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/insert_organism.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/webserver.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -165,28 +156,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="inserting-a-new-organism">
-<h1>2.3. Inserting a new organism<a class="headerlink" href="#inserting-a-new-organism" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="insert-organism">
-<h2>2.3.1. Insert organism<a class="headerlink" href="#insert-organism" title="Permalink to this headline">¶</a></h2>
-<p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
-These are instructions to insert a new organism to the database <strong>if you did NOT</strong> load the NCBI taxonomy or if the organism you’re working with is not included.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py insert_organism --genus <span class="s1">&#39;Organismus&#39;</span> --species <span class="s1">&#39;ineditus&#39;</span>
+  <div class="section" id="web-server">
+<h1>3.3. Web server<a class="headerlink" href="#web-server" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="machado">
+<h2>3.3.1. machado<a class="headerlink" href="#machado" title="Permalink to this headline">¶</a></h2>
+<p>Start the <em>machado</em> server:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
 </pre></div>
 </div>
-<ul class="simple">
-<li>There are optional fields you can provide. Please take a look at the command help (–help).</li>
-</ul>
-</div>
-<div class="section" id="remove-organism">
-<h2>2.3.2. Remove organism<a class="headerlink" href="#remove-organism" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove an organism you should use the command <em>remove_organism</em>. Most data files you’ll load depend on the organism record (eg. fasta, gff, blast). <strong>If you delete an organism, every data file you loaded that depend on it will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_organism --help
-</pre></div>
-</div>
-<ul class="simple">
-<li>These commands require the following info: Organism.genus and Organism.species</li>
-</ul>
+<p>Now, open your browser and go to <a class="reference external" href="http://127.0.0.1:8000/machado">http://127.0.0.1:8000/machado</a></p>
 </div>
 </div>
 
@@ -198,10 +176,10 @@ These are instructions to insert a new organism to the database <strong>if you d
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_publication.html" class="btn btn-neutral float-right" title="2.4. Loading publication files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="diagrams.html" class="btn btn-neutral float-right" title="4. Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_taxonomy.html" class="btn btn-neutral" title="2.2. Loading taxonomy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="jbrowse.html" class="btn btn-neutral" title="3.2. JBrowse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

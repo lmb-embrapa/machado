@@ -6,13 +6,13 @@
 
 """URLs."""
 
-from machado.views import common, summary, feature
+from machado.views import common, feature, search
 from django.conf.urls import include, url
 
 urlpatterns = [
-    url(r'^$', common.index, name='index'),
-    url(r'summary/', summary.get_queryset, name='summary'),
-    url(r'feature/', feature.get_queryset, name='feature'),
-    url(r'data-numbers/', common.data_numbers, name='data-numbers'),
+    url(r'feature/', feature.FeatureView.as_view(), name='feature'),
+    url(r'data/', common.CommonView.as_view(), name='data_numbers'),
     url(r'api/', include('machado.api.urls')),
+    url(r'find/', search.FeatureSearchView.as_view(), name='feature_search'),
+    url(r'^.*', common.HomeView.as_view(), name='home')
 ]

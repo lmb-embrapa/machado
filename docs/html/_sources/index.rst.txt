@@ -16,10 +16,10 @@ Content
    :titlesonly:
    :numbered:
 
-   installation
-   dataload
-   visualization
-   diagrams
-   models
+   Installation <installation>
+   Data loading <dataload>
+   Visualization <visualization>
+   Diagrams <diagrams>
+   Models <models>
 
 * :ref:`search`

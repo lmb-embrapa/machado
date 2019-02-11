@@ -14,6 +14,7 @@
   {% if transcript %}
   <div class="card">
     <div class="card-body">
+      <small>{{ feature.organism}}</small>
       <h2 class="card-title">Transcript: {{ transcript.name }}</h2>
       <div class="card-text">
       <p>ID: {{ transcript.uniquename }}</p>
@@ -112,6 +113,7 @@
   {% if protein %}
   <div class="card">
     <div class="card-body">
+      <small>{{ feature.organism}}</small>
       <h2 class="card-title">Protein: {{ protein.name }}</h2>
       <div class="card-text">
       {% if protein.feature_id|safe == feature.feature_id|safe %}
@@ -166,7 +168,7 @@
           {% for domain in protein.relationship %}
             <tr>
               <td>{{ domain.db|safe }}</td>
-              <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|safe }}
+              <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|default_if_none:'' }}
             </td>
             </tr>
           {% endfor %}
