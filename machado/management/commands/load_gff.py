@@ -53,7 +53,6 @@ class Command(BaseCommand):
                verbosity: int = 1,
                **options):
         """Execute the main function."""
-
         # retrieve only the file name
         filename = os.path.basename(file)
 
