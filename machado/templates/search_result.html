@@ -23,7 +23,7 @@
                 <dt>Filter by Organism</dt>
                 {% for organism in facets.fields.organism %}
                 <dd>
-                    <li><a href="{{ request.get_full_path}}&selected_facets=organism_exact:{{ organism.0 }}"><i>{{ organism.0|title }}</i> </a>({{ organism.1 }})</li>
+                    <li><a href="{{ request.get_full_path}}&selected_facets=organism_exact:{{ organism.0 }}"><i>{{ organism.0|capfirst }}</i> </a>({{ organism.1 }})</li>
                 </dd>
                 {% endfor %}
                 {% endif %}
