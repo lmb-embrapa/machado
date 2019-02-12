@@ -10,12 +10,11 @@
 
 {% block content %}
 
-{% include "search_form.html" %}
-
     {% if object_list %}
 
     <div class="container">
         <div class="row">
+
         <div class="col-md-3">
             <h3>Filters</h3>
             <dl>
@@ -43,25 +42,27 @@
         <div class="col-md-9">
             <h3>Results</h3>
             <table>
-            {% for result in page_obj.object_list %}
                 <tr>
-                    <td>
-                        {{ result.object.type.name }}
-                    </td>
-                    <td>
-                        <a href="/machado/feature/?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>
-                    </td>
+                    <th>SO term</th>
+                    <th>Feature ID</th>
+                    <th>Display</th>
                 </tr>
-            {% empty %}
+                {% for result in page_obj.object_list %}
+                <tr>
+                    <td>{{ result.object.type.name }}</td>
+                    <td><a href="/machado/feature/?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
+                    <td>{{ result.object.get_display|default_if_none:"" }}</td>
+                </tr>
+                {% empty %}
                 <p>No results found.</p>
-            {% endfor %}
+                {% endfor %}
             </table>
 
             {% if page_obj.has_previous or page_obj.has_next %}
                 <div>
-                    {% if page_obj.has_previous %}<a href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}">{% endif %}&laquo; Previous{% if page_obj.has_previous %}</a>{% endif %}
+                    {% if page_obj.has_previous %}<a href="?q={{ query }}&page={{ page_obj.previous_page_number }}">{% endif %}&laquo; Previous{% if page_obj.has_previous %}</a>{% endif %}
                     |
-                    {% if page_obj.has_next %}<a href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}">{% endif %}Next &raquo;{% if page_obj.has_next %}</a>{% endif %}
+                    {% if page_obj.has_next %}<a href="?q={{ query }}&page={{ page_obj.next_page_number }}">{% endif %}Next &raquo;{% if page_obj.has_next %}</a>{% endif %}
                 </div>
             {% endif %}
             {% else %}
