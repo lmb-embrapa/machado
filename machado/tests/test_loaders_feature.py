@@ -325,7 +325,9 @@ class FeatureTest(TestCase):
                                           organism=test_organism,
                                           source='InterproScan_source')
         # store the bio searchio hit
-        test_feature_file.store_bio_searchio_hit(test_searchio_hit)
+        # From interproscan
+        target = None
+        test_feature_file.store_bio_searchio_hit(test_searchio_hit, target)
 
         test_feature = Feature.objects.get(uniquename='PF1234')
         self.assertEqual('PFAM mock domain', test_feature.name)

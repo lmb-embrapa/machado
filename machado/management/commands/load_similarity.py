@@ -35,7 +35,16 @@ class Command(BaseCommand):
                             required=True, type=str)
         parser.add_argument("--so_subject", help="Subject Sequence Ontology "
                             "term. eg. assembly, mRNA, CDS, polypeptide "
-                            "(protein_match if loading InterproScan XML file)",
+                            "(protein_match if loading InterproScan or BLAST "
+                            "xml file)",
+                            required=True, type=str)
+        parser.add_argument("--organism_query", help="Query's organism name. "
+                            "eg. 'Oryza sativa'. If not loaded previously put"
+                            " 'multispecies multispecies'.",
+                            required=True, type=str)
+        parser.add_argument("--organism_subject", help="Subject's organism "
+                            "name eg. 'Oryza sativa'. If not loaded"
+                            " previously put 'multispecies multispecies'.",
                             required=True, type=str)
         parser.add_argument("--program", help="Program", required=True,
                             type=str)
@@ -55,6 +64,8 @@ class Command(BaseCommand):
                format: str,
                so_query: str,
                so_subject: str,
+               organism_query: str,
+               organism_subject: str,
                program: str,
                programversion: str,
                name: str = None,
@@ -82,6 +93,8 @@ class Command(BaseCommand):
                     filename=filename,
                     so_query=so_query,
                     so_subject=so_subject,
+                    org_query=organism_query,
+                    org_subject=organism_subject,
                     algorithm=algorithm,
                     name=name,
                     description=description,

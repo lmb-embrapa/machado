@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load InterproScan matches."""
+"""Load Similarity matches."""
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
@@ -14,23 +14,32 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import os
+import warnings
 from Bio import SearchIO
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
+# with warnings.catch_warnings():
+#     from Bio.SearchIO._model import query, hsp
 
 
 class Command(BaseCommand):
-    """Load InterproScan matches."""
+    """Load similarity multispecies matches."""
 
-    help = 'Load InterproScan matches'
+    help = 'Load similiarity multispecies matches'
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file", help="InterproScan XML file",
+        parser.add_argument("--file", help="BLAST/InterproScan XML file",
+                            required=True, type=str)
+        parser.add_argument("--format",
+                            help="blast-xml or interproscan-xml",
                             required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
     def handle(self,
                file: str,
+               format: str,
                cpu: int = 1,
                verbosity: int = 1,
                **options):
@@ -40,7 +49,16 @@ class Command(BaseCommand):
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
-
+        # set format
+        if format == 'blast-xml':
+            source = 'BLAST_source'
+            source_type = 'blast-xml'
+        elif format == 'interproscan-xml':
+            source = 'InterproScan_source'
+            source_type = 'interproscan-xml'
+        else:
+            raise ("Format allowed options are blast-xml or interproscan-xml"
+                   " only not {}".format(format))
         organism, created = Organism.objects.get_or_create(
             abbreviation='multispecies', genus='multispecies',
             species='multispecies', common_name='multispecies')
@@ -51,23 +69,28 @@ class Command(BaseCommand):
         try:
             feature_file = FeatureLoader(
                 filename=filename,
-                source='InterproScan_source',
+                source=source,
                 organism=organism,
             )
         except ImportingError as e:
             raise CommandError(e)
 
         try:
-            records = SearchIO.parse(file, 'interproscan-xml')
+            records = SearchIO.parse(file, source_type)
         except ValueError as e:
             return CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        # target is the database name (e.g. nr.dmnd)
+        target = None
         for record in records:
+            # get target from SearchIO's QueryResult if parsing BLAST output
+            if source_type == 'blast-xml':
+                target = record.target
             for hit in record.hits:
                 tasks.append(pool.submit(
-                    feature_file.store_bio_searchio_hit, hit))
+                    feature_file.store_bio_searchio_hit, hit, target))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

@@ -40,21 +40,25 @@ class SimilarityTest(TestCase):
         test_db2 = Db.objects.create(name='RO')
         test_cv2 = Cv.objects.create(name='relationship')
         test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
+        test_dbxref2 = Dbxref.objects.create(accession='7890', db=test_db)
         test_aa_term = Cvterm.objects.create(
             name='polypeptide', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-        test_dbxref2 = Dbxref.objects.create(accession='1234567', db=test_db)
-        Cvterm.objects.create(
-            name='match_part', cv=test_cv, dbxref=test_dbxref2,
+        test_aa_term2 = Cvterm.objects.create(
+            name='protein_match', cv=test_cv, dbxref=test_dbxref2,
             is_obsolete=0, is_relationshiptype=0)
-        test_dbxref3 = Dbxref.objects.create(accession='12345678', db=test_db2)
+        test_dbxref3 = Dbxref.objects.create(accession='1234567', db=test_db)
         Cvterm.objects.create(
-            name='contained in', cv=test_cv2, dbxref=test_dbxref3,
+            name='match_part', cv=test_cv, dbxref=test_dbxref3,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref4 = Dbxref.objects.create(accession='12345678', db=test_db2)
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv2, dbxref=test_dbxref4,
             is_obsolete=0, is_relationshiptype=1)
-        test_dbxref4 = Dbxref.objects.create(accession='12345679', db=test_db2)
+        test_dbxref5 = Dbxref.objects.create(accession='12345679', db=test_db2)
         Cvterm.objects.create(
             name='in similarity relationship with', cv=test_cv2,
-            dbxref=test_dbxref4, is_obsolete=0, is_relationshiptype=1)
+            dbxref=test_dbxref5, is_obsolete=0, is_relationshiptype=1)
 
         # creating test features
         feature_db = Db.objects.create(name='FASTA_source')
@@ -70,13 +74,13 @@ class SimilarityTest(TestCase):
             dbxref=feature_dbxref1, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         Feature.objects.create(
-            organism=test_organism, uniquename='feat2', is_analysis=False,
-            type_id=test_aa_term.cvterm_id, is_obsolete=False,
+            organism=test_organism2, uniquename='feat2', is_analysis=False,
+            type_id=test_aa_term2.cvterm_id, is_obsolete=False,
             dbxref=feature_dbxref2, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         test_feat = Feature.objects.create(
             organism=test_organism2, uniquename='feat3', is_analysis=False,
-            type_id=test_aa_term.cvterm_id, is_obsolete=False,
+            type_id=test_aa_term2.cvterm_id, is_obsolete=False,
             dbxref=feature_dbxref3, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
 
@@ -135,7 +139,10 @@ class SimilarityTest(TestCase):
                 input_format='blast-xml',
                 programversion='2.2.31+',
                 so_query='polypeptide',
-                so_subject='polypeptide')
+                so_subject='protein_match',
+                org_query='Mus musculus',
+                org_subject='multispecies multispecies'
+        )
 
         test_blast_file.store_bio_searchio_query_result(test_result1)
 

@@ -318,12 +318,21 @@ class FeatureLoader(object):
 
         FeatureRelationship.objects.bulk_create(relationships)
 
-    def store_bio_searchio_hit(self, searchio_hit: Hit) -> None:
-        """Store tabix feature."""
+    def store_bio_searchio_hit(self,
+                               searchio_hit: Hit,
+                               target: str) -> None:
+        """Store bio searchio hit."""
         if not hasattr(searchio_hit, 'accession'):
             searchio_hit.accession = None
-        db, created = Db.objects.get_or_create(
-            name=searchio_hit.attributes['Target'].upper())
+
+        # if blast-xml parsing, db name comes from QueryResult.target
+        if target:
+            db_name = target.upper()
+        # if interproscan-xml parsing, get db name from Hit.attributes.
+        else:
+            db_name = searchio_hit.attributes['Target'].upper()
+
+        db, created = Db.objects.get_or_create(name=db_name)
         dbxref, created = Dbxref.objects.get_or_create(
             db=db, accession=searchio_hit.id)
         feature, created = Feature.objects.get_or_create(
