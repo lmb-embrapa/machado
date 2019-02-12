@@ -23,5 +23,4 @@ class FeatureSearchView(FacetedSearchView):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args,
                                                                   **kwargs)
-        # print(context)
         return context

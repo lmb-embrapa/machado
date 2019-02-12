@@ -6,13 +6,20 @@
 
 """URLs."""
 
-from machado.views import common, feature, search
+from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import include, url
 
-urlpatterns = [
-    url(r'feature/', feature.FeatureView.as_view(), name='feature'),
-    url(r'data/', common.CommonView.as_view(), name='data_numbers'),
-    url(r'api/', include('machado.api.urls')),
-    url(r'find/', search.FeatureSearchView.as_view(), name='feature_search'),
-    url(r'^.*', common.HomeView.as_view(), name='home')
-]
+try:
+    from machado.views import common, feature, search
+
+    urlpatterns = [
+        url(r'feature/', feature.FeatureView.as_view(), name='feature'),
+        url(r'data/', common.CommonView.as_view(), name='data_numbers'),
+        url(r'api/', include('machado.api.urls')),
+        url(r'find/', search.FeatureSearchView.as_view(),
+            name='feature_search'),
+        url(r'^.*', common.HomeView.as_view(), name='home')
+    ]
+except ImproperlyConfigured as e:
+    urlpatterns = list()
+    print('Please install and configure haystack in order: {}'.format(e))
