@@ -10,28 +10,16 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views import View
-from machado.models import Analysis, Analysisfeature, Cvterm
-from machado.models import Feature, Featureloc, Featureprop
+from machado.models import Analysis, Analysisfeature
+from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 VALID_TYPES = ['mRNA', 'polypeptide']
 
 
 class FeatureView(View):
     """Feature views."""
-
-    def retrieve_feature_prop(self, feature_id: int,
-                              prop: str) -> Optional[str]:
-        """Retrieve feature general info."""
-        try:
-            cvterm = Cvterm.objects.get(name=prop, cv__name='feature_property')
-            feature_prop = Featureprop.objects.get(
-                type_id=cvterm.cvterm_id,
-                feature_id=feature_id)
-            return feature_prop.value
-        except ObjectDoesNotExist:
-            return None
 
     def retrieve_feature_location(self, feature_id: int,
                                   organism: str) -> List[Dict]:
