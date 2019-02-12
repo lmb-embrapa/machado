@@ -20,7 +20,7 @@ def get_display(self):
 
 def machado_feature_methods():
     """Add methods to machado.models.Feature."""
-    def wrapper(K):
-        setattr(K, 'get_display', get_display)
-        return K
+    def wrapper(cls):
+        setattr(cls, 'get_display', get_display)
+        return cls
     return wrapper

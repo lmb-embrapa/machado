@@ -138,8 +138,6 @@ class FeatureView(View):
                 else:
                     match_feat = Feature.objects.get(
                         feature_id=match.srcfeature_id)
-                    display = self.retrieve_feature_prop(
-                        feature_id=match_feat.feature_id, prop='display')
 
                     if match_feat.dbxref.db.name == 'GFF_SOURCE':
                         db_name = None
@@ -158,7 +156,7 @@ class FeatureView(View):
                 'db_name': db_name,
                 'unique': match_feat.uniquename,
                 'name': match_feat.name,
-                'display': display,
+                'display': match_feat.get_display,
                 'query_start': query_start,
                 'query_end': query_end,
                 'score': score,
@@ -176,8 +174,7 @@ class FeatureView(View):
             'uniquename': feature_obj.uniquename,
         }
 
-        result['display'] = self.retrieve_feature_prop(
-            feature_id=feature_obj.feature_id, prop='display')
+        result['display'] = feature_obj.get_display
 
         result['location'] = self.retrieve_feature_location(
             feature_id=feature_obj.feature_id,
