@@ -52,13 +52,11 @@ class Command(BaseCommand):
         # set format
         if format == 'blast-xml':
             source = 'BLAST_source'
-            source_type = 'blast-xml'
         elif format == 'interproscan-xml':
             source = 'InterproScan_source'
-            source_type = 'interproscan-xml'
         else:
             raise ("Format allowed options are blast-xml or interproscan-xml"
-                   " only not {}".format(format))
+                   " only, not {}".format(format))
         organism, created = Organism.objects.get_or_create(
             abbreviation='multispecies', genus='multispecies',
             species='multispecies', common_name='multispecies')
@@ -76,21 +74,16 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
-            records = SearchIO.parse(file, source_type)
+            records = SearchIO.parse(file, format)
         except ValueError as e:
             return CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        # target is the database name (e.g. nr.dmnd)
-        target = None
         for record in records:
-            # get target from SearchIO's QueryResult if parsing BLAST output
-            if source_type == 'blast-xml':
-                target = record.target
             for hit in record.hits:
                 tasks.append(pool.submit(
-                    feature_file.store_bio_searchio_hit, hit, target))
+                    feature_file.store_bio_searchio_hit, hit, record.target))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

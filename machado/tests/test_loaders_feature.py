@@ -326,7 +326,7 @@ class FeatureTest(TestCase):
                                           source='InterproScan_source')
         # store the bio searchio hit
         # From interproscan
-        target = None
+        target = "InterPro"
         test_feature_file.store_bio_searchio_hit(test_searchio_hit, target)
 
         test_feature = Feature.objects.get(uniquename='PF1234')

@@ -76,7 +76,8 @@ class Command(BaseCommand):
                **options):
         """Execute the main function."""
         filename = os.path.basename(file)
-
+        if organism_query == 'mutispecies multispecies':
+            raise CommandError("Query's organism cannot be multispecies")
         if verbosity > 0:
             self.stdout.write('Processing file: {}'.format(filename))
 

@@ -325,12 +325,12 @@ class FeatureLoader(object):
         if not hasattr(searchio_hit, 'accession'):
             searchio_hit.accession = None
 
-        # if blast-xml parsing, db name comes from QueryResult.target
-        if target:
-            db_name = target.upper()
         # if interproscan-xml parsing, get db name from Hit.attributes.
-        else:
+        if target == 'InterPro':
             db_name = searchio_hit.attributes['Target'].upper()
+        # if blast-xml parsing, db name comes from QueryResult.target
+        else:
+            db_name = target.upper()
 
         db, created = Db.objects.get_or_create(name=db_name)
         dbxref, created = Dbxref.objects.get_or_create(
