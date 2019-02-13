@@ -39,13 +39,7 @@ def patch_root_urlconf():
 
 def patch_templates():
     """Include dependencies to TEMPLATE."""
-    if len(settings.TEMPLATES) > 0:
-        for template in settings.TEMPLATES:
-            if template['BACKEND'] == 'django.template.backends.django.'\
-               'DjangoTemplates':
-                template['OPTIONS']['context_processors'].append(
-                    'machado.context_processors.organism_processor')
-    else:
+    if len(settings.TEMPLATES) == 0:
         settings.TEMPLATES.append(
             {
                 'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -57,7 +51,6 @@ def patch_templates():
                         'django.template.context_processors.request',
                         'django.contrib.auth.context_processors.auth',
                         'django.contrib.messages.context_processors.messages',
-                        'machado.context_processors.organism_processor'
                     ]
                 }
             }
