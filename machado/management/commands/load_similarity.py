@@ -39,12 +39,11 @@ class Command(BaseCommand):
                             "xml file)",
                             required=True, type=str)
         parser.add_argument("--organism_query", help="Query's organism name. "
-                            "eg. 'Oryza sativa'. If not loaded previously put"
-                            " 'multispecies multispecies'.",
+                            "eg. 'Oryza sativa'. Cannot be multispecies'.",
                             required=True, type=str)
         parser.add_argument("--organism_subject", help="Subject's organism "
-                            "name eg. 'Oryza sativa'. If not loaded"
-                            " previously put 'multispecies multispecies'.",
+                            "name eg. 'Oryza sativa'. If using a multispecies "
+                            "database put 'multispecies multispecies'.",
                             required=True, type=str)
         parser.add_argument("--program", help="Program", required=True,
                             type=str)
