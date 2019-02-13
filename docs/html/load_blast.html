@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -167,10 +166,21 @@
             
   <div class="section" id="loading-blast-results">
 <h1>2.8. Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Permalink to this headline">¶</a></h1>
-<p>In order to load a Blast results file, both the query and the subject records must be previously stored.</p>
+<p>In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on <strong>proteins</strong>.</p>
+<div class="section" id="load-blast-subject-records">
+<h2>2.8.1. Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Permalink to this headline">¶</a></h2>
+<p>In case you did a BLAST against a multispecies protein database, like NCBI’s nr or Uniprot’s trembl or swissprot, you need to load previously all subject matches before loading the result itself. To do so, use the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity_matches --file blast_result.xml --format blast-xml
+</pre></div>
+</div>
+<ul class="simple">
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+</ul>
+</div>
 <div class="section" id="load-blast">
-<h2>2.8.1. Load Blast<a class="headerlink" href="#load-blast" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query mRNA --so_subject assembly --program blastn --programversion <span class="m">2</span>.2.31+
+<h2>2.8.2. Load BLAST<a class="headerlink" href="#load-blast" title="Permalink to this headline">¶</a></h2>
+<p>If all queries and subjects are already loaded you can run the following command to load a BLAST xml result:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query polypeptide --so_subject protein_match --program diamond --programversion <span class="m">0</span>.9.24 --organism_query <span class="s1">&#39;Oryza sativa&#39;</span> --organism_subject <span class="s1">&#39;multispecies multispecies&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -181,8 +191,8 @@
 </div>
 <table border="1" class="docutils">
 <colgroup>
-<col width="19%" />
-<col width="81%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>–file</td>
@@ -195,7 +205,13 @@
 <td>Query Sequence Ontology term. (eg. assembly, mRNA, polypeptide) *</td>
 </tr>
 <tr class="row-even"><td>–so_subject</td>
-<td>Subject Sequence Ontology term. (eg. assembly, mRNA, polypeptide) *</td>
+<td>Subject Sequence Ontology term. (eg. protein_match if loading a BLAST result) *</td>
+</tr>
+<tr class="row-odd"><td>–organism_query</td>
+<td>Query’s organism name. eg. ‘Oryza sativa’. Cannot be ‘multispecies’ *</td>
+</tr>
+<tr class="row-even"><td>–organism_subject</td>
+<td>Subject’s organism name eg. ‘Oryza sativa’. Put ‘multispecies multispecies’ if using a multispecies database. *</td>
 </tr>
 <tr class="row-odd"><td>–program</td>
 <td>Program *</td>
@@ -220,7 +236,7 @@
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>2.8.2. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.8.3. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a Blast result set you should use the command <em>remove_analysis</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_analysis --help
 </pre></div>
@@ -251,7 +267,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -270,27 +286,18 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

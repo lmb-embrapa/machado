@@ -9,7 +9,7 @@ Load InterproScan subject records
 
 .. code-block:: bash
 
-    python manage.py load_interproscan_matches --file interproscan_result.xml
+    python manage.py load_similarity_matches --file interproscan_result.xml --format interproscan-xml
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -18,7 +18,7 @@ Load InterproScan similarity
 
 .. code-block:: bash
 
-    python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion 5
+    python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion 5 --organism_query 'Oryza sativa' --organism_subject 'multispecies multispecies'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -26,18 +26,20 @@ Load InterproScan similarity
 
     python manage.py load_similarity --help
 
-================   ===================================================================
---file 			   InterproScan XML file *
---format		   interpro-xml *
---so_query         Query Sequence Ontology term. (polypeptide) *
---so_subject       Subject Sequence Ontology term. (protein_match) *
---program          Program *
---programversion   Program version *
---name             Name
---description      Description
---algorithm        Algorithm
---cpu 			   Number of threads
-================   ===================================================================
+==================   ========================================================================================================
+--file 		     InterproScan XML file *
+--format	     interproscan-xml *
+--so_query           Query Sequence Ontology term. (polypeptide) *
+--so_subject         Subject Sequence Ontology term. (protein_match) *
+--organism_query     Query's organism name. eg. 'Oryza sativa'. Cannot be 'multispecies'. *
+--organism_subject   Subject's organism name eg. 'Oryza sativa'. Put 'multispecies multispecies' if using a multispecies database. *
+--program            Program *
+--programversion     Program version *
+--name               Name
+--description        Description
+--algorithm          Algorithm
+--cpu 		     Number of threads
+==================   ========================================================================================================
 
 \* required fields
 

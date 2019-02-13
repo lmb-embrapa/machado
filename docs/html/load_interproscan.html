@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -171,7 +170,7 @@
 The current version was tested for loading InterproScan analysis on <strong>proteins</strong>.</p>
 <div class="section" id="load-interproscan-subject-records">
 <h2>2.9.1. Load InterproScan subject records<a class="headerlink" href="#load-interproscan-subject-records" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_interproscan_matches --file interproscan_result.xml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity_matches --file interproscan_result.xml --format interproscan-xml
 </pre></div>
 </div>
 <ul class="simple">
@@ -180,7 +179,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 </div>
 <div class="section" id="load-interproscan-similarity">
 <h2>2.9.2. Load InterproScan similarity<a class="headerlink" href="#load-interproscan-similarity" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion <span class="m">5</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion <span class="m">5</span> --organism_query <span class="s1">&#39;Oryza sativa&#39;</span> --organism_subject <span class="s1">&#39;multispecies multispecies&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -191,21 +190,27 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 </div>
 <table border="1" class="docutils">
 <colgroup>
-<col width="19%" />
-<col width="81%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>–file</td>
 <td>InterproScan XML file *</td>
 </tr>
 <tr class="row-even"><td>–format</td>
-<td>interpro-xml *</td>
+<td>interproscan-xml *</td>
 </tr>
 <tr class="row-odd"><td>–so_query</td>
 <td>Query Sequence Ontology term. (polypeptide) *</td>
 </tr>
 <tr class="row-even"><td>–so_subject</td>
 <td>Subject Sequence Ontology term. (protein_match) *</td>
+</tr>
+<tr class="row-odd"><td>–organism_query</td>
+<td>Query’s organism name. eg. ‘Oryza sativa’. Cannot be ‘multispecies’. *</td>
+</tr>
+<tr class="row-even"><td>–organism_subject</td>
+<td>Subject’s organism name eg. ‘Oryza sativa’. Put ‘multispecies multispecies’ if using a multispecies database. *</td>
 </tr>
 <tr class="row-odd"><td>–program</td>
 <td>Program *</td>
@@ -261,7 +266,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -280,27 +285,18 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
