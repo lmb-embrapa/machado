@@ -11,6 +11,7 @@ from machado.models import FeatureCvterm, FeatureCvtermprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
+from machado.loaders.common import retrieve_organism
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -35,12 +36,16 @@ class SimilarityLoader(object):
                  programversion: str,
                  so_query: str,
                  so_subject: str,
+                 org_query: str,
+                 org_subject: str,
                  input_format: str,
                  algorithm: str = None,
                  name: str = None,
                  description: str = None) -> None:
         """Execute the init function."""
         try:
+            self.org_query = retrieve_organism(org_query)
+            self.org_subject = retrieve_organism(org_subject)
             self.input_format = input_format
             self.so_term_query = Cvterm.objects.get(
                 name=so_query, cv__name='sequence')
@@ -85,6 +90,7 @@ class SimilarityLoader(object):
         try:
             query_feature = Feature.objects.get(
                     dbxref__accession=hsp.query_id,
+                    organism=self.org_query,
                     type_id=self.so_term_query.cvterm_id)
         except ObjectDoesNotExist as e1:
             try:
@@ -92,6 +98,7 @@ class SimilarityLoader(object):
                         hsp.query_description)
                 query_feature = Feature.objects.get(
                         dbxref__accession=query_id,
+                        organism=self.org_query,
                         type_id=self.so_term_query.cvterm_id)
             except ObjectDoesNotExist as e2:
                 raise ImportingError('Query', e1, e2)
@@ -104,6 +111,7 @@ class SimilarityLoader(object):
         try:
             subject_feature = Feature.objects.get(
                     dbxref__accession=hsp.hit_id,
+                    organism=self.org_subject,
                     type_id=self.so_term_subject.cvterm_id)
         except ObjectDoesNotExist as e1:
             try:
@@ -111,6 +119,7 @@ class SimilarityLoader(object):
                     hsp.hit_description)
                 subject_feature = Feature.objects.get(
                         dbxref__accession=subject_id,
+                        organism=self.org_subject,
                         type_id=self.so_term_subject.cvterm_id)
             except ObjectDoesNotExist as e2:
                 raise ImportingError('Subject', hsp.hit_id, e1, e2)
