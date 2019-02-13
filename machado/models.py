@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 from django.db import models
-from machado.decorators import machado_feature_methods
+from machado.decorators import machadoFeatureMethods
 
 
 class Acquisition(models.Model):
@@ -766,7 +766,7 @@ class Expressionprop(models.Model):
         db_table = 'expressionprop'
         unique_together = (('expression', 'type', 'rank'),)
 
-@machado_feature_methods()
+@machadoFeatureMethods()
 class Feature(models.Model):
     feature_id = models.BigAutoField(primary_key=True)
     dbxref = models.ForeignKey(Dbxref, on_delete=models.DO_NOTHING, related_name='Feature_dbxref_Dbxref', blank=True, null=True)

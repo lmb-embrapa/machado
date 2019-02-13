@@ -18,7 +18,7 @@ def get_display(self):
         return None
 
 
-def machado_feature_methods():
+def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
     def wrapper(cls):
         setattr(cls, 'get_display', get_display)
