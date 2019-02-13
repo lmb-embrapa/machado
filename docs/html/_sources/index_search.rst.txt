@@ -52,6 +52,8 @@ The settings.py file should contain the `search engine configuration <http://doc
 
 **Indexing the data**
 
+Go to the WEBPROJECT directory and use the manage.py
+
 .. code-block:: bash
 
     python manage.py rebuild_index

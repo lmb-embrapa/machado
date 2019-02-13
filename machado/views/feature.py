@@ -10,28 +10,16 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views import View
-from machado.models import Analysis, Analysisfeature, Cvterm
-from machado.models import Feature, Featureloc, Featureprop
+from machado.models import Analysis, Analysisfeature
+from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 VALID_TYPES = ['mRNA', 'polypeptide']
 
 
 class FeatureView(View):
     """Feature views."""
-
-    def retrieve_feature_prop(self, feature_id: int,
-                              prop: str) -> Optional[str]:
-        """Retrieve feature general info."""
-        try:
-            cvterm = Cvterm.objects.get(name=prop, cv__name='feature_property')
-            feature_prop = Featureprop.objects.get(
-                type_id=cvterm.cvterm_id,
-                feature_id=feature_id)
-            return feature_prop.value
-        except ObjectDoesNotExist:
-            return None
 
     def retrieve_feature_location(self, feature_id: int,
                                   organism: str) -> List[Dict]:
@@ -138,8 +126,6 @@ class FeatureView(View):
                 else:
                     match_feat = Feature.objects.get(
                         feature_id=match.srcfeature_id)
-                    display = self.retrieve_feature_prop(
-                        feature_id=match_feat.feature_id, prop='display')
 
                     if match_feat.dbxref.db.name == 'GFF_SOURCE':
                         db_name = None
@@ -158,7 +144,7 @@ class FeatureView(View):
                 'db_name': db_name,
                 'unique': match_feat.uniquename,
                 'name': match_feat.name,
-                'display': display,
+                'display': match_feat.get_display,
                 'query_start': query_start,
                 'query_end': query_end,
                 'score': score,
@@ -176,8 +162,7 @@ class FeatureView(View):
             'uniquename': feature_obj.uniquename,
         }
 
-        result['display'] = self.retrieve_feature_prop(
-            feature_id=feature_obj.feature_id, prop='display')
+        result['display'] = feature_obj.get_display
 
         result['location'] = self.retrieve_feature_location(
             feature_id=feature_obj.feature_id,

@@ -9,6 +9,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.conf.urls import include, url
 
+# Don't add pages if the haystack library is not installed and configured.
 try:
     from machado.views import common, feature, search
 
@@ -22,4 +23,3 @@ try:
     ]
 except ImproperlyConfigured as e:
     urlpatterns = list()
-    print('Please install and configure haystack in order: {}'.format(e))

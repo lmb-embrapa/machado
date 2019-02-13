@@ -3,14 +3,8 @@
 # This code is part of the machado distribution and governed by its
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
-
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from machado.decorators import machadoFeatureMethods
 
 
 class Acquisition(models.Model):
@@ -772,7 +766,7 @@ class Expressionprop(models.Model):
         db_table = 'expressionprop'
         unique_together = (('expression', 'type', 'rank'),)
 
-
+@machadoFeatureMethods()
 class Feature(models.Model):
     feature_id = models.BigAutoField(primary_key=True)
     dbxref = models.ForeignKey(Dbxref, on_delete=models.DO_NOTHING, related_name='Feature_dbxref_Dbxref', blank=True, null=True)
