@@ -14,7 +14,6 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def param_replace(context, **kwargs):
     """Return the encoded URL parameters. Replace if the parameter exists."""
-    print(context['request'].GET)
     params = context['request'].GET.copy()
 
     for k, v in kwargs.items():
