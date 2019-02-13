@@ -1,11 +1,11 @@
 Loading Blast results
 =====================
 
-In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on proteins.
+In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on **proteins**.
 
 Load BLAST subject records
 ---------------------------------
-In case you did a BLAST against a multispecies protein database, like NCBI's nr or Uniprot's trembl or swissprot, you need to use the following command with the flag: --organism_subject 'multispecies multispecies' in order to load all subjects.
+In case you did a BLAST against a multispecies protein database, like NCBI's nr or Uniprot's trembl or swissprot, you need to load previously all subject matches before loading the result itself. To do so, use the following command:
 
 .. code-block:: bash
 
@@ -33,8 +33,8 @@ If all queries and subjects are already loaded you can run the following command
 --format	                        blast-xml *
 --so_query           Query Sequence Ontology term. (eg. assembly, mRNA, polypeptide) *
 --so_subject         Subject Sequence Ontology term. (eg. protein_match if loading a BLAST result) *
---organism_query     Query's organism name. eg. 'Oryza sativa'. If not loaded previously put 'multispecies multispecies'. *
---organism_subject   Subject's organism name eg. 'Oryza sativa'. If not loaded previously put 'multispecies multispecies'. *
+--organism_query     Query's organism name. eg. 'Oryza sativa'. Cannot be 'multispecies' *
+--organism_subject   Subject's organism name eg. 'Oryza sativa'. Put 'multispecies multispecies' if using a multispecies database. *
 --program            Program *
 --programversion     Program version *
 --name               Name

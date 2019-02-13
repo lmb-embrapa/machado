@@ -31,8 +31,8 @@ Load InterproScan similarity
 --format	     interproscan-xml *
 --so_query           Query Sequence Ontology term. (polypeptide) *
 --so_subject         Subject Sequence Ontology term. (protein_match) *
---organism_query     Query's organism name. eg. 'Oryza sativa'. If not loaded previously put 'multispecies multispecies'. *
---organism_subject   Subject's organism name eg. 'Oryza sativa'. If not loaded previously put 'multispecies multispecies'. *
+--organism_query     Query's organism name. eg. 'Oryza sativa'. Cannot be 'multispecies'. *
+--organism_subject   Subject's organism name eg. 'Oryza sativa'. Put 'multispecies multispecies' if using a multispecies database. *
 --program            Program *
 --programversion     Program version *
 --name               Name

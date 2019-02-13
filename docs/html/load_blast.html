@@ -166,10 +166,10 @@
             
   <div class="section" id="loading-blast-results">
 <h1>2.8. Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Permalink to this headline">¶</a></h1>
-<p>In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on proteins.</p>
+<p>In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on <strong>proteins</strong>.</p>
 <div class="section" id="load-blast-subject-records">
 <h2>2.8.1. Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Permalink to this headline">¶</a></h2>
-<p>In case you did a BLAST against a multispecies protein database, like NCBI’s nr or Uniprot’s trembl or swissprot, you need to use the following command with the flag: –organism_subject ‘multispecies multispecies’ in order to load all subjects.</p>
+<p>In case you did a BLAST against a multispecies protein database, like NCBI’s nr or Uniprot’s trembl or swissprot, you need to load previously all subject matches before loading the result itself. To do so, use the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity_matches --file blast_result.xml --format blast-xml
 </pre></div>
 </div>
@@ -191,8 +191,8 @@
 </div>
 <table border="1" class="docutils">
 <colgroup>
-<col width="15%" />
-<col width="85%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>–file</td>
@@ -208,10 +208,10 @@
 <td>Subject Sequence Ontology term. (eg. protein_match if loading a BLAST result) *</td>
 </tr>
 <tr class="row-odd"><td>–organism_query</td>
-<td>Query’s organism name. eg. ‘Oryza sativa’. If not loaded previously put ‘multispecies multispecies’. *</td>
+<td>Query’s organism name. eg. ‘Oryza sativa’. Cannot be ‘multispecies’ *</td>
 </tr>
 <tr class="row-even"><td>–organism_subject</td>
-<td>Subject’s organism name eg. ‘Oryza sativa’. If not loaded previously put ‘multispecies multispecies’. *</td>
+<td>Subject’s organism name eg. ‘Oryza sativa’. Put ‘multispecies multispecies’ if using a multispecies database. *</td>
 </tr>
 <tr class="row-odd"><td>–program</td>
 <td>Program *</td>
