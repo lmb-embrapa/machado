@@ -143,10 +143,9 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_subfeatures(self, obj):
         """Get the subfeatures."""
-        cvterm_part_of = self.context['cvterm_part_of']
         relationship = FeatureRelationship.objects.filter(
             subject_id=obj.feature_id,
-            type_id=cvterm_part_of.cvterm_id)
+            type__name='part_of', type__cv__name='sequence')
         result = list()
         for feat in relationship:
             result.append(self._get_subfeature(feat.object_id))
@@ -159,9 +158,9 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     def get_display(self, obj):
         """Get the display."""
         try:
-            cvterm_display = self.context['cvterm_display']
-            featureprop = Featureprop.objects.get(feature=obj,
-                                                  type_id=cvterm_display)
+            featureprop = Featureprop.objects.get(
+                feature=obj, type__name='display',
+                type__cv__name='feature_property')
             return featureprop.value
         except ObjectDoesNotExist:
             return None

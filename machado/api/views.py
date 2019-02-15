@@ -112,16 +112,11 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
-        cvterm_display = Cvterm.objects.get(cv__name='feature_property',
-                                            name='display')
-        cvterm_part_of = Cvterm.objects.get(cv__name='sequence',
-                                            name='part_of')
+
         refseq_feature_id = Feature.objects.get(
             uniquename=self.kwargs.get('refseq'))
         soType = self.request.query_params.get('soType')
         return {
-            'cvterm_display': cvterm_display,
-            'cvterm_part_of': cvterm_part_of,
             'refseq': refseq_feature_id,
             'soType': soType,
         }
