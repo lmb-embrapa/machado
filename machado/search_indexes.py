@@ -13,9 +13,10 @@ from machado.models import Feature, FeatureCvterm, Featureprop
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     """Transcript index."""
 
-    text = indexes.CharField(document=True, null=True)
+    text = indexes.EdgeNgramField(document=True, null=True)
     organism = indexes.CharField(faceted=True)
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
+    uniquename = indexes.CharField(model_attr='uniquename')
 
     def get_model(self):
         """Get model."""
@@ -35,7 +36,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_text(self, obj):
         """Prepare text."""
         keywords = list()
-        keywords.append(obj.uniquename)
 
         display = Featureprop.objects.filter(
             type__cv__name='feature_property',
