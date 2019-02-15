@@ -6,11 +6,13 @@
 """Search views."""
 
 from haystack.generic_views import FacetedSearchView
+from machado.forms import FeatureSearchForm
 
 
 class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
+    form_class = FeatureSearchForm
     facet_fields = ['organism', 'so_term']
     template_name = 'search_result.html'
     paginate_by = 25

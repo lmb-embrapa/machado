@@ -162,21 +162,21 @@
 <p>The <a class="reference external" href="https://haystacksearch.org">Haystack</a> software enables the Django framework to run third party search engines such as Elasticsearch and Solr. Even though you can use any search engine supported by Haystack, machado was tested using <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>.</p>
 <p><strong>Elasticsearch</strong></p>
 <p>The latest Elasticsearch supported by Haystack is version 5.x.x
-Install Elasticsearch following the <a class="reference external" href="https://django-haystack.readthedocs.io/en/v2.4.1/installing_search_engines.html#elasticsearch">instructions</a>.</p>
+Install Elasticsearch following the <a class="reference external" href="https://django-haystack.readthedocs.io/en/v2.4.1/installing_search_engines.html#elasticsearch">instructions</a>. “Elasticsearch requires Java 8 or later. Use the official Oracle distribution or an open-source distribution such as OpenJDK.”</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> YOURPROJECT
 <span class="nb">source</span> bin/activate
 <span class="nb">cd</span> src
 wget wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.14.deb
-dpkg -i elasticsearch-5.6.14.deb
-systemctl daemon-reload
-systemctl <span class="nb">enable</span> elasticsearch.service
-systemctl start elasticsearch.service
+sudo dpkg -i elasticsearch-5.6.14.deb
+sudo systemctl daemon-reload
+sudo systemctl <span class="nb">enable</span> elasticsearch.service
+sudo systemctl start elasticsearch.service
 pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 </pre></div>
 </div>
 <p><strong>Django Haystack</strong></p>
 <p>Install django-haystack following the <a class="reference external" href="http://docs.haystacksearch.org/en/master/tutorial.html#installation">official instructions</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install django-haystack
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/django-haystack/django-haystack
 </pre></div>
 </div>
 <p>In the WEBPROJECT/settings.py file, add haystack to INSTALLED_APPS section.</p>
