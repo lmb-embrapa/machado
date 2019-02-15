@@ -57,12 +57,28 @@ def patch_templates():
         )
 
 
+def patch_elasticsearch(es_settings):
+    """Set elasticsearch settings from ELASTICSEARCH_INDEX_SETTINGS."""
+    from haystack.backends import elasticsearch_backend as eb
+
+    class ConfigurableElasticBackend(eb.ElasticsearchSearchBackend):
+
+        def __init__(self, connection_alias, **connection_options):
+            super(ConfigurableElasticBackend, self).__init__(
+                                    connection_alias, **connection_options)
+            setattr(self, 'DEFAULT_SETTINGS', es_settings)
+
+
 def patch_all():
     """Apply patches."""
     patch_root_urlconf()
     patch_installed_apps()
     patch_middleware()
     patch_templates()
+
+    es_settings = getattr(settings, 'ELASTICSEARCH_INDEX_SETTINGS', None)
+    if es_settings:
+        patch_elasticsearch(es_settings)
 
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True

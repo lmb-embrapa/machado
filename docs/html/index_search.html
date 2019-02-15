@@ -159,16 +159,19 @@
   <div class="section" id="index-and-search">
 <h1>3.1. Index and search<a class="headerlink" href="#index-and-search" title="Permalink to this headline">¶</a></h1>
 <p><strong>Haystack</strong></p>
-<p>The <a class="reference external" href="https://haystacksearch.org">Haystack</a> software enables the Django framework to run third party search engines such as Xapian, Whoosh, Solr and Elasticsearch. Such search engines will provide fast queries, boolean operators, wildcards, and facets. Even though you can use any search engine supported by Haystack, machado was tested using <a class="reference external" href="https://xapian.org">Xapian</a>.</p>
-<p><strong>Xapian</strong></p>
-<p>Install xapian-haystack following the <a class="reference external" href="https://github.com/notanumber/xapian-haystack">instructions</a>.</p>
+<p>The <a class="reference external" href="https://haystacksearch.org">Haystack</a> software enables the Django framework to run third party search engines such as Elasticsearch and Solr. Even though you can use any search engine supported by Haystack, machado was tested using <a class="reference external" href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a>.</p>
+<p><strong>Elasticsearch</strong></p>
+<p>The latest Elasticsearch supported by Haystack is version 5.x.x
+Install Elasticsearch following the <a class="reference external" href="https://django-haystack.readthedocs.io/en/v2.4.1/installing_search_engines.html#elasticsearch">instructions</a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> YOURPROJECT
 <span class="nb">source</span> bin/activate
 <span class="nb">cd</span> src
-git clone https://github.com/notanumber/xapian-haystack.git
-<span class="nb">cd</span> xapian-haystack
-./install_xapian.sh <span class="m">1</span>.4.9
-python setup.py install
+wget wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.14.deb
+dpkg -i elasticsearch-5.6.14.deb
+systemctl daemon-reload
+systemctl <span class="nb">enable</span> elasticsearch.service
+systemctl start elasticsearch.service
+pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 </pre></div>
 </div>
 <p><strong>Django Haystack</strong></p>
@@ -187,8 +190,9 @@ python setup.py install
 <p>The settings.py file should contain the <a class="reference external" href="http://docs.haystacksearch.org/en/master/tutorial.html#xapian">search engine configuration</a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">HAYSTACK_CONNECTIONS</span> <span class="o">=</span> <span class="o">{</span>
     <span class="s1">&#39;default&#39;</span>: <span class="o">{</span>
-        <span class="s1">&#39;ENGINE&#39;</span>: <span class="s1">&#39;xapian_backend.XapianEngine&#39;</span>,
-        <span class="s1">&#39;PATH&#39;</span>: os.path.join<span class="o">(</span>os.path.dirname<span class="o">(</span>__file__<span class="o">)</span>, <span class="s1">&#39;xapian_index&#39;</span><span class="o">)</span>,
+        <span class="s1">&#39;ENGINE&#39;</span>: <span class="s1">&#39;haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine&#39;</span>,
+        <span class="s1">&#39;URL&#39;</span>: <span class="s1">&#39;http://127.0.0.1:9200/&#39;</span>,
+        <span class="s1">&#39;INDEX_NAME&#39;</span>: <span class="s1">&#39;haystack&#39;</span>,
     <span class="o">}</span>,
 <span class="o">}</span>
 </pre></div>

@@ -3,11 +3,12 @@ Index and search
 
 **Haystack**
 
-The `Haystack <https://haystacksearch.org>`_ software enables the Django framework to run third party search engines such as Xapian, Whoosh, Solr and Elasticsearch. Such search engines will provide fast queries, boolean operators, wildcards, and facets. Even though you can use any search engine supported by Haystack, machado was tested using `Xapian <https://xapian.org>`_.
+The `Haystack <https://haystacksearch.org>`_ software enables the Django framework to run third party search engines such as Elasticsearch and Solr. Even though you can use any search engine supported by Haystack, machado was tested using `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_.
 
-**Xapian**
+**Elasticsearch**
 
-Install xapian-haystack following the `instructions <https://github.com/notanumber/xapian-haystack>`_.
+The latest Elasticsearch supported by Haystack is version 5.x.x
+Install Elasticsearch following the `instructions <https://django-haystack.readthedocs.io/en/v2.4.1/installing_search_engines.html#elasticsearch>`_.
 
 
 .. code-block:: bash
@@ -15,10 +16,12 @@ Install xapian-haystack following the `instructions <https://github.com/notanumb
     cd YOURPROJECT
     source bin/activate
     cd src
-    git clone https://github.com/notanumber/xapian-haystack.git
-    cd xapian-haystack
-    ./install_xapian.sh 1.4.9
-    python setup.py install
+    wget wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.14.deb
+    dpkg -i elasticsearch-5.6.14.deb
+    systemctl daemon-reload
+    systemctl enable elasticsearch.service
+    systemctl start elasticsearch.service
+    pip install 'elasticsearch>=5,<6'
 
 **Django Haystack**
 
@@ -45,8 +48,9 @@ The settings.py file should contain the `search engine configuration <http://doc
 
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'xapian_backend.XapianEngine',
-            'PATH': os.path.join(os.path.dirname(__file__), 'xapian_index'),
+            'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+            'URL': 'http://127.0.0.1:9200/',
+            'INDEX_NAME': 'haystack',
         },
     }
 

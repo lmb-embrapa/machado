@@ -24,7 +24,7 @@
                     {% for organism in facets.fields.organism %}
                     <dd>
                             {% with "organism_exact:"|add:organism.0 as organism_filter %}
-                            <a href="?{% param_replace selected_facets=organism_filter %}">{{ organism.0 }} </a>({{ organism.1 }})</li>
+                            <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i>({{ organism.1 }})
                             {% endwith %}
                     </dd>
                     {% endfor %}
@@ -35,9 +35,8 @@
                     <dt>Filter by SO term</dt>
                     {% for so_term in facets.fields.so_term %}
                     <dd>
-                        <li>
                             {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
-                            <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a>({{ so_term.1 }})</li>
+                            <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a>({{ so_term.1 }})
                             {% endwith %}
                     </dd>
                     {% endfor %}
@@ -64,12 +63,21 @@
                 {% endfor %}
             </table>
 
+            <br />
+
             {% if page_obj.has_previous or page_obj.has_next %}
-                <div>
-                    {% if page_obj.has_previous %}<a href="?{% param_replace page=page_obj.previous_page_number %}">{% endif %}&laquo; Previous{% if page_obj.has_previous %}</a>{% endif %}
-                    |
-                    {% if page_obj.has_next %}<a href="?{% param_replace page=page_obj.next_page_number %}">{% endif %}Next &raquo;{% if page_obj.has_next %}</a>{% endif %}
-                </div>
+
+            <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-left">
+                <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
+                    <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
+                </li>
+                <li class="page-item {% if page_obj.has_next == False %}disabled{% endif %}">
+                    <a class="page-link" href="{% if page_obj.has_next %}?{% param_replace page=page_obj.next_page_number %}{% endif %}">Next</a>
+                </li>
+            </ul>
+            </nav>
+
             {% endif %}
 
             {% else %}

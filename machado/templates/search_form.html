@@ -1,3 +1,3 @@
 <form class="search-form-container" action="/machado/find/" method="get" >
-  <input type="text" placeholder="Search" class="form-control" name="q" id="q">
+  <input type="text" placeholder="Search" class="form-control" name="q" id="q" value="{% if query %}{{ query }}{%endif%}">
 </form>
