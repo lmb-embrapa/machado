@@ -112,7 +112,6 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
-
         refseq_feature_id = Feature.objects.get(
             uniquename=self.kwargs.get('refseq'))
         soType = self.request.query_params.get('soType')
