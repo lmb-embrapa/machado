@@ -36,7 +36,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         """Prepare text."""
         keywords = list()
         keywords.append(obj.uniquename)
-        keywords.append(obj.name)
 
         display = Featureprop.objects.filter(
             type__cv__name='feature_property',
