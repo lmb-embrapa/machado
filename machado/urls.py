@@ -23,4 +23,3 @@ if 'haystack' in settings.INSTALLED_APPS:
             name='feature_search'),
         url(r'^.*', common.HomeView.as_view(), name='home')
     ]
-    urlpatterns = list()
