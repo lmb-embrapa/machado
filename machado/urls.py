@@ -9,15 +9,16 @@
 from django.conf import settings
 from django.conf.urls import include, url
 
-urlpatterns = list()
+urlpatterns = [
+        url(r'api/', include('machado.api.urls'))
+]
 
 if 'haystack' in settings.INSTALLED_APPS:
     from machado.views import common, feature, search
 
-    urlpatterns = [
+    urlpatterns += [
         url(r'feature/', feature.FeatureView.as_view(), name='feature'),
         url(r'data/', common.CommonView.as_view(), name='data_numbers'),
-        url(r'api/', include('machado.api.urls')),
         url(r'find/', search.FeatureSearchView.as_view(),
             name='feature_search'),
         url(r'^.*', common.HomeView.as_view(), name='home')
