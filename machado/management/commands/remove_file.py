@@ -60,8 +60,6 @@ class Command(BaseCommand):
             Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Dbxrefprop.objects.filter(value=name).delete()
             Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
-            if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Features: cannot remove {} (not registered)'.format(name))
@@ -76,8 +74,6 @@ class Command(BaseCommand):
             AssayProject.objects.filter(
                 project_id__in=project_ids).delete()
             Project.objects.filter(project_id__in=project_ids).delete()
-            if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Projects: cannot remove {} (not registered)'.format(name))
@@ -91,8 +87,6 @@ class Command(BaseCommand):
                 value=name).values_list('biomaterial_id', flat=True))
             Biomaterial.objects.filter(
                 biomaterial_id__in=biomaterial_ids).delete()
-            if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Biomaterials: cannot remove {} (not registered)'.format(name))
@@ -108,8 +102,6 @@ class Command(BaseCommand):
                 assay_id__in=assay_ids).delete()
             AssayProject.objects.filter(
                 assay_id__in=assay_ids).delete()
-            if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Assays: cannot remove {} (not registered)'.format(name))
@@ -123,8 +115,8 @@ class Command(BaseCommand):
                 value=name).values_list('analysis_id', flat=True))
             Analysis.objects.filter(
                 analysis_id__in=analysis_ids).delete()
-            if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS('Done'))
         except ObjectDoesNotExist:
             raise CommandError(
                 'Analysis: cannot remove {} (not registered)'.format(name))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))
