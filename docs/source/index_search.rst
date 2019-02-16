@@ -21,7 +21,6 @@ Install Elasticsearch following the `instructions <https://django-haystack.readt
     sudo systemctl daemon-reload
     sudo systemctl enable elasticsearch.service
     sudo systemctl start elasticsearch.service
-    pip install 'elasticsearch>=5,<6'
 
 **Django Haystack**
 
@@ -31,6 +30,7 @@ Install django-haystack following the `official instructions <http://docs.haysta
 .. code-block:: bash
 
     pip install git+https://github.com/django-haystack/django-haystack
+    pip install 'elasticsearch>=5,<6'
 
 In the WEBPROJECT/settings.py file, add haystack to INSTALLED_APPS section.
 
