@@ -6,7 +6,7 @@ Load FASTA
 
 .. code-block:: bash
 
-    python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism 'Arabidopsis thaliana' --nosequence
+    python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 

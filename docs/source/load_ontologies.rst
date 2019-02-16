@@ -33,12 +33,12 @@ Gene ontology
 
 Source ontology files for the Gene Ontology.
 
-* **URL**: http://www.geneontology.org/ontology/
-* **File**: gene_ontology.obo
+* **URL**: http://current.geneontology.org/ontology/
+* **File**: go.obo
 
 .. code-block:: bash
 
-    python manage.py load_gene_ontology --file gene_ontology.obo
+    python manage.py load_gene_ontology --file go.obo
 
 * Loading the gene ontology can be faster if you increase the number of threads (--cpu).
 * After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.

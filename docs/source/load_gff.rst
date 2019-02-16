@@ -9,7 +9,7 @@ In this case, there are two options:
 * Load the GFF directly, without a reference FASTA file
 * Load the FASTA file and then load the GFF using the parameter 'ignore' to not load the reference features
 
-
+The GFF file must be indexed using `tabix <http://www.htslib.org/doc/tabix.html>`_.
 
 Load GFF
 ----------
