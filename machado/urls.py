@@ -6,11 +6,12 @@
 
 """URLs."""
 
-from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 from django.conf.urls import include, url
 
-# Don't add pages if the haystack library is not installed and configured.
-try:
+urlpatterns = list()
+
+if 'haystack' in settings.INSTALLED_APPS:
     from machado.views import common, feature, search
 
     urlpatterns = [
@@ -21,5 +22,4 @@ try:
             name='feature_search'),
         url(r'^.*', common.HomeView.as_view(), name='home')
     ]
-except ImproperlyConfigured as e:
     urlpatterns = list()
