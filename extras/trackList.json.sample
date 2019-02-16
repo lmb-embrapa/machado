@@ -18,7 +18,6 @@
          "storeClass": "JBrowse/Store/SeqFeature/REST",
          "baseUrl":    "http://localhost:8000/machado/api/jbrowse",
          "query": {
-            "soType": "reference",
             "organism": "Arabidopsis thaliana"
          }
        },
