@@ -31,7 +31,7 @@ class Command(BaseCommand):
                             default=1,
                             type=int)
 
-    def handle(self, file: str, cpu: int=1, verbosity: int=1, **options):
+    def handle(self, file: str, cpu: int = 1, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         with open(file) as obo_file:
             G = read_obo(obo_file)
 
-        cv_definition = G.graph['date']
+        cv_definition = G.graph['data-version']
 
         if verbosity > 0:
             self.stdout.write('Preprocessing')
