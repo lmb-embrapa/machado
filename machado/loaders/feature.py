@@ -137,10 +137,16 @@ class FeatureLoader(object):
                     except ObjectDoesNotExist:
                         self.ignored_goterms.add(term)
             elif key in ['dbxref']:
-                dbxrefs = attrs[key].split(',')
+                try:
+                    dbxrefs = attrs[key].split(',')
+                except ValueError as e:
+                    raise ImportingError('{}: {}'.format(attrs[key], e))
                 for dbxref in dbxrefs:
                     # It expects just one dbxref formated as XX:012345
-                    aux_db, aux_dbxref = dbxref.split(':')
+                    try:
+                        aux_db, aux_dbxref = dbxref.split(':')
+                    except ValueError as e:
+                        raise ImportingError('{}: {}'.format(dbxref, e))
                     db, created = Db.objects.get_or_create(name=aux_db.upper())
                     dbxref, created = Dbxref.objects.get_or_create(
                         db=db, accession=aux_dbxref)
