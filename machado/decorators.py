@@ -18,9 +18,31 @@ def get_display(self):
         return None
 
 
+def get_description(self):
+    """Get the description feature prop."""
+    try:
+        return self.Featureprop_feature_Feature.get(
+            type__name='description',
+            type__cv__name='feature_property').value
+    except ObjectDoesNotExist:
+        return None
+
+
+def get_note(self):
+    """Get the note feature prop."""
+    try:
+        return self.Featureprop_feature_Feature.get(
+            type__name='note',
+            type__cv__name='feature_property').value
+    except ObjectDoesNotExist:
+        return None
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
     def wrapper(cls):
         setattr(cls, 'get_display', get_display)
+        setattr(cls, 'get_description', get_description)
+        setattr(cls, 'get_note', get_note)
         return cls
     return wrapper
