@@ -25,8 +25,8 @@ from Bio.SearchIO._model import Hit
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
-               'gene', 'orf_classification', 'ncrna_class', 'pseudo',
-               'product', 'is_circular', 'gene_synonym', 'partial']
+               'orf_classification', 'synonym', 'is_circular',
+               'gene_synonym', 'description']
 
 
 class FeatureLoader(object):
@@ -153,7 +153,7 @@ class FeatureLoader(object):
                     FeatureDbxref.objects.create(feature=feature,
                                                  dbxref=dbxref,
                                                  is_current=1)
-            elif key in ['alias']:
+            elif key in ['alias', 'gene_synonym', 'synonym']:
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
                     defaults={'type_id': cvterm_exact.cvterm_id,
