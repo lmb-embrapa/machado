@@ -25,6 +25,6 @@ class FeatureSearchForm(FacetedSearchForm):
         q = self.cleaned_data['q']
         sqs = sqs.filter(
             SQ(uniquename=Exact(q)) |
+            SQ(name=Exact(q)) |
             SQ(text=AutoQuery(q)))
-
         return sqs
