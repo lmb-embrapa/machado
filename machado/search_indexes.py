@@ -37,21 +37,20 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_text(self, obj):
         """Prepare text."""
         keywords = list()
-        if obj.name is not None:
-            keywords.append(obj.uniquename)
-            keywords.append(obj.name)
+        keywords.append(obj.organism.genus)
+        keywords.append(obj.organism.species)
 
         display = Featureprop.objects.filter(
             ~Q(type__name='parent'),
             type__cv__name='feature_property',
             feature=obj)
         for i in display:
-            keywords.append(i.value)
+            keywords += i.value.split()
 
         feature_cvterm = FeatureCvterm.objects.filter(
             feature=obj)
         for i in feature_cvterm:
             keywords.append('{}:{}'.format(i.cvterm.dbxref.db.name,
                                            i.cvterm.dbxref.accession))
-            keywords.append(i.cvterm.name)
+            keywords += i.cvterm.name.split()
         return '\n'.join(keywords)
