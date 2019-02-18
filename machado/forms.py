@@ -22,6 +22,10 @@ class FeatureSearchForm(FacetedSearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
+        if 'selected_facets' in self.data:
+            for facet in self.data.getlist('selected_facets'):
+                sqs = sqs.narrow(facet)
+
         if q == '':
             return sqs.all()
 

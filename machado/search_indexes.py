@@ -16,8 +16,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True, null=True)
     organism = indexes.CharField(faceted=True)
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
-    uniquename = indexes.CharField(model_attr='uniquename')
-    name = indexes.CharField(model_attr='name')
+    uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
+    name = indexes.CharField(model_attr='name', faceted=True)
 
     def get_model(self):
         """Get model."""
@@ -37,20 +37,19 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_text(self, obj):
         """Prepare text."""
         keywords = list()
-        keywords.append(obj.organism.genus)
-        keywords.append(obj.organism.species)
+        keywords.append(obj.organism.genus + ' ' + obj.organism.species)
 
         display = Featureprop.objects.filter(
             ~Q(type__name='parent'),
             type__cv__name='feature_property',
             feature=obj)
         for i in display:
-            keywords += i.value.split()
+            keywords.append(i.value)
 
         feature_cvterm = FeatureCvterm.objects.filter(
             feature=obj)
         for i in feature_cvterm:
             keywords.append('{}:{}'.format(i.cvterm.dbxref.db.name,
                                            i.cvterm.dbxref.accession))
-            keywords += i.cvterm.name.split()
+            keywords.append(i.cvterm.name)
         return '\n'.join(keywords)
