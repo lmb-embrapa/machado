@@ -9,27 +9,30 @@
 
 {% block content %}
 
+
 {% if feature.error == None %}
 
-  {% if transcript %}
+  {% if data %}
   <div class="card">
     <div class="card-body">
-      <small>{{ feature.organism}}</small>
-      <h2 class="card-title">Transcript: {{ transcript.name }}</h2>
+        <small><i>{{ feature.organism.genus }} {{ feature.organism.species }}</i></small>
+      <h2 class="card-title">{{ feature.type.name }}: {{ feature.name }}</h2>
       <div class="card-text">
-      <p>ID: {{ transcript.uniquename }}</p>
-      <p>Display: {{ transcript.display|default_if_none:'' }}</p>
+      <p>ID: {{ feature.uniquename }}</p>
+      {% if feature.get_display %}<p>Display: {{ feature.get_display }}</p>{% endif %}
+      {% if feature.get_description %}<p>Description: {{ feature.get_description }}</p>{% endif %}
+      {% if feature.get_note %}<p>Note: {{ feature.get_note }}</p>{% endif %}
       </div>
     </div>
   </div>
   {% endif%}
 
-  {% if transcript.location %}
+  {% if data.location %}
   <div class="card">
     <div class="card-body">
       <h3 class="card-title">Location</h3>
       <div class="card-text">
-        {% for location in transcript.location %}
+        {% for location in data.location %}
         <p>{{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}</p>
           {% if location.jbrowse_url %}
             <iframe style='border:0' width='600' height='300' src="{{ location.jbrowse_url }}"></iframe>
@@ -40,11 +43,14 @@
   </div>
   {% endif %}
 
-  {% if transcript.cvterm %}
+  {% if data.cvterm or data.relationship %}
   <div class="card">
     <div class="card-body">
       <h3 class="card-title">Functional annotation</h3>
       <div class="card-text">
+
+
+        {% if data.cvterm %}
         <table class="table table-sm">
           <thead>
             <tr>
@@ -54,97 +60,7 @@
             </tr>
           </thead>
           <tbody>
-          {% for cvterm in transcript.cvterm %}
-            <tr>
-              <td>{{ cvterm.cv|safe }}</td>
-              <td>{{ cvterm.db }}:{{ cvterm.dbxref }}</td>
-              <td>{{ cvterm.cvterm|safe }}
-            </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% if transcript.similarity %}
-  <div class="card">
-    <div class="card-body">
-      <h3 class="card-title">Similarity</h3>
-      <div class="card-text">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Program</th>
-              <th scope="col">Hit</th>
-              <th scope="col">Query start</th>
-              <th scope="col">Query end</th>
-              <th scope="col">Score</th>
-              <th scope="col">Evalue</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for hit in transcript.similarity %}
-            <tr>
-              <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
-              <td>
-                  {{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}
-                  {% for ontology in hit.feature_cvterm %}
-                  <br /><small>{{ ontology.cv}} {{ ontology.db }}:{{ ontology.dbxref }} {{ ontology.cvterm }}</small>
-                  {% endfor%}
-              </td>
-              <td>{{ hit.query_start|default_if_none:''|safe }}</td>
-              <td>{{ hit.query_end|default_if_none:''|safe }}</td>
-              <td>{{ hit.score|default_if_none:''|safe }}</td>
-              <td>{{ hit.evalue|default_if_none:''|safe }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <br />
-
-  {% if protein %}
-  <div class="card">
-    <div class="card-body">
-      <small>{{ feature.organism}}</small>
-      <h2 class="card-title">Protein: {{ protein.name }}</h2>
-      <div class="card-text">
-      {% if protein.feature_id|safe == feature.feature_id|safe %}
-        <p>ID: {{ protein.uniquename }} </p>
-      {% else %}
-        <p>ID: <a href="/machado/feature/?feature_id={{ protein.feature_id|safe }}">{{ protein.uniquename }}</a></p>
-      {% endif %}
-      <p>Display: {{ protein.display|default_if_none:'' }}</p>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% if protein.cvterm or protein.relationship %}
-  <div class="card">
-    <div class="card-body">
-      <h3 class="card-title">Functional annotation</h3>
-      <div class="card-text">
-
-
-        {% if protein.cvterm %}
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Ontology</th>
-              <th scope="col">ID</th>
-              <th scope="col">Term</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for cvterm in protein.cvterm %}
+          {% for cvterm in data.cvterm %}
             <tr>
               <td>{{ cvterm.cv|safe }}</td>
               <td>{{ cvterm.db }}:{{ cvterm.dbxref }}</td>
@@ -156,7 +72,7 @@
         </table>
         {% endif %}
 
-        {% if protein.relationship %}
+        {% if data.relationship %}
         <table class="table table-sm">
           <thead>
             <tr>
@@ -165,7 +81,7 @@
             </tr>
           </thead>
           <tbody>
-          {% for domain in protein.relationship %}
+          {% for domain in data.relationship %}
             <tr>
               <td>{{ domain.db|safe }}</td>
               <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|default_if_none:'' }}
@@ -182,7 +98,7 @@
   </div>
   {% endif %}
 
-  {% if protein.similarity %}
+  {% if data.similarity %}
   <div class="card">
     <div class="card-body">
       <h3 class="card-title">Similarity</h3>
@@ -199,7 +115,7 @@
             </tr>
           </thead>
           <tbody>
-          {% for hit in protein.similarity %}
+          {% for hit in data.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
               <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
