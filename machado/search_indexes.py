@@ -17,6 +17,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     organism = indexes.CharField(faceted=True)
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
     uniquename = indexes.CharField(model_attr='uniquename')
+    name = indexes.CharField(model_attr='name')
 
     def get_model(self):
         """Get model."""
@@ -36,11 +37,12 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_text(self, obj):
         """Prepare text."""
         keywords = list()
-        keywords.append(obj.uniquename)
+        keywords.append(obj.organism.genus)
+        keywords.append(obj.organism.species)
 
         display = Featureprop.objects.filter(
+            ~Q(type__name='parent'),
             type__cv__name='feature_property',
-            type__name='display',
             feature=obj)
         for i in display:
             keywords += i.value.split()
@@ -51,5 +53,4 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             keywords.append('{}:{}'.format(i.cvterm.dbxref.db.name,
                                            i.cvterm.dbxref.accession))
             keywords += i.cvterm.name.split()
-
         return '\n'.join(keywords)

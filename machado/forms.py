@@ -15,16 +15,25 @@ class FeatureSearchForm(FacetedSearchForm):
 
     def search(self):
         """Search."""
-        sqs = super(FeatureSearchForm, self).search()
+        # sqs = super(FeatureSearchForm, self).search()
+        q = self.cleaned_data.get('q')
+        sqs = self.searchqueryset
+
         if not self.is_valid():
             return self.no_query_found()
 
-        if self.cleaned_data.get('q') is None:
-            return self.no_query_found()
+        if q == '':
+            return sqs.all()
+
+        if 'selected_facets' in self.data:
+            for facet in self.data.getlist('selected_facets'):
+                sqs = sqs.narrow(facet)
+
+        # sqs = sqs.narrow(u'organism_exact:%s' % q)
 
         q = self.cleaned_data['q']
         sqs = sqs.filter(
             SQ(uniquename=Exact(q)) |
+            SQ(name=Exact(q)) |
             SQ(text=AutoQuery(q)))
-
         return sqs
