@@ -24,7 +24,7 @@ from Bio.SearchIO._model import Hit
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
-VALID_ATTRS = ['dbxref', 'note', 'display', 'parent', 'alias', 'ontology_term',
+VALID_ATTRS = ['dbxref', 'note', 'display', 'alias', 'ontology_term',
                'orf_classification', 'synonym', 'is_circular',
                'gene_synonym', 'description']
 
