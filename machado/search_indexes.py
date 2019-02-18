@@ -10,6 +10,9 @@ from django.db.models import Q
 from machado.models import Feature, FeatureCvterm, Featureprop
 
 
+VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+
+
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     """Transcript index."""
 
@@ -26,7 +29,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Index queryset."""
         return self.get_model().objects.filter(
-            Q(type__name='mRNA') | Q(type__name='polypeptide'),
+            type__name__in=VALID_TYPES,
             type__cv__name='sequence',
             is_obsolete=False)
 
