@@ -22,12 +22,15 @@ class FeatureSearchForm(FacetedSearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        if q == '':
-            return sqs.all()
-
         if 'selected_facets' in self.data:
             for facet in self.data.getlist('selected_facets'):
-                sqs = sqs.narrow(facet)
+                facet_field, facet_query = facet.split(':')
+                sqs = sqs.filter(**{facet_field: Exact(facet_query)})
+                # narrowing did not work
+                # sqs = sqs.narrow(facet)
+
+        if q == '':
+            return sqs.load_all()
 
         # sqs = sqs.narrow(u'organism_exact:%s' % q)
 

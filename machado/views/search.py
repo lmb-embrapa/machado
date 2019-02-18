@@ -28,4 +28,5 @@ class FeatureSearchView(FacetedSearchView):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args,
                                                                   **kwargs)
+        context['total_count'] = self.queryset.count()
         return context
