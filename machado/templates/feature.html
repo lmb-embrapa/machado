@@ -22,6 +22,13 @@
       {% if feature.get_display %}<p>Display: {{ feature.get_display }}</p>{% endif %}
       {% if feature.get_description %}<p>Description: {{ feature.get_description }}</p>{% endif %}
       {% if feature.get_note %}<p>Note: {{ feature.get_note }}</p>{% endif %}
+      {% if data.relationship %}
+        <p>
+        {% for relative in data.relationship %}
+        {{ relative.type.name }}: <a href="/machado/feature/?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display }}<br />
+        {% endfor %}
+        </p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -43,7 +50,20 @@
   </div>
   {% endif %}
 
-  {% if data.cvterm or data.relationship %}
+  {% if data.relationship %}
+  <div class="card">
+    <div class="card-body">
+      <h3 class="card-title">Relationship</h3>
+      <div class="card-text">
+        {% for relative in data.relationship %}
+        {{ relative.type.name }}: <a href="/machado/feature/?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display }}<br />
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if data.cvterm or data.protein_matches %}
   <div class="card">
     <div class="card-body">
       <h3 class="card-title">Functional annotation</h3>
@@ -72,7 +92,7 @@
         </table>
         {% endif %}
 
-        {% if data.relationship %}
+        {% if data.protein_matches %}
         <table class="table table-sm">
           <thead>
             <tr>
@@ -81,7 +101,7 @@
             </tr>
           </thead>
           <tbody>
-          {% for domain in data.relationship %}
+          {% for domain in data.protein_matches %}
             <tr>
               <td>{{ domain.db|safe }}</td>
               <td>{{ domain.subject_id|safe }} {{ domain.subject_desc|default_if_none:'' }}

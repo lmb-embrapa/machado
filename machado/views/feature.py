@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.shortcuts import render
 from django.views import View
 from machado.models import Analysis, Analysisfeature
@@ -77,7 +78,7 @@ class FeatureView(View):
             })
         return result
 
-    def retrieve_feature_relationship(self, feature_id: int) -> List[Dict]:
+    def retrieve_feature_protein_matches(self, feature_id: int) -> List[Dict]:
         """Retrieve feature relationships."""
         feature_relationships = FeatureRelationship.objects.filter(
             object_id=feature_id,
@@ -91,6 +92,25 @@ class FeatureView(View):
                 'db': feature_relationship.subject.dbxref.db.name,
                 'dbxref': feature_relationship.subject.dbxref.accession,
             })
+        return result
+
+    def retrieve_feature_relationship(self, feature_id: int) -> List[Dict]:
+        """Retrieve feature relationships."""
+        result = list()
+        feature_relationships = FeatureRelationship.objects.filter(
+            Q(type__name='part_of') | Q(type__name='translation_of'),
+            type__cv__name='sequence',
+            object_id=feature_id)
+        for feature_relationship in feature_relationships:
+            if feature_relationship.subject.type.name in VALID_TYPES:
+                result.append(feature_relationship.subject)
+        feature_relationships = FeatureRelationship.objects.filter(
+            Q(type__name='part_of') | Q(type__name='translation_of'),
+            type__cv__name='sequence',
+            subject_id=feature_id)
+        for feature_relationship in feature_relationships:
+            if feature_relationship.object.type.name in VALID_TYPES:
+                result.append(feature_relationship.object)
         return result
 
     def retrieve_feature_similarity(self, feature_id: int,
@@ -166,6 +186,8 @@ class FeatureView(View):
         result['dbxref'] = self.retrieve_feature_dbxref(
             feature_id=feature_obj.feature_id)
         result['cvterm'] = self.retrieve_feature_cvterm(
+            feature_id=feature_obj.feature_id)
+        result['protein_matches'] = self.retrieve_feature_protein_matches(
             feature_id=feature_obj.feature_id)
         result['relationship'] = self.retrieve_feature_relationship(
             feature_id=feature_obj.feature_id)
