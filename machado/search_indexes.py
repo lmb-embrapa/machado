@@ -10,10 +10,14 @@ from django.db.models import Q
 from machado.models import Feature, FeatureCvterm, Featureprop
 
 
+VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+
+
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     """Transcript index."""
 
-    text = indexes.EdgeNgramField(document=True, null=True)
+    text = indexes.CharField(document=True, null=True)
+    autocomplete = indexes.EdgeNgramField(null=True)
     organism = indexes.CharField(faceted=True)
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
     uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
@@ -26,7 +30,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Index queryset."""
         return self.get_model().objects.filter(
-            Q(type__name='mRNA') | Q(type__name='polypeptide'),
+            type__name__in=VALID_TYPES,
             type__cv__name='sequence',
             is_obsolete=False)
 
@@ -52,4 +56,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             keywords.append('{}:{}'.format(i.cvterm.dbxref.db.name,
                                            i.cvterm.dbxref.accession))
             keywords.append(i.cvterm.name)
+        self.temp = '\n'.join(keywords)
         return '\n'.join(keywords)
+
+    def prepare_autocomplete(self, obj):
+        """Prepare autocomplete."""
+        return self.temp

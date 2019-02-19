@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.shortcuts import render
 from django.views import View
 from machado.models import Analysis, Analysisfeature
@@ -15,7 +16,7 @@ from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Dict, List
 
-VALID_TYPES = ['mRNA', 'polypeptide']
+VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
 
 
 class FeatureView(View):
@@ -77,7 +78,7 @@ class FeatureView(View):
             })
         return result
 
-    def retrieve_feature_relationship(self, feature_id: int) -> List[Dict]:
+    def retrieve_feature_protein_matches(self, feature_id: int) -> List[Dict]:
         """Retrieve feature relationships."""
         feature_relationships = FeatureRelationship.objects.filter(
             object_id=feature_id,
@@ -93,14 +94,33 @@ class FeatureView(View):
             })
         return result
 
+    def retrieve_feature_relationship(self, feature_id: int) -> List[Dict]:
+        """Retrieve feature relationships."""
+        result = list()
+        feature_relationships = FeatureRelationship.objects.filter(
+            Q(type__name='part_of') | Q(type__name='translation_of'),
+            type__cv__name='sequence',
+            object_id=feature_id)
+        for feature_relationship in feature_relationships:
+            if feature_relationship.subject.type.name in VALID_TYPES:
+                result.append(feature_relationship.subject)
+        feature_relationships = FeatureRelationship.objects.filter(
+            Q(type__name='part_of') | Q(type__name='translation_of'),
+            type__cv__name='sequence',
+            subject_id=feature_id)
+        for feature_relationship in feature_relationships:
+            if feature_relationship.object.type.name in VALID_TYPES:
+                result.append(feature_relationship.object)
+        return result
+
     def retrieve_feature_similarity(self, feature_id: int,
-                                    current_organism_id: int) -> List:
+                                    organism_id: int) -> List:
         """Retrieve feature locations."""
         result = list()
         try:
             match_parts_ids = Featureloc.objects.filter(
                 srcfeature_id=feature_id).filter(
-                feature__organism_id=current_organism_id).values_list(
+                feature__organism_id=organism_id).values_list(
                     'feature_id')
         except ObjectDoesNotExist:
             return list()
@@ -156,13 +176,7 @@ class FeatureView(View):
 
     def retrieve_feature_data(self, request, feature_obj: Feature) -> Dict:
         """Retrieve feature data."""
-        result = {
-            'feature_id': feature_obj.feature_id,
-            'name': feature_obj.name,
-            'uniquename': feature_obj.uniquename,
-        }
-
-        result['display'] = feature_obj.get_display
+        result = dict()
 
         result['location'] = self.retrieve_feature_location(
             feature_id=feature_obj.feature_id,
@@ -173,11 +187,13 @@ class FeatureView(View):
             feature_id=feature_obj.feature_id)
         result['cvterm'] = self.retrieve_feature_cvterm(
             feature_id=feature_obj.feature_id)
+        result['protein_matches'] = self.retrieve_feature_protein_matches(
+            feature_id=feature_obj.feature_id)
         result['relationship'] = self.retrieve_feature_relationship(
             feature_id=feature_obj.feature_id)
         result['similarity'] = self.retrieve_feature_similarity(
             feature_id=feature_obj.feature_id,
-            current_organism_id=feature_obj.organism_id)
+            organism_id=feature_obj.organism_id)
         return result
 
     def get(self, request):
@@ -186,8 +202,6 @@ class FeatureView(View):
 
         feature = dict()
         feature['feature_id'] = feature_id
-        feature['organism_id'] = request.session.get('current_organism_id')
-        feature['organism'] = request.session.get('current_organism_name')
 
         try:
             feature_obj = Feature.objects.get(
@@ -198,11 +212,6 @@ class FeatureView(View):
                           'error.html',
                           {'context': error})
 
-        if feature['organism'] is None:
-            feature['organism'] = "{} {}".format(feature_obj.organism.genus,
-                                                 feature_obj.organism.species)
-            feature['organism_id'] = feature_obj.organism_id
-
         feature['type'] = feature_obj.type.name
         if feature['type'] not in VALID_TYPES:
             error = {'error': 'Invalid feature type.'}
@@ -210,32 +219,11 @@ class FeatureView(View):
                           'error.html',
                           {'context': error})
 
-        transcript = dict()
-        protein = dict()
+        data = self.retrieve_feature_data(
+            request=request,
+            feature_obj=feature_obj)
 
-        if feature['type'] == 'mRNA':
-            transcript = self.retrieve_feature_data(
-                request=request,
-                feature_obj=feature_obj)
-            try:
-                protein_id = FeatureRelationship.objects.get(
-                    subject_id=feature_obj.feature_id,
-                    type__name='translation_of',
-                    type__cv__name='sequence'
-                ).object_id
-                protein_obj = Feature.objects.get(feature_id=protein_id)
-                protein = self.retrieve_feature_data(
-                    request=request,
-                    feature_obj=protein_obj)
-            except ObjectDoesNotExist:
-                pass
-
-        if feature['type'] == 'polypeptide':
-            protein = self.retrieve_feature_data(
-                request=request,
-                feature_obj=feature_obj)
         return render(request,
                       'feature.html',
-                      {'feature': feature,
-                       'transcript': transcript,
-                       'protein': protein})
+                      {'feature': feature_obj,
+                       'data': data})
