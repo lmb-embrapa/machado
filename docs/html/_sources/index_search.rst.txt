@@ -61,3 +61,5 @@ Go to the WEBPROJECT directory and use the manage.py
 .. code-block:: bash
 
     python manage.py rebuild_index
+
+* Rebuilding the index can be faster if you increase the number of workers (-k).
