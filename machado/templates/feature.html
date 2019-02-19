@@ -50,19 +50,6 @@
   </div>
   {% endif %}
 
-  {% if data.relationship %}
-  <div class="card">
-    <div class="card-body">
-      <h3 class="card-title">Relationship</h3>
-      <div class="card-text">
-        {% for relative in data.relationship %}
-        {{ relative.type.name }}: <a href="/machado/feature/?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display }}<br />
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
   {% if data.cvterm or data.protein_matches %}
   <div class="card">
     <div class="card-body">
