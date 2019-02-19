@@ -8,11 +8,11 @@ It provides users with a framework to store, search and visualize biological dat
 Detailed documentation can be found in the **docs** directory ([Read the docs](http://machado.readthedocs.io)).
 
 ## Features
-- The Django framework allows rapid development
 - There are data loaders for the major bioinformatics formats: fasta, gff, obo, bibtex, blast, interproscan, orthomcl
 - The machado API delivers data directly to the JBrowse genome browser
+- The Haystack framework provides a very fast query interface using the Elasticsearch engine
 
-## Instalation
+## Installation
 Please refer to the complete documentation at [Read the docs](http://machado.readthedocs.io/en/latest/installation.html).
 
 ## Example

@@ -6,7 +6,7 @@ Load Feature Annotation
 
 .. code-block:: bash
 
-    python manage.py load_feature_annotation --file feature_annotation.fa --organism 'Arabidopsis thaliana' --cvterm display
+    python manage.py load_feature_annotation --file feature_annotation.tab --organism 'Arabidopsis thaliana' --cvterm display
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
