@@ -29,12 +29,10 @@ def patch_middleware():
 
 def patch_root_urlconf():
     """Include the machado urls."""
-    from django.conf.urls import include, url
     if hasattr(settings, 'ROOT_URLCONF'):
         urlconf_module = import_module(settings.ROOT_URLCONF)
-        urlconf_module.urlpatterns = [
-            url('machado/', include('machado.urls')),
-        ] + urlconf_module.urlpatterns
+        from machado.urls import urlpatterns
+        urlconf_module.urlpatterns += urlpatterns
 
 
 def patch_templates():

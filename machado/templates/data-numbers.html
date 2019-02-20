@@ -17,7 +17,7 @@
         <ul class="list-group">
             {% for entry in data %}
             <li class="list-group-item">
-                <a href="/machado/find/?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }}
+                <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }}
             </li>
         {% endfor %}
         </ul>
