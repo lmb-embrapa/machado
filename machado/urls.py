@@ -21,5 +21,5 @@ if 'haystack' in settings.INSTALLED_APPS:
         url(r'data/', common.CommonView.as_view(), name='data_numbers'),
         url(r'find/', search.FeatureSearchView.as_view(),
             name='feature_search'),
-        url(r'^.*', common.HomeView.as_view(), name='home')
+        url(r'^$', common.HomeView.as_view(), name='home')
     ]
