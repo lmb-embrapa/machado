@@ -28,7 +28,6 @@ In order to have Apache2 hosting the Django applications, it's necessary to use 
 
 Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
 
-
 .. code-block:: bash
 
     <Directory "/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT">
@@ -41,16 +40,21 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
     WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT
     WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
 
-* In this example the whole project is in /var/www/YOURPROJECT
+* In this example the whole project is in /var/www/YOURPROJECT, but it's not required to be there.
 * This directory and sub-directories must have 755 permissions
 
-In the WEBPROJECT/settings.py file, add '*' to ALLOWED_HOSTS.
+There must be a symlink of your config file in the sites-enabled directory
+
+.. code-block:: bash
+
+    sudo ln -s /etc/apache2/sites-available/YOURPROJECT.conf /etc/apache2/sites-available/YOURPROJECT.conf
+
+
+* In the WEBPROJECT/settings.py file, add '*' to ALLOWED_HOSTS.
 
 .. code-block:: bash
 
     ALLOWED_HOSTS = ['*']
-
-* SECURITY WARNING: don't run with debug turned on in production!
 
 
 It's necessary to restart the Apache2 service everytime there are modifications on configuration files or source code updates.
