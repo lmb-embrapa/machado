@@ -158,13 +158,49 @@
             
   <div class="section" id="web-server">
 <h1>3.3. Web server<a class="headerlink" href="#web-server" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="machado">
-<h2>3.3.1. machado<a class="headerlink" href="#machado" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="django-manage-runserver">
+<h2>3.3.1. Django manage runserver<a class="headerlink" href="#django-manage-runserver" title="Permalink to this headline">¶</a></h2>
 <p>Start the <em>machado</em> server:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
 </pre></div>
 </div>
-<p>Now, open your browser and go to <a class="reference external" href="http://127.0.0.1:8000/machado">http://127.0.0.1:8000/machado</a></p>
+<p>Now, open your browser and go to <a class="reference external" href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></p>
+<p>Use CTRL+C to stop the webserver.</p>
+</div>
+<div class="section" id="django-apache-wsgi">
+<h2>3.3.2. Django Apache WSGI<a class="headerlink" href="#django-apache-wsgi" title="Permalink to this headline">¶</a></h2>
+<p>In order to have Apache2 hosting the Django applications, it’s necessary to use WSGI.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apt install libapache2-mod-wsgi-py3
+</pre></div>
+</div>
+<p>Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;Directory <span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT&quot;</span>&gt;
+&lt;Files <span class="s2">&quot;wsgi.py&quot;</span>&gt;
+       Require all granted
+&lt;/Files&gt;
+&lt;/Directory&gt;
+WSGIDaemonProcess WEBPROJECT
+WSGIPythonHome /var/www/YOURPROJECT
+WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT
+WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
+</pre></div>
+</div>
+<ul class="simple">
+<li>In this example the whole project is in /var/www/YOURPROJECT</li>
+<li>This directory and sub-directories must have 755 permissions</li>
+</ul>
+<p>In the WEBPROJECT/settings.py file, add ‘*’ to ALLOWED_HOSTS.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;*&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>SECURITY WARNING: don’t run with debug turned on in production!</li>
+</ul>
+<p>It’s necessary to restart the Apache2 service everytime there are modifications on configuration files or source code updates.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl restart apache2.service
+</pre></div>
+</div>
+<p>Now, open your browser and go to <a class="reference external" href="http://localhost/YOURPROJECT">http://localhost/YOURPROJECT</a></p>
 </div>
 </div>
 
@@ -221,6 +257,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
 
   
 

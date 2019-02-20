@@ -1,8 +1,8 @@
 Web server
 ==========
 
-machado
--------
+Django manage runserver
+-----------------------
 
 Start the *machado* server:
 
@@ -11,4 +11,53 @@ Start the *machado* server:
     python manage.py runserver
 
 
-Now, open your browser and go to http://127.0.0.1:8000/machado
+Now, open your browser and go to http://127.0.0.1:8000
+
+Use CTRL+C to stop the webserver.
+
+
+Django Apache WSGI
+------------------
+
+In order to have Apache2 hosting the Django applications, it's necessary to use WSGI.
+
+.. code-block:: bash
+
+    apt install libapache2-mod-wsgi-py3
+
+
+Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
+
+
+.. code-block:: bash
+
+    <Directory "/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT">
+    <Files "wsgi.py">
+           Require all granted
+    </Files>
+    </Directory>
+    WSGIDaemonProcess WEBPROJECT
+    WSGIPythonHome /var/www/YOURPROJECT
+    WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT
+    WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
+
+* In this example the whole project is in /var/www/YOURPROJECT
+* This directory and sub-directories must have 755 permissions
+
+In the WEBPROJECT/settings.py file, add '*' to ALLOWED_HOSTS.
+
+.. code-block:: bash
+
+    ALLOWED_HOSTS = ['*']
+
+* SECURITY WARNING: don't run with debug turned on in production!
+
+
+It's necessary to restart the Apache2 service everytime there are modifications on configuration files or source code updates.
+
+.. code-block:: bash
+
+    sudo systemctl restart apache2.service
+
+
+Now, open your browser and go to http://localhost/YOURPROJECT
