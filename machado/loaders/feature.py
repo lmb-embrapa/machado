@@ -334,11 +334,11 @@ class FeatureLoader(object):
         # if interproscan-xml parsing, get db name from Hit.attributes.
         if target == 'InterPro':
             db_name = searchio_hit.attributes['Target'].upper()
-        # if blast-xml parsing, db name comes from QueryResult.target
+            db, created = Db.objects.get_or_create(name=db_name)
+        # if blast-xml parsing, db name is self.db ("BLAST_source")
         else:
-            db_name = target.upper()
+            db = self.db
 
-        db, created = Db.objects.get_or_create(name=db_name)
         dbxref, created = Dbxref.objects.get_or_create(
             db=db, accession=searchio_hit.id)
         feature, created = Feature.objects.get_or_create(
