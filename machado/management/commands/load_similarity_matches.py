@@ -49,7 +49,6 @@ class Command(BaseCommand):
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
-        # set format
         if format == 'blast-xml':
             source = 'BLAST_source'
         elif format == 'interproscan-xml':
@@ -57,6 +56,7 @@ class Command(BaseCommand):
         else:
             raise ("Format allowed options are blast-xml or interproscan-xml"
                    " only, not {}".format(format))
+
         organism, created = Organism.objects.get_or_create(
             abbreviation='multispecies', genus='multispecies',
             species='multispecies', common_name='multispecies')
