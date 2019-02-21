@@ -4,7 +4,7 @@ Web server
 Django manage runserver
 -----------------------
 
-Start the *machado* server:
+Check if your server is working, test the *machado* server:
 
 .. code-block:: bash
 
@@ -18,14 +18,30 @@ Use CTRL+C to stop the webserver.
 
 Django Apache WSGI
 ------------------
-
-In order to have Apache2 hosting the Django applications, it's necessary to use WSGI.
+Before starting, make sure you have Apache installed in your system. In Ubuntu 18.04,
+do:
 
 .. code-block:: bash
 
-    apt install libapache2-mod-wsgi-py3
+    sudo apt install apache2
 
+In order to have Apache2 hosting the Django applications, it's necessary to use WSGI.
+By doing this it won't be necessary to run the runserver command anymore, Apache will
+take care of this process. It will be necessary to install the following package:
 
+.. code-block:: bash
+
+    sudo apt install libapache2-mod-wsgi-py3
+
+Now symlink the directory of YOURPROJECT to '/var/www/' (tested in Ubuntu 18.04):
+
+.. code-block:: bash
+
+    sudo ln -s /FULL/PATH/TO/YOURPROJECT /var/www/
+
+* Make sure this directory and sub-directories have 755 permissions
+
+Now configure Apache to use the WSGI module.
 Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
 
 .. code-block:: bash
