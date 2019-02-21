@@ -1,20 +1,6 @@
 include LICENSE
 include README.md
-include machado/admin.py
-include machado/apps.py
-include machado/models.py
-include machado/view.py
-include machado/serializers.py
-include machado/settings.py
-include machado/tests.py
-include machado/urls.py
-recursive-include bin *
-recursive-include machado/loaders *
-recursive-include machado/management *
-recursive-include machado/migrations *
-recursive-include machado/schemas *
-recursive-include machado/templates *
-recursive-include machado/tests *
+recursive-include machado *
 recursive-include docs *
 
 global-exclude *.pyc *.pyo *.py{} *.py-e

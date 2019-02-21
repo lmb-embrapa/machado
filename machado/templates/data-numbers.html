@@ -10,19 +10,15 @@
 {% block content %}
 
 {% for item, data in context.items %}
-<div class="card">
-  <div class="card-body">
-    <h4 class="card-title">{{ item }}</h4>
-    <div class="card-text">
-        <ul class="list-group">
-            {% for entry in data %}
-            <li class="list-group-item">
-                <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }}
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-  </div>
+<div class="card w-25">
+    <ul class="list-group">
+        <li class="list-group-item list-group-item-primary">{{ item }}</li>
+        {% for entry in data %}
+        <li class="list-group-item">
+            <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }}
+        </li>
+    {% endfor %}
+    </ul>
 </div>
 </br>
 {% endfor %}

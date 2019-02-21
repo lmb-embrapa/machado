@@ -18,49 +18,42 @@
 
             <div class="col-md-3">
                 <h3>Filters</h3>
-                <dl>
-                    {% if facets.fields.organism %}
-                    <dt>Filter by Organism</dt>
+                {% if facets.fields.organism %}
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-primary">Organism</li>
                     {% for organism in facets.fields.organism %}
-                    <dd>
-                            {% with "organism_exact:"|add:organism.0 as organism_filter %}
-                            <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i>({{ organism.1 }})
-                            {% endwith %}
-                    </dd>
+                        {% with "organism_exact:"|add:organism.0 as organism_filter %}
+                        <li class="list-group-item"><a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small></li>
+                        {% endwith %}
                     {% endfor %}
-                    {% endif %}
-                </dl>
-                <dl>
-                    {% if facets.fields.so_term %}
-                    <dt>Filter by SO term</dt>
+                </ul>
+                {% endif %}
+
+                {% if facets.fields.so_term %}
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-primary">SO term</li>
                     {% for so_term in facets.fields.so_term %}
-                    <dd>
-                            {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
-                            <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a>({{ so_term.1 }})
-                            {% endwith %}
-                    </dd>
+                        {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
+                        <li class="list-group-item"><a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small></li>
+                        {% endwith %}
                     {% endfor %}
-                    {% endif %}
-                </dl>
+                </ul>
+                {% endif %}
             </div>
 
             <div class="col-md-9">
                 <h3>Results</h3>
-                <table>
+                <table class="table table-hover table-sm">
                 <tr>
                     <th>SO term</th>
                     <th>Feature ID</th>
                     <th>Display</th>
-                    <th>Description</th>
-                    <th>Note</th>
                 </tr>
                 {% for result in page_obj.object_list %}
                 <tr>
                     <td>{{ result.object.type.name }}</td>
                     <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
                     <td>{{ result.object.get_display|default_if_none:"" }}</td>
-                    <td>{{ result.object.get_description|default_if_none:"" }}</td>
-                    <td>{{ result.object.get_note|default_if_none:"" }}</td>
                 </tr>
                 {% empty %}
                 <p>No results found.</p>
