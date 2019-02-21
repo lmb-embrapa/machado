@@ -42,7 +42,7 @@ Finally, proceed with JBrowse installation
    cd jbrowse
    ./setup.sh # don't do sudo ./setup.sh
 
-*If using curl does not work for downloading Jbrowse zip file, try using wget.
+-If using curl does not work for downloading Jbrowse zip file, try using wget.
 
 **configuring JBrowse**
 
@@ -62,9 +62,9 @@ Edit the file trackList.json to set the **organism** name you have loaded to the
 
     baseUrl":    "http://localhost/YOURPROJECT/api/jbrowse"
 
-*Now repeat the steps above for as many other organisms as you may have loaded to the database.
+-Now repeat the steps above for as many other organisms as you may have loaded to the database.
 
-*Remember to restart the Apache server after the modifications.
+-Remember to restart the Apache server after the modifications.
 
 
 **machado API**

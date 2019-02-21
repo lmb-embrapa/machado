@@ -16,32 +16,41 @@
         <div class="container">
             <div class="row">
 
-            <div class="col-md-3">
+            <div class="col-sm py-3 mx-1 rounded bg-light">
+
                 <h3>Filters</h3>
                 {% if facets.fields.organism %}
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-primary">Organism</li>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title">Organism</h5>
+                    </div>
+                    <div class="card-body">
                     {% for organism in facets.fields.organism %}
                         {% with "organism_exact:"|add:organism.0 as organism_filter %}
-                        <li class="list-group-item"><a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small></li>
+                        <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
                         {% endwith %}
                     {% endfor %}
-                </ul>
+                    </div>
+                </div>
                 {% endif %}
 
                 {% if facets.fields.so_term %}
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-primary">SO term</li>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title">SO Term</h5>
+                    </div>
+                    <div class="card-body">
                     {% for so_term in facets.fields.so_term %}
                         {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
-                        <li class="list-group-item"><a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small></li>
+                        <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
                         {% endwith %}
                     {% endfor %}
-                </ul>
+                    </div>
+                </div>
                 {% endif %}
             </div>
 
-            <div class="col-md-9">
+            <div class="col-auto col-9 py-3 mx-1 rounded bg-light">
                 <h3>Results</h3>
                 <table class="table table-hover table-sm">
                 <tr>
