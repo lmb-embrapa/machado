@@ -176,8 +176,15 @@
 <p>Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;Directory <span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT&quot;</span>&gt;
 &lt;Files <span class="s2">&quot;wsgi.py&quot;</span>&gt;
-       Require all granted
+    Require all granted
 &lt;/Files&gt;
+
+Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
+
+&lt;Directory <span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT/static&quot;</span>&gt;
+    Require all granted
+&lt;/Directory&gt;
+
 &lt;/Directory&gt;
 WSGIDaemonProcess WEBPROJECT
 WSGIPythonHome /var/www/YOURPROJECT
@@ -194,9 +201,15 @@ WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
 </pre></div>
 </div>
 <ul class="simple">
-<li>In the WEBPROJECT/settings.py file, add ‘*’ to ALLOWED_HOSTS.</li>
+<li>In the WEBPROJECT/settings.py file, set the following variables:</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;*&#39;</span><span class="o">]</span>
+<span class="nv">STATIC_URL</span> <span class="o">=</span> <span class="s1">&#39;/static/&#39;</span>
+<span class="nv">STATIC_ROOT</span> <span class="o">=</span> <span class="s1">&#39;/var/www/YOURPROJECT/WEBPROJECT/static&#39;</span>
+</pre></div>
+</div>
+<p>Now, run collectstatic to gather the static files from all libraries to STATIC_ROOT.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py collectstatic
 </pre></div>
 </div>
 <p>It’s necessary to restart the Apache2 service everytime there are modifications on configuration files or source code updates.</p>

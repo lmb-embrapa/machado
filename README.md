@@ -17,7 +17,7 @@ Please refer to the complete documentation at [Read the docs](http://machado.rea
 
 ## Example
 
-![Screenshot](static/screenshot.png)
+![Screenshot](machado/static/screenshot.png)
 
 ## Contributing
 

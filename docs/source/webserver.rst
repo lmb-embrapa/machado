@@ -32,8 +32,15 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
 
     <Directory "/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT">
     <Files "wsgi.py">
-           Require all granted
+        Require all granted
     </Files>
+
+    Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
+
+    <Directory "/var/www/YOURPROJECT/WEBPROJECT/static">
+        Require all granted
+    </Directory>
+
     </Directory>
     WSGIDaemonProcess WEBPROJECT
     WSGIPythonHome /var/www/YOURPROJECT
@@ -50,11 +57,20 @@ There must be a symlink of your config file in the sites-enabled directory
     sudo ln -s /etc/apache2/sites-available/YOURPROJECT.conf /etc/apache2/sites-available/YOURPROJECT.conf
 
 
-* In the WEBPROJECT/settings.py file, add '*' to ALLOWED_HOSTS.
+* In the WEBPROJECT/settings.py file, set the following variables:
 
 .. code-block:: bash
 
     ALLOWED_HOSTS = ['*']
+    STATIC_URL = '/static/'
+    STATIC_ROOT = '/var/www/YOURPROJECT/WEBPROJECT/static'
+
+
+Now, run collectstatic to gather the static files from all libraries to STATIC_ROOT.
+
+.. code-block:: bash
+
+    python manage.py collectstatic
 
 
 It's necessary to restart the Apache2 service everytime there are modifications on configuration files or source code updates.
