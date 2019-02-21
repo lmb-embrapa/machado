@@ -1,6 +1,6 @@
 <form class="navbar-form" action="{% url 'feature_search' %}" method="get" >
   <div class="input-group mb-3">
-    <input type="text" placeholder="Search" class="form-control input-outline-primary" name="q" id="q" value="{% if query %}{{ query }}{%endif%}">
+    <input type="text" placeholder="Search" class="form-control" name="q" id="q" value="{% if query %}{{ query }}{%endif%}">
     <div class="input-group-append">
       <button class="btn btn-outline-secondary" type="submit" id="button-addon2"><i class="fas fa-search"></i></button>
     </div>

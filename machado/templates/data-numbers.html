@@ -8,19 +8,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<div class="bg-light rounded p-5">
+<div class="row">
 {% for item, data in context.items %}
-<div class="card w-25">
-    <ul class="list-group">
-        <li class="list-group-item list-group-item-primary">{{ item }}</li>
+<div class="card mb-3 col-sm mx-1">
+    <div class="card-header">
+        <h5 class="card-title">{{ item }}</h5>
+    </div>
+    <div class="card-body">
         {% for entry in data %}
-        <li class="list-group-item">
-            <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }}
-        </li>
+        <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }} <br />
     {% endfor %}
-    </ul>
+    </div>
 </div>
-</br>
 {% endfor %}
+</div>
+</div>
 
 {% endblock%}

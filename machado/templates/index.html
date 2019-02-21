@@ -9,7 +9,8 @@
 
 {% block content %}
 
-<p>Just use the <a href="{% url 'feature_search' %}?q="><b>Search box</b></a> or click on <a href="{% url 'data_numbers' %}"><b>Data summary</b></a> to find out all the data that was loaded using <a href="https://github.com/lmb-embrapa/machado">machado</a>!</p>
+<div class="rounded bg-light p-5">
+    <p>Just use the <a href="{% url 'feature_search' %}?q="><b>Search box</b></a> or click on <a href="{% url 'data_numbers' %}"><b>Data summary</b></a> to find out all the data that was loaded using <a href="https://github.com/lmb-embrapa/machado">machado</a>!</p>
 
     <h2>Demo</h2>
 
@@ -27,5 +28,7 @@
     <h3>Installation</h3>
 
     Please refer to the complete documentation at <a href="https://machado.readthedocs.io">Read the docs</a>.
+
+</div>
 
 {% endblock %}
