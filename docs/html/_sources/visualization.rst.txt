@@ -9,5 +9,5 @@ The machado web interface requires the instalation and configuration of third pa
    :titlesonly:
 
    Index and search <index_search>
-   JBrowse <jbrowse>
    Web server <webserver>
+   JBrowse <jbrowse>

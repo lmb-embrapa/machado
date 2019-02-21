@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>3.2. JBrowse (optional) &mdash; machado 0.1.0 documentation</title>
+  <title>3.3. JBrowse (optional) &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -17,35 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="3.3. Web server" href="webserver.html" />
-    <link rel="prev" title="3.1. Index and search" href="index_search.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="next" title="4. Diagrams" href="diagrams.html" />
+    <link rel="prev" title="3.2. Web server" href="webserver.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -84,8 +85,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dataload.html">2. Data loading</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="visualization.html">3. Visualization</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index_search.html">3.1. Index and search</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">3.2. JBrowse</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webserver.html">3.3. Web server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webserver.html">3.2. Web server</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.3. JBrowse</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
@@ -137,7 +138,7 @@
         
           <li><a href="visualization.html">3. Visualization</a> &raquo;</li>
         
-      <li>3.2. JBrowse (optional)</li>
+      <li>3.3. JBrowse (optional)</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -157,26 +158,61 @@
            <div itemprop="articleBody">
             
   <div class="section" id="jbrowse-optional">
-<h1>3.2. JBrowse (optional)<a class="headerlink" href="#jbrowse-optional" title="Permalink to this headline">¶</a></h1>
+<h1>3.3. JBrowse (optional)<a class="headerlink" href="#jbrowse-optional" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference external" href="https://jbrowse.org">JBrowse</a> software renders genomic tracks from Chado using the <em>machado</em> API.</p>
 <p><strong>JBrowse</strong></p>
-<p>Install JBrowse following the <a class="reference external" href="https://jbrowse.org/docs/installation.html">official instructions</a>.</p>
-<p>The <em>machado</em> source contains the directory extras. Copy the file extras/trackList.json.sample to the JBrowse data directory, inside a subdirectory with the name of the organism (eg. /var/www/html/jbrowse/data/Arabidopsis thaliana) and rename it to trackList.json
+<p>Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 18.04):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install bioperl
+</pre></div>
+</div>
+<p>Then install JBrowse following the <a class="reference external" href="https://jbrowse.org/docs/installation.html">official instructions</a>:</p>
+<p>In Ubuntu 18.04:</p>
+<p>Install some prerequisites:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install build-essential zlib1g-dev curl
+</pre></div>
+</div>
+</div></blockquote>
+<p>Also <em>Node.js</em> is needed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -sL https://deb.nodesource.com/setup_11.x <span class="p">|</span> sudo -E bash -
+sudo apt-get install -y nodejs
+</pre></div>
+</div>
+<p>Finally, proceed with JBrowse installation</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -O https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
+unzip JBrowse-1.16.2.zip
+sudo mv JBrowse-1.16.2 /var/www/html/jbrowse
+<span class="nb">cd</span> /var/www/html
+sudo chown <span class="sb">`</span>whoami<span class="sb">`</span> jbrowse
+<span class="nb">cd</span> jbrowse
+./setup.sh <span class="c1"># don&#39;t do sudo ./setup.sh</span>
+</pre></div>
+</div>
+<p><a href="#id1"><span class="problematic" id="id2">*</span></a>If using curl does not work for downloading Jbrowse zip file, try using wget.</p>
+<p><strong>configuring JBrowse</strong></p>
+<p>The <em>machado</em> source contains the directory extras. Copy the file extras/trackList.json.sample to the JBrowse data directory, inside a subdirectory with the name of the organism (e.g. /var/www/html/jbrowse/data/Arabidopsis thaliana) and rename it to trackList.json
 This directory structure will enable machado to embed JBrowse in its pages.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p <span class="s2">&quot;/var/www/html/jbrowse/data/Arabidopsis thaliana&quot;</span>
 cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/data/Arabidopsis thaliana/trackList.json&quot;</span>
 </pre></div>
 </div>
-<p>Edit the file to set the <strong>organism</strong> name you have loaded to the database.</p>
+<p>Edit the file trackList.json to set the <strong>organism</strong> name you have loaded to the database.</p>
+<p><strong>In case you have WSGI apache module configured and running</strong>, change the <em>baseUrl</em> variable in trackList.json to refer to the proper address:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>baseUrl<span class="s2">&quot;:    &quot;</span>http://localhost/YOURPROJECT/api/jbrowse<span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p><a href="#id3"><span class="problematic" id="id4">*</span></a>Now repeat the steps above for as many other organisms as you may have loaded to the database.</p>
+<p><a href="#id5"><span class="problematic" id="id6">*</span></a>Remember to restart the Apache server after the modifications.</p>
 <p><strong>machado API</strong></p>
-<p>Start the <em>machado</em> API framework:</p>
+<p><strong>In case you don’t have the WSGI module installed under Apache</strong> (and did change the <em>baseUrl</em> variable in trackList.json), start the <em>machado</em> API framework:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver
 </pre></div>
 </div>
-<p>Once the server is running, just go to your browser and open your JBrowse instance (eg. <a class="reference external" href="http://localhost/jbrowse/?data=data/Arabidopsis">http://localhost/jbrowse/?data=data/Arabidopsis</a> thaliana)</p>
+<p>Once the server is running, just go to your browser and open your JBrowse instance (e.g.: <a class="reference external" href="http://localhost/jbrowse/?data=data/Arabidopsis thaliana">http://localhost/jbrowse/?data=data/Arabidopsis thaliana</a> ).</p>
 <p><strong>machado</strong></p>
 <p>The settings.py file should contain these variables</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_JBROWSE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://localhost/jbrowse&#39;</span>
+
 <span class="nv">MACHADO_JBROWSE_OFFSET</span> <span class="o">=</span> <span class="m">1200</span>
 </pre></div>
 </div>
@@ -192,10 +228,10 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="webserver.html" class="btn btn-neutral float-right" title="3.3. Web server" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="diagrams.html" class="btn btn-neutral float-right" title="4. Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index_search.html" class="btn btn-neutral" title="3.1. Index and search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="webserver.html" class="btn btn-neutral float-left" title="3.2. Web server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -204,7 +240,7 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -221,36 +257,16 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
