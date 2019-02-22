@@ -37,7 +37,6 @@ class Command(BaseCommand):
                 name='contained in', cv__name='relationship')
         except IntegrityError as e:
             raise ImportingError(e)
-        frs = list()
         try:
             frps = FeatureRelationshipprop.objects.filter(
                     value=filename,
@@ -51,11 +50,9 @@ class Command(BaseCommand):
             for frp in tqdm(frps, total=len(frps)):
                 fr = FeatureRelationship.objects.get(
                         feature_relationship_id=frp.feature_relationship_id)
-                frs.append(fr)
                 frp.delete()
-            # remove all feature_relationships
-            for fr in tqdm(frs, total=len(frs)):
                 fr.delete()
+            # remove all feature_relationships
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))
         except IntegrityError as e:
