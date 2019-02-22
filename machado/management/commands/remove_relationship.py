@@ -11,6 +11,7 @@ from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from tqdm import tqdm
 
 
 class Command(BaseCommand):
@@ -47,13 +48,13 @@ class Command(BaseCommand):
                         .format(filename))
             # get all feature_relationship_id and
             # remove all feature_relationshipprop
-            for frp in frps:
+            for frp in tqdm(frps, total=len(frps)):
                 fr = FeatureRelationship.objects.get(
                         feature_relationship_id=frp.feature_relationship_id)
                 frs.append(fr)
                 frp.delete()
             # remove all feature_relationships
-            for fr in frs:
+            for fr in tqdm(frs, total=len(frs)):
                 fr.delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))

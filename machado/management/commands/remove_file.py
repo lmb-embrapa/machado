@@ -16,6 +16,7 @@ from machado.models import Analysis, Analysisprop
 from machado.models import Feature, Featureloc, FeatureDbxref
 from machado.models import Featureprop, FeatureRelationship, FeatureSynonym
 from machado.models import FeatureCvterm
+from tqdm import tqdm
 
 
 class Command(BaseCommand):
@@ -48,18 +49,18 @@ class Command(BaseCommand):
                 value=name).values_list('dbxref_id', flat=True))
             feature_ids = list(Feature.objects.filter(
                 dbxref_id__in=dbxref_ids).values_list('feature_id', flat=True))
-            Featureloc.objects.filter(feature_id__in=feature_ids).delete()
-            Featureprop.objects.filter(feature_id__in=feature_ids).delete()
-            FeatureSynonym.objects.filter(feature_id__in=feature_ids).delete()
-            FeatureCvterm.objects.filter(feature_id__in=feature_ids).delete()
-            FeatureDbxref.objects.filter(feature_id__in=feature_ids).delete()
-            FeatureRelationship.objects.filter(
-                object_id__in=feature_ids).delete()
-            FeatureRelationship.objects.filter(
-                subject_id__in=feature_ids).delete()
-            Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
+            for fid in tqdm(feature_ids, total=len(feature_ids)):
+                Featureloc.objects.filter(feature_id=fid).delete()
+                Featureprop.objects.filter(feature_id=fid).delete()
+                FeatureSynonym.objects.filter(feature_id=fid).delete()
+                FeatureCvterm.objects.filter(feature_id=fid).delete()
+                FeatureDbxref.objects.filter(feature_id=fid).delete()
+                FeatureRelationship.objects.filter(object_id=fid).delete()
+                FeatureRelationship.objects.filter(subject_id=fid).delete()
+                Feature.objects.filter(feature_id=fid).delete()
             Dbxrefprop.objects.filter(value=name).delete()
-            Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+            for dbxrfid in tqdm(dbxref_ids, total=len(dbxref_ids)):
+                Dbxref.objects.filter(dbxref_id=dbxrfid).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Features: cannot remove {} (not registered)'.format(name))
@@ -71,9 +72,9 @@ class Command(BaseCommand):
                                   .format(name))
             project_ids = list(Projectprop.objects.filter(
                 value=name).values_list('project_id', flat=True))
-            AssayProject.objects.filter(
-                project_id__in=project_ids).delete()
-            Project.objects.filter(project_id__in=project_ids).delete()
+            for pid in tqdm(project_ids, total=len(project_ids)):
+                AssayProject.objects.filter(project_id=pid).delete()
+                Project.objects.filter(project_id=pid).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Projects: cannot remove {} (not registered)'.format(name))
@@ -85,8 +86,8 @@ class Command(BaseCommand):
                                   .format(name))
             biomaterial_ids = list(Biomaterialprop.objects.filter(
                 value=name).values_list('biomaterial_id', flat=True))
-            Biomaterial.objects.filter(
-                biomaterial_id__in=biomaterial_ids).delete()
+            for bid in tqdm(biomaterial_ids, total=len(biomaterial_ids)):
+                Biomaterial.objects.filter(biomaterial_id=bid).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Biomaterials: cannot remove {} (not registered)'.format(name))
@@ -98,10 +99,9 @@ class Command(BaseCommand):
                                   .format(name))
             assay_ids = list(Assayprop.objects.filter(
                 value=name).values_list('assay_id', flat=True))
-            Assay.objects.filter(
-                assay_id__in=assay_ids).delete()
-            AssayProject.objects.filter(
-                assay_id__in=assay_ids).delete()
+            for aid in tqdm(assay_ids, total=len(assay_ids)):
+                AssayProject.objects.filter(assay_id=aid).delete()
+                Assay.objects.filter(assay_id=aid).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Assays: cannot remove {} (not registered)'.format(name))
@@ -113,8 +113,8 @@ class Command(BaseCommand):
                                   .format(name))
             analysis_ids = list(Analysisprop.objects.filter(
                 value=name).values_list('analysis_id', flat=True))
-            Analysis.objects.filter(
-                analysis_id__in=analysis_ids).delete()
+            for anid in tqdm(analysis_ids, total=len(analysis_ids)):
+                Analysis.objects.filter(analysis_id=anid).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Analysis: cannot remove {} (not registered)'.format(name))

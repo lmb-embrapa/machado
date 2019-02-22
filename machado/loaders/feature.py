@@ -21,6 +21,7 @@ from time import time
 from typing import Dict, List, Set, Union
 from urllib.parse import unquote
 from Bio.SearchIO._model import Hit
+from tqdm import tqdm
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
@@ -305,7 +306,7 @@ class FeatureLoader(object):
         part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
         features = Feature.objects.exclude(type=self.aa_cvterm)
-        for item in self.relationships:
+        for item in tqdm(self.relationships, total=len(self.relationships)):
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
