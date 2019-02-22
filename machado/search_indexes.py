@@ -8,6 +8,7 @@
 from haystack import indexes
 from django.db.models import Q
 from machado.models import Feature, FeatureCvterm, Featureprop
+from machado.models import Featureloc
 
 
 VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
@@ -22,6 +23,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
     uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
     name = indexes.CharField(model_attr='name', faceted=True)
+    match_part = indexes.BooleanField(faceted=True, null=True)
 
     def get_model(self):
         """Get model."""
@@ -37,6 +39,25 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_organism(self, obj):
         """Prepare organism."""
         return obj.organism.genus + ' ' + obj.organism.species
+
+    def prepare_match_part(self, obj):
+        """Prepare match_part."""
+        match_part = Featureloc.objects.filter(
+            srcfeature_id=obj.feature_id)
+        match_part = match_part.filter(
+                feature__organism_id=obj.organism_id)
+        match_part = match_part.filter(
+            feature__type__name='match_part')
+        match_part = match_part.filter(
+            feature__type__cv__name='sequence')
+
+        if match_part:
+            # evalue = Analysisfeature.objects.filter(
+            #     feature_id__in=match_part_ids).order_by(
+            #        'significance').first().significance
+            return True
+        else:
+            return False
 
     def prepare_text(self, obj):
         """Prepare text."""

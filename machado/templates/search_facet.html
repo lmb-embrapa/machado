@@ -1,0 +1,63 @@
+<!--
+ Copyright 2018 by Embrapa.  All rights reserved.
+
+ This code is part of the machado distribution and governed by its
+ license. Please see the LICENSE.txt and README.md files that should
+ have been included as part of this package for licensing information.
+-->
+
+{% load machado_extras %}
+
+<h3>Filters</h3>
+{% if facets.fields.organism %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title">Organism</h5>
+    </div>
+    <div class="card-body">
+    {% for organism in facets.fields.organism %}
+        {% with "organism_exact:"|add:organism.0 as organism_filter %}
+        <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
+        {% endwith %}
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if facets.fields.so_term %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title">SO Term</h5>
+    </div>
+    <div class="card-body">
+    {% for so_term in facets.fields.so_term %}
+        {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
+        <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
+        {% endwith %}
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if facets.fields.match_part %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title">Similarity</h5>
+    </div>
+    <div class="card-body">
+    {% for match_part in facets.fields.match_part %}
+        {{ match_part.0}}
+        {% if match_part.0 %}
+            {% with "match_part:true" as match_part_filter %}
+            <a href="?{% param_replace selected_facets=match_part_filter %}">Hit</a>
+            {% endwith %}
+        {% else %}
+            {% with "match_part:false" as match_part_filter %}
+            <a href="?{% param_replace selected_facets=match_part_filter %}">No hit</a>
+            {% endwith %}
+        {% endif %}
+        <small>({{ match_part.1 }})</small><br />
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
