@@ -7,6 +7,7 @@
 """Load OrthoMCL groups.txt result."""
 
 from machado.loaders.common import FileValidator
+from machado.loaders.common import get_num_lines
 from machado.loaders.orthology import OrthologyLoader
 from machado.loaders.exceptions import ImportingError
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -59,7 +60,7 @@ The feature members need to be loaded previously."""
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # each line is an orthologous group
-        for line in groups:
+        for line in tqdm(groups, total=get_num_lines(filename)):
             members = []
             name = ''
             fields = re.split(r'\s+', line.strip())
