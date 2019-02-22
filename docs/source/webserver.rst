@@ -70,7 +70,7 @@ There must be a symlink of your config file in the sites-enabled directory
 
 .. code-block:: bash
 
-    sudo ln -s /etc/apache2/sites-available/YOURPROJECT.conf /etc/apache2/sites-available/YOURPROJECT.conf
+    sudo ln -s /etc/apache2/sites-available/YOURPROJECT.conf /etc/apache2/sites-enabled/YOURPROJECT.conf
 
 
 * In the WEBPROJECT/settings.py file, set the following variables:

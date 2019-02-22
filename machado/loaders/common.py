@@ -16,6 +16,7 @@ from django.db.utils import IntegrityError
 from machado.models import Cvterm, Feature, Organism
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
+import mmap
 
 
 class FileValidator(object):
@@ -67,6 +68,16 @@ class FieldsValidator(object):
                 raise ImportingError("Found null or empty field in position {}"
                                      .format(counter))
             counter += 1
+
+
+def get_num_lines(file_path):
+    """Count number of lines in a text file."""
+    fp = open(file_path, "r+")
+    buf = mmap.mmap(fp.fileno(), 0)
+    lines = 0
+    while buf.readline():
+        lines += 1
+    return lines
 
 
 def insert_organism(genus: str,
