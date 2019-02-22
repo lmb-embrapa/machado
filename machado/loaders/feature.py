@@ -306,7 +306,8 @@ class FeatureLoader(object):
         part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
         features = Feature.objects.exclude(type=self.aa_cvterm)
-        for item in tqdm(self.relationships, total=len(self.relationships)):
+        # for item in tqdm(self.relationships, total=len(self.relationships)):
+        for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID

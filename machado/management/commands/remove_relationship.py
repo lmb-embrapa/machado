@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self,
                filename: str,
-               verbosity: int = 1,
+               verbosity: int = 0,
                **options):
         """Execute the main function."""
         # get cvterm for contained in
@@ -45,13 +45,19 @@ class Command(BaseCommand):
                 self.stdout.write(
                         'Deleting every relationship relations from {}'
                         .format(filename))
-            # get all feature_relationship_id and
-            # remove all feature_relationshipprop
-            for frp in tqdm(frps, total=len(frps)):
-                fr = FeatureRelationship.objects.get(
-                        feature_relationship_id=frp.feature_relationship_id)
-                frp.delete()
-                fr.delete()
+                # get all feature_relationship_id and
+                # remove all feature_relationshipprop
+                for frp in tqdm(frps, total=len(frps)):
+                    fr = FeatureRelationship.objects.get(
+                           feature_relationship_id=frp.feature_relationship_id)
+                    frp.delete()
+                    fr.delete()
+            else:
+                for frp in frps:
+                    fr = FeatureRelationship.objects.get(
+                           feature_relationship_id=frp.feature_relationship_id)
+                    frp.delete()
+                    fr.delete()
             # remove all feature_relationships
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))
