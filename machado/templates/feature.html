@@ -27,7 +27,7 @@
       {% if data.relationship %}
         <p>
         {% for relative in data.relationship %}
-        {{ relative.type.name }}: <a href="{% url 'feature'%}?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display }}<br />
+        {{ relative.type.name }}: <a href="{% url 'feature'%}?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display|default_if_none:'' }}<br />
         {% endfor %}
         </p>
         {% endif %}

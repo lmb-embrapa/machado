@@ -13,7 +13,7 @@ class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
     form_class = FeatureSearchForm
-    facet_fields = ['organism', 'so_term']
+    facet_fields = ['organism', 'so_term', 'match_part']
     template_name = 'search_result.html'
     paginate_by = 25
     context_object_name = 'object_list'

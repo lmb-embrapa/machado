@@ -1,78 +1,46 @@
-    <!--
-     Copyright 2018 by Embrapa.  All rights reserved.
+<!--
+ Copyright 2018 by Embrapa.  All rights reserved.
 
-     This code is part of the machado distribution and governed by its
-     license. Please see the LICENSE.txt and README.md files that should
-     have been included as part of this package for licensing information.
-    -->
+ This code is part of the machado distribution and governed by its
+ license. Please see the LICENSE.txt and README.md files that should
+ have been included as part of this package for licensing information.
+-->
 
-    {% extends 'base.html' %}
-    {% load machado_extras %}
+{% extends 'base.html' %}
+{% load machado_extras %}
 
-    {% block content %}
+{% block content %}
+
+    <div class="container">
+        <div class="row">
 
         {% if object_list %}
+        <div class="col-sm py-3 mx-1 rounded bg-light">
+            {% include "search_facet.html" %}
+        </div>
 
-        <div class="container">
-            <div class="row">
-
-            <div class="col-sm py-3 mx-1 rounded bg-light">
-
-                <h3>Filters</h3>
-                {% if facets.fields.organism %}
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title">Organism</h5>
-                    </div>
-                    <div class="card-body">
-                    {% for organism in facets.fields.organism %}
-                        {% with "organism_exact:"|add:organism.0 as organism_filter %}
-                        <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
-                        {% endwith %}
-                    {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if facets.fields.so_term %}
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title">SO Term</h5>
-                    </div>
-                    <div class="card-body">
-                    {% for so_term in facets.fields.so_term %}
-                        {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
-                        <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
-                        {% endwith %}
-                    {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="col-auto col-9 py-3 mx-1 rounded bg-light">
-                <h3>Results</h3>
-                <table class="table table-hover table-sm">
-                <tr>
-                    <th>SO term</th>
-                    <th>Feature ID</th>
-                    <th>Display</th>
-                </tr>
-                {% for result in page_obj.object_list %}
-                <tr>
-                    <td>{{ result.object.type.name }}</td>
-                    <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
-                    <td>{{ result.object.get_display|default_if_none:"" }}</td>
-                </tr>
-                {% empty %}
-                <p>No results found.</p>
-                {% endfor %}
+        <div class="col-auto col-9 py-3 mx-1 rounded bg-light">
+            <h3>Results</h3>
+            <table class="table table-hover table-sm">
+            <tr>
+                <th>SO term</th>
+                <th>Feature ID</th>
+                <th>Display</th>
+            </tr>
+            {% for result in page_obj.object_list %}
+            <tr>
+                <td>{{ result.object.type.name }}</td>
+                <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
+                <td>{{ result.object.get_display|default_if_none:"" }}</td>
+            </tr>
+            {% empty %}
+            <p>No results found.</p>
+            {% endfor %}
             </table>
 
             <br />
 
             {% if page_obj.has_previous or page_obj.has_next %}
-
             <nav aria-label="Page navigation">
             <ul class="pagination justify-content-left">
                 <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
@@ -83,16 +51,15 @@
                 </li>
             </ul>
             </nav>
-
-            {% endif %}
-
-            {% else %}
-            Not found.
-            {# Show some example queries to run, maybe query syntax, something else? #}
-
-            {% endif %}
-
+             {% endif %}
         </div>
+        {% else %}
+        <div class="col-auto col-12 py-3 mx-1 rounded bg-light">
+            <h3>Results</h3>
+                Not found.
+        </div>
+        {% endif %}
+
         </div>
     </div>
 {% endblock %}
