@@ -20,6 +20,7 @@
         <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
         {% endwith %}
     {% endfor %}
+    <small><a href="?{% remove_facet 'organism' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
     </div>
 </div>
 {% endif %}
@@ -35,6 +36,7 @@
         <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
         {% endwith %}
     {% endfor %}
+    <small><a href="?{% remove_facet 'so_term' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
     </div>
 </div>
 {% endif %}
@@ -57,6 +59,7 @@
         {% endif %}
         <small>({{ match_part.1 }})</small><br />
     {% endfor %}
+    <small><a href="?{% remove_facet 'match_part' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
     </div>
 </div>
 {% endif %}

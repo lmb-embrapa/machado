@@ -23,3 +23,21 @@ def param_replace(context, **kwargs):
             params[k] = v
 
     return params.urlencode()
+
+
+@register.simple_tag(takes_context=True)
+def remove_facet(context, *args):
+    """Return the encoded URL parameters. Remove facet."""
+    params = context['request'].GET.copy()
+
+#    print("**{}**{}**".format(params, args))
+
+    for facet in args:
+        params_new = list()
+        for i in params.getlist('selected_facets'):
+            k, v = i.split(':')
+            if not k.startswith(facet):
+                params_new.append(i)
+        params.setlist('selected_facets', params_new)
+
+    return params.urlencode()
