@@ -20,13 +20,10 @@
         <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
         {% endwith %}
     {% endfor %}
-    {% if facets.fields.organism|length == 1 %}
     <small><a href="?{% remove_facet 'organism' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    {% endif %}
     </div>
 </div>
 {% endif %}
-
 
 {% if facets.fields.so_term %}
 <div class="card mb-3">
@@ -39,14 +36,10 @@
         <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
         {% endwith %}
     {% endfor %}
-    {% if facets.fields.so_term|length == 1 %}
     <small><a href="?{% remove_facet 'so_term' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    {% endif %}
     </div>
 </div>
 {% endif %}
-
-{{ facets }}
 
 {% if facets.fields.match_part %}
 <div class="card mb-3">
@@ -66,9 +59,7 @@
         {% endif %}
         <small>({{ match_part.1 }})</small><br />
     {% endfor %}
-    {% if facets.fields.match_part|length == 1 %}
     <small><a href="?{% remove_facet 'match_part' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    {% endif %}
     </div>
 </div>
 {% endif %}
