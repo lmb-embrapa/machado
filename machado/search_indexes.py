@@ -56,8 +56,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             feature_id__in=match_part_ids).values_list(
                 'analysis__program').distinct()
 
-        print(programs, match_part_programs)
-
         result = list()
         for i in list(programs):
             if i in match_part_programs:
