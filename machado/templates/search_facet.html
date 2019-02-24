@@ -48,16 +48,10 @@
     </div>
     <div class="card-body">
     {% for match_part in facets.fields.match_part %}
-        {% if match_part.0 %}
-            {% with "match_part:true" as match_part_filter %}
-            <a href="?{% param_replace selected_facets=match_part_filter %}">Have matches</a>
-            {% endwith %}
-        {% else %}
-            {% with "match_part:false" as match_part_filter %}
-            <a href="?{% param_replace selected_facets=match_part_filter %}">Have no matches</a>
-            {% endwith %}
-        {% endif %}
-        <small>({{ match_part.1 }})</small><br />
+        {% with "match_part_exact:"|add:match_part.0 as match_part_filter %}
+        <a href="?{% param_replace selected_facets=match_part_filter %}">{{ match_part.0 }} </a><small>({{ match_part.1 }})</small><br />
+        {% endwith %}
+
     {% endfor %}
     <small><a href="?{% remove_facet 'match_part' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
     </div>
