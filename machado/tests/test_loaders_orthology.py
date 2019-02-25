@@ -406,7 +406,7 @@ class OrthologyTest(TestCase):
                            subject_id=feature16.feature_id).exists())
         # removing all relationships
         call_command("remove_relationship",
-                     "--filename=groups.txt",
+                     "--file=groups.txt",
                      "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature9.feature_id,

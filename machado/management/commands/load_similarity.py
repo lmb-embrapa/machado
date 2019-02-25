@@ -77,8 +77,6 @@ class Command(BaseCommand):
         filename = os.path.basename(file)
         if organism_query == 'mutispecies multispecies':
             raise CommandError("Query's organism cannot be multispecies")
-        if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
 
         if format not in VALID_FORMAT:
             raise CommandError('The format is not valid. Please choose: '
@@ -111,10 +109,13 @@ class Command(BaseCommand):
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        if verbosity > 0:
+            self.stdout.write('Processing file: {}'.format(filename))
         for record in similarity_records:
             if len(record.hsps) > 0:
                 tasks.append(pool.submit(
-                    similarity_file.store_bio_searchio_query_result, record))
+                    similarity_file.store_bio_searchio_query_result,
+                    record))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -122,5 +123,4 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
-
         self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))

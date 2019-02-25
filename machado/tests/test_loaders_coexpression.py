@@ -151,7 +151,7 @@ class CoexpressionTest(TestCase):
                            type_id=cvterm_contained_in.cvterm_id,
                            value=test_filename).exists())
         call_command("remove_relationship",
-                     "--filename=pcc.mcl.dummy.txt",
+                     "--file=pcc.mcl.dummy.txt",
                      "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
@@ -376,7 +376,7 @@ class CoexpressionTest(TestCase):
                            subject_id=test_feature6.feature_id,
                            value=test_value).exists())
         call_command("remove_relationship",
-                     "--filename=mcl.clusters.dummy.txt",
+                     "--file=mcl.clusters.dummy.txt",
                      "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,

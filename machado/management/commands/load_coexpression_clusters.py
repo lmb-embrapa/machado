@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import re
+import os
 
 
 class Command(BaseCommand):
@@ -32,7 +33,7 @@ The features need to be loaded previously or won't be registered."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="'mcl.clusters.txt' File",
                             required=True,
                             type=str)
@@ -46,7 +47,7 @@ The features need to be loaded previously or won't be registered."""
                             type=int)
 
     def handle(self,
-               filename: str,
+               file: str,
                organism: str,
                cpu: int = 1,
                verbosity: int = 0,
@@ -60,21 +61,22 @@ The features need to be loaded previously or won't be registered."""
         except IntegrityError as e:
             raise ImportingError(e)
         try:
-            FileValidator().validate(filename)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
         try:
-            clusters = open(filename, 'r')
+            clusters = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
 
+        filename = os.path.basename(file)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # arbitrary naming...
         value = "MCL_CLUSTER"
         # each line is an orthologous group
-        for line in clusters:
+        for line in tqdm(clusters, total=len(clusters)):
             # a pair of features plus the PCC value
             fields = re.split(r'\s+', line.rstrip())
             nfields = len(fields)

@@ -13,6 +13,7 @@ from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureCvtermprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Quantification, Acquisition
+from tqdm import tqdm
 
 
 class Command(BaseCommand):
@@ -43,7 +44,8 @@ class Command(BaseCommand):
             analysisprop_list = Analysisprop.objects.filter(
                 value=name, type_id=cvterm_contained_in.cvterm_id)
 
-            for analysisprop in analysisprop_list:
+            for analysisprop in tqdm(analysisprop_list,
+                                     total=len(analysisprop_list)):
                 analysis = Analysis.objects.get(
                         analysis_id=analysisprop.analysis_id)
                 # remove quantification and aquisition if exists...

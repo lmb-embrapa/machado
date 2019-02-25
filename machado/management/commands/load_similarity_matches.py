@@ -62,8 +62,6 @@ class Command(BaseCommand):
             species='multispecies', common_name='multispecies')
 
         filename = os.path.basename(file)
-        if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
         try:
             feature_file = FeatureLoader(
                 filename=filename,
@@ -73,6 +71,8 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
+        if verbosity > 0:
+            self.stdout.write('Processing file: {}'.format(filename))
         try:
             records = SearchIO.parse(file, format)
         except ValueError as e:
@@ -83,7 +83,9 @@ class Command(BaseCommand):
         for record in records:
             for hit in record.hits:
                 tasks.append(pool.submit(
-                    feature_file.store_bio_searchio_hit, hit, record.target))
+                    feature_file.store_bio_searchio_hit,
+                    hit,
+                    record.target))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
