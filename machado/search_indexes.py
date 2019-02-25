@@ -9,7 +9,7 @@ from haystack import indexes
 from django.db.models import Q
 from machado.models import Analysis, Analysisfeature
 from machado.models import Feature, FeatureCvterm, Featureprop
-from machado.models import Featureloc
+from machado.models import Featureloc, FeatureRelationship
 
 
 VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
@@ -70,6 +70,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         keywords = list()
         keywords.append(obj.organism.genus + ' ' + obj.organism.species)
 
+        # Featureprop: display, description, note
         display = Featureprop.objects.filter(
             ~Q(type__name='parent'),
             type__cv__name='feature_property',
@@ -77,12 +78,24 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         for i in display:
             keywords.append(i.value)
 
+        # GO terms
         feature_cvterm = FeatureCvterm.objects.filter(
             feature=obj)
         for i in feature_cvterm:
             keywords.append('{}:{}'.format(i.cvterm.dbxref.db.name,
                                            i.cvterm.dbxref.accession))
             keywords.append(i.cvterm.name)
+
+        # Protein matches
+        feature_relationships = FeatureRelationship.objects.filter(
+            object=obj,
+            subject__type__name='protein_match',
+            subject__type__cv__name='sequence')
+        for feature_relationship in feature_relationships:
+            keywords.append(feature_relationship.subject.uniquename)
+            if feature_relationship.subject.name is not None:
+                keywords.append(feature_relationship.subject.name)
+
         self.temp = '\n'.join(keywords)
         return '\n'.join(keywords)
 
