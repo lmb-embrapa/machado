@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="'.csv' file with sample and projects info.",
                             required=True,
                             type=str)
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                             type=int)
 
     def handle(self,
-               filename: str,
+               file: str,
                biomaterialdb: str,
                assaydb: str,
                cpu: int = 1,
@@ -75,15 +75,15 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
-            FileValidator().validate(filename)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
         try:
-            rnaseq_data = open(filename, 'r')
+            rnaseq_data = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
-        base_filename = os.path.basename(filename)
+        filename = os.path.basename(file)
         # each line is an RNA-seq experiment
         # e.g:
         # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
@@ -104,7 +104,7 @@ class Command(BaseCommand):
                 # e.g: "GSExxx" from GEO
                 project_model = project_file.store_project(
                     name=fields[1],
-                    filename=base_filename)
+                    filename=filename)
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
@@ -116,7 +116,7 @@ class Command(BaseCommand):
                                         acc=fields[2],
                                         organism=organism,
                                         name=fields[2],
-                                        filename=base_filename,
+                                        filename=filename,
                                         description=fields[5])
             except ImportingError as e:
                 raise CommandError(e)
@@ -143,7 +143,7 @@ class Command(BaseCommand):
                                         acc=fields[3],
                                         assaydate=fields[6],
                                         name=fields[3],
-                                        filename=base_filename,
+                                        filename=filename,
                                         description=fields[3])
                 assay_file.store_assay_project(
                                         assay=assay_model,
