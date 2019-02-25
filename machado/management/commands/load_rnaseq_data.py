@@ -14,6 +14,7 @@ from django.core.management.base import BaseCommand, CommandError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import re
+import os
 
 
 class Command(BaseCommand):
@@ -33,7 +34,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="tabular text file with gene counts",
                             required=True,
                             type=str)
@@ -81,7 +82,7 @@ class Command(BaseCommand):
                             type=int)
 
     def handle(self,
-               filename: str,
+               file: str,
                organism: str,
                program: str,
                programversion: str,
@@ -98,16 +99,17 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Preprocessing')
         try:
-            FileValidator().validate(filename)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
         # start reading file
         try:
-            rnaseq_data = open(filename, 'r')
+            rnaseq_data = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
+        filename = os.path.basename(file)
         header = 1
         # analysis_list = defaultdict(list)
         analysis_list = list()

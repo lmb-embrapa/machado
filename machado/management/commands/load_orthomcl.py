@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import re
+import os
 
 
 class Command(BaseCommand):
@@ -28,7 +29,7 @@ The feature members need to be loaded previously."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="'groups.txt' File",
                             required=True,
                             type=str)
@@ -38,7 +39,7 @@ The feature members need to be loaded previously."""
                             type=int)
 
     def handle(self,
-               filename: str,
+               file: str,
                cpu: int = 1,
                verbosity: int = 0,
                **options):
@@ -47,15 +48,16 @@ The feature members need to be loaded previously."""
             self.stdout.write('Preprocessing')
 
         try:
-            FileValidator().validate(filename)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
 
         try:
-            groups = open(filename, 'r')
+            groups = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
+        filename = os.path.basename(file)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
