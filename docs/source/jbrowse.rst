@@ -34,15 +34,13 @@ Finally, proceed with JBrowse installation
 
 .. code-block:: bash
 
-   curl -O https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
+   wget https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
    unzip JBrowse-1.16.2.zip
    sudo mv JBrowse-1.16.2 /var/www/html/jbrowse
    cd /var/www/html
    sudo chown `whoami` jbrowse
    cd jbrowse
    ./setup.sh # don't do sudo ./setup.sh
-
--If using curl does not work for downloading Jbrowse zip file, try using wget.
 
 **configuring JBrowse**
 
@@ -62,9 +60,9 @@ Edit the file trackList.json to set the **organism** name you have loaded to the
 
     baseUrl":    "http://localhost/YOURPROJECT/api/jbrowse"
 
--Now repeat the steps above for as many other organisms as you may have loaded to the database.
+- Now repeat the steps above for as many other organisms as you may have loaded to the database.
 
--Remember to restart the Apache server after the modifications.
+- Remember to restart the Apache server after the modifications.
 
 
 **machado API**
