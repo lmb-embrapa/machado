@@ -6,7 +6,7 @@ Load OrthoMCL
 
 .. code-block:: bash
 
-    python manage.py load_orthomcl --filename groups.txt
+    python manage.py load_orthomcl --file groups.tx
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -15,7 +15,7 @@ Load OrthoMCL
     python manage.py load_orthomcl --help
 
 =============   ==================================================================================
---filename 		groups.txt file *
+--file    		groups.txt file *
 --cpu 			Number of threads
 =============   ==================================================================================
 
@@ -25,7 +25,7 @@ Load OrthoMCL
 Remove orthology
 ----------------
 
-If, by any reason, you need to remove orthology relationships, you should use the command *remove_relationship --filename*. **Every orthologous relations from filename (e.g. 'groups.txt' from OrthoMCL) will be deleted on cascade**.
+If, by any reason, you need to remove orthology relationships, you should use the command *remove_relationship --file*. **Every orthologous relations from file (e.g. 'groups.txt' from OrthoMCL) will be deleted on cascade**.
 
 .. code-block:: bash
 

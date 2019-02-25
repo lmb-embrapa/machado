@@ -17,35 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2.11. Loading RNA-seq data" href="load_rnaseq.html" />
     <link rel="prev" title="2.9. Loading InterproScan results" href="load_interproscan.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -169,7 +170,7 @@
 <h1>2.10. Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="load-orthomcl">
 <h2>2.10.1. Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --filename groups.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --file groups.tx
 </pre></div>
 </div>
 <ul class="simple">
@@ -184,7 +185,7 @@
 <col width="86%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>–filename</td>
+<tr class="row-odd"><td>–file</td>
 <td>groups.txt file *</td>
 </tr>
 <tr class="row-even"><td>–cpu</td>
@@ -196,7 +197,7 @@
 </div>
 <div class="section" id="remove-orthology">
 <h2>2.10.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_relationship –filename</em>. <strong>Every orthologous relations from filename (e.g. ‘groups.txt’ from OrthoMCL) will be deleted on cascade</strong>.</p>
+<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_relationship –file</em>. <strong>Every orthologous relations from file (e.g. ‘groups.txt’ from OrthoMCL) will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
 </pre></div>
 </div>
@@ -217,7 +218,7 @@
         <a href="load_rnaseq.html" class="btn btn-neutral float-right" title="2.11. Loading RNA-seq data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_interproscan.html" class="btn btn-neutral" title="2.9. Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_interproscan.html" class="btn btn-neutral float-left" title="2.9. Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -226,7 +227,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -243,36 +244,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
