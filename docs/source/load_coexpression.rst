@@ -25,7 +25,7 @@ To load such a table, one can run the command below:
 
 .. code-block:: bash
 
-    python manage.py load_coexpression_pairs --filename pcc.mcl.txt --organism 'Arabidopsis thaliana'
+    python manage.py load_coexpression_pairs --file pcc.mcl.txt --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -34,7 +34,7 @@ To load such a table, one can run the command below:
     python manage.py load_coexpression_pairs --help
 
 =============   ==================================================================================
---filename        'pcc.mcl.txt' File *
+--file           'pcc.mcl.txt' File *
 --organism        Scientific name (e.g.: 'Arabidopsis thaliana')
 --cpu 	          Number of threads
 =============   ==================================================================================
@@ -63,7 +63,7 @@ To load such a file, one can run the command below:
 
 .. code-block:: bash
 
-    python manage.py load_coexpression_clusters --filename mcl.clusters.txt --organism 'Arabidopsis thaliana'
+    python manage.py load_coexpression_clusters --file mcl.clusters.txt --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -72,7 +72,7 @@ To load such a file, one can run the command below:
     python manage.py load_coexpression_clusters --help
 
 =============   ==================================================================================
---filename        'mcl.clusters.txt' file *
+--file           'mcl.clusters.txt' file *
 --organism        Scientific name (e.g.: 'Arabidopsis thaliana')
 --cpu 	          Number of threads
 =============   ==================================================================================
@@ -84,7 +84,7 @@ Remove coexpression
 -------------------
 
 If, by any reason, you need to remove coexpression analyzes, from pairs or clusters, all you need to do is pass
-the filename used to load the analyzes to the remove_relationships command: remove_relationship --filename <coexpression_file>'
+the filename used to load the analyzes to the remove_relationships command: remove_relationship --file <coexpression_file>'
 **Every coexpression relations from coexpression_file (e.g. 'pcc.mcl.txt' or 'mcl.clusters.txt' from LSTrAP) will be deleted on cascade**.
 
 .. code-block:: bash
@@ -92,7 +92,7 @@ the filename used to load the analyzes to the remove_relationships command: remo
     python manage.py remove_relationship --help
 
 =============   ==================================================================================
---filename        'mcl.clusters.txt' file *
+--file           'mcl.clusters.txt' file *
 =============   ==================================================================================
 
 \* example output file from LSTrAP software.

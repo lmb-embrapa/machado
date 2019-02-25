@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from tqdm import tqdm
+import os
 
 
 class Command(BaseCommand):
@@ -21,13 +22,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="name of the file (e.g.: groups.txt",
                             required=True,
                             type=str)
 
     def handle(self,
-               filename: str,
+               file: str,
                verbosity: int = 0,
                **options):
         """Execute the main function."""
@@ -37,6 +38,7 @@ class Command(BaseCommand):
                 name='contained in', cv__name='relationship')
         except IntegrityError as e:
             raise ImportingError(e)
+        filename = os.path.basename(file)
         try:
             frps = FeatureRelationshipprop.objects.filter(
                     value=filename,

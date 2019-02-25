@@ -44,25 +44,22 @@ The feature members need to be loaded previously."""
                verbosity: int = 0,
                **options):
         """Execute the main function."""
-        if verbosity > 0:
-            self.stdout.write('Preprocessing')
-
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
-
+        filename = os.path.basename(file)
+        if verbosity > 0:
+            self.stdout.write('Processing file: {}'.format(filename))
         try:
             groups = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
-        filename = os.path.basename(file)
-
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # each line is an orthologous group
-        for line in tqdm(groups, total=get_num_lines(filename)):
+        for line in tqdm(groups, total=get_num_lines(file)):
             members = []
             name = ''
             fields = re.split(r'\s+', line.strip())

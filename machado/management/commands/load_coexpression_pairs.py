@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import re
+import os
 
 
 class Command(BaseCommand):
@@ -33,7 +34,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--filename",
+        parser.add_argument("--file",
                             help="'pcc.mcl.txt' File",
                             required=True,
                             type=str)
@@ -47,7 +48,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                             type=int)
 
     def handle(self,
-               filename: str,
+               file: str,
                organism: str,
                cpu: int = 1,
                verbosity: int = 0,
@@ -61,19 +62,20 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         except IntegrityError as e:
             raise ImportingError(e)
         try:
-            FileValidator().validate(filename)
+            FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
         try:
-            pairs = open(filename, 'r')
+            pairs = open(file, 'r')
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
 
+        filename = os.path.basename(file)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # each line is an orthologous group
-        for line in pairs:
+        for line in tqdm(pairs, total=len(pairs)):
             # a pair of features plus the PCC value
             nfields = 3
             fields = re.split(r'\s+', line.rstrip())
