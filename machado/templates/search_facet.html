@@ -9,51 +9,34 @@
 {% load machado_extras %}
 
 <h3>Filters</h3>
-{% if facets.fields.organism %}
+
+{% for facet, data in facets.fields.items %}
+
 <div class="card mb-3">
     <div class="card-header">
-        <h5 class="card-title">Organism</h5>
+        <h5 class="card-title">
+            {% if facet == "so_term" %}
+            Sequence type
+            {% elif facet == "match_part" %}
+            Similarity
+            {% else %}
+            {{ facet|capfirst }}
+            {% endif %}
+        </h5>
     </div>
     <div class="card-body">
-    {% for organism in facets.fields.organism %}
-        {% with "organism_exact:"|add:organism.0 as organism_filter %}
-        <a href="?{% param_replace selected_facets=organism_filter %}"><i>{{ organism.0|capfirst }} </a></i><small>({{ organism.1 }})</small><br />
+    {% for item in data %}
+        {% with facet|add:"_exact:"|add:item.0 as item_filter %}
+        <a href="?{% param_replace selected_facets=item_filter %}">
+            {% if facet == "organism" %}
+                <i>{{ item.0|capfirst }}</i>
+            {% else %}
+                {{ item.0 }}
+            {% endif %}
+         </a> <small>({{ item.1 }})</small><br />
         {% endwith %}
     {% endfor %}
-    <small><a href="?{% remove_facet 'organism' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
+    <small><a href="?{% remove_facet facet %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
     </div>
 </div>
-{% endif %}
-
-{% if facets.fields.so_term %}
-<div class="card mb-3">
-    <div class="card-header">
-        <h5 class="card-title">SO Term</h5>
-    </div>
-    <div class="card-body">
-    {% for so_term in facets.fields.so_term %}
-        {% with "so_term_exact:"|add:so_term.0 as so_term_filter %}
-        <a href="?{% param_replace selected_facets=so_term_filter %}">{{ so_term.0 }} </a><small>({{ so_term.1 }})</small><br />
-        {% endwith %}
-    {% endfor %}
-    <small><a href="?{% remove_facet 'so_term' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    </div>
-</div>
-{% endif %}
-
-{% if facets.fields.match_part %}
-<div class="card mb-3">
-    <div class="card-header">
-        <h5 class="card-title">Similarity</h5>
-    </div>
-    <div class="card-body">
-    {% for match_part in facets.fields.match_part %}
-        {% with "match_part_exact:"|add:match_part.0 as match_part_filter %}
-        <a href="?{% param_replace selected_facets=match_part_filter %}">{{ match_part.0 }} </a><small>({{ match_part.1 }})</small><br />
-        {% endwith %}
-
-    {% endfor %}
-    <small><a href="?{% remove_facet 'match_part' %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    </div>
-</div>
-{% endif %}
+{% endfor %}
