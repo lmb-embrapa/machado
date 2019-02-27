@@ -145,6 +145,25 @@
   </div>
   {% endif %}
 
+  {% if data.orthologs %}
+  <div class="card m-1">
+    <div class="card-header">
+        <h3 class="card-title">Orthologs</h3>
+    </div>
+    <div class="card-body">
+      <div class="card-text">
+        {% for group_id, group in data.orthologs.items %}
+            <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-secondary"><a href="{% url 'feature_search' %}?q={{ group_id }}">{{ group_id }}</a></li>
+            {% for ortholog in group  %}
+            <li class="list-group-item">{{ ortholog.type.name }}: <a href="{% url 'feature'%}?feature_id={{ ortholog.feature_id|safe }}">{{ ortholog.uniquename }}</a> {{ ortholog.get_display|default_if_none:'' }} (<i>{{ ortholog.organism.genus }} {{ ortholog.organism.species }}</i>)</li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
 {% else %}
   {{ feature.error }}

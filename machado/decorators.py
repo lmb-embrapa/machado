@@ -38,11 +38,23 @@ def get_note(self):
         return None
 
 
+def get_orthologs_groups(self):
+    """Get the orthologous group id."""
+    result = list()
+    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
+        type__name='in orthology relationship with',
+        type__cv__name='relationship').distinct("value")
+    for feature_relationship in feature_relationships:
+        result.append(feature_relationship.value)
+    return result
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
     def wrapper(cls):
         setattr(cls, 'get_display', get_display)
         setattr(cls, 'get_description', get_description)
         setattr(cls, 'get_note', get_note)
+        setattr(cls, 'get_orthologs_groups', get_orthologs_groups)
         return cls
     return wrapper
