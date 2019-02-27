@@ -26,12 +26,18 @@
                 <th>SO term</th>
                 <th>Feature ID</th>
                 <th>Display</th>
+                <th>Ortholog Group</th>
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
                 <td>{{ result.object.type.name }}</td>
                 <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
                 <td>{{ result.object.get_display|default_if_none:"" }}</td>
+                <td>
+                    {% for group in result.object.get_orthologs_groups %}
+                    <a href="{% url 'feature_search' %}?q={{ group }}">{{ group }}</a>
+                    {% endfor %}
+                </td>
             </tr>
             {% empty %}
             <p>No results found.</p>

@@ -96,6 +96,14 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             if feature_relationship.subject.name is not None:
                 keywords.append(feature_relationship.subject.name)
 
+        # Orthologs
+        feature_relationships = FeatureRelationship.objects.filter(
+            type__name='in orthology relationship with',
+            type__cv__name='relationship',
+            object=obj).distinct("value")
+        for feature_relationship in feature_relationships:
+            keywords.append(feature_relationship.value)
+
         self.temp = '\n'.join(keywords)
         return '\n'.join(keywords)
 

@@ -14,7 +14,7 @@ from django.views import View
 from machado.models import Analysis, Analysisfeature
 from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
-from typing import Dict, List
+from typing import Any, Dict, List
 
 VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
 
@@ -174,9 +174,25 @@ class FeatureView(View):
 
         return result
 
-    def retrieve_feature_data(self, request, feature_obj: Feature) -> Dict:
+    def retrieve_feature_orthologs(self, feature_id: int) -> Dict[str, Any]:
+        """Retrieve feature orthologs."""
+        result = dict()  # type: Dict[str, List]
+        feature_relationships = FeatureRelationship.objects.filter(
+            type__name='in orthology relationship with',
+            type__cv__name='relationship',
+            subject_id=feature_id)
+        for i in feature_relationships.distinct("value"):
+            result = {i.value: list()}
+        for feature_relationship in feature_relationships:
+            if feature_relationship.object.type.name in VALID_TYPES:
+                result[feature_relationship.value].append(
+                    feature_relationship.object)
+        return result
+
+    def retrieve_feature_data(self, request,
+                              feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""
-        result = dict()
+        result = dict()  # type: Dict[str, Any]
 
         result['location'] = self.retrieve_feature_location(
             feature_id=feature_obj.feature_id,
@@ -194,6 +210,8 @@ class FeatureView(View):
         result['similarity'] = self.retrieve_feature_similarity(
             feature_id=feature_obj.feature_id,
             organism_id=feature_obj.organism_id)
+        result['orthologs'] = self.retrieve_feature_orthologs(
+            feature_id=feature_obj.feature_id)
         return result
 
     def get(self, request):
