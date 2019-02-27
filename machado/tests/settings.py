@@ -38,3 +38,4 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MACHADO_JBROWSE_URL = 'http://localhost/jbrowse'
+MACHADO_JBROWSE_OFFSET = 1200
