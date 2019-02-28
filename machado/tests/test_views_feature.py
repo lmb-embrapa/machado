@@ -62,6 +62,11 @@ class FeatureTest(TestCase):
         mRNA_cvterm = Cvterm.objects.create(
             name='mRNA', cv=so_cv, dbxref=mRNA_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+        tRNA_dbxref = Dbxref.objects.create(
+            accession='tRNA', db=so_db)
+        tRNA_cvterm = Cvterm.objects.create(
+            name='tRNA', cv=so_cv, dbxref=tRNA_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         polypeptide_dbxref = Dbxref.objects.create(
             accession='polypeptide_match', db=so_db)
         polypeptide_cvterm = Cvterm.objects.create(
@@ -107,6 +112,11 @@ class FeatureTest(TestCase):
         mRNA_feat1 = Feature.objects.create(
             organism=self.organism1, uniquename='feat1', is_analysis=False,
             type=mRNA_cvterm, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
+            organism=self.organism1, uniquename='tfeat1', is_analysis=False,
+            type=tRNA_cvterm, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
 
@@ -297,11 +307,19 @@ class FeatureTest(TestCase):
     def test_get(self):
         """Tests - get."""
         f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
-
         request = self.factory.get(
             '/feature/?feature_id={}'.format(f.feature_id))
-
         fv = feature.FeatureView()
         response = fv.get(request)
-
         self.assertEqual(response.status_code, 200)
+
+        print("*{}".format(response))
+
+        f = Feature.objects.get(uniquename='tfeat1', type__name='tRNA')
+        request = self.factory.get(
+            '/feature/?feature_id={}'.format(f.feature_id))
+        fv = feature.FeatureView()
+        response = fv.get(request)
+        self.assertEqual(response.status_code, 200)
+
+        print("**{}".format(response))
