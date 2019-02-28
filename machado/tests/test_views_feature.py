@@ -275,3 +275,19 @@ class FeatureTest(TestCase):
         result = fv.retrieve_feature_orthologs(feature_id=f.feature_id)
         self.assertTrue('orthomcl1' in result)
         self.assertEquals('feat2', result['orthomcl1'][0].uniquename)
+
+    def test_retrieve_feature_data(self):
+        """Tests - retrieve_feature_data."""
+        fv = feature.FeatureView()
+        f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
+        result = fv.retrieve_feature_data(feature_obj=f)
+        self.assertEquals(1, result['location'][0]['start'])
+        self.assertEquals('GI', result['dbxref'][0]['db'])
+        self.assertEquals('GO', result['cvterm'][0]['db'])
+
+        f = Feature.objects.get(uniquename='feat1', type__name='polypeptide')
+        result = fv.retrieve_feature_data(feature_obj=f)
+        self.assertEquals('PFAM', result['protein_matches'][0]['db'])
+        self.assertEqual('mRNA', result['relationship'][0].type.name)
+        self.assertEqual('blast', result['similarity'][0]['program'])
+        self.assertTrue('orthomcl1' in result['orthologs'])
