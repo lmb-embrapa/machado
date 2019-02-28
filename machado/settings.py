@@ -33,6 +33,8 @@ def patch_root_urlconf():
         urlconf_module = import_module(settings.ROOT_URLCONF)
         from machado.urls import urlpatterns
         urlconf_module.urlpatterns += urlpatterns
+    else:
+        settings.ROOT_URLCONF = 'machado.urls'
 
 
 def patch_templates():

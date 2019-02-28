@@ -189,8 +189,7 @@ class FeatureView(View):
                     feature_relationship.object)
         return result
 
-    def retrieve_feature_data(self, request,
-                              feature_obj: Feature) -> Dict[str, Any]:
+    def retrieve_feature_data(self, feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""
         result = dict()  # type: Dict[str, Any]
 
@@ -237,9 +236,7 @@ class FeatureView(View):
                           'error.html',
                           {'context': error})
 
-        data = self.retrieve_feature_data(
-            request=request,
-            feature_obj=feature_obj)
+        data = self.retrieve_feature_data(feature_obj=feature_obj)
 
         return render(request,
                       'feature.html',

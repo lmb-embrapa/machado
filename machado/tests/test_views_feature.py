@@ -11,7 +11,7 @@ from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
 from machado.models import FeatureRelationship
 from machado.views import feature
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from datetime import datetime, timezone
 
 
@@ -20,6 +20,8 @@ class FeatureTest(TestCase):
 
     def setUp(self):
         """Setup."""
+        self.factory = RequestFactory()
+
         null_db = Db.objects.create(name='null')
         null_cv = Cv.objects.create(name='null')
         null_dbxref = Dbxref.objects.create(
@@ -59,6 +61,11 @@ class FeatureTest(TestCase):
             accession='mRNA', db=so_db)
         mRNA_cvterm = Cvterm.objects.create(
             name='mRNA', cv=so_cv, dbxref=mRNA_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        tRNA_dbxref = Dbxref.objects.create(
+            accession='tRNA', db=so_db)
+        tRNA_cvterm = Cvterm.objects.create(
+            name='tRNA', cv=so_cv, dbxref=tRNA_dbxref,
             is_obsolete=0, is_relationshiptype=0)
         polypeptide_dbxref = Dbxref.objects.create(
             accession='polypeptide_match', db=so_db)
@@ -105,6 +112,11 @@ class FeatureTest(TestCase):
         mRNA_feat1 = Feature.objects.create(
             organism=self.organism1, uniquename='feat1', is_analysis=False,
             type=mRNA_cvterm, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
+            organism=self.organism1, uniquename='tfeat1', is_analysis=False,
+            type=tRNA_cvterm, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
 
@@ -275,3 +287,41 @@ class FeatureTest(TestCase):
         result = fv.retrieve_feature_orthologs(feature_id=f.feature_id)
         self.assertTrue('orthomcl1' in result)
         self.assertEquals('feat2', result['orthomcl1'][0].uniquename)
+
+    def test_retrieve_feature_data(self):
+        """Tests - retrieve_feature_data."""
+        fv = feature.FeatureView()
+        f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
+        result = fv.retrieve_feature_data(feature_obj=f)
+        self.assertEquals(1, result['location'][0]['start'])
+        self.assertEquals('GI', result['dbxref'][0]['db'])
+        self.assertEquals('GO', result['cvterm'][0]['db'])
+
+        f = Feature.objects.get(uniquename='feat1', type__name='polypeptide')
+        result = fv.retrieve_feature_data(feature_obj=f)
+        self.assertEquals('PFAM', result['protein_matches'][0]['db'])
+        self.assertEqual('mRNA', result['relationship'][0].type.name)
+        self.assertEqual('blast', result['similarity'][0]['program'])
+        self.assertTrue('orthomcl1' in result['orthologs'])
+
+    def test_get(self):
+        """Tests - get."""
+        f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
+        request = self.factory.get(
+            '/feature/?feature_id={}'.format(f.feature_id))
+        fv = feature.FeatureView()
+        response = fv.get(request)
+        self.assertEqual(response.status_code, 200)
+
+        f = Feature.objects.get(uniquename='tfeat1', type__name='tRNA')
+        request = self.factory.get(
+            '/feature/?feature_id={}'.format(f.feature_id))
+        fv = feature.FeatureView()
+        response = fv.get(request)
+        self.assertContains(response, 'Invalid feature type.')
+
+        request = self.factory.get(
+            '/feature/?feature_id=123456789')
+        fv = feature.FeatureView()
+        response = fv.get(request)
+        self.assertContains(response, 'Feature not found.')
