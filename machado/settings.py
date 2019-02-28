@@ -34,8 +34,7 @@ def patch_root_urlconf():
         from machado.urls import urlpatterns
         urlconf_module.urlpatterns += urlpatterns
     else:
-        from machado import urls
-        settings.configure(ROOT_URLCONF=urls)
+        settings.ROOT_URLCONF = 'machado.urls'
 
 
 def patch_templates():
