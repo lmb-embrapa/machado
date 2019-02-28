@@ -298,8 +298,8 @@ class FeatureTest(TestCase):
         """Tests - get."""
         f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
 
-        request = self.factory.get('/testurl')
-        request.feature_id = f.feature_id
+        request = self.factory.get(
+            '/feature/?feature_id={}'.format(f.feature_id))
 
         fv = feature.FeatureView()
         response = fv.get(request)

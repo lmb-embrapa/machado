@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'machado',
+    'haystack',
 ]
 
 DATABASES = {
@@ -39,3 +40,11 @@ STATIC_URL = '/static/'
 
 MACHADO_JBROWSE_URL = 'http://localhost/jbrowse'
 MACHADO_JBROWSE_OFFSET = 1200
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
