@@ -11,7 +11,7 @@ from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
 from machado.models import FeatureRelationship
 from machado.views import feature
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from datetime import datetime, timezone
 
 
@@ -20,6 +20,8 @@ class FeatureTest(TestCase):
 
     def setUp(self):
         """Setup."""
+        self.factory = RequestFactory()
+
         null_db = Db.objects.create(name='null')
         null_cv = Cv.objects.create(name='null')
         null_dbxref = Dbxref.objects.create(
@@ -291,3 +293,15 @@ class FeatureTest(TestCase):
         self.assertEqual('mRNA', result['relationship'][0].type.name)
         self.assertEqual('blast', result['similarity'][0]['program'])
         self.assertTrue('orthomcl1' in result['orthologs'])
+
+    def test_get(self):
+        """Tests - get."""
+        f = Feature.objects.get(uniquename='feat1', type__name='mRNA')
+
+        request = self.factory.get('/testurl')
+        request.feature_id = f.feature_id
+
+        fv = feature.FeatureView()
+        response = fv.get(request)
+
+        self.assertEqual(response.status_code, 200)
