@@ -313,13 +313,15 @@ class FeatureTest(TestCase):
         response = fv.get(request)
         self.assertEqual(response.status_code, 200)
 
-        print("*{}".format(response))
-
         f = Feature.objects.get(uniquename='tfeat1', type__name='tRNA')
         request = self.factory.get(
             '/feature/?feature_id={}'.format(f.feature_id))
         fv = feature.FeatureView()
         response = fv.get(request)
-        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Invalid feature type.')
 
-        print("**{}".format(response))
+        request = self.factory.get(
+            '/feature/?feature_id=123456789')
+        fv = feature.FeatureView()
+        response = fv.get(request)
+        self.assertContains(response, 'Feature not found.')
