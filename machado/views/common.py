@@ -21,7 +21,7 @@ class HomeView(TemplateView):
     template_name = "index.html"
 
 
-class CommonView(View):
+class DataSummaryView(View):
     """Summary views."""
 
     def get(self, request):

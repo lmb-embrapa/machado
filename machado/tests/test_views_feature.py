@@ -68,7 +68,7 @@ class FeatureTest(TestCase):
             name='tRNA', cv=so_cv, dbxref=tRNA_dbxref,
             is_obsolete=0, is_relationshiptype=0)
         polypeptide_dbxref = Dbxref.objects.create(
-            accession='polypeptide_match', db=so_db)
+            accession='polypeptide', db=so_db)
         polypeptide_cvterm = Cvterm.objects.create(
             name='polypeptide', cv=so_cv, dbxref=polypeptide_dbxref,
             is_obsolete=0, is_relationshiptype=0)
