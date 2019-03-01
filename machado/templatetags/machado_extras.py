@@ -30,8 +30,6 @@ def remove_facet(context, *args):
     """Return the encoded URL parameters. Remove facet."""
     params = context['request'].GET.copy()
 
-#    print("**{}**{}**".format(params, args))
-
     for facet in args:
         params_new = list()
         for i in params.getlist('selected_facets'):
