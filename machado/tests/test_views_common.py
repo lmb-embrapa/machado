@@ -22,6 +22,11 @@ class DataSummaryTest(TestCase):
 
         so_db = Db.objects.create(name='SO')
         so_cv = Cv.objects.create(name='sequence')
+        assembly_dbxref = Dbxref.objects.create(
+            accession='assembly', db=so_db)
+        assembly_cvterm = Cvterm.objects.create(
+            name='assembly', cv=so_cv, dbxref=assembly_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         chromosome_dbxref = Dbxref.objects.create(
             accession='chromosome', db=so_db)
         chromosome_cvterm = Cvterm.objects.create(
@@ -59,6 +64,16 @@ class DataSummaryTest(TestCase):
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
         Feature.objects.create(
+            organism=self.organism1, uniquename='chr1', is_analysis=False,
+            type=assembly_cvterm, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
+            organism=self.organism1, uniquename='chr2', is_analysis=False,
+            type=assembly_cvterm, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
             organism=self.organism1, uniquename='feat1', is_analysis=False,
             type=gene_cvterm, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
@@ -92,6 +107,11 @@ class DataSummaryTest(TestCase):
         Feature.objects.create(
             organism=self.organism2, uniquename='chr1', is_analysis=False,
             type=chromosome_cvterm, is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+        Feature.objects.create(
+            organism=self.organism2, uniquename='chr1', is_analysis=False,
+            type=assembly_cvterm, is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
         Feature.objects.create(
