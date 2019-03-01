@@ -52,6 +52,8 @@ class DataSummaryTest(TestCase):
             genus='Mus', species='musculus')
         self.organism2 = Organism.objects.create(
             genus='Homo', species='sapiens')
+        Organism.objects.create(
+            genus='Arabidopsis', species='thaliana')
 
         Feature.objects.create(
             organism=self.organism1, uniquename='chr1', is_analysis=False,
