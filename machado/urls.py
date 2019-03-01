@@ -18,7 +18,7 @@ if 'haystack' in settings.INSTALLED_APPS:
 
     urlpatterns += [
         url(r'feature/', feature.FeatureView.as_view(), name='feature'),
-        url(r'data/', common.CommonView.as_view(), name='data_numbers'),
+        url(r'data/', common.DataSummaryView.as_view(), name='data_numbers'),
         url(r'find/', search.FeatureSearchView.as_view(),
             name='feature_search'),
         url(r'^$', common.HomeView.as_view(), name='home')
