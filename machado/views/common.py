@@ -8,7 +8,7 @@
 
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, F, Value
+from django.db.models import Count, Value
 from django.db.models.functions import Concat
 from django.views import View
 from django.views.generic import TemplateView
@@ -77,17 +77,6 @@ class DataSummaryView(View):
             proteins = proteins.annotate(count=Count('key'))
             if proteins:
                 data.update({'Proteins': proteins})
-        except ObjectDoesNotExist:
-            pass
-
-        try:
-            cvs = Cvterm.objects.values(key=F('cv__name'))
-            cvs = cvs.values('key')
-            cvs = cvs.annotate(count=Count('key'))
-            cvs = cvs.filter(count__gt=5)
-            cvs = cvs.order_by('key')
-            # if cvs:
-            #     data.update({'Controlled vocabularies': cvs})
         except ObjectDoesNotExist:
             pass
 
