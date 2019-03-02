@@ -14,12 +14,8 @@ from datetime import datetime
 from django.test import TestCase
 from django.core.management import call_command
 
-import warnings
-from Bio import BiopythonExperimentalWarning
-with warnings.catch_warnings():
-    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
-    from Bio.Alphabet import generic_protein
-    from Bio.SearchIO._model import QueryResult, Hit, HSP, HSPFragment
+from Bio.Alphabet import generic_protein
+from Bio.SearchIO._model import QueryResult, Hit, HSP, HSPFragment
 
 
 class SimilarityTest(TestCase):
