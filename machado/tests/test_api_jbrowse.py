@@ -102,45 +102,47 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
 
         # creates features gene and exon
         class TabixFeature(object):
-            """mock parent features"""
-
             """mock tabix feature."""
 
-        test_feature1 = TabixFeature()
-        test_feature1.contig = 'contig1'
-        test_feature1.feature = 'gene'
-        test_feature1.start = '10'
-        test_feature1.end = '100'
-        test_feature1.strand = '+'
-        test_feature1.frame = '1'
-        test_feature1.attributes = 'id=id1;name=name1;display=gene1'
+        test_feat1 = TabixFeature()
+        test_feat1.contig = 'contig1'
+        test_feat1.feature = 'gene'
+        test_feat1.start = '10'
+        test_feat1.end = '100'
+        test_feat1.strand = '+'
+        test_feat1.frame = '1'
+        test_feat1.attributes = 'id=jbrowseid1;name=name1;display=gene1'
 
-        test_feature2 = TabixFeature()
-        test_feature2.contig = 'contig1'
-        test_feature2.feature = 'mRNA'
-        test_feature2.start = '10'
-        test_feature2.end = '100'
-        test_feature2.strand = '+'
-        test_feature2.frame = '1'
-        test_feature2.attributes = 'id=id1m;name=name1m;display=transcript1'
+        test_feat2 = TabixFeature()
+        test_feat2.contig = 'contig1'
+        test_feat2.feature = 'mRNA'
+        test_feat2.start = '10'
+        test_feat2.end = '100'
+        test_feat2.strand = '+'
+        test_feat2.frame = '1'
+        test_feat2.attributes = ('id=jbrowseid1m;name=name1m;' +
+                                 'display=transcript1;parent=jbrowseid1')
 
-        test_feature3 = TabixFeature()
-        test_feature3.contig = 'contig1'
-        test_feature3.feature = 'exon'
-        test_feature3.start = '10'
-        test_feature3.end = '100'
-        test_feature3.strand = '-'
-        test_feature3.frame = '2'
-        test_feature3.attributes = 'id=id2;name=name2;display=exon1'
+        test_feat3 = TabixFeature()
+        test_feat3.contig = 'contig1'
+        test_feat3.feature = 'exon'
+        test_feat3.start = '10'
+        test_feat3.end = '100'
+        test_feat3.strand = '-'
+        test_feat3.frame = '2'
+        test_feat3.attributes = ('id=jbrowseid1e;name=name1e;display=exon1;' +
+                                 'parent=jbrowseid1m')
 
         # instantiate the loader
-        test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
-                                          source='GFF_source')
+        test_feat_file = FeatureLoader(filename='file.name',
+                                       organism='Mus musculus',
+                                       source='GFF_source')
         # store the tabix feature
-        test_feature_file.store_tabix_feature(test_feature1)
-        test_feature_file.store_tabix_feature(test_feature2)
-        test_feature_file.store_tabix_feature(test_feature3)
+        test_feat_file.store_tabix_feature(test_feat1)
+        test_feat_file.store_tabix_feature(test_feat2)
+        test_feat_file.store_tabix_feature(test_feat3)
+
+        test_feat_file.store_relationships()
 
         # Tests stats/global
         url = reverse('jbrowse_global-list')

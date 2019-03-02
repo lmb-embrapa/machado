@@ -21,7 +21,6 @@ from time import time
 from typing import Dict, List, Set, Union
 from urllib.parse import unquote
 from Bio.SearchIO._model import Hit
-from tqdm import tqdm
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
@@ -35,18 +34,18 @@ class FeatureLoader(object):
 
     help = 'Load feature records.'
 
-    # initialization of lists/sets to store ignored attributes,
-    # ignored goterms, and relationships
-    ignored_attrs: Set[str] = set()
-    ignored_goterms: Set[str] = set()
-    relationships: List[Dict[str, str]] = list()
-
     def __init__(self,
                  source: str,
                  filename: str,
                  organism: Union[str, Organism],
                  doi: str = None) -> None:
         """Execute the init function."""
+        # initialization of lists/sets to store ignored attributes,
+        # ignored goterms, and relationships
+        self.ignored_attrs: Set[str] = set()
+        self.ignored_goterms: Set[str] = set()
+        self.relationships: List[Dict[str, str]] = list()
+
         if isinstance(organism, Organism):
             self.organism = organism
         else:
@@ -305,8 +304,8 @@ class FeatureLoader(object):
         """Store the relationships."""
         part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
-        features = Feature.objects.exclude(type=self.aa_cvterm)
-        # for item in tqdm(self.relationships, total=len(self.relationships)):
+        features = Feature.objects.filter(
+            organism=self.organism).exclude(type=self.aa_cvterm)
         for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created

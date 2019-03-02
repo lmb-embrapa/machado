@@ -16,9 +16,18 @@ from datetime import datetime, timezone
 class DataSummaryTest(TestCase):
     """Tests Feature View."""
 
-    def setUp(self):
-        """Setup."""
+    def test_get(self):
+        """Tests - get."""
         self.factory = RequestFactory()
+
+        Organism.objects.create(
+            genus='Arabidopsis', species='thaliana')
+
+        request = self.factory.get('/data/')
+        ds = common.DataSummaryView()
+        response = ds.get(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Arabidopsis thaliana')
 
         so_db = Db.objects.create(name='SO')
         so_cv = Cv.objects.create(name='sequence')
@@ -130,8 +139,6 @@ class DataSummaryTest(TestCase):
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
 
-    def test_get(self):
-        """Tests - get."""
         request = self.factory.get('/data/')
         ds = common.DataSummaryView()
         response = ds.get(request)

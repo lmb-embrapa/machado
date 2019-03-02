@@ -176,7 +176,7 @@ class FeatureView(View):
 
     def retrieve_feature_orthologs(self, feature_id: int) -> Dict[str, Any]:
         """Retrieve feature orthologs."""
-        result = dict()  # type: Dict[str, List]
+        result: Dict[str, List] = dict()
         feature_relationships = FeatureRelationship.objects.filter(
             type__name='in orthology relationship with',
             type__cv__name='relationship',

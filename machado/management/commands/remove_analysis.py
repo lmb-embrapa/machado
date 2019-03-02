@@ -45,7 +45,8 @@ class Command(BaseCommand):
                 value=name, type_id=cvterm_contained_in.cvterm_id)
 
             for analysisprop in tqdm(analysisprop_list,
-                                     total=len(analysisprop_list)):
+                                     total=len(analysisprop_list),
+                                     disable=False if verbosity > 0 else True):
                 analysis = Analysis.objects.get(
                         analysis_id=analysisprop.analysis_id)
                 # remove quantification and aquisition if exists...
