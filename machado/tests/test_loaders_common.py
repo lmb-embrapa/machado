@@ -18,15 +18,26 @@ class CommonTest(TestCase):
     """Tests Loaders - Common."""
 
     def test_insert_organism_1(self):
-        """Tests - insert_organism 1."""
+        """Tests - insert_organism."""
+        # test empty
+        with self.assertRaisesMessage(
+                  ImportingError,
+                  'The type must be previously registered in Cvterm'):
+            insert_organism(genus='Mus', species='musculus', type='test')
+
+        # test insert organism simple
         insert_organism(genus='Mus', species='musculus')
-        test_organism_1 = Organism.objects.get(genus='Mus',
-                                               species='musculus')
+        test_organism_1 = Organism.objects.get(genus='Mus', species='musculus')
         self.assertEqual('Mus', test_organism_1.genus)
         self.assertEqual('musculus', test_organism_1.species)
 
-    def test_insert_organism_2(self):
-        """Tests - insert_organism 2."""
+        # test organism already registered
+        with self.assertRaisesMessage(
+                  ImportingError,
+                  'Organism already registered (Mus musculus)!'):
+            insert_organism(genus='Mus', species='musculus')
+
+        # test insert organism complete
         test_db = Db.objects.create(name='test_db')
         test_dbxref = Dbxref.objects.create(accession='test_dbxref',
                                             db=test_db)

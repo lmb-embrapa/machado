@@ -88,9 +88,6 @@ def insert_organism(genus: str,
                     common_name: str = None,
                     comment: str = None) -> None:
     """Insert organism."""
-    if genus is None:
-        raise ImportingError('genus is required!')
-
     type_id = ''
     if type is not None:
         try:
