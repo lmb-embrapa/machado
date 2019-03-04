@@ -7,8 +7,11 @@
 """Tests Loaders - Common."""
 
 from machado.loaders.common import insert_organism, retrieve_organism
+from machado.loaders.common import FileValidator
+from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
+import os
 
 
 class CommonTest(TestCase):
@@ -60,3 +63,30 @@ class CommonTest(TestCase):
         self.assertEqual('taurus', test_organism.species)
         test_organism = retrieve_organism("Bos taurus indicus")
         self.assertEqual('indicus', test_organism.infraspecific_name)
+
+    def test_validate_file(self):
+        """Tests - validate file."""
+        # test file not exists
+        file_path = '/tmp/machado.test.file'
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} does not exist'.format(file_path)):
+            v.validate(file_path=file_path)
+
+        # test wrong file type
+        file_path = '/tmp/machado.test.dir'
+        os.mkdir(file_path)
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} is not a file'.format(file_path)):
+            v.validate(file_path=file_path)
+        os.rmdir(file_path)
+
+        # test file not readable
+        file_path = '/tmp/machado.test.file'
+        os.mknod(file_path, mode=0o200)
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} is not readable'.format(file_path)):
+            v.validate(file_path=file_path)
+        os.remove(file_path)
