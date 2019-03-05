@@ -7,8 +7,8 @@
 """Tests similarity data loader."""
 
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism
-from machado.models import Feature, Featureloc
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Pub
+from machado.models import Feature, Featureloc, FeatureCvterm
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.similarity import SimilarityLoader
 from datetime import datetime
@@ -24,6 +24,16 @@ class SimilarityTest(TestCase):
 
     def test_store_bio_searchio_blast_record(self):
         """Run Tests - __init__ and store_searchio_blast_record."""
+        null_db = Db.objects.create(name='null')
+        null_cv = Cv.objects.create(name='null')
+        null_dbxref = Dbxref.objects.create(
+            accession='null', db=null_db)
+        null_cvterm = Cvterm.objects.create(
+            name='null', cv=null_cv, dbxref=null_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        null_pub = Pub.objects.create(
+            uniquename='null', type=null_cvterm, is_obsolete=False)
+
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
         test_organism2 = Organism.objects.create(
@@ -56,6 +66,13 @@ class SimilarityTest(TestCase):
         Cvterm.objects.create(
             name='in similarity relationship with', cv=test_cv2,
             dbxref=test_dbxref5, is_obsolete=0, is_relationshiptype=1)
+        test_db_pfam = Db.objects.create(name='PFAM')
+        test_cv_pfam = Cv.objects.create(name='PFAM')
+        test_dbxref_pfam_term = Dbxref.objects.create(
+            accession='123', db=test_db_pfam)
+        test_cvterm_pfam_term = Cvterm.objects.create(
+            name='kinase', cv=test_cv_pfam, dbxref=test_dbxref_pfam_term,
+            is_obsolete=0, is_relationshiptype=0)
 
         # creating test features
         feature_db = Db.objects.create(name='FASTA_source')
@@ -80,6 +97,9 @@ class SimilarityTest(TestCase):
             type_id=test_aa_term2.cvterm_id, is_obsolete=False,
             dbxref=feature_dbxref3, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        FeatureCvterm.objects.create(
+            feature=test_feat, cvterm=test_cvterm_pfam_term,
+            pub=null_pub, is_not=False, rank=0)
 
         test_HSPFragment1 = HSPFragment('feat1', 'feat2')
         setattr(test_HSPFragment1, 'alphabet', generic_protein)
