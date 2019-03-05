@@ -9,6 +9,7 @@
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureloc
+from machado.loaders.exceptions import ImportingError
 from machado.loaders.similarity import SimilarityLoader
 from datetime import datetime
 from django.test import TestCase
@@ -127,13 +128,28 @@ class SimilarityTest(TestCase):
         setattr(test_result1, 'seq_len', 3000)
         setattr(test_result1, 'blast_id', 'feat1')
 
-        test_blast_file = SimilarityLoader(
+        # test SimilarityLoader fail
+        with self.assertRaises(ImportingError):
+            SimilarityLoader(
                 filename='similarity.file',
                 algorithm='smith-waterman',
                 description='command-line example',
                 program='blastp',
                 input_format='blast-xml',
                 programversion='2.2.31+',
+                so_query='polypeptide',
+                so_subject='protein_match',
+                org_query='Homo sapiens',
+                org_subject='multispecies multispecies'
+            )
+
+        test_blast_file = SimilarityLoader(
+                filename='similarity.file',
+                algorithm='smith-waterman',
+                description='command-line example',
+                program='interproscan',
+                input_format='interproscan-xml',
+                programversion='5',
                 so_query='polypeptide',
                 so_subject='protein_match',
                 org_query='Mus musculus',
@@ -143,7 +159,7 @@ class SimilarityTest(TestCase):
         test_blast_file.store_bio_searchio_query_result(test_result1)
 
         test_analysis = Analysis.objects.get(sourcename='similarity.file')
-        self.assertEqual('blastp', test_analysis.program)
+        self.assertEqual('interproscan', test_analysis.program)
 
         test_featureloc = Featureloc.objects.get(
                 srcfeature=test_feat)

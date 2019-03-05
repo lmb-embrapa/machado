@@ -137,7 +137,7 @@ class SimilarityLoader(object):
                          query_end: int = None,
                          subject_start: int = None,
                          subject_end: int = None) -> None:
-        """Store bio_blast_hsp record."""
+        """Store hsp record."""
         # set id = auto# for match_part features
         match_part_id = 'match_part_{}{}{}'.format(
             str(time()), query_feature.feature_id, subject_feature.feature_id)
@@ -162,10 +162,6 @@ class SimilarityLoader(object):
         except IntegrityError as e:
             raise ImportingError(e)
 
-        if (query_end is not None and
-                query_start is not None and
-                query_end < query_start):
-            query_start, query_end = query_end, query_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=query_feature,
                                   fmax=query_end,
@@ -175,10 +171,6 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=0)
 
-        if (subject_end is not None and
-                subject_start is not None and
-                subject_end < subject_start):
-            subject_start, subject_end = subject_end, subject_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=subject_feature,
                                   fmax=subject_end,
