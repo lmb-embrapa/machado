@@ -7,23 +7,37 @@
 """Tests Loaders - Common."""
 
 from machado.loaders.common import insert_organism, retrieve_organism
+from machado.loaders.common import FileValidator
+from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from django.test import TestCase
+import os
 
 
 class CommonTest(TestCase):
     """Tests Loaders - Common."""
 
     def test_insert_organism_1(self):
-        """Tests - insert_organism 1."""
+        """Tests - insert_organism."""
+        # test empty
+        with self.assertRaisesMessage(
+                  ImportingError,
+                  'The type must be previously registered in Cvterm'):
+            insert_organism(genus='Mus', species='musculus', type='test')
+
+        # test insert organism simple
         insert_organism(genus='Mus', species='musculus')
-        test_organism_1 = Organism.objects.get(genus='Mus',
-                                               species='musculus')
+        test_organism_1 = Organism.objects.get(genus='Mus', species='musculus')
         self.assertEqual('Mus', test_organism_1.genus)
         self.assertEqual('musculus', test_organism_1.species)
 
-    def test_insert_organism_2(self):
-        """Tests - insert_organism 2."""
+        # test organism already registered
+        with self.assertRaisesMessage(
+                  ImportingError,
+                  'Organism already registered (Mus musculus)!'):
+            insert_organism(genus='Mus', species='musculus')
+
+        # test insert organism complete
         test_db = Db.objects.create(name='test_db')
         test_dbxref = Dbxref.objects.create(accession='test_dbxref',
                                             db=test_db)
@@ -60,3 +74,30 @@ class CommonTest(TestCase):
         self.assertEqual('taurus', test_organism.species)
         test_organism = retrieve_organism("Bos taurus indicus")
         self.assertEqual('indicus', test_organism.infraspecific_name)
+
+    def test_validate_file(self):
+        """Tests - validate file."""
+        # test file not exists
+        file_path = '/tmp/machado.test.file'
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} does not exist'.format(file_path)):
+            v.validate(file_path=file_path)
+
+        # test wrong file type
+        file_path = '/tmp/machado.test.dir'
+        os.mkdir(file_path)
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} is not a file'.format(file_path)):
+            v.validate(file_path=file_path)
+        os.rmdir(file_path)
+
+        # test file not readable
+        file_path = '/tmp/machado.test.file'
+        os.mknod(file_path, mode=0o200)
+        v = FileValidator()
+        with self.assertRaisesMessage(
+                  ImportingError, '{} is not readable'.format(file_path)):
+            v.validate(file_path=file_path)
+        os.remove(file_path)

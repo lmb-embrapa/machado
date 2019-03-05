@@ -21,8 +21,8 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         path('api/', include('machado.api.urls')),
     ]
 
-    def test_jbrowse_api(self):
-        """Ensure we can retrieve JBrowse from the API endpoint."""
+    def setUp(self):
+        """setUp."""
         # creates cvterm display
         test_db_null = Db.objects.create(name='null')
         test_dbxref_display = Dbxref.objects.create(accession='display',
@@ -64,6 +64,10 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
 
         # creates SO terms: assembly, gene, and exon
         test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='00000', db=test_db)
+        test_cvterm_assembly = Cvterm.objects.create(
+                name='chromosome', cv=test_cv, dbxref=test_dbxref,
+                is_obsolete=0, is_relationshiptype=0)
         test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
         test_cvterm_assembly = Cvterm.objects.create(
                 name='assembly', cv=test_cv, dbxref=test_dbxref,
@@ -144,13 +148,16 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
 
         test_feat_file.store_relationships()
 
-        # Tests stats/global
+    def test_jbrowse_api_global(self):
+        """Retrieve JBrowse data from the global API endpoint."""
         url = reverse('jbrowse_global-list')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 1)
         self.assertEqual(response.json()['featureDensity'], 0.02)
 
+    def test_jbrowse_api_features(self):
+        """Retrieve JBrowse data from the features API endpoint."""
         # Tests features
         base_url = reverse('jbrowse_features-list', args=['contig1'])
         params = "soType=mRNA&organism=Mus musculus"
@@ -170,7 +177,17 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(response_data['start'], 10)
         self.assertEqual(response_data['end'], 100)
 
-        # Tests names
+    def test_jbrowse_api_names(self):
+        """Retrieve JBrowse data from the names API endpoint."""
+        # Tests names no organism
+        base_url = reverse('jbrowse_names-list')
+        params = "organism=Organismus nullus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # Tests names equals
         base_url = reverse('jbrowse_names-list')
         params = "equals=contig1&organism=Mus musculus"
         url = '{}?{}'.format(base_url, params)
@@ -179,6 +196,50 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 1)
         self.assertEqual(response_data['name'], 'contig1')
+
+        # Tests names startswith
+        base_url = reverse('jbrowse_names-list')
+        params = "startswith=contig1&organism=Mus musculus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        response_data = response.json()[0]
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response_data['name'], 'contig1')
+
+        # Tests names none
+        base_url = reverse('jbrowse_names-list')
+        params = "organism=Mus musculus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_jbrowse_api_refseqs(self):
+        """Retrieve JBrowse data from the refseqs API endpoint."""
+        # Tests refseqs no organism
+        base_url = reverse('jbrowse_refseqs-list')
+        params = "organism=Organismus nullus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # Tests refseqs no soType
+        base_url = reverse('jbrowse_refseqs-list')
+        params = "soType=ncRNA&organism=Mus musculus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # Tests refseqs none
+        base_url = reverse('jbrowse_refseqs-list')
+        params = "soType=chromosome&organism=Mus musculus"
+        url = '{}?{}'.format(base_url, params)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
 
         # Tests refseqs
         base_url = reverse('jbrowse_refseqs-list')
