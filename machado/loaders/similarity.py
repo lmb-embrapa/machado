@@ -78,7 +78,7 @@ class SimilarityLoader(object):
         for item in description.split(' '):
             try:
                 key, value = item.split('=')
-                if key == 'ID':
+                if key.lower() == 'id':
                     return value
             except ValueError:
                 pass
