@@ -169,7 +169,6 @@ class SimilarityTest(TestCase):
         setattr(test_HSPFragment3, 'hit_start', 200)
         setattr(test_HSPFragment3, 'hit_end', 2000)
 
-        # test retrieve_query_from_hsp and retrieve_subject_from_hsp
         test_HSP3 = HSP([test_HSPFragment3])
         setattr(test_HSP3, 'query_id', 'feat4_desc')
         setattr(test_HSP3, 'query_description', 'test id=feat4')
