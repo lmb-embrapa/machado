@@ -78,7 +78,7 @@ class SimilarityLoader(object):
         for item in description.split(' '):
             try:
                 key, value = item.split('=')
-                if key == 'ID':
+                if key.lower() == 'id':
                     return value
             except ValueError:
                 pass
@@ -101,7 +101,9 @@ class SimilarityLoader(object):
                         organism=self.org_query,
                         type_id=self.so_term_query.cvterm_id)
             except ObjectDoesNotExist as e2:
-                raise ImportingError('Query', e1, e2)
+                raise ImportingError(
+                    e1, e2, 'Query {} {}'.format(
+                        hsp.query_id, hsp.query_description))
 
         return query_feature
 
@@ -122,7 +124,9 @@ class SimilarityLoader(object):
                         organism=self.org_subject,
                         type_id=self.so_term_subject.cvterm_id)
             except ObjectDoesNotExist as e2:
-                raise ImportingError('Subject', hsp.hit_id, e1, e2)
+                raise ImportingError(
+                    e1, e2, 'Subject {} {}'.format(
+                        hsp.hit_id, hsp.hit_description))
 
         return subject_feature
 
@@ -137,7 +141,7 @@ class SimilarityLoader(object):
                          query_end: int = None,
                          subject_start: int = None,
                          subject_end: int = None) -> None:
-        """Store bio_blast_hsp record."""
+        """Store hsp record."""
         # set id = auto# for match_part features
         match_part_id = 'match_part_{}{}{}'.format(
             str(time()), query_feature.feature_id, subject_feature.feature_id)
@@ -162,10 +166,6 @@ class SimilarityLoader(object):
         except IntegrityError as e:
             raise ImportingError(e)
 
-        if (query_end is not None and
-                query_start is not None and
-                query_end < query_start):
-            query_start, query_end = query_end, query_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=query_feature,
                                   fmax=query_end,
@@ -175,10 +175,6 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=0)
 
-        if (subject_end is not None and
-                subject_start is not None and
-                subject_end < subject_start):
-            subject_start, subject_end = subject_end, subject_start
         Featureloc.objects.create(feature=match_part_feature,
                                   srcfeature=subject_feature,
                                   fmax=subject_end,

@@ -7,8 +7,9 @@
 """Tests similarity data loader."""
 
 from machado.models import Analysis, Analysisfeature
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism
-from machado.models import Feature, Featureloc
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Pub
+from machado.models import Feature, Featureloc, FeatureCvterm
+from machado.loaders.exceptions import ImportingError
 from machado.loaders.similarity import SimilarityLoader
 from datetime import datetime
 from django.test import TestCase
@@ -23,6 +24,16 @@ class SimilarityTest(TestCase):
 
     def test_store_bio_searchio_blast_record(self):
         """Run Tests - __init__ and store_searchio_blast_record."""
+        null_db = Db.objects.create(name='null')
+        null_cv = Cv.objects.create(name='null')
+        null_dbxref = Dbxref.objects.create(
+            accession='null', db=null_db)
+        null_cvterm = Cvterm.objects.create(
+            name='null', cv=null_cv, dbxref=null_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        null_pub = Pub.objects.create(
+            uniquename='null', type=null_cvterm, is_obsolete=False)
+
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
         test_organism2 = Organism.objects.create(
@@ -55,6 +66,13 @@ class SimilarityTest(TestCase):
         Cvterm.objects.create(
             name='in similarity relationship with', cv=test_cv2,
             dbxref=test_dbxref5, is_obsolete=0, is_relationshiptype=1)
+        test_db_pfam = Db.objects.create(name='PFAM')
+        test_cv_pfam = Cv.objects.create(name='PFAM')
+        test_dbxref_pfam_term = Dbxref.objects.create(
+            accession='123', db=test_db_pfam)
+        test_cvterm_pfam_term = Cvterm.objects.create(
+            name='kinase', cv=test_cv_pfam, dbxref=test_dbxref_pfam_term,
+            is_obsolete=0, is_relationshiptype=0)
 
         # creating test features
         feature_db = Db.objects.create(name='FASTA_source')
@@ -64,6 +82,10 @@ class SimilarityTest(TestCase):
             db=feature_db, accession='feat2')
         feature_dbxref3 = Dbxref.objects.create(
             db=feature_db, accession='feat3')
+        feature_dbxref4 = Dbxref.objects.create(
+            db=feature_db, accession='feat4')
+        feature_dbxref5 = Dbxref.objects.create(
+            db=feature_db, accession='feat5')
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
@@ -79,6 +101,19 @@ class SimilarityTest(TestCase):
             type_id=test_aa_term2.cvterm_id, is_obsolete=False,
             dbxref=feature_dbxref3, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        Feature.objects.create(
+            organism=test_organism, uniquename='feat4', is_analysis=False,
+            type_id=test_aa_term.cvterm_id, is_obsolete=False,
+            dbxref=feature_dbxref4, timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
+        Feature.objects.create(
+            organism=test_organism2, uniquename='feat5', is_analysis=False,
+            type_id=test_aa_term2.cvterm_id, is_obsolete=False,
+            dbxref=feature_dbxref5, timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
+        FeatureCvterm.objects.create(
+            feature=test_feat, cvterm=test_cvterm_pfam_term,
+            pub=null_pub, is_not=False, rank=0)
 
         test_HSPFragment1 = HSPFragment('feat1', 'feat2')
         setattr(test_HSPFragment1, 'alphabet', generic_protein)
@@ -97,7 +132,6 @@ class SimilarityTest(TestCase):
         setattr(test_HSP1, 'ident_num', 82)
 
         test_HIT1 = Hit([test_HSP1])
-        setattr(test_HIT1, 'description', 'feat2 test')
         setattr(test_HIT1, 'accession', '5050')
         setattr(test_HIT1, 'seq_len', 2000)
 
@@ -118,16 +152,39 @@ class SimilarityTest(TestCase):
         setattr(test_HSP2, 'ident_num', 72)
 
         test_HIT2 = Hit([test_HSP2])
-        setattr(test_HIT2, 'description', 'feat3 test')
         setattr(test_HIT2, 'accession', '500')
         setattr(test_HIT2, 'seq_len', 4000)
 
         test_result1 = QueryResult([test_HIT1, test_HIT2], 'feat1')
-        setattr(test_result1, 'description', 'feat1 test')
         setattr(test_result1, 'seq_len', 3000)
         setattr(test_result1, 'blast_id', 'feat1')
 
-        test_blast_file = SimilarityLoader(
+        # test retrieve_query_from_hsp and retrieve_subject_from_hsp
+        # test hsp with no bitscore, bitscore_raw, evalue, and ident_num
+        test_HSPFragment3 = HSPFragment('feat4_desc', 'feat5_desc')
+        setattr(test_HSPFragment3, 'alphabet', generic_protein)
+        setattr(test_HSPFragment3, 'query_start', 210)
+        setattr(test_HSPFragment3, 'query_end', 2100)
+        setattr(test_HSPFragment3, 'aln_span', 1890)
+        setattr(test_HSPFragment3, 'hit_start', 200)
+        setattr(test_HSPFragment3, 'hit_end', 2000)
+
+        test_HSP3 = HSP([test_HSPFragment3])
+        setattr(test_HSP3, 'query_id', 'feat4_desc')
+        setattr(test_HSP3, 'query_description', 'test id=feat4')
+        setattr(test_HSP3, 'hit_id', 'feat5_desc')
+        setattr(test_HSP3, 'hit_description', 'test id=feat5')
+
+        test_HIT3 = Hit([test_HSP3])
+        setattr(test_HIT3, 'seq_len', 4000)
+
+        test_result2 = QueryResult([test_HIT3], 'feat4_desc')
+        setattr(test_result2, 'seq_len', 3000)
+        setattr(test_result2, 'blast_id', 'feat4_desc')
+
+        # test SimilarityLoader fail
+        with self.assertRaises(ImportingError):
+            SimilarityLoader(
                 filename='similarity.file',
                 algorithm='smith-waterman',
                 description='command-line example',
@@ -136,14 +193,28 @@ class SimilarityTest(TestCase):
                 programversion='2.2.31+',
                 so_query='polypeptide',
                 so_subject='protein_match',
+                org_query='Homo sapiens',
+                org_subject='multispecies multispecies'
+            )
+
+        test_blast_file = SimilarityLoader(
+                filename='similarity.file',
+                algorithm='smith-waterman',
+                description='command-line example',
+                program='interproscan',
+                input_format='interproscan-xml',
+                programversion='5',
+                so_query='polypeptide',
+                so_subject='protein_match',
                 org_query='Mus musculus',
                 org_subject='multispecies multispecies'
         )
 
         test_blast_file.store_bio_searchio_query_result(test_result1)
+        test_blast_file.store_bio_searchio_query_result(test_result2)
 
         test_analysis = Analysis.objects.get(sourcename='similarity.file')
-        self.assertEqual('blastp', test_analysis.program)
+        self.assertEqual('interproscan', test_analysis.program)
 
         test_featureloc = Featureloc.objects.get(
                 srcfeature=test_feat)
