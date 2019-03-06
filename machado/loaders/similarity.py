@@ -101,7 +101,9 @@ class SimilarityLoader(object):
                         organism=self.org_query,
                         type_id=self.so_term_query.cvterm_id)
             except ObjectDoesNotExist as e2:
-                raise ImportingError('Query', e1, e2)
+                raise ImportingError(
+                    e1, e2, 'Query {} {}'.format(
+                        hsp.query_id, hsp.query_description))
 
         return query_feature
 
@@ -122,7 +124,9 @@ class SimilarityLoader(object):
                         organism=self.org_subject,
                         type_id=self.so_term_subject.cvterm_id)
             except ObjectDoesNotExist as e2:
-                raise ImportingError('Subject', hsp.hit_id, e1, e2)
+                raise ImportingError(
+                    e1, e2, 'Subject {} {}'.format(
+                        hsp.hit_id, hsp.hit_description))
 
         return subject_feature
 

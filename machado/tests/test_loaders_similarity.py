@@ -84,6 +84,8 @@ class SimilarityTest(TestCase):
             db=feature_db, accession='feat3')
         feature_dbxref4 = Dbxref.objects.create(
             db=feature_db, accession='feat4')
+        feature_dbxref5 = Dbxref.objects.create(
+            db=feature_db, accession='feat5')
         Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
             type_id=test_aa_term.cvterm_id, is_obsolete=False,
@@ -100,9 +102,14 @@ class SimilarityTest(TestCase):
             dbxref=feature_dbxref3, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         Feature.objects.create(
-            organism=test_organism2, uniquename='feat4', is_analysis=False,
-            type_id=test_aa_term2.cvterm_id, is_obsolete=False,
+            organism=test_organism, uniquename='feat4', is_analysis=False,
+            type_id=test_aa_term.cvterm_id, is_obsolete=False,
             dbxref=feature_dbxref4, timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now())
+        Feature.objects.create(
+            organism=test_organism2, uniquename='feat5', is_analysis=False,
+            type_id=test_aa_term2.cvterm_id, is_obsolete=False,
+            dbxref=feature_dbxref5, timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         FeatureCvterm.objects.create(
             feature=test_feat, cvterm=test_cvterm_pfam_term,
@@ -125,7 +132,6 @@ class SimilarityTest(TestCase):
         setattr(test_HSP1, 'ident_num', 82)
 
         test_HIT1 = Hit([test_HSP1])
-        setattr(test_HIT1, 'description', 'feat2 test')
         setattr(test_HIT1, 'accession', '5050')
         setattr(test_HIT1, 'seq_len', 2000)
 
@@ -146,11 +152,16 @@ class SimilarityTest(TestCase):
         setattr(test_HSP2, 'ident_num', 72)
 
         test_HIT2 = Hit([test_HSP2])
-        setattr(test_HIT2, 'description', 'feat3 test')
         setattr(test_HIT2, 'accession', '500')
         setattr(test_HIT2, 'seq_len', 4000)
 
-        test_HSPFragment3 = HSPFragment('feat1', 'feat4_desc')
+        test_result1 = QueryResult([test_HIT1, test_HIT2], 'feat1')
+        setattr(test_result1, 'seq_len', 3000)
+        setattr(test_result1, 'blast_id', 'feat1')
+
+        # test retrieve_query_from_hsp and retrieve_subject_from_hsp
+        # test hsp with no bitscore, bitscore_raw, evalue, and ident_num
+        test_HSPFragment3 = HSPFragment('feat4_desc', 'feat5_desc')
         setattr(test_HSPFragment3, 'alphabet', generic_protein)
         setattr(test_HSPFragment3, 'query_start', 210)
         setattr(test_HSPFragment3, 'query_end', 2100)
@@ -158,40 +169,19 @@ class SimilarityTest(TestCase):
         setattr(test_HSPFragment3, 'hit_start', 200)
         setattr(test_HSPFragment3, 'hit_end', 2000)
 
+        # test retrieve_query_from_hsp and retrieve_subject_from_hsp
         test_HSP3 = HSP([test_HSPFragment3])
-        setattr(test_HSP3, 'query_id', 'feat1')
-        setattr(test_HSP3, 'hit_id', 'feat4_desc')
-        setattr(test_HSP3, 'hit_description', 'test id=feat4')
+        setattr(test_HSP3, 'query_id', 'feat4_desc')
+        setattr(test_HSP3, 'query_description', 'test id=feat4')
+        setattr(test_HSP3, 'hit_id', 'feat5_desc')
+        setattr(test_HSP3, 'hit_description', 'test id=feat5')
 
         test_HIT3 = Hit([test_HSP3])
         setattr(test_HIT3, 'seq_len', 4000)
 
-        test_result1 = QueryResult([test_HIT1, test_HIT2, test_HIT3], 'feat1')
-        setattr(test_result1, 'description', 'feat1 test')
-        setattr(test_result1, 'seq_len', 3000)
-        setattr(test_result1, 'blast_id', 'feat1')
-
-        test_HSPFragment4 = HSPFragment('feat2_desc', 'feat4_desc')
-        setattr(test_HSPFragment4, 'alphabet', generic_protein)
-        setattr(test_HSPFragment4, 'query_start', 210)
-        setattr(test_HSPFragment4, 'query_end', 2100)
-        setattr(test_HSPFragment4, 'aln_span', 1890)
-        setattr(test_HSPFragment4, 'hit_start', 200)
-        setattr(test_HSPFragment4, 'hit_end', 2000)
-
-        test_HSP4 = HSP([test_HSPFragment4])
-        setattr(test_HSP4, 'query_id', 'feat2_desc')
-        setattr(test_HSP4, 'query_description', 'test id=feat2')
-        setattr(test_HSP4, 'hit_id', 'feat4_desc')
-        setattr(test_HSP4, 'hit_description', 'test id=feat4')
-
-        test_HIT4 = Hit([test_HSP4])
-        setattr(test_HIT4, 'seq_len', 4000)
-
-        test_result2 = QueryResult([test_HIT4], 'feat2_desc')
-        setattr(test_result2, 'description', 'feat2 test id=feat2')
+        test_result2 = QueryResult([test_HIT3], 'feat4_desc')
         setattr(test_result2, 'seq_len', 3000)
-        setattr(test_result2, 'blast_id', 'feat2_desc')
+        setattr(test_result2, 'blast_id', 'feat4_desc')
 
         # test SimilarityLoader fail
         with self.assertRaises(ImportingError):
@@ -222,6 +212,7 @@ class SimilarityTest(TestCase):
         )
 
         test_blast_file.store_bio_searchio_query_result(test_result1)
+        test_blast_file.store_bio_searchio_query_result(test_result2)
 
         test_analysis = Analysis.objects.get(sourcename='similarity.file')
         self.assertEqual('interproscan', test_analysis.program)
