@@ -7,7 +7,7 @@
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Cvterm, Feature, Featureloc
-from machado.models import FeatureRelationship, Featureprop
+from machado.models import FeatureRelationship
 from rest_framework import serializers
 
 
@@ -157,13 +157,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_display(self, obj):
         """Get the display."""
-        try:
-            featureprop = Featureprop.objects.get(
-                feature=obj, type__name='display',
-                type__cv__name='feature_property')
-            return featureprop.value
-        except ObjectDoesNotExist:
-            return None
+        return obj.get_display()
 
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):

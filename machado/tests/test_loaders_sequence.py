@@ -8,6 +8,7 @@
 
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from machado.loaders.exceptions import ImportingError
 from machado.loaders.sequence import SequenceLoader
 from machado.loaders.publication import PublicationLoader
 from machado.models import Feature, FeaturePub
@@ -21,9 +22,8 @@ from bibtexparser.bibdatabase import BibDatabase
 class SequenceTest(TestCase):
     """Tests Loaders - SequenceLoader."""
 
-    def test_store_biopython_seq_record(self):
-        """Tests - __init__ and store_biopython_seq_record."""
-        Organism.objects.create(genus='Mus', species='musculus')
+    def setUp(self):
+        """Setup."""
         test_db = Db.objects.create(name='SO')
         test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
         test_cv = Cv.objects.create(name='sequence')
@@ -35,6 +35,33 @@ class SequenceTest(TestCase):
         Cvterm.objects.create(
             name='contained in', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
+
+    def test_fail_biopython_seq_record(self):
+        """Tests fail __init__ and store_biopython_seq_record."""
+        # organism does not exist
+        with self.assertRaises(ImportingError):
+            SequenceLoader(filename='sequence.fasta',
+                           organism='Mus musculus',
+                           soterm='assembly')
+
+        # sequence already registered
+        Organism.objects.create(genus='Mus', species='musculus')
+        with self.assertRaises(ImportingError):
+            test_seq_file = SequenceLoader(filename='sequence.fasta',
+                                           organism='Mus musculus',
+                                           soterm='assembly')
+            test_seq_obj = SeqRecord(
+                Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                id='chr1', description='chromosome 1')
+            test_seq_file.store_biopython_seq_record(test_seq_obj)
+            test_seq_obj = SeqRecord(
+                Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                id='chr1', description='chromosome 1')
+            test_seq_file.store_biopython_seq_record(test_seq_obj)
+
+    def test_store_biopython_seq_record(self):
+        """Tests - __init__ and store_biopython_seq_record."""
+        Organism.objects.create(genus='Mus', species='musculus')
         test_seq_file = SequenceLoader(filename='sequence.fasta',
                                        organism='Mus musculus',
                                        soterm='assembly')
@@ -42,10 +69,19 @@ class SequenceTest(TestCase):
                                  id='chr1',
                                  description='chromosome 1')
         test_seq_file.store_biopython_seq_record(test_seq_obj)
+
         test_feature = Feature.objects.get(uniquename='chromosome 1')
         self.assertEqual('chromosome 1', test_feature.uniquename)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
+
+        test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                                 id='chr2')
+        test_seq_file.store_biopython_seq_record(test_seq_obj,
+                                                 ignore_residues=True)
+        test_feature = Feature.objects.get(uniquename='chr2')
+        self.assertEqual('chr2', test_feature.uniquename)
+        self.assertEqual('', test_feature.residues)
 
     def test_store_biopython_seq_record_DOI(self):
         """Tests - __init__ and store_biopython_seq_record with DOI."""
@@ -79,17 +115,6 @@ class SequenceTest(TestCase):
                          test_bibtex3_dbxref.accession)
 
         Organism.objects.create(genus='Mus', species='musculus')
-        test_db = Db.objects.create(name='SO')
-        test_dbxref = Dbxref.objects.create(accession='00001', db=test_db)
-        test_cv = Cv.objects.create(name='sequence')
-        Cvterm.objects.create(name='assembly', cv=test_cv, dbxref=test_dbxref,
-                              is_obsolete=0, is_relationshiptype=0)
-        test_db = Db.objects.create(name='RO')
-        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
-        test_cv = Cv.objects.create(name='relationship')
-        Cvterm.objects.create(
-            name='contained in', cv=test_cv, dbxref=test_dbxref,
-            is_obsolete=0, is_relationshiptype=0)
         test_seq_file_pub = SequenceLoader(
                                        filename='sequence_doi.fasta',
                                        organism='Mus musculus',
