@@ -38,10 +38,6 @@ class Command(BaseCommand):
                             help="infraspecific name",
                             required=False,
                             type=str)
-        parser.add_argument("--type",
-                            help="type (Organism_type_Cvterm)",
-                            required=False,
-                            type=str)
         parser.add_argument("--comment",
                             help="comment",
                             required=False,
@@ -50,22 +46,23 @@ class Command(BaseCommand):
     def handle(self,
                genus: str,
                species: str,
-               abbreviation: str=None,
-               common_name: str=None,
-               infraspecific_name: str=None,
-               type: str=None,
-               comment: str=None,
-               **options):
+               abbreviation: str = None,
+               common_name: str = None,
+               infraspecific_name: str = None,
+               comment: str = None,
+               verbosity: int = 1,
+               **options) -> None:
         """Execute the main function."""
         try:
-            insert_organism(genus,
-                            species,
-                            common_name,
-                            infraspecific_name,
-                            type,
-                            comment)
+            insert_organism(genus=genus,
+                            species=species,
+                            abbreviation=abbreviation,
+                            common_name=common_name,
+                            infraspecific_name=infraspecific_name,
+                            comment=comment)
         except ImportingError as e:
             raise CommandError(e)
 
-        self.stdout.write(
-            self.style.SUCCESS('{} {} registered'.format(genus, species)))
+        if verbosity > 0:
+            self.stdout.write(
+                self.style.SUCCESS('{} {} registered'.format(genus, species)))

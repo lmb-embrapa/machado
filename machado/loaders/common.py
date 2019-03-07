@@ -82,21 +82,11 @@ def get_num_lines(file_path):
 
 def insert_organism(genus: str,
                     species: str = 'spp.',
-                    type: str = None,
                     infraspecific_name: str = None,
                     abbreviation: str = None,
                     common_name: str = None,
                     comment: str = None) -> None:
     """Insert organism."""
-    type_id = ''
-    if type is not None:
-        try:
-            cvterm = Cvterm.objects.get(name=type)
-            type_id = cvterm.cvterm_id
-        except ObjectDoesNotExist:
-            raise ImportingError(
-                'The type must be previously registered in Cvterm')
-
     try:
         spp = Organism.objects.get(
             genus=genus, species=species,
@@ -111,7 +101,6 @@ def insert_organism(genus: str,
             species=species,
             common_name=common_name,
             infraspecific_name=infraspecific_name,
-            type_id=type_id,
             comment=comment)
         organism.save()
 

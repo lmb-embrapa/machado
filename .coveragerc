@@ -1,4 +1,4 @@
 [run]
 branch = True
 source = machado
-omit=bin/*,docs/*,extras/*,machado/migrations/*,machado/schemas/*,machado/static/*,machado/tests/*,machado/management/*
+omit=bin/*,docs/*,extras/*,machado/migrations/*,machado/schemas/*,machado/static/*,machado/tests/*

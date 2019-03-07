@@ -46,13 +46,13 @@ class Command(BaseCommand):
                file: str,
                organism: str,
                soterm: str,
-               nosequence: bool=False,
-               cpu: int=1,
-               description: str=None,
-               url: str=None,
-               doi: str=None,
-               verbosity: int=1,
-               **options):
+               nosequence: bool = False,
+               cpu: int = 1,
+               description: str = None,
+               url: str = None,
+               doi: str = None,
+               verbosity: int = 1,
+               **options) -> None:
         """Execute the main function."""
         if verbosity > 0:
             self.stdout.write('Preprocessing')
@@ -89,4 +89,5 @@ class Command(BaseCommand):
             if task.result():
                 raise(task.result())
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

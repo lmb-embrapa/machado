@@ -19,12 +19,6 @@ class CommonTest(TestCase):
 
     def test_insert_organism_1(self):
         """Tests - insert_organism."""
-        # test empty
-        with self.assertRaisesMessage(
-                  ImportingError,
-                  'The type must be previously registered in Cvterm'):
-            insert_organism(genus='Mus', species='musculus', type='test')
-
         # test insert organism simple
         insert_organism(genus='Mus', species='musculus')
         test_organism_1 = Organism.objects.get(genus='Mus', species='musculus')
@@ -52,8 +46,7 @@ class CommonTest(TestCase):
                         species='sapiens',
                         abbreviation='hs',
                         common_name='human',
-                        comment='no comments',
-                        type='test_cvterm')
+                        comment='no comments')
         test_organism_2 = Organism.objects.get(genus='Homo',
                                                species='sapiens')
         self.assertEqual('Homo', test_organism_2.genus)

@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def handle(self,
                genus: str,
                species: str,
-               verbosity: int=1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
         try:
@@ -41,4 +41,4 @@ class Command(BaseCommand):
                         '{} {} removed'.format(genus, species)))
 
         except ObjectDoesNotExist:
-                raise CommandError('Organism does not exist in database!')
+            raise CommandError('Organism does not exist in database!')
