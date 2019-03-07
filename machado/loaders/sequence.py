@@ -24,9 +24,9 @@ class SequenceLoader(object):
                  filename: str,
                  organism: str,
                  soterm: str,
-                 doi: str=None,
-                 description: str=None,
-                 url: str=None) -> None:
+                 doi: str = None,
+                 description: str = None,
+                 url: str = None) -> None:
         """Execute the init function."""
         # Retrieve organism object
         try:
@@ -35,12 +35,9 @@ class SequenceLoader(object):
             raise ImportingError(e)
 
         # Save DB file info
-        try:
-            self.db, created = Db.objects.get_or_create(
-                name='FASTA_source', description=description, url=url)
-            self.filename = filename
-        except IntegrityError as e:
-            raise ImportingError(e)
+        self.db, created = Db.objects.get_or_create(
+            name='FASTA_source', description=description, url=url)
+        self.filename = filename
 
         # Retrieve sequence ontology object
         self.soterm = Cvterm.objects.get(name=soterm, cv__name='sequence')
@@ -62,7 +59,7 @@ class SequenceLoader(object):
 
     def store_biopython_seq_record(self,
                                    seq_obj: SeqRecord,
-                                   ignore_residues: bool=False) -> None:
+                                   ignore_residues: bool = False) -> None:
         """Store Biopython SeqRecord."""
         try:
             dbxref, created = Dbxref.objects.get_or_create(
@@ -82,10 +79,10 @@ class SequenceLoader(object):
             if ignore_residues is True:
                 residues = ''
 
-            if seq_obj.description:
-                uniquename = seq_obj.description
-            else:
+            if seq_obj.description == '<unknown description>':
                 uniquename = seq_obj.id
+            else:
+                uniquename = seq_obj.description
 
             # storing feature
             feature = Feature(dbxref=dbxref,
