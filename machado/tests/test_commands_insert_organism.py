@@ -7,8 +7,9 @@
 """Tests loader sequence."""
 
 from django.test import TestCase
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
-from machado.loaders.exceptions import ImportingError
+from django.core.management.base import CommandError
 from machado.models import Organism
 
 
@@ -40,9 +41,9 @@ class CommandTest(TestCase):
                                              infraspecific_name='spp.',
                                              comment='Escherichia coli'))
 
-        # test fail insert organism
+        # test insert duplicate organism
         with self.assertRaisesMessage(
-                ImportingError, 'Organism already registered (Mus musculus)!'):
+                CommandError, 'Organism already registered (Mus musculus)!'):
             call_command("insert_organism",
                          "--genus=Mus",
                          "--species=musculus")
