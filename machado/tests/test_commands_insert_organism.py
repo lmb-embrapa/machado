@@ -55,3 +55,11 @@ class CommandTest(TestCase):
                      "--verbosity=0")
         with self.assertRaises(ObjectDoesNotExist):
             Organism.objects.get(genus='Mus', species='musculus')
+
+        # test remove organism does not exist
+        with self.assertRaisesMessage(
+                CommandError, 'Organism does not exist in database!'):
+            call_command("remove_organism",
+                         "--genus=Not",
+                         "--species=Registered",
+                         "--verbosity=0")
