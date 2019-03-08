@@ -19,7 +19,7 @@ import re
 class OntologyLoader(object):
     """Ontology."""
 
-    def __init__(self, cv_name: str, cv_definition: str=None) -> None:
+    def __init__(self, cv_name: str, cv_definition: str = None) -> None:
         """Invoke all validations."""
         # Save the name and definition to the Cv model
         try:
@@ -196,7 +196,7 @@ class OntologyLoader(object):
     def store_term(self,
                    n: str,
                    data: Dict[str, Any],
-                   lock: Optional[Lock]=None) -> None:
+                   lock: Optional[Lock] = None) -> None:
         """Store the ontology terms."""
         # Save the term to the Dbxref model
         aux_db, aux_accession = n.split(':')
@@ -209,13 +209,16 @@ class OntologyLoader(object):
             cv, created = Cv.objects.get_or_create(name=data['namespace'])
         else:
             cv = self.cv
-        cvterm, created = Cvterm.objects.get_or_create(
-            cv=cv,
-            name=data['name'],
-            definition='',
-            dbxref=dbxref,
-            is_obsolete=0,
-            is_relationshiptype=0)
+        try:
+            cvterm, created = Cvterm.objects.get_or_create(
+                cv=cv,
+                name=data['name'],
+                definition='',
+                dbxref=dbxref,
+                is_obsolete=0,
+                is_relationshiptype=0)
+        except KeyError as e:
+            raise ImportingError("{}\nError loading {}".format(e, data))
 
         # Definitions usually contain recurrent dbxrefs
         # will sometimes break since they're running concurrently with
@@ -296,7 +299,7 @@ class OntologyLoader(object):
     def process_cvterm_def(self,
                            cvterm: Cvterm,
                            definition: str,
-                           is_for_definition: int=1) -> None:
+                           is_for_definition: int = 1) -> None:
         """Process defition to obtain cvterms."""
         text = ''
 
@@ -346,7 +349,7 @@ class OntologyLoader(object):
     def process_cvterm_xref(self,
                             cvterm: Cvterm,
                             xref: str,
-                            is_for_definition: int=0) -> None:
+                            is_for_definition: int = 0) -> None:
         """Process cvterm_xref."""
         if xref:
 

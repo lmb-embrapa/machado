@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Tests loader sequence."""
+"""Tests commands insert organism."""
 
 from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist

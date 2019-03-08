@@ -26,7 +26,7 @@ class Command(BaseCommand):
                             "The-Sequence-Ontology/SO-Ontologies",
                             required=True, type=str)
 
-    def handle(self, file: str, verbosity: int=1, **options):
+    def handle(self, file: str, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
@@ -50,19 +50,23 @@ class Command(BaseCommand):
             self.stdout.write('Loading typedefs')
 
         # Load typedefs as Dbxrefs and Cvterm
-        for typedef in tqdm(G.graph['typedefs']):
+        for typedef in tqdm(G.graph['typedefs'],
+                            disable=False if verbosity > 0 else True):
             ontology.store_type_def(typedef)
 
         if verbosity > 0:
             self.stdout.write('Loading terms')
 
-        for n, data in tqdm(G.nodes(data=True)):
+        for n, data in tqdm(G.nodes(data=True),
+                            disable=False if verbosity > 0 else True):
             ontology.store_term(n, data)
 
         if verbosity > 0:
             self.stdout.write('Loading relationships')
 
-        for u, v, type in tqdm(G.edges(keys=True)):
+        for u, v, type in tqdm(G.edges(keys=True),
+                               disable=False if verbosity > 0 else True):
             ontology.store_relationship(u, v, type)
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

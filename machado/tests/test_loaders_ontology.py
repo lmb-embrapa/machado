@@ -231,7 +231,7 @@ class OntologyTest(TestCase):
     def test_store_type_def(self):
         """Tests - store type_def."""
         directory = os.path.dirname(os.path.abspath(__file__))
-        file = os.path.join(directory, 'data', 'so_trunc.obo')
+        file = os.path.join(directory, 'data', 'so_fake.obo')
 
         with open(file) as obo_file:
             G = obonet.read_obo(obo_file)
@@ -285,7 +285,7 @@ class OntologyTest(TestCase):
     def test_store_term(self):
         """Tests - store term."""
         directory = os.path.dirname(os.path.abspath(__file__))
-        file = os.path.join(directory, 'data', 'so_trunc.obo')
+        file = os.path.join(directory, 'data', 'so_fake.obo')
 
         with open(file) as obo_file:
             G = obonet.read_obo(obo_file)
@@ -325,7 +325,7 @@ class OntologyTest(TestCase):
     def test_store_relationship(self):
         """Tests - store relationship."""
         directory = os.path.dirname(os.path.abspath(__file__))
-        file = os.path.join(directory, 'data', 'so_trunc.obo')
+        file = os.path.join(directory, 'data', 'so_fake.obo')
 
         with open(file) as obo_file:
             G = obonet.read_obo(obo_file)
