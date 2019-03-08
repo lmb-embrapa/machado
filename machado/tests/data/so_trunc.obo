@@ -113,6 +113,17 @@ subset: SOFA
 synonym: "INSDC_feature:gene" EXACT []
 xref: http://en.wikipedia.org/wiki/Gene "wiki"
 
+[Term]
+id: SO:0000104
+name: polypeptide
+alt_id: SO:0000358
+def: "A sequence of amino acids linked by peptide bonds which may lack appreciable tertiary structure and may not be liable to irreversible denaturation." [SO:ma]
+comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology. The term 'protein' was merged with 'polypeptide'. Although 'protein' was a sequence_attribute and therefore meant to describe the quality rather than an actual feature, it was being used erroneously. It is replaced by 'peptidyl' as the polymer attribute.
+subset: SOFA
+synonym: "protein" EXACT []
+xref: http://en.wikipedia.org/wiki/Polypeptide "wiki"
+relationship: derives_from SO:0000316 ! CDS
+
 [Typedef]
 id: part_of
 name: part_of
@@ -130,3 +141,10 @@ created_by: kareneilbeck
 creation_date: 2009-08-19T12:09:59Z
 is_transitive: true
 is_symmetric: true
+
+[Typedef]
+id: derives_from
+name: derives_from
+subset: SOFA
+is_transitive: true
+
