@@ -41,7 +41,8 @@ class CommandTest(TestCase):
 
         # test remove ontology does not exist
         with self.assertRaisesMessage(
-                CommandError, 'Cannot remove \'sequence\' (not registered)'):
+                    CommandError,
+                    'Cannot remove \'sequence\' (not registered)'):
             call_command("remove_ontology",
                          "--name=sequence",
                          "--verbosity=0")
