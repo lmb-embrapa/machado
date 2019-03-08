@@ -1,0 +1,54 @@
+format-version: 1.2
+data-version: so.obo(fake)
+date: 15:12:2017 11:11
+saved-by: nicole
+auto-generated-by: OBO-Edit 2.3.1
+subsetdef: biosapiens "biosapiens protein feature ontology"
+subsetdef: DBVAR "database of genomic structural variation"
+subsetdef: SOFA "SO feature annotation"
+synonymtypedef: aa1 "amino acid 1 letter code"
+synonymtypedef: aa3 "amino acid 3 letter code"
+synonymtypedef: AAMOD "amino acid modification"
+synonymtypedef: BS "biosapiens"
+synonymtypedef: dbsnp "dbsnp variant terms"
+synonymtypedef: dbvar "DBVAR"
+synonymtypedef: ebi_variants "ensembl variant terms"
+synonymtypedef: RNAMOD "RNA modification" EXACT
+synonymtypedef: VAR "variant annotation term"
+default-namespace: sequence
+ontology: so
+
+[Term]
+id: SO:0000000
+name: Sequence_Ontology
+subset: SOFA
+is_obsolete: true
+
+[Term]
+id: SO:0000012
+name: scRNA_primary_transcript
+def: "The primary transcript of any one of several small cytoplasmic RNA molecules present in the cytoplasm and sometimes nucleus of a Eukaryote." [http://www.ebi.ac.uk/embl/WebFeat/align/scRNA_s.html]
+synonym: "scRNA primary transcript" EXACT []
+synonym: "small_cytoplasmic_RNA" RELATED []
+
+[Term]
+id: SO:0000013
+name: scRNA
+def: "A small non coding RNA sequence, present in the cytoplasm." [SO:ke]
+subset: SOFA
+xref: http://web.site/FakeData "wiki"
+synonym: "small cytoplasmic RNA" EXACT []
+comment: Fake term data.
+alt_id: SO:0000012
+relationship: derives_from SO:0000012 ! scRNA_primary_transcript
+
+[Typedef]
+id: derives_from
+name: derives_from
+def: "testing def loading." [PMID:999090909]
+comment: Fake typedef data.
+xref: FAKE:0123
+is_transitive: true
+is_class_level: true
+is_metadata_tag: true
+is_symmetric: true
