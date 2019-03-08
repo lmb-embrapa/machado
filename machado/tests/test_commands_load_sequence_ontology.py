@@ -8,7 +8,6 @@
 
 import os
 from django.test import TestCase
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from machado.models import Cvterm
@@ -26,3 +25,8 @@ class CommandTest(TestCase):
                      "--file={}".format(file),
                      "--verbosity=0")
         self.assertTrue(Cvterm.objects.get(name='gene'))
+
+        # test ImportingError
+        with self.assertRaises(CommandError):
+            call_command("load_sequence_ontology",
+                         "--file=does_not_exist")
