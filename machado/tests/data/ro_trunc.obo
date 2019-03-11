@@ -98,3 +98,53 @@ holds_over_chain: BFO:0000050 BFO:0000050
 holds_over_chain: BFO:0000051 BFO:0000050 {http://purl.obolibrary.org/obo/RO_0002582="true"}
 holds_over_chain: BFO:0000051 RO:0002131
 expand_expression_to: "http://purl.obolibrary.org/obo/BFO_0000051 some (http://purl.obolibrary.org/obo/BFO_0000050 some ?Y)" []
+
+[Typedef]
+id: RO:0002609
+name: related via dependence to
+def: "A relationship that holds between two entities, where the relationship holds based on the presence or absence of statistical dependence relationship. The entities may be statistical variables, or they may be other kinds of entities such as diseases, chemical entities or processes." []
+property_value: IAO:0000232 "Do not use this relation directly. It is intended as a grouping for a diverse set of relations, all involving cause and effect." xsd:string
+
+[Typedef]
+id: RO:0002610
+name: correlated with
+def: "A relationship that holds between two entities, where the entities exhibit a statistical dependence relationship. The entities may be statistical variables, or they may be other kinds of entities such as diseases, chemical entities or processes." []
+property_value: IAO:0000232 "Groups both positive and negative correlation" xsd:string
+is_a: RO:0002609 ! related via dependence to
+
+[Typedef]
+id: RO:0002375
+name: in branching relationship with
+def: "A relationship that holds between two material entities in a system of connected structures, where the branching relationship holds based on properties of the connecting network." []
+property_value: http://xmlns.com/foaf/0.1/page https://github.com/obophenotype/uberon/issues/170 xsd:anyURI
+property_value: IAO:0000114 IAO:0000428
+property_value: IAO:0000117 "Chris Mungall" xsd:string
+property_value: IAO:0000232 "Do not use this relation directly. It is ended as a grouping for a diverse set of relations, all involving branching relationships" xsd:string
+property_value: IAO:0000232 "This relation can be used for geographic features (e.g. rivers) as well as anatomical structures (plant branches and roots, leaf veins, animal veins, arteries, nerves)" xsd:string
+property_value: seeAlso http://purl.obolibrary.org/obo/ro/docs/branching_part_of.png
+
+[Typedef]
+id: RO:0001018
+name: contained in
+subset: ro-eco
+property_value: IAO:0000111 "contained in" xsd:string
+property_value: IAO:0000116 "Containment is location not involving parthood, and arises only where some immaterial continuant is involved." xsd:string
+property_value: IAO:0000116 "Containment obtains in each case between material and immaterial continuants, for instance: lung contained_in thoracic cavity; bladder contained_in pelvic cavity. Hence containment is not a transitive relation.    If c part_of c1 at t then we have also, by our definition and by the axioms of mereology applied to spatial regions, c located_in c1 at t. Thus, many examples of instance-level location relations for continuants are in fact cases of instance-level parthood. For material continuants location and parthood coincide. Containment is location not involving parthood, and arises only where some immaterial continuant is involved. To understand this relation, we first define overlap for continuants as follows:    c1 overlap c2 at t =def for some c, c part_of c1 at t and c part_of c2 at t. The containment relation on the instance level can then be defined (see definition):" xsd:string
+property_value: IAO:0000116 "Intended meaning:\ndomain: material entity\nrange: spatial region or site (immaterial continuant)\n        " xsd:string
+property_value: IAO:0000118 "contained_in" xsd:string
+property_value: RO:0001900 RO:0001901
+
+[Typedef]
+id: RO:HOM0000017
+name: in orthology relationship with
+def: "Historical homology that involves genes that diverged after a speciation event." [http://dx.doi.org/10.1007/BF02814484, http://dx.doi.org/10.1016/S0168-9525(00)02005-9, http://dx.doi.org/10.1146/annurev.genet.39.073003.114725, http://purl.obolibrary.org/obo/HOM_0000017, http://www.ncbi.nlm.nih.gov/pubmed/5449325]
+comment: The term is sometimes also used for anatomical structures.
+synonym: "orthologous to" EXACT []
+xref: ECO:00000060
+xref: SO:0000855
+xref: SO:0000858
+xref: SO:orthologous_to
+property_value: http://purl.org/dc/elements/1.1/creator http://bgee.unil.ch
+property_value: http://purl.org/dc/elements/1.1/source http://www.ncbi.nlm.nih.gov/pubmed/20116127
+property_value: seeAlso HOM:0000017
+is_symmetric: true
