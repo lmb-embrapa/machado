@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Tests command load sequence ontology."""
+"""Tests command load relations ontology."""
 
 import os
 from django.test import TestCase
@@ -17,24 +17,24 @@ from machado.models import Cvterm
 class CommandTest(TestCase):
     """Tests Loaders - OntologyLoader."""
 
-    def test_load_sequence_ontology(self):
-        """Tests - insert organism."""
-        # test load sequence ontology
+    def test_load_relations_ontology(self):
+        """Tests - load relations ontology."""
+        # test load relations ontology
         directory = os.path.dirname(os.path.abspath(__file__))
-        file = os.path.join(directory, 'data', 'so_trunc.obo')
-        call_command("load_sequence_ontology",
+        file = os.path.join(directory, 'data', 'ro_trunc.obo')
+        call_command("load_relations_ontology",
                      "--file={}".format(file),
                      "--verbosity=0")
-        self.assertTrue(Cvterm.objects.get(name='gene'))
+        self.assertTrue(Cvterm.objects.get(name='overlaps'))
 
         # test ImportingError
         with self.assertRaises(CommandError):
-            call_command("load_sequence_ontology",
+            call_command("load_relations_ontology",
                          "--file=does_not_exist")
 
-        # test remove sequence ontology
+        # test remove relations ontology
         call_command("remove_ontology",
-                     "--name=sequence",
+                     "--name=relationship",
                      "--verbosity=0")
         with self.assertRaises(ObjectDoesNotExist):
             Cvterm.objects.get(name='gene')
@@ -42,7 +42,7 @@ class CommandTest(TestCase):
         # test remove ontology does not exist
         with self.assertRaisesMessage(
                     CommandError,
-                    'Cannot remove \'sequence\' (not registered)'):
+                    'Cannot remove \'relationship\' (not registered)'):
             call_command("remove_ontology",
-                         "--name=sequence",
+                         "--name=relationship",
                          "--verbosity=0")
