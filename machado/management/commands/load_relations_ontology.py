@@ -25,7 +25,7 @@ class Command(BaseCommand):
                             "Available at https://github.com/oborel/"
                             "obo-relations", required=True, type=str)
 
-    def handle(self, file: str, verbosity: int=1, **options):
+    def handle(self, file: str, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
