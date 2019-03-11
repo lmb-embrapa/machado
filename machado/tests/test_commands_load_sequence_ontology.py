@@ -18,7 +18,7 @@ class CommandTest(TestCase):
     """Tests Loaders - OntologyLoader."""
 
     def test_load_sequence_ontology(self):
-        """Tests - insert organism."""
+        """Tests - load sequence ontology."""
         # test load sequence ontology
         directory = os.path.dirname(os.path.abspath(__file__))
         file = os.path.join(directory, 'data', 'so_trunc.obo')
