@@ -16,6 +16,7 @@ from machado.models import Pub, PubDbxref
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Dbxrefprop
 from django.test import TestCase
 from django.core.management import call_command
+from django.db.utils import IntegrityError
 from bibtexparser.bibdatabase import BibDatabase
 
 
@@ -61,6 +62,7 @@ class SequenceTest(TestCase):
 
     def test_store_biopython_seq_record(self):
         """Tests - __init__ and store_biopython_seq_record."""
+        # test insert sequence
         Organism.objects.create(genus='Mus', species='musculus')
         test_seq_file = SequenceLoader(filename='sequence.fasta',
                                        organism='Mus musculus',
@@ -70,11 +72,15 @@ class SequenceTest(TestCase):
                                  description='chromosome 1')
         test_seq_file.store_biopython_seq_record(test_seq_obj)
 
-        test_feature = Feature.objects.get(uniquename='chromosome 1')
+        test_feature = Feature.objects.get(
+            uniquename='chromosome 1',
+            organism__genus='Mus',
+            organism__species='musculus')
         self.assertEqual('chromosome 1', test_feature.uniquename)
         self.assertEqual('acgtgtgtgcatgctagatcgatgcatgca',
                          test_feature.residues)
 
+        # test insert no sequence
         test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
                                  id='chr2')
         test_seq_file.store_biopython_seq_record(test_seq_obj,
@@ -82,6 +88,18 @@ class SequenceTest(TestCase):
         test_feature = Feature.objects.get(uniquename='chr2')
         self.assertEqual('chr2', test_feature.uniquename)
         self.assertEqual('', test_feature.residues)
+
+        # test fail insert same id, different organism
+        # dbxref.accession must be unique
+        Organism.objects.create(genus='Homo', species='sapiens')
+        test_seq_file = SequenceLoader(filename='sequence2.fasta',
+                                       organism='Homo sapiens',
+                                       soterm='assembly')
+        test_seq_obj = SeqRecord(Seq('atgctagctagcatgactgactggtgcagtgcatgca'),
+                                 id='chr1',
+                                 description='chromosome 1')
+        with self.assertRaises(IntegrityError):
+            test_seq_file.store_biopython_seq_record(test_seq_obj)
 
     def test_store_biopython_seq_record_DOI(self):
         """Tests - __init__ and store_biopython_seq_record with DOI."""
