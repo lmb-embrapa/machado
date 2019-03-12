@@ -6,8 +6,6 @@
 
 """Load publication file."""
 from machado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
-from machado.loaders.exceptions import ImportingError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class PublicationLoader(object):
@@ -25,47 +23,44 @@ class PublicationLoader(object):
             name=entry['ENTRYTYPE'], cv=cv_type, dbxref=dbxref_type,
             is_obsolete=0, is_relationshiptype=0)
 
-        try:
-            pub = Pub.objects.create(type=cvterm_type,
-                                     uniquename=entry.get('ID'),
-                                     title=entry.get('title'),
-                                     pyear=entry.get('year'),
-                                     pages=entry.get('pages'),
-                                     volume=entry.get('volume'),
-                                     series_name=entry.get('journal'))
-            # try to store DOI information
-            if (pub and (("doi" in entry) or ("DOI" in entry))):
-                db_doi, created = Db.objects.get_or_create(name='DOI')
-                try:
-                    doi = entry["DOI"]
-                except KeyError:
-                    doi = entry["doi"]
-                dbxref_doi, created = Dbxref.objects.get_or_create(
-                    accession=doi, db=db_doi)
-                PubDbxref.objects.create(pub=pub,
-                                         dbxref=dbxref_doi, is_current=True)
-            # try to store author information
-            if (pub and (("author" in entry) or ("AUTHOR" in entry))):
-                author_line = ""
-                if ("author" in entry):
-                    author_line = entry["author"]
-                elif ("AUTHOR" in entry):
-                    author_line = entry["AUTHOR"]
+        pub = Pub.objects.create(type=cvterm_type,
+                                 uniquename=entry.get('ID'),
+                                 title=entry.get('title'),
+                                 pyear=entry.get('year'),
+                                 pages=entry.get('pages'),
+                                 volume=entry.get('volume'),
+                                 series_name=entry.get('journal'))
+        # try to store DOI information
+        if (pub and (("doi" in entry) or ("DOI" in entry))):
+            db_doi, created = Db.objects.get_or_create(name='DOI')
+            try:
+                doi = entry["DOI"]
+            except KeyError:
+                doi = entry["doi"]
+            dbxref_doi, created = Dbxref.objects.get_or_create(
+                accession=doi, db=db_doi)
+            PubDbxref.objects.create(pub=pub,
+                                     dbxref=dbxref_doi, is_current=True)
+        # try to store author information
+        if (pub and (("author" in entry) or ("AUTHOR" in entry))):
+            author_line = ""
+            if ("author" in entry):
+                author_line = entry["author"]
+            elif ("AUTHOR" in entry):
+                author_line = entry["AUTHOR"]
 
-                # retrieve every givenname and surname and create tables
-                # for them (authors are separated by "and"; surnames and
-                # names are separated by ",".
-                authors = author_line.split("and")
+            # retrieve every givenname and surname and create tables
+            # for them (authors are separated by "and"; surnames and
+            # names are separated by ",".
+            authors = author_line.split("and")
 
-                # enumerate returns author ranks automagically
-                for rank, author in enumerate(authors):
-                    names = author.split(",")
-                    surname = names[0].lstrip()
-                    givennames = ""
-                    if (len(names) > 1):
-                        givennames = names[1].lstrip()
-                    pubauthor, created = Pubauthor.objects.get_or_create(
-                        pub=pub, rank=rank, surname=surname,
-                        givennames=givennames)
-        except ObjectDoesNotExist as e1:
-            raise ImportingError(e1)
+            # enumerate returns author ranks automagically
+            for rank, author in enumerate(authors):
+                names = author.split(",")
+                surname = names[0].lstrip()
+                givennames = ""
+                if (len(names) > 1):
+                    givennames = names[1].lstrip()
+                pubauthor, created = Pubauthor.objects.get_or_create(
+                    pub=pub, rank=rank, surname=surname,
+                    givennames=givennames)

@@ -45,7 +45,9 @@ class Command(BaseCommand):
         # filename = os.path.basename(file)
         bib_database = None
         try:
-            bib_database = bibtexparser.load(open(file))
+            file = open(file)
+            bib_database = bibtexparser.load(file)
+            file.close()
         except ValueError as e:
             return CommandError(e)
 
