@@ -44,8 +44,8 @@ class Command(BaseCommand):
                file: str,
                cvterm: str,
                organism: str,
-               verbosity: int=1,
-               cpu: int=1,
+               verbosity: int = 1,
+               cpu: int = 1,
                **options):
         """Execute the main function."""
         if verbosity > 0:
@@ -86,5 +86,7 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

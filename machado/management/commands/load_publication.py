@@ -30,12 +30,10 @@ class Command(BaseCommand):
 
     def handle(self,
                file=str,
+               verbosity: int = 1,
+               cpu: int = 1,
                **options):
         """Execute the main function."""
-        verbosity = 1
-        if options.get('verbosity'):
-            verbosity = options.get('verbosity')
-
         if verbosity > 0:
             self.stdout.write('Preprocessing')
 
@@ -45,27 +43,30 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         # filename = os.path.basename(file)
-        bib_database = 0
+        bib_database = None
         try:
             bib_database = bibtexparser.load(open(file))
         except ValueError as e:
             return CommandError(e)
 
-        cpu = options.get('cpu')
+        bibtex = PublicationLoader()
+
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for entry in bib_database.entries:
             # create model object for each entry
             if (entry['ENTRYTYPE']):
-                bibtex = PublicationLoader(entry['ENTRYTYPE'])
                 tasks.append(pool.submit(bibtex.store_bibtex_entry,
                                          entry))
         if verbosity > 0:
             self.stdout.write('Loading')
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks),
+                         disable=False if verbosity > 0 else True):
             try:
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

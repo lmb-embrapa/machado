@@ -25,7 +25,7 @@ class Command(BaseCommand):
                             "Available at https://github.com/oborel/"
                             "obo-relations", required=True, type=str)
 
-    def handle(self, file: str, verbosity: int=1, **options):
+    def handle(self, file: str, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
@@ -48,7 +48,9 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Loading typedefs')
 
-        for data in tqdm(G.graph['typedefs']):
+        for data in tqdm(G.graph['typedefs'],
+                         disable=False if verbosity > 0 else True):
             ontology.store_type_def(data)
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

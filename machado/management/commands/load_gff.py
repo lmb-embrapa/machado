@@ -93,6 +93,7 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
 
         if verbosity > 0:
             self.stdout.write('Loading relationships')
@@ -104,4 +105,5 @@ class Command(BaseCommand):
                 self.style.WARNING('Ignored attrs: {}'.format(
                     feature_file.ignored_attrs)))
 
-        self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))

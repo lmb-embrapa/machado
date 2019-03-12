@@ -29,7 +29,7 @@ class PublicationTest(TestCase):
         test_entry2['author'] = 'Foo, b. and Foo1, b. and Foo b.'
         test_entry2['volume'] = 'v2'
         test_entry2['journal'] = 'Journal of Testing'
-        bibtest = PublicationLoader(test_entry2['ENTRYTYPE'])
+        bibtest = PublicationLoader()
         bibtest.store_bibtex_entry(test_entry2)
         test_bibtex = Pub.objects.get(uniquename='Chado2006')
         self.assertEqual('v2', test_bibtex.volume)
@@ -52,7 +52,7 @@ class PublicationTest(TestCase):
                        'ENTRYTYPE': 'article'}
                      ]
         for entry in db.entries:
-            bibtest2 = PublicationLoader(entry['ENTRYTYPE'])
+            bibtest2 = PublicationLoader()
             bibtest2.store_bibtex_entry(entry)
         test_bibtex2 = Pub.objects.get(uniquename='Cesar2013')
         self.assertEqual('12', test_bibtex2.volume)

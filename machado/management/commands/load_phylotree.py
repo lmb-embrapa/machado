@@ -54,8 +54,8 @@ class Command(BaseCommand):
                file: str,
                name: str,
                organismdb: str,
-               verbosity: int=1,
-               cpu: int=1,
+               verbosity: int = 1,
+               cpu: int = 1,
                **options):
         """Execute the main function."""
         if verbosity > 0:
@@ -138,5 +138,7 @@ class Command(BaseCommand):
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
+        pool.shutdown()
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

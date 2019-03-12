@@ -153,4 +153,5 @@ class Command(BaseCommand):
                                         biomaterial=biomaterial_model)
             except ImportingError as e:
                 raise CommandError(e)
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))
