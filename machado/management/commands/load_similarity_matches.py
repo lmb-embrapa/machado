@@ -93,10 +93,12 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
 
         if len(feature_file.ignored_goterms) > 0:
             self.stdout.write(
                 self.style.WARNING('Ignored GO terms: {}'.format(
                     feature_file.ignored_goterms)))
-
-        self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))

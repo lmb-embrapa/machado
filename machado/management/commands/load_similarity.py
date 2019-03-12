@@ -123,6 +123,7 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

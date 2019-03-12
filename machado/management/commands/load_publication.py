@@ -45,9 +45,7 @@ class Command(BaseCommand):
         # filename = os.path.basename(file)
         bib_database = None
         try:
-            file = open(file)
-            bib_database = bibtexparser.load(file)
-            file.close()
+            bib_database = bibtexparser.load(open(file))
         except ValueError as e:
             return CommandError(e)
 
@@ -68,6 +66,7 @@ class Command(BaseCommand):
                 task.result()
             except ImportingError as e:
                 raise CommandError(e)
+        pool.shutdown()
 
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS('Done'))

@@ -95,5 +95,6 @@ The features need to be loaded previously or won't be registered."""
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
+        pool.shutdown()
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS('Done'))
