@@ -24,14 +24,14 @@ class SimilarityTest(TestCase):
 
     def test_store_bio_searchio_blast_record(self):
         """Run Tests - __init__ and store_searchio_blast_record."""
-        null_db = Db.objects.create(name='null')
-        null_cv = Cv.objects.create(name='null')
-        null_dbxref = Dbxref.objects.create(
+        null_db, created = Db.objects.get_or_create(name='null')
+        null_cv, created = Cv.objects.get_or_create(name='null')
+        null_dbxref, created = Dbxref.objects.get_or_create(
             accession='null', db=null_db)
-        null_cvterm = Cvterm.objects.create(
+        null_cvterm, created = Cvterm.objects.get_or_create(
             name='null', cv=null_cv, dbxref=null_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-        null_pub = Pub.objects.create(
+        null_pub, created = Pub.objects.get_or_create(
             uniquename='null', type=null_cvterm, is_obsolete=False)
 
         test_organism = Organism.objects.create(

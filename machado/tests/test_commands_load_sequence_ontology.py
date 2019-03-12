@@ -15,7 +15,7 @@ from machado.models import Cvterm
 
 
 class CommandTest(TestCase):
-    """Tests Loaders - OntologyLoader."""
+    """Tests Commands - load sequence ontology."""
 
     def test_load_sequence_ontology(self):
         """Tests - load sequence ontology."""

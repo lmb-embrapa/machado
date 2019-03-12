@@ -96,4 +96,5 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

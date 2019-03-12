@@ -26,7 +26,7 @@ class OntologyTest(TestCase):
         self.assertEqual('test_cv_definition', test_ontology.definition)
 
         # Testing db_internal
-        test_db_internal = Db.objects.get(name='internal')
+        test_db_internal, created = Db.objects.get_or_create(name='internal')
         self.assertEqual('internal', test_db_internal.name)
         # Testing db_OBO_REL
         test_db_obo_rel = Db.objects.get(name='OBO_REL')

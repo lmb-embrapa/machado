@@ -4,45 +4,47 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Tests command load relations ontology."""
+"""Tests command load publication."""
 
 import os
 from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from machado.models import Cvterm
+from machado.models import Pub
 
 
 class CommandTest(TestCase):
-    """Tests Commands - load relations ontology."""
+    """Tests Commands - load publication."""
 
-    def test_load_relations_ontology(self):
-        """Tests - load relations ontology."""
-        # test load relations ontology
+    def test_load_publication(self):
+        """Tests - load publication."""
+        # test load publication
         directory = os.path.dirname(os.path.abspath(__file__))
-        file = os.path.join(directory, 'data', 'ro_trunc.obo')
-        call_command("load_relations_ontology",
+        file = os.path.join(directory, 'data', 'reference.bib')
+        call_command("load_publication",
                      "--file={}".format(file),
                      "--verbosity=0")
-        self.assertTrue(Cvterm.objects.get(name='overlaps'))
+        self.assertTrue(Pub.objects.get(
+            volume='113'))
 
         # test ImportingError
         with self.assertRaises(CommandError):
-            call_command("load_relations_ontology",
-                         "--file=does_not_exist")
+            call_command("load_publication",
+                         "--file=does_not_exist",
+                         "--verbosity=0")
 
-        # test remove relations ontology
-        call_command("remove_ontology",
-                     "--name=relationship",
+        # test remove publication
+        call_command("remove_publication",
+                     "--doi=10.1073/pnas.1604560113",
                      "--verbosity=0")
         with self.assertRaises(ObjectDoesNotExist):
-            Cvterm.objects.get(name='gene')
+            Pub.objects.get(volume='113')
 
-        # test remove ontology does not exist
+        # test remove publication does not exist
         with self.assertRaisesMessage(
                     CommandError,
-                    'Cannot remove \'relationship\' (not registered)'):
-            call_command("remove_ontology",
-                         "--name=relationship",
+                    'DOI does not exist in database'):
+            call_command("remove_publication",
+                         "--doi=10.1073/pnas.1604560113",
                          "--verbosity=0")

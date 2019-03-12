@@ -25,16 +25,13 @@ class DbModelTest(TestCase):
 
     def test_PUB(self):
         """Tests - Publication."""
-        test_db_pub = Db.objects.create(name='internal')
-        test_dbxref = Dbxref.objects.create(accession='article',
-                                            db=test_db_pub)
-        test_cv = Cv.objects.create(name='null')
-        test_cvterm = Cvterm.objects.create(
-                                            name='article',
-                                            cv=test_cv,
-                                            dbxref=test_dbxref,
-                                            is_obsolete=0,
-                                            is_relationshiptype=0)
+        test_db_pub, created = Db.objects.get_or_create(name='internal')
+        test_dbxref, created = Dbxref.objects.get_or_create(
+            accession='article', db=test_db_pub)
+        test_cv, created = Cv.objects.get_or_create(name='null')
+        test_cvterm, created = Cvterm.objects.get_or_create(
+            name='article', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
         # create test pub entry
         # ommited 'volume' just to test null values
         test_pub = Pub.objects.create(type=test_cvterm,

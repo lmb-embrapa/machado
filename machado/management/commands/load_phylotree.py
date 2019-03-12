@@ -54,8 +54,8 @@ class Command(BaseCommand):
                file: str,
                name: str,
                organismdb: str,
-               verbosity: int=1,
-               cpu: int=1,
+               verbosity: int = 1,
+               cpu: int = 1,
                **options):
         """Execute the main function."""
         if verbosity > 0:
@@ -139,4 +139,5 @@ class Command(BaseCommand):
             if task.result():
                 raise(task.result())
 
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

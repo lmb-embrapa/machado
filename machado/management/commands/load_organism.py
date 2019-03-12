@@ -90,4 +90,5 @@ class Command(BaseCommand):
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
                 raise(task.result())
-        self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS('Done'))

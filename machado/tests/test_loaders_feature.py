@@ -215,7 +215,7 @@ class FeatureTest(TestCase):
                        'ENTRYTYPE': 'article'}
                      ]
         for entry in db2.entries:
-            bibtest3 = PublicationLoader(entry['ENTRYTYPE'])
+            bibtest3 = PublicationLoader()
             bibtest3.store_bibtex_entry(entry)
         test_bibtex3 = Pub.objects.get(uniquename='Teste2018')
         test_bibtex3_pubdbxref = PubDbxref.objects.get(pub=test_bibtex3)
