@@ -80,7 +80,7 @@ class SequenceLoader(object):
                 residues = ''
 
             name = None
-            if seq_obj.description == '<unknown description>':
+            if seq_obj.description != '<unknown description>':
                 name = seq_obj.description
 
             # storing feature
