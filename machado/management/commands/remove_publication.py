@@ -24,19 +24,15 @@ class Command(BaseCommand):
 
     def handle(self,
                doi: str,
-               verbosity: int=1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
         try:
             dbxref = Dbxref.objects.get(accession=doi)
             pub_dbxref = PubDbxref.objects.get(dbxref_id=dbxref.dbxref_id)
-            pub = Pub.objects.get(pub_id=pub_dbxref.pub_id)
-            # pub_author = Pubauthor.objects.get(pub_id=pub.pub_id)
-            if dbxref and pub_dbxref and pub:
-                pub.delete()
-                if verbosity > 0:
-                    self.stdout.write(self.style.SUCCESS(
-                       '{} removed'.format(doi)))
-
+            Pub.objects.get(pub_id=pub_dbxref.pub_id).delete()
+            if verbosity > 0:
+                self.stdout.write(self.style.SUCCESS(
+                   '{} removed'.format(doi)))
         except ObjectDoesNotExist:
-                raise CommandError('DOI does not exist in database!')
+            raise CommandError('DOI does not exist in database!')
