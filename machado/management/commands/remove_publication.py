@@ -29,7 +29,7 @@ class Command(BaseCommand):
         """Execute the main function."""
         try:
             dbxref = Dbxref.objects.get(accession=doi)
-            pub_dbxref = PubDbxref.objects.get(dbxref_id=dbxref.dbxref_id)
+            pub_dbxref = PubDbxref.objects.get(dbxref=dbxref)
             Pub.objects.get(pub_id=pub_dbxref.pub_id).delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS(
