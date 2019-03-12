@@ -17,7 +17,7 @@ Please refer to the complete documentation at [Read the docs](http://machado.rea
 
 ## Demo
 
-[https://www.cnptia.embrapa.br](https://www.machado.cnptia.embrapa.br "machado demo")
+[https://www.machado.cnptia.embrapa.br](https://www.machado.cnptia.embrapa.br "machado demo")
 
 ## Contributing
 
