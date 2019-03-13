@@ -146,8 +146,6 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
         test_feat_file.store_tabix_feature(test_feat2)
         test_feat_file.store_tabix_feature(test_feat3)
 
-        test_feat_file.store_relationships()
-
     def test_jbrowse_api_global(self):
         """Retrieve JBrowse data from the global API endpoint."""
         url = reverse('jbrowse_global-list')

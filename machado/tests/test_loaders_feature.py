@@ -34,6 +34,12 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='protein_match', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
+        part_of_dbxref = Dbxref.objects.create(
+                accession='123', db=test_db)
+        Cvterm.objects.create(
+                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
+                is_obsolete=0, is_relationshiptype=1)
+
         test_db = Db.objects.create(name='RO')
         test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
         test_cv = Cv.objects.create(name='relationship')
@@ -75,8 +81,11 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='protein_match', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
-        # create RO term: contained in
-
+        part_of_dbxref = Dbxref.objects.create(
+                accession='123', db=test_db)
+        Cvterm.objects.create(
+                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
+                is_obsolete=0, is_relationshiptype=1)
         # creating test feature
         test_feature = Feature.objects.create(
             organism=test_organism, uniquename='feat1', is_analysis=False,
@@ -267,9 +276,6 @@ class FeatureTest(TestCase):
         test_feature_file.store_tabix_feature(test_tabix_feature1)
         test_feature_file.store_tabix_feature(test_tabix_feature2)
 
-        # store the relationships
-        test_feature_file.store_relationships()
-
         test_feature = Feature.objects.get(uniquename='id2')
         test_featureloc = Featureloc.objects.get(feature=test_feature)
         test_feature_relationship = FeatureRelationship.objects.get(
@@ -301,6 +307,12 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='polypeptide', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
+        part_of_dbxref = Dbxref.objects.create(
+                accession='123', db=test_db)
+        Cvterm.objects.create(
+                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
+                is_obsolete=0, is_relationshiptype=1)
+
         # create GO term
         test_db = Db.objects.create(name='GO')
         test_dbxref = Dbxref.objects.create(accession='1234', db=test_db)
@@ -370,6 +382,11 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='protein_match', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
+        part_of_dbxref = Dbxref.objects.create(
+                accession='123', db=test_db)
+        Cvterm.objects.create(
+                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
+                is_obsolete=0, is_relationshiptype=1)
 
         test_db = Db.objects.create(name='GO')
         test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
