@@ -14,11 +14,11 @@ from machado.models import Organism, Pub, PubDbxref, FeaturePub, Synonym
 from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy
 from time import time
-from typing import Dict, Set, Union
+from typing import Dict, List, Set, Union
 from urllib.parse import unquote
 from Bio.SearchIO._model import Hit
 
@@ -41,9 +41,10 @@ class FeatureLoader(object):
                  doi: str = None) -> None:
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
-        # ignored goterms
+        # ignored goterms, and relationships
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
+        self.relationships: List[Dict[str, str]] = list()
 
         if isinstance(organism, Organism):
             self.organism = organism
@@ -82,8 +83,6 @@ class FeatureLoader(object):
             name='polypeptide', cv__name='sequence')
         self.so_term_protein_match = Cvterm.objects.get(
             name='protein_match', cv__name='sequence')
-        self.so_term_part_of = Cvterm.objects.get(
-            name='part_of', cv__name='sequence')
         # Retrieve DOI's Dbxref
         dbxref_doi = None
         self.pub_dbxref_doi = None
@@ -203,9 +202,9 @@ class FeatureLoader(object):
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
-            feature_obj = Feature.objects.create(
+            feature = Feature.objects.create(
                     organism=self.organism,
-                    uniquename=attrs['id'],
+                    uniquename=attrs.get('id'),
                     type_id=cvterm.cvterm_id,
                     name=attrs.get('name'),
                     dbxref=dbxref,
@@ -218,10 +217,10 @@ class FeatureLoader(object):
                     'ID {} already registered. {}'.format(attrs.get('id'), e))
 
         # DOI: try to link feature to publication's DOI
-        if (feature_obj and self.pub_dbxref_doi):
+        if (feature and self.pub_dbxref_doi):
             try:
                 FeaturePub.objects.get_or_create(
-                        feature=feature_obj,
+                        feature=feature,
                         pub_id=self.pub_dbxref_doi.pub_id)
             except IntegrityError as e:
                 raise ImportingError(e)
@@ -257,8 +256,8 @@ class FeatureLoader(object):
 
         try:
             Featureloc.objects.get_or_create(
-                feature=feature_obj,
-                srcfeature=srcfeature,
+                feature=feature,
+                srcfeature_id=srcfeature.feature_id,
                 fmin=tabix_feature.start,
                 is_fmin_partial=False,
                 fmax=tabix_feature.end,
@@ -268,30 +267,19 @@ class FeatureLoader(object):
                 locgroup=0,
                 rank=0)
         except IntegrityError as e:
-            raise ImportingError(e, feature_obj.uniquename,
-                                 srcfeature.uniquename,
-                                 tabix_feature.start,
-                                 tabix_feature.end,
-                                 strand,
-                                 phase)
+            print(feature.uniquename,
+                  srcfeature.uniquename,
+                  tabix_feature.start,
+                  tabix_feature.end,
+                  strand,
+                  phase)
+            raise ImportingError(e)
 
-        self.process_attributes(feature_obj, attrs)
+        self.process_attributes(feature, attrs)
 
         if attrs.get('parent') is not None:
-            try:
-                parents = Feature.objects.exclude(type__name='polypeptide')
-                parent_obj = parents.get(
-                    dbxref__accession=attrs['parent'],
-                    dbxref__db=self.db, organism=self.organism)
-                FeatureRelationship.objects.create(
-                    object=feature_obj, subject=parent_obj,
-                    type=self.so_term_part_of, rank=0)
-            except ObjectDoesNotExist:
-                raise ImportingError('{} parent not found: {}'.format(
-                    feature_obj.dbxref.accession, attrs['parent']))
-            except MultipleObjectsReturned:
-                raise ImportingError('{} multiple parents found: {}'.format(
-                    feature_obj.dbxref.accession, attrs['parent']))
+            self.relationships.append({'object_id': attrs['id'],
+                                       'subject_id': attrs['parent']})
 
         # Additional protrein record for each mRNA with the exact same ID
         if tabix_feature.feature == 'mRNA':
@@ -308,9 +296,34 @@ class FeatureLoader(object):
                     timeaccessioned=datetime.now(timezone.utc),
                     timelastmodified=datetime.now(timezone.utc))
             FeatureRelationship.objects.create(object=feature_mRNA_translation,
-                                               subject=feature_obj,
+                                               subject=feature,
                                                type=translation_of,
                                                rank=0)
+
+    def store_relationships(self) -> None:
+        """Store the relationships."""
+        part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
+        relationships = list()
+        features = Feature.objects.filter(
+            organism=self.organism).exclude(type=self.aa_cvterm)
+        for item in self.relationships:
+            try:
+                # the aa features should be excluded since they were created
+                # using the same mRNA ID
+                object = features.get(uniquename=item['object_id'],
+                                      organism=self.organism)
+                subject = features.get(uniquename=item['subject_id'],
+                                       organism=self.organism)
+                relationships.append(FeatureRelationship(
+                    subject_id=subject.feature_id,
+                    object_id=object.feature_id,
+                    type_id=part_of.cvterm_id,
+                    rank=0))
+            except ObjectDoesNotExist:
+                print('Parent/Feature ({}/{}) not registered.'
+                      .format(item['object_id'], item['subject_id']))
+
+        FeatureRelationship.objects.bulk_create(relationships)
 
     def store_bio_searchio_hit(self,
                                searchio_hit: Hit,
