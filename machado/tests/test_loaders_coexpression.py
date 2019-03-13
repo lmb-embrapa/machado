@@ -37,12 +37,6 @@ class CoexpressionTest(TestCase):
         # creating test SO term
         test_db = Db.objects.create(name='SO')
         test_cv = Cv.objects.create(name='sequence')
-        part_of_dbxref = Dbxref.objects.create(
-                accession='123', db=test_db)
-        Cvterm.objects.create(
-                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
-                is_obsolete=0, is_relationshiptype=1)
-
         # creating test RO term
         test_db2 = Db.objects.create(name='RO')
         test_cv2 = Cv.objects.create(name='relationship')
@@ -194,12 +188,6 @@ class CoexpressionTest(TestCase):
         # creating test SO term
         test_db = Db.objects.create(name='SO')
         test_cv = Cv.objects.create(name='sequence')
-        part_of_dbxref = Dbxref.objects.create(
-                accession='123', db=test_db)
-        Cvterm.objects.create(
-                name='part_of', cv=test_cv, dbxref=part_of_dbxref,
-                is_obsolete=0, is_relationshiptype=1)
-
         # creating test RO term
         test_db2 = Db.objects.create(name='RO')
         test_cv2 = Cv.objects.create(name='relationship')
