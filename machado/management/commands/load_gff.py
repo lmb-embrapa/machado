@@ -95,15 +95,11 @@ class Command(BaseCommand):
                 raise CommandError(e)
         pool.shutdown()
 
-        if verbosity > 0:
-            self.stdout.write('Loading relationships')
-
-        feature_file.store_relationships()
-
         if feature_file.ignored_attrs is not None:
             self.stdout.write(
                 self.style.WARNING('Ignored attrs: {}'.format(
                     feature_file.ignored_attrs)))
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))

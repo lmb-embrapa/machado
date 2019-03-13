@@ -45,6 +45,11 @@ class OrthologyTest(TestCase):
         #         is_relationshiptype=0)
         ro_dbxref = Dbxref.objects.create(accession='00003', db=ro_db)
         ro_cv = Cv.objects.create(name='relationship')
+        part_of_dbxref = Dbxref.objects.create(
+                accession='123', db=so_db)
+        Cvterm.objects.create(
+                name='part_of', cv=sequence_cv, dbxref=part_of_dbxref,
+                is_obsolete=0, is_relationshiptype=1)
         cvterm_contained_in = Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
             is_obsolete=0, is_relationshiptype=1)
