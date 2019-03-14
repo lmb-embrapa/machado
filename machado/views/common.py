@@ -36,6 +36,7 @@ class DataSummaryView(View):
                 'organism__genus', Value(' '), 'organism__species'))
             chrs = chrs.values('key')
             chrs = chrs.annotate(count=Count('key'))
+            chrs = chrs.order_by('organism__genus', 'organism__species')
             if chrs:
                 data.update({'Chromosomes': chrs})
         except ObjectDoesNotExist:
@@ -49,6 +50,7 @@ class DataSummaryView(View):
                 'organism__genus', Value(' '), 'organism__species'))
             scaffs = scaffs.values('key')
             scaffs = scaffs.annotate(count=Count('key'))
+            scaffs = scaffs.order_by('organism__genus', 'organism__species')
             if scaffs:
                 data.update({'Scaffolds': scaffs})
         except ObjectDoesNotExist:
@@ -62,6 +64,7 @@ class DataSummaryView(View):
                 'organism__genus', Value(' '), 'organism__species'))
             genes = genes.values('key')
             genes = genes.annotate(count=Count('key'))
+            genes = genes.order_by('organism__genus', 'organism__species')
             if genes:
                 data.update({'Genes': genes})
         except ObjectDoesNotExist:
@@ -75,6 +78,8 @@ class DataSummaryView(View):
                 'organism__genus', Value(' '), 'organism__species'))
             proteins = proteins.values('key')
             proteins = proteins.annotate(count=Count('key'))
+            proteins = proteins.order_by('organism__genus',
+                                         'organism__species')
             if proteins:
                 data.update({'Proteins': proteins})
         except ObjectDoesNotExist:
