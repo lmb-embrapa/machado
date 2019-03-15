@@ -70,9 +70,16 @@ def get_pub_authors(self):
                 'author', flat=True))
 
 
+def get_pub_doi(self):
+    """Get a publication DOI."""
+    return self.PubDbxref_pub_Pub.filter(
+        dbxref__db__name='DOI').first().dbxref.accession
+
+
 def machadoPubMethods():
     """Add methods to machado.models.Pub."""
     def wrapper(cls):
         setattr(cls, 'get_authors', get_pub_authors)
+        setattr(cls, 'get_doi', get_pub_doi)
         return cls
     return wrapper
