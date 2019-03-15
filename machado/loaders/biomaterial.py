@@ -100,10 +100,10 @@ class BiomaterialLoader(object):
                               rank: int = 0) -> None:
         """Store analysisprop."""
         try:
-            Biomaterialprop.objects.create(
-                                       biomaterial=biomaterial,
-                                       type_id=type_id,
-                                       value=value,
-                                       rank=rank)
+            biomaterialprop, created = Biomaterialprop.objects.get_or_create(
+                                           biomaterial=biomaterial,
+                                           type_id=type_id,
+                                           value=value,
+                                           rank=rank)
         except IntegrityError as e:
             raise ImportingError(e)

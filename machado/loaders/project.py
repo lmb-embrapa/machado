@@ -42,7 +42,7 @@ class ProjectLoader(object):
                           rank: int = 0) -> None:
         """Store analysisprop."""
         try:
-            Projectprop.objects.create(
+            projectprop, created = Projectprop.objects.get_or_create(
                                        project=project,
                                        type_id=type_id,
                                        value=value,

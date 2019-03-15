@@ -32,7 +32,7 @@ To load such a file an example command can be seen below. The databases for the 
 
 .. code-block:: bash
 
-    python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+    python manage.py load_rnaseq_info --file file.csv --biomaterialdb GEO --assaydb SRA
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -41,8 +41,7 @@ To load such a file an example command can be seen below. The databases for the 
     python manage.py load_rnaseq_info --help
 
 ===============        ==================================================================================
---filename 		.csv file *
---projectdb             Project database info (e.g.: 'GEO')
+--file     		.csv file *
 --biomaterialdb         Biomaterial database info (e.g.: 'GEO')
 --assaydb               Assay database info (e.g.: 'SRA')
 --cpu 			Number of threads
@@ -92,7 +91,7 @@ We used the output of the LSTrAP program as standard format for this file.
 
 .. code-block:: bash
 
-    python manage.py load_rnaseq_data --filename file.tab --organism 'Oryza sativa' --programversion 1.3 --assaydb SRA
+    python manage.py load_rnaseq_data --file file.tab --organism 'Oryza sativa' --programversion 1.3 --assaydb SRA
 
 * As default the program name is 'LSTrAP' but can be changed with --program
 * The data is by default taken as normalized (TPM, FPKM, etc.) but can be changed with --norm
@@ -103,7 +102,7 @@ We used the output of the LSTrAP program as standard format for this file.
     python manage.py load_rnaseq_data --help
 
 =================      ====================================================================================
---filename               tabular text file with gene counts per line.
+--file                   tabular text file with gene counts per line.
 --organism               Scientific name (e.g.: 'Oryza sativa')
 --programversion         Version of the software (e.g.: '1.3') (string)
 --name                   Optional name (string)

@@ -190,7 +190,7 @@ that will be input.</p>
 </pre></div>
 </div>
 <p>To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --filename file.csv --projectdb GEO --biomaterialdb GEO --assaydb SRA
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --file file.csv --biomaterialdb GEO --assaydb SRA
 </pre></div>
 </div>
 <ul class="simple">
@@ -205,19 +205,16 @@ that will be input.</p>
 <col width="85%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>–filename</td>
+<tr class="row-odd"><td>–file</td>
 <td>.csv file *</td>
 </tr>
-<tr class="row-even"><td>–projectdb</td>
-<td>Project database info (e.g.: ‘GEO’)</td>
-</tr>
-<tr class="row-odd"><td>–biomaterialdb</td>
+<tr class="row-even"><td>–biomaterialdb</td>
 <td>Biomaterial database info (e.g.: ‘GEO’)</td>
 </tr>
-<tr class="row-even"><td>–assaydb</td>
+<tr class="row-odd"><td>–assaydb</td>
 <td>Assay database info (e.g.: ‘SRA’)</td>
 </tr>
-<tr class="row-odd"><td>–cpu</td>
+<tr class="row-even"><td>–cpu</td>
 <td>Number of threads</td>
 </tr>
 </tbody>
@@ -251,7 +248,7 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 <p>Note that the count fields can have floats or integers, depending on the normalization used (usually TPM, FPKM or raw counts).</p>
 <p>The gene identifier is supposed to already be loaded as a feature, usually from the organism’s genome annotation .gff file.</p>
 <p>We used the output of the LSTrAP program as standard format for this file.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_data --filename file.tab --organism <span class="s1">&#39;Oryza sativa&#39;</span> --programversion <span class="m">1</span>.3 --assaydb SRA
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_data --file file.tab --organism <span class="s1">&#39;Oryza sativa&#39;</span> --programversion <span class="m">1</span>.3 --assaydb SRA
 </pre></div>
 </div>
 <ul class="simple">
@@ -268,7 +265,7 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 <col width="83%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>–filename</td>
+<tr class="row-odd"><td>–file</td>
 <td>tabular text file with gene counts per line.</td>
 </tr>
 <tr class="row-even"><td>–organism</td>
