@@ -6,6 +6,7 @@
 
 """Load publication file."""
 from machado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
+import re
 
 
 class PublicationLoader(object):
@@ -23,9 +24,13 @@ class PublicationLoader(object):
             name=entry['ENTRYTYPE'], cv=cv_type, dbxref=dbxref_type,
             is_obsolete=0, is_relationshiptype=0)
 
+        title = entry.get('title')
+        title = re.sub('^{', '', title)
+        title = re.sub('}$', '', title)
+
         pub = Pub.objects.create(type=cvterm_type,
                                  uniquename=entry.get('ID'),
-                                 title=entry.get('title'),
+                                 title=title,
                                  pyear=entry.get('year'),
                                  pages=entry.get('pages'),
                                  volume=entry.get('volume'),
@@ -57,10 +62,10 @@ class PublicationLoader(object):
             # enumerate returns author ranks automagically
             for rank, author in enumerate(authors):
                 names = author.split(",")
-                surname = names[0].lstrip()
+                surname = names[0].strip()
                 givennames = ""
                 if (len(names) > 1):
-                    givennames = names[1].lstrip()
+                    givennames = names[1].strip()
                 pubauthor, created = Pubauthor.objects.get_or_create(
                     pub=pub, rank=rank, surname=surname,
                     givennames=givennames)

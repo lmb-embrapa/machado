@@ -7,12 +7,10 @@
 """common views."""
 
 from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Value
-from django.db.models.functions import Concat
+from django.db.models import Count
 from django.views import View
 from django.views.generic import TemplateView
-from machado.models import Cvterm, Feature
+from machado.models import Feature, Organism, Pub
 
 
 class HomeView(TemplateView):
@@ -28,61 +26,23 @@ class DataSummaryView(View):
         """General data numbers."""
         data = dict()
 
-        try:
-            chr_cvterm = Cvterm.objects.get(
-                cv__name='sequence', name='chromosome')
-            chrs = Feature.objects.filter(type_id=chr_cvterm.cvterm_id)
-            chrs = chrs.annotate(key=Concat(
-                'organism__genus', Value(' '), 'organism__species'))
-            chrs = chrs.values('key')
-            chrs = chrs.annotate(count=Count('key'))
-            chrs = chrs.order_by('organism__genus', 'organism__species')
-            if chrs:
-                data.update({'Chromosomes': chrs})
-        except ObjectDoesNotExist:
-            pass
+        VALID_TYPES = ['chromosome', 'assembly', 'gene', 'mRNA', 'polypeptide']
 
-        try:
-            scaff_cvterm = Cvterm.objects.get(
-                cv__name='sequence', name='assembly')
-            scaffs = Feature.objects.filter(type_id=scaff_cvterm.cvterm_id)
-            scaffs = scaffs.annotate(key=Concat(
-                'organism__genus', Value(' '), 'organism__species'))
-            scaffs = scaffs.values('key')
-            scaffs = scaffs.annotate(count=Count('key'))
-            scaffs = scaffs.order_by('organism__genus', 'organism__species')
-            if scaffs:
-                data.update({'Scaffolds': scaffs})
-        except ObjectDoesNotExist:
-            pass
+        organism_objs = Organism.objects.order_by('genus', 'species')
+        for organism_obj in organism_objs:
+            organism_name = "{} {}".format(
+                organism_obj.genus, organism_obj.species)
 
-        try:
-            gene_cvterm = Cvterm.objects.get(
-                cv__name='sequence', name='gene')
-            genes = Feature.objects.filter(type_id=gene_cvterm.cvterm_id)
-            genes = genes.annotate(key=Concat(
-                'organism__genus', Value(' '), 'organism__species'))
-            genes = genes.values('key')
-            genes = genes.annotate(count=Count('key'))
-            genes = genes.order_by('organism__genus', 'organism__species')
-            if genes:
-                data.update({'Genes': genes})
-        except ObjectDoesNotExist:
-            pass
-
-        try:
-            protein_cvterm = Cvterm.objects.get(
-                cv__name='sequence', name='polypeptide')
-            proteins = Feature.objects.filter(type_id=protein_cvterm.cvterm_id)
-            proteins = proteins.annotate(key=Concat(
-                'organism__genus', Value(' '), 'organism__species'))
-            proteins = proteins.values('key')
-            proteins = proteins.annotate(count=Count('key'))
-            proteins = proteins.order_by('organism__genus',
-                                         'organism__species')
-            if proteins:
-                data.update({'Proteins': proteins})
-        except ObjectDoesNotExist:
-            pass
+            counts = Feature.objects.filter(
+                type__name__in=VALID_TYPES,
+                type__cv__name='sequence',
+                organism=organism_obj).values('type__name').annotate(
+                    count=Count('type__name'))
+            if counts:
+                data[organism_name] = {'counts': counts}
+                pubs = Pub.objects.filter(
+                    OrganismPub_pub_Pub__organism=organism_obj)
+                if pubs:
+                    data[organism_name].update({'pubs': pubs})
 
         return render(request, 'data-numbers.html', {'context': data})

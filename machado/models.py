@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 from django.db import models
-from machado.decorators import machadoFeatureMethods
+from machado.decorators import machadoFeatureMethods, machadoPubMethods
 
 
 class Acquisition(models.Model):
@@ -1958,6 +1958,7 @@ class Protocolparam(models.Model):
         db_table = 'protocolparam'
 
 
+@machadoPubMethods()
 class Pub(models.Model):
     pub_id = models.BigAutoField(primary_key=True)
     title = models.TextField(blank=True, null=True)

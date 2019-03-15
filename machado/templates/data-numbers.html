@@ -8,21 +8,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="bg-light rounded p-5">
-<div class="row">
 {% for item, data in context.items %}
-<div class="card col-sm m-1 p-0">
+<div class="card m-1">
     <div class="card-header">
-        <h5 class="card-title">{{ item }}</h5>
+        <h4 class="card-title"><a href="{% url 'feature_search' %}?q=&selected_facets=organism_exact:{{ item }}">{{ item }}</a></h4>
     </div>
     <div class="card-body">
-        {% for entry in data %}
-        <a href="{% url 'feature_search' %}?q={{ entry.key }}">{{ entry.key }}</a>: {{ entry.count }} <br />
-    {% endfor %}
+        <div class="row">
+            <div class="col-sm">
+            {% for entry in data.counts %}
+            {{ entry.type__name }}: {{ entry.count }} <br />
+            {% endfor %}
+            </div>
+            <div class="col">
+            <ul class="list-group">
+            {% for pub in data.pubs %}
+            <li class="list-group-item"><small>{{ pub.get_authors }} <b>{{ pub.title }}.</b> <i>{{ pub.series_name }}</i>. {{ pub.pyear }}; {{ pub.volume}} {{ pub.pages }}</small></li>
+            {% endfor %}
+            </ul>
+            </div>
+        </div>
     </div>
 </div>
 {% endfor %}
-</div>
-</div>
 
 {% endblock%}
