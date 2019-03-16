@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import render
 from django.views import View
-from machado.models import Analysis, Analysisfeature
+from machado.models import Analysis, Analysisfeature, Pub
 from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Any, Dict, List
@@ -189,6 +189,11 @@ class FeatureView(View):
                     feature_relationship.object)
         return result
 
+    def retrieve_feature_pub(self, feature_id: int) -> List[Pub]:
+        """Retrieve feature publications."""
+        return Pub.objects.filter(
+            FeaturePub_pub_Pub__feature__feature_id=feature_id)
+
     def retrieve_feature_data(self, feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""
         result = dict()  # type: Dict[str, Any]
@@ -210,6 +215,8 @@ class FeatureView(View):
             feature_id=feature_obj.feature_id,
             organism_id=feature_obj.organism_id)
         result['orthologs'] = self.retrieve_feature_orthologs(
+            feature_id=feature_obj.feature_id)
+        result['pubs'] = self.retrieve_feature_pub(
             feature_id=feature_obj.feature_id)
         return result
 

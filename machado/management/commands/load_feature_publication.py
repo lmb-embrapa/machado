@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load feature annotation file."""
+"""Load feature publication file."""
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
@@ -16,25 +16,20 @@ import os
 
 
 class Command(BaseCommand):
-    """Load feature annotation file."""
+    """Load feature publication file."""
 
     help = 'Load two-column tab separated file containing feature name and '
-    'annotation. Current annotation will be replaced.'
+    'publication DOI.'
 
     def add_arguments(self, parser):
         """Define the arguments."""
         parser.add_argument("--file",
                             help="Two-column tab separated file. "
-                            "(feature.dbxref\\tannotation text)",
+                            "(feature.dbxref\\tpublication DOI)",
                             required=True,
                             type=str)
         parser.add_argument("--organism", help="Species name (eg. Homo "
                             "sapiens, Mus musculus)",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cvterm", help="cvterm.name from cv "
-                            "feature_property. (eg. display, note, product, "
-                            "alias, ontology_term)",
                             required=True,
                             type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
@@ -42,7 +37,6 @@ class Command(BaseCommand):
 
     def handle(self,
                file: str,
-               cvterm: str,
                organism: str,
                verbosity: int = 1,
                cpu: int = 1,
@@ -62,7 +56,7 @@ class Command(BaseCommand):
         try:
             feature_file = FeatureLoader(
                 filename=filename,
-                source='GFF_source',
+                source='PUBLICATION',
                 organism=organism,
             )
         except ImportingError as e:
@@ -71,16 +65,16 @@ class Command(BaseCommand):
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
 
-        # Load the annotation file
+        # Load the publication file
         with open(file) as tab_file:
             for line in tab_file:
-                feature, annotation = line.strip().split('\t')
+                feature, doi = line.strip().split('\t')
                 tasks.append(pool.submit(
-                    feature_file.store_feature_annotation,
-                    feature, cvterm, annotation))
+                    feature_file.store_feature_publication,
+                    feature, doi))
 
         if verbosity > 0:
-            self.stdout.write('Loading feature annotations')
+            self.stdout.write('Loading feature publications')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()

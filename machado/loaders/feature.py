@@ -389,15 +389,39 @@ class FeatureLoader(object):
             if key not in VALID_ATTRS:
                 self.ignored_attrs.add(key)
 
-        features = Feature.objects.filter(dbxref__accession=feature)
-        if len(features) == 0:
-            features = Feature.objects.filter(name=feature)
+        features = Feature.objects.filter(
+            organism=self.organism,
+            dbxref__accession=feature,
+            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
 
         if len(features) == 0:
             raise ImportingError('{} not found.'.format(feature))
 
         for feature_obj in features:
             self.process_attributes(feature_obj, attrs)
+
+    def store_feature_publication(self,
+                                  feature: str,
+                                  doi: str) -> None:
+        """Store feature publication."""
+        features = Feature.objects.filter(
+            organism=self.organism,
+            dbxref__accession=feature,
+            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
+
+        if len(features) == 0:
+            raise ImportingError('{} not found.'.format(feature))
+
+        try:
+            doi_obj = Dbxref.objects.get(accession=doi, db__name='DOI')
+            pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
+        except ObjectDoesNotExist:
+            raise ImportingError('{} not registered.', doi)
+
+        for feature_obj in features:
+            FeaturePub.objects.get_or_create(
+                    feature=feature_obj,
+                    pub=pub_obj)
 
     def store_feature_relationships_group(
                                self,

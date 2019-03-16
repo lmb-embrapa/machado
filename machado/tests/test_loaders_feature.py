@@ -75,7 +75,6 @@ class FeatureTest(TestCase):
         Cvterm.objects.create(name='protein_match', cv=test_cv,
                               dbxref=test_dbxref, is_obsolete=0,
                               is_relationshiptype=0)
-        # create RO term: contained in
 
         # creating test feature
         test_feature = Feature.objects.create(
@@ -352,7 +351,6 @@ class FeatureTest(TestCase):
         test_so_term = Cvterm.objects.create(
             name='exact', cv=test_cv, dbxref=test_dbxref,
             is_obsolete=0, is_relationshiptype=0)
-
         test_db = Db.objects.create(name='RO')
         test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
         test_cv = Cv.objects.create(name='relationship')
@@ -381,9 +379,12 @@ class FeatureTest(TestCase):
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
 
+        test_db = Db.objects.create(name='GFF_SOURCE')
+        test_dbxref = Dbxref.objects.create(accession='feat2', db=test_db)
         test_feature = Feature.objects.create(
-            organism=test_organism, uniquename='feat2', is_analysis=False,
-            type_id=test_so_term.cvterm_id, is_obsolete=False, name='feat2',
+            organism=test_organism, uniquename='feat2', dbxref=test_dbxref,
+            is_analysis=False, type_id=test_so_term.cvterm_id,
+            is_obsolete=False,
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc))
 
@@ -419,3 +420,71 @@ class FeatureTest(TestCase):
         test_feature_dbxref = FeatureDbxref.objects.get(feature=test_feature,
                                                         dbxref=test_dbxref)
         self.assertIsNotNone(test_feature_dbxref)
+
+    def test_store_feature_publication(self):
+        """Tests - store feature publication."""
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        test_so_term = Cvterm.objects.create(
+            name='gene', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
+        Cvterm.objects.create(
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+
+        test_db = Db.objects.create(name='GFF_SOURCE')
+        test_dbxref = Dbxref.objects.create(accession='feat_gene', db=test_db)
+        test_feature = Feature.objects.create(
+            organism=test_organism, uniquename='feat_gene', dbxref=test_dbxref,
+            is_analysis=False, type_id=test_so_term.cvterm_id,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+
+        db2 = BibDatabase()
+        db2.entries = [
+
+                      {'journal': 'Nice Journal',
+                       'comments': 'A comment',
+                       'pages': '12--23',
+                       'month': 'jan',
+                       'abstract': 'This is an abstract. This line should be '
+                                   'long enough to test multilines...',
+                       'title': 'An amazing title',
+                       'year': '2013',
+                       'doi': '10.1186/s12864-016-2535-300002',
+                       'volume': '12',
+                       'ID': 'Teste2018',
+                       'author': 'Foo, b. and Foo1, b. and Foo b.',
+                       'keyword': 'keyword1, keyword2',
+                       'ENTRYTYPE': 'article'}
+                     ]
+        for entry in db2.entries:
+            bibtest = PublicationLoader()
+            bibtest.store_bibtex_entry(entry)
+
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          organism='Mus musculus',
+                                          source='GFF_loader')
+
+        test_feature_file.store_feature_publication(
+            feature='feat_gene', doi='10.1186/s12864-016-2535-300002')
+        test_featurepub = FeaturePub.objects.get(feature=test_feature)
+        self.assertEqual('An amazing title',
+                         test_featurepub.pub.title)
