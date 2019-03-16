@@ -13,8 +13,10 @@ from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
 from machado.models import PubDbxref
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.db.utils import IntegrityError
 from hashlib import md5
+from typing import Optional
 
 
 class SequenceLoader(object):
@@ -91,7 +93,7 @@ class SequenceLoader(object):
                               residues=residues,
                               seqlen=len(seq_obj.seq),
                               md5checksum=m,
-                              type_id=self.soterm.cvterm_id,
+                              type=self.soterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -108,3 +110,34 @@ class SequenceLoader(object):
                             pub_id=self.pub_dbxref_doi.pub_id)
                 except IntegrityError as e:
                     raise ImportingError(e)
+
+    def retrieve_id_from_description(self, description: str) -> Optional[str]:
+        """Retrieve ID from description."""
+        for item in description.split(' '):
+            try:
+                key, value = item.split('=')
+                if key.lower() == 'id':
+                    return value
+            except ValueError:
+                pass
+        return None
+
+    def add_sequence_to_feature(
+            self, seq_obj: SeqRecord) -> None:
+        """Store Biopython SeqRecord."""
+        try:
+            description_id = self.retrieve_id_from_description(
+                description=seq_obj.description)
+            feature_obj = Feature.objects.get(
+                Q(dbxref__accession=seq_obj.id) |
+                Q(dbxref__accession=description_id),
+                organism=self.organism,
+                type=self.soterm,
+                dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
+        except ObjectDoesNotExist:
+            raise ImportingError(
+                'The feature {} does NOT exist.'.format(seq_obj.id))
+
+        feature_obj.md5 = md5(str(seq_obj.seq).encode()).hexdigest()
+        feature_obj.residues = seq_obj.seq
+        feature_obj.save()
