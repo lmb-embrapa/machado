@@ -7,9 +7,12 @@
 """Tests organism loader."""
 
 from machado.loaders.organism import OrganismLoader
-from machado.models import Db, Dbxref, Organism, OrganismDbxref, Organismprop
+from machado.loaders.publication import PublicationLoader
+from machado.models import Db, Dbxref
+from machado.models import Organism, OrganismDbxref, Organismprop, OrganismPub
 from django.test import TestCase
 from django.core.management import call_command
+from bibtexparser.bibdatabase import BibDatabase
 
 
 class OrganismTest(TestCase):
@@ -53,3 +56,36 @@ class OrganismTest(TestCase):
         self.assertFalse(Organism.objects.filter(genus='Ilex',
                                                  species='paraguariensis')
                          .exists())
+
+    def test_store_organism_publication(self):
+        """Tests - store organism publication."""
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+
+        db2 = BibDatabase()
+        db2.entries = [
+
+                      {'journal': 'Nice Journal',
+                       'comments': 'A comment',
+                       'pages': '12--23',
+                       'month': 'jan',
+                       'abstract': 'This is an abstract. This line should be '
+                                   'long enough to test multilines...',
+                       'title': 'An amazing title',
+                       'year': '2013',
+                       'doi': '10.1186/s12864-016-2535-300002',
+                       'volume': '12',
+                       'ID': 'Teste2018',
+                       'author': 'Foo, b. and Foo1, b. and Foo b.',
+                       'keyword': 'keyword1, keyword2',
+                       'ENTRYTYPE': 'article'}
+                     ]
+        for entry in db2.entries:
+            bibtest = PublicationLoader()
+            bibtest.store_bibtex_entry(entry)
+
+        OrganismLoader().store_organism_publication(
+            organism='Mus musculus', doi='10.1186/s12864-016-2535-300002')
+        test_organismpub = OrganismPub.objects.get(organism=test_organism)
+        self.assertEqual('An amazing title',
+                         test_organismpub.pub.title)

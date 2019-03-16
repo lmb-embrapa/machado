@@ -7,8 +7,11 @@
 """Organism."""
 
 from machado.loaders.exceptions import ImportingError
+from machado.loaders.common import retrieve_organism
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Organism, OrganismDbxref, Organismprop
+from machado.models import OrganismPub, Pub
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from typing import List, Optional, Tuple
 
@@ -16,11 +19,12 @@ from typing import List, Optional, Tuple
 class OrganismLoader(object):
     """Load organism records."""
 
-    def __init__(self, organism_db: str) -> None:
+    def __init__(self, organism_db: str = None) -> None:
         """Execute the init function."""
-        try:
+        if organism_db is not None:
             self.db = Db.objects.create(name=organism_db)
 
+        try:
             db_synonym, created = Db.objects.get_or_create(
                 name='local')
             dbxref_synonym, created = Dbxref.objects.get_or_create(
@@ -54,9 +58,6 @@ class OrganismLoader(object):
             self, taxid: str, scname: str, synonyms: List[str],
             common_names: List[str]) -> None:
         """Store organism record."""
-        dbxref = Dbxref.objects.create(
-            db=self.db, accession=taxid, description=scname)
-
         genus, species, infra = self.parse_scientific_name(scname)
 
         abbreviation = None
@@ -69,9 +70,26 @@ class OrganismLoader(object):
             genus=genus, species=species, infraspecific_name=infra,
             common_name=common_names_join, abbreviation=abbreviation)
 
-        OrganismDbxref.objects.create(organism=organism, dbxref=dbxref)
+        if self.db:
+            dbxref = Dbxref.objects.create(
+                db=self.db, accession=taxid, description=scname)
+            OrganismDbxref.objects.create(organism=organism, dbxref=dbxref)
 
         for i, synonym in enumerate(synonyms):
             Organismprop.objects.get_or_create(
                 organism=organism, type_id=self.cvterm_synonym.cvterm_id,
                 value=synonym, rank=i)
+
+    def store_organism_publication(self,
+                                   organism: str,
+                                   doi: str) -> None:
+        """Store organism publication."""
+        organism_obj = retrieve_organism(organism)
+
+        try:
+            doi_obj = Dbxref.objects.get(accession=doi, db__name='DOI')
+            pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
+        except ObjectDoesNotExist:
+            raise ImportingError('{} not registered.', doi)
+
+        OrganismPub.objects.get_or_create(organism=organism_obj, pub=pub_obj)
