@@ -36,7 +36,7 @@ class SequenceLoader(object):
 
         # Save DB file info
         self.db, created = Db.objects.get_or_create(
-            name='FASTA_source', description=description, url=url)
+            name='FASTA_SOURCE', description=description, url=url)
         self.filename = filename
 
         # Retrieve sequence ontology object

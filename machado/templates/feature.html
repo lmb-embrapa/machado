@@ -165,6 +165,29 @@
   </div>
   {% endif %}
 
+  {% if data.pubs %}
+  <div class="card m-1">
+    <div class="card-header">
+        <h3 class="card-title">Publications</h3>
+    </div>
+    <div class="card-body">
+      <div class="card-text">
+        <ul class="list-group">
+        {% for pub in data.pubs %}
+            <li class="list-group-item"><small>
+                    {{ pub.get_authors }} <b>{{ pub.title }}.</b> <i>{{ pub.series_name }}</i>. {{ pub.pyear }}; {{ pub.volume}} {{ pub.pages }}
+                    {% if pub.get_doi %}
+                    DOI:<a target="_blank" href="http://dx.doi.org/{{ pub.get_doi }}">{{ pub.get_doi }}</a>
+                    {% endif %}
+            </small></li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+
 {% else %}
   {{ feature.error }}
 {% endif %}
