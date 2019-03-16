@@ -162,3 +162,22 @@ class SequenceTest(TestCase):
                      "--verbosity=0")
         self.assertFalse(Dbxrefprop.objects.filter(value='sequence_doi.fasta')
                          .exists())
+
+    def test_add_sequence_to_feature(self):
+        """Tests - add_sequence_to_feature."""
+        # test insert sequence
+        Organism.objects.create(genus='Mus', species='musculus')
+        test_seq_file = SequenceLoader(filename='sequence.fasta',
+                                       organism='Mus musculus',
+                                       soterm='assembly')
+        test_seq_obj = SeqRecord(Seq('acgtgtgtgcatgctagatcgatgcatgca'),
+                                 id='chr1',
+                                 description='chromosome 1')
+        test_seq_file.store_biopython_seq_record(test_seq_obj)
+
+        # test add_sequence_to_feature
+        test_seq_obj = SeqRecord(
+            Seq('aaaaaaaaaaaaaaaaaaaa'), id='chr1', description='chromosome 1')
+        test_seq_file.add_sequence_to_feature(test_seq_obj)
+        test_feature_seq = Feature.objects.get(uniquename='chr1')
+        self.assertEqual('aaaaaaaaaaaaaaaaaaaa', test_feature_seq.residues)
