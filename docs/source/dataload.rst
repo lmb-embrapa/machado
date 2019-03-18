@@ -15,6 +15,8 @@ The data files must be loaded in a particular order, taking into account their `
    FASTA <load_fasta>
    GFF <load_gff>
    Feature annotation<load_feature_annotation>
+   Feature sequence<load_feature_sequence>
+   Feature publication<load_feature_publication>
    Blast <load_blast>
    InterproScan <load_interproscan>
    OrthoMCL <load_orthomcl>
