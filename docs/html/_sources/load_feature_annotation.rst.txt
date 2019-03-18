@@ -1,6 +1,8 @@
 Loading Feature Annotation Files
 ================================
 
+If the annotation was loaded previously, it will be replaced.
+
 Load Feature Annotation
 -----------------------
 
@@ -15,7 +17,7 @@ Load Feature Annotation
     python manage.py load_feature_annotation --help
 
 =============   ==========================================================================================
---file 			Two-column tab separated file (feature.accession\tannotation text). *
+--file 			Two-column tab separated file (feature.accession<TAB>annotation text). *
 --organism 		Species name (eg. Homo sapiens, Mus musculus) *
 --cvterm 		cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term) *
 --cpu 			Number of threads

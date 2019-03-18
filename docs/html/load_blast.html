@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2.8. Loading Blast results &mdash; machado 0.1.0 documentation</title>
+  <title>2.10. Loading Blast results &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -17,36 +17,35 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2.9. Loading InterproScan results" href="load_interproscan.html" />
-    <link rel="prev" title="2.7. Loading Feature Annotation Files" href="load_feature_annotation.html" /> 
+    <link rel="next" title="2.11. Loading InterproScan results" href="load_interproscan.html" />
+    <link rel="prev" title="2.9. Loading Feature Publication File" href="load_feature_publication.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -90,11 +89,13 @@
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.8. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.10. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -147,7 +148,7 @@
         
           <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>2.8. Loading Blast results</li>
+      <li>2.10. Loading Blast results</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,10 +168,10 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-blast-results">
-<h1>2.8. Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Permalink to this headline">¶</a></h1>
+<h1>2.10. Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Permalink to this headline">¶</a></h1>
 <p>In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on <strong>proteins</strong>.</p>
 <div class="section" id="load-blast-subject-records">
-<h2>2.8.1. Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.1. Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Permalink to this headline">¶</a></h2>
 <p>In case you did a BLAST against a multispecies protein database, like NCBI’s nr or Uniprot’s trembl or swissprot, you need to load previously all subject matches before loading the result itself. To do so, use the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity_matches --file blast_result.xml --format blast-xml
 </pre></div>
@@ -180,7 +181,7 @@
 </ul>
 </div>
 <div class="section" id="load-blast">
-<h2>2.8.2. Load BLAST<a class="headerlink" href="#load-blast" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.2. Load BLAST<a class="headerlink" href="#load-blast" title="Permalink to this headline">¶</a></h2>
 <p>If all queries and subjects are already loaded you can run the following command to load a BLAST xml result:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file blast_result.xml --format blast-xml --so_query polypeptide --so_subject protein_match --program diamond --programversion <span class="m">0</span>.9.24 --organism_query <span class="s1">&#39;Oryza sativa&#39;</span> --organism_subject <span class="s1">&#39;multispecies multispecies&#39;</span>
 </pre></div>
@@ -238,7 +239,7 @@
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>2.8.3. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.3. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a Blast result set you should use the command <em>remove_analysis</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_analysis --help
 </pre></div>
@@ -257,10 +258,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_interproscan.html" class="btn btn-neutral float-right" title="2.9. Loading InterproScan results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_interproscan.html" class="btn btn-neutral float-right" title="2.11. Loading InterproScan results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_feature_annotation.html" class="btn btn-neutral float-left" title="2.7. Loading Feature Annotation Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_feature_publication.html" class="btn btn-neutral" title="2.9. Loading Feature Publication File" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -269,7 +270,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa
+        &copy; Copyright 2018, Embrapa.
 
     </p>
   </div>
@@ -286,16 +287,36 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
