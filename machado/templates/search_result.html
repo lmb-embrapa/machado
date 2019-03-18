@@ -52,6 +52,15 @@
                 <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
                     <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
                 </li>
+
+                {% for l in page_obj.paginator.page_range %}
+                    {% if l <= page_obj.number|add:4 and l >= page_obj.number|add:-4 %}
+                    <li class="page-item {% if page_obj.number == forloop.counter %}disabled{% endif %}">
+                        <a class="page-link" href="?{% param_replace page=forloop.counter %}">{{ forloop.counter }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
                 <li class="page-item {% if page_obj.has_next == False %}disabled{% endif %}">
                     <a class="page-link" href="{% if page_obj.has_next %}?{% param_replace page=page_obj.next_page_number %}{% endif %}">Next</a>
                 </li>
