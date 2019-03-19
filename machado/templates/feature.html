@@ -46,7 +46,7 @@
         {% for location in data.location %}
         <p>{{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}</p>
           {% if location.jbrowse_url %}
-            <iframe style='border:0' width='600' height='300' src="{{ location.jbrowse_url }}"></iframe>
+            <iframe style='border:0' width='100%' height='300' src="{{ location.jbrowse_url }}"></iframe>
           {% endif %}
         {% endfor %}
       </div>
