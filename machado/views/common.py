@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.db.models import Count
 from django.views import View
 from django.views.generic import TemplateView
-from machado.models import Feature, Organism, Pub
+from machado.models import Feature, Pub
 
 
 class HomeView(TemplateView):
@@ -28,21 +28,25 @@ class DataSummaryView(View):
 
         VALID_TYPES = ['chromosome', 'assembly', 'gene', 'mRNA', 'polypeptide']
 
-        organism_objs = Organism.objects.order_by('genus', 'species')
-        for organism_obj in organism_objs:
-            organism_name = "{} {}".format(
-                organism_obj.genus, organism_obj.species)
+        counts = Feature.objects.filter(
+            type__name__in=VALID_TYPES, type__cv__name='sequence').values(
+                'organism__genus', 'organism__species',
+                'type__name').annotate(count=Count(
+                    'type__name')).order_by('organism__genus',
+                                            'organism__species')
 
-            counts = Feature.objects.filter(
-                type__name__in=VALID_TYPES,
-                type__cv__name='sequence',
-                organism=organism_obj).values('type__name').annotate(
-                    count=Count('type__name'))
-            if counts:
-                data[organism_name] = {'counts': counts}
-                pubs = Pub.objects.filter(
-                    OrganismPub_pub_Pub__organism=organism_obj)
-                if pubs:
-                    data[organism_name].update({'pubs': pubs})
+        for item in counts:
+            organism_name = '{} {}'.format(item['organism__genus'],
+                                           item['organism__species'])
+            data.setdefault(organism_name, {}).setdefault(
+                'counts', []).append(item)
+
+        for key, value in data.items():
+            genus, species = key.split()
+            pubs = Pub.objects.filter(
+                OrganismPub_pub_Pub__organism__genus=genus,
+                OrganismPub_pub_Pub__organism__species=species)
+            if pubs:
+                data[key].update({'pubs': pubs})
 
         return render(request, 'data-numbers.html', {'context': data})
