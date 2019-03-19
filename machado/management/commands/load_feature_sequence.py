@@ -43,9 +43,6 @@ class Command(BaseCommand):
                cpu: int = 1,
                **options):
         """Execute the main function."""
-        if verbosity > 0:
-            self.stdout.write('Preprocessing')
-
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -61,8 +58,10 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
-        fasta_sequences = SeqIO.parse(open(file), 'fasta')
+        if verbosity > 0:
+            self.stdout.write('Processing file: {}'.format(filename))
 
+        fasta_sequences = SeqIO.parse(open(file), 'fasta')
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for fasta in fasta_sequences:
@@ -76,4 +75,5 @@ class Command(BaseCommand):
         pool.shutdown()
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))
