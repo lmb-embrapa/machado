@@ -8,11 +8,12 @@
 
 {% load machado_extras %}
 
+
 <h3>Filters</h3>
 
 {% for facet, data in facets.fields.items %}
 
-<div class="card mb-3">
+<div class="card m-1">
     <div class="card-header">
         <h5 class="card-title">
             {% if facet == "so_term" %}
