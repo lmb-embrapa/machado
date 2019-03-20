@@ -11,10 +11,10 @@
 
 {% block content %}
 
-        <div class="row">
+        <div class="row m-1">
 
         {% if object_list %}
-        <div class="col-xs py-2 mx-1 rounded bg-light">
+        <div class="col col-3 py-2 mx-1 rounded bg-light">
             {% include "search_facet.html" %}
         </div>
 
@@ -67,12 +67,12 @@
             </nav>
              {% endif %}
         </div>
-        {% else %}
-        <div class="col-auto col-12 py-3 mx-1 rounded bg-light">
-            <h3>Results</h3>
-                Not found.
-        </div>
-        {% endif %}
+     </div>
+    {% else %}
+    <div class="col-auto col-12 py-3 mx-1 rounded bg-light">
+        <h3>Results</h3>
+            Not found.
+    </div>
+    {% endif %}
 
-        </div>
 {% endblock %}
