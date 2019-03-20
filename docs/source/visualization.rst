@@ -11,3 +11,4 @@ The machado web interface requires the instalation and configuration of third pa
    Index and search <index_search>
    Web server <webserver>
    JBrowse <jbrowse>
+   Cache <cache>
