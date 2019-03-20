@@ -15,13 +15,15 @@
 
 <div class="card">
     <div class="card-header">
-            {% if facet == "so_term" %}
-            Sequence type
-            {% elif facet == "match_part" %}
-            Similarity
-            {% else %}
-            {{ facet|capfirst }}
-            {% endif %}
+        <b>
+        {% if facet == "so_term" %}
+        Sequence type
+        {% elif facet == "match_part" %}
+        Similarity
+        {% else %}
+        {{ facet|capfirst }}
+        {% endif %}
+       </b>
     </div>
     <div class="card-body">
     {% for item in data %}
