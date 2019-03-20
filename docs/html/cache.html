@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>machado’s documentation &mdash; machado 0.1.0 documentation</title>
+  <title>3.4. Cache (optional) &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -29,7 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="1. Installation" href="installation.html" /> 
+    <link rel="next" title="4. Diagrams" href="diagrams.html" />
+    <link rel="prev" title="3.3. JBrowse (optional)" href="jbrowse.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -48,7 +49,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> machado
+            <a href="index.html" class="icon icon-home"> machado
           
 
           
@@ -78,10 +79,16 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataload.html">2. Data loading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="visualization.html">3. Visualization</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index_search.html">3.1. Index and search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webserver.html">3.2. Web server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jbrowse.html">3.3. JBrowse</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.4. Cache</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
@@ -98,7 +105,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">machado</a>
+          <a href="index.html">machado</a>
         
       </nav>
 
@@ -127,15 +134,17 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>machado’s documentation</li>
+          <li><a href="visualization.html">3. Visualization</a> &raquo;</li>
+        
+      <li>3.4. Cache (optional)</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/cache.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -148,46 +157,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="machado-s-documentation">
-<h1>machado’s documentation<a class="headerlink" href="#machado-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p><cite>machado</cite> is a <a class="reference external" href="https://www.djangoproject.com/">Django</a> framework for <a class="reference external" href="http://gmod.org/wiki/Chado_-_Getting_Started">Chado</a>.</p>
+  <div class="section" id="cache-optional">
+<h1>3.4. Cache (optional)<a class="headerlink" href="#cache-optional" title="Permalink to this headline">¶</a></h1>
+<p>The machado.urls are pre-configured to enable caching.
+You just need to enable Django’s cache framework following the <a class="reference external" href="https://docs.djangoproject.com/en/2.1/topics/cache/">official instructions</a>.</p>
+<p><strong>Example</strong></p>
+<p>Include the following in the settings.py</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">CACHES</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="s1">&#39;default&#39;</span>: <span class="o">{</span>
+        <span class="s1">&#39;BACKEND&#39;</span>: <span class="s1">&#39;django.core.cache.backends.db.DatabaseCache&#39;</span>,
+        <span class="s1">&#39;LOCATION&#39;</span>: <span class="s1">&#39;machado_cache_table&#39;</span>,
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="nv">CACHE_TIMEOUT</span> <span class="o">=</span> <span class="m">60</span> * <span class="m">60</span>  <span class="c1"># 3600 seconds == 1 hour</span>
+</pre></div>
 </div>
-<div class="section" id="content">
-<h1>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dataload.html">2. Data loading</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="index_search.html">3.1. Index and search</a></li>
-<li class="toctree-l2"><a class="reference internal" href="webserver.html">3.2. Web server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jbrowse.html">3.3. JBrowse</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cache.html">3.4. Cache</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
-</ul>
+<p>Create the cache table</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py createcachetable
+</pre></div>
 </div>
-<ul class="simple">
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
-</ul>
 </div>
 
 
@@ -198,8 +186,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="installation.html" class="btn btn-neutral float-right" title="1. Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="diagrams.html" class="btn btn-neutral float-right" title="4. Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+      
+        <a href="jbrowse.html" class="btn btn-neutral" title="3.3. JBrowse (optional)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
