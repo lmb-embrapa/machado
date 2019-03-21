@@ -7,7 +7,7 @@
 """Views."""
 
 from machado.loaders.common import retrieve_organism
-from machado.models import Cvterm, Feature, Featureloc
+from machado.models import Feature, Featureloc
 from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
@@ -56,9 +56,8 @@ class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         except (ObjectDoesNotExist, AttributeError):
             return
 
-        queryset = Feature.objects.filter(organism=organism)
-        queryset = queryset.filter(is_obsolete=0)
-        queryset = queryset.order_by('uniquename')
+        queryset = Feature.objects.filter(
+            organism=organism, is_obsolete=0)
 
         equals = self.request.query_params.get('equals')
         startswith = self.request.query_params.get('startswith')
@@ -87,17 +86,9 @@ class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return
 
         try:
-            cvterm = Cvterm.objects.get(
-                cv__name='sequence',
-                name=self.request.query_params.get('soType'))
-        except (ObjectDoesNotExist, AttributeError):
-            return
-
-        try:
-            queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-            queryset = queryset.filter(organism=organism)
-            queryset = queryset.filter(is_obsolete=0)
-            queryset = queryset.order_by('uniquename')
+            queryset = Feature.objects.filter(
+                organism=organism, is_obsolete=0, type__cv__name='sequence',
+                type__name=self.request.query_params.get('soType'))
         except ObjectDoesNotExist:
             return
 
@@ -142,26 +133,18 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
             try:
                 soType = self.request.query_params.get('soType')
-                start = self.request.query_params.get('start') or 1
-                end = self.request.query_params.get('end') or refseq.seqlen
+                start = self.request.query_params.get('start', 1)
+                end = self.request.query_params.get('end', refseq.seqlen)
 
-                transcriptsloc = Featureloc.objects.filter(srcfeature=refseq)
-                if end is not None:
-                    transcriptsloc = transcriptsloc.filter(fmin__lte=end)
-                if start is not None:
-                    transcriptsloc = transcriptsloc.filter(fmax__gte=start)
-                transcript_ids = transcriptsloc.values_list('feature_id',
-                                                            flat=True)
+                features_ids = Featureloc.objects.filter(
+                    srcfeature=refseq, fmin__lte=end,
+                    fmax__gte=start).values_list('feature_id', flat=True)
 
-                cvterm = Cvterm.objects.get(cv__name='sequence', name=soType)
+                return Feature.objects.filter(
+                    type__cv__name='sequence', type__name=soType,
+                    organism=organism, is_obsolete=0,
+                    feature_id__in=features_ids)
 
-                queryset = Feature.objects.filter(type_id=cvterm.cvterm_id)
-                queryset = queryset.filter(organism=organism)
-                queryset = queryset.filter(is_obsolete=0)
-                queryset = queryset.order_by('uniquename')
-                queryset = queryset.filter(feature_id__in=transcript_ids)
-
-                return queryset
             except ObjectDoesNotExist:
                 return None
 
