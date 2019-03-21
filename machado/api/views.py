@@ -145,7 +145,7 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                     organism=organism, is_obsolete=0,
                     feature_id__in=features_ids)
 
-            except ObjectDoesNotExist:
+            except (ObjectDoesNotExist, ValueError):
                 return None
 
     def list(self, request, *args, **kwargs):
