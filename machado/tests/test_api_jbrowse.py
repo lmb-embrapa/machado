@@ -102,7 +102,8 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
                     type=test_cvterm_assembly, uniquename='contig1',
                     is_analysis=False, is_obsolete=False,
                     timeaccessioned=datetime.now(timezone.utc),
-                    timelastmodified=datetime.now(timezone.utc))
+                    timelastmodified=datetime.now(timezone.utc),
+                    residues='ACGTGTGACTAGCTAGATCGTAGTGCTAGATCGATCGTGTGCAT')
 
         # creates features gene and exon
         class TabixFeature(object):

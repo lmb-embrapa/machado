@@ -103,11 +103,11 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
-        refseq_feature_id = Feature.objects.get(
+        refseq_feature_obj = Feature.objects.get(
             uniquename=self.kwargs.get('refseq'))
         soType = self.request.query_params.get('soType')
         return {
-            'refseq': refseq_feature_id,
+            'refseq': refseq_feature_obj,
             'soType': soType,
         }
 
@@ -136,16 +136,19 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 start = self.request.query_params.get('start', 1)
                 end = self.request.query_params.get('end', refseq.seqlen)
 
-                features_ids = Featureloc.objects.filter(
-                    srcfeature=refseq, fmin__lte=end,
-                    fmax__gte=start).values_list('feature_id', flat=True)
+                features_locs = Featureloc.objects.filter(srcfeature=refseq)
+                if end is not None:
+                    features_locs = features_locs.filter(fmin__lte=end)
+                features_locs = features_locs.filter(fmax__gte=start)
+                features_ids = features_locs.values_list('feature_id',
+                                                         flat=True)
 
                 return Feature.objects.filter(
                     type__cv__name='sequence', type__name=soType,
                     organism=organism, is_obsolete=0,
                     feature_id__in=features_ids)
 
-            except (ObjectDoesNotExist, ValueError):
+            except ObjectDoesNotExist:
                 return None
 
     def list(self, request, *args, **kwargs):
