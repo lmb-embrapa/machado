@@ -25,6 +25,11 @@ class FeatureSearchForm(FacetedSearchForm):
         if q == '':
             return sqs
 
+        if 'selected_facets' in self.data:
+            for facet in self.data.getlist('selected_facets'):
+                facet_field, facet_query = facet.split(':')
+                sqs = sqs.filter(**{facet_field: Exact(facet_query)})
+
         result = sqs.filter(
             SQ(uniquename_exact=Exact(q)) |
             SQ(name_exact=Exact(q)) |
@@ -32,12 +37,5 @@ class FeatureSearchForm(FacetedSearchForm):
 
         for i in q.split():
             result |= sqs.filter(SQ(text__startswith=i))
-
-        if 'selected_facets' in self.data:
-            for facet in self.data.getlist('selected_facets'):
-                facet_field, facet_query = facet.split(':')
-                result = result.filter(**{facet_field: Exact(facet_query)})
-                # narrowing did not work
-                # sqs = sqs.narrow(facet)
 
         return result
