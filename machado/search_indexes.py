@@ -68,7 +68,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_text(self, obj):
         """Prepare text."""
         keywords = list()
-        keywords.append(obj.organism.genus + ' ' + obj.organism.species)
 
         # Featureprop: display, description, note
         display = Featureprop.objects.filter(
@@ -104,8 +103,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         for feature_relationship in feature_relationships:
             keywords.append(feature_relationship.value)
 
-        self.temp = '\n'.join(keywords)
-        return '\n'.join(keywords)
+        self.temp = ' '.join(keywords)
+        return ' '.join(keywords)
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
