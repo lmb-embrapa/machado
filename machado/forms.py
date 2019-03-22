@@ -17,18 +17,18 @@ class FeatureSearchForm(FacetedSearchForm):
         """Search."""
         # sqs = super(FeatureSearchForm, self).search()
         q = self.cleaned_data.get('q')
-        sqs = self.searchqueryset.load_all()
+        sqs = self.searchqueryset
 
         if not self.is_valid():
             return self.no_query_found()
-
-        if q == '':
-            return sqs
 
         if 'selected_facets' in self.data:
             for facet in self.data.getlist('selected_facets'):
                 facet_field, facet_query = facet.split(':')
                 sqs = sqs.filter(**{facet_field: Exact(facet_query)})
+
+        if q == '':
+            return sqs.load_all()
 
         result = sqs.filter(
             SQ(uniquename_exact=Exact(q)) |
