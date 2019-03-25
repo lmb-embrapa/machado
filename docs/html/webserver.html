@@ -86,6 +86,7 @@
 <li class="toctree-l2"><a class="reference internal" href="index_search.html">3.1. Index and search</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">3.2. Web server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jbrowse.html">3.3. JBrowse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html">3.4. Cache</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
@@ -193,6 +194,7 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)</
 &lt;Files <span class="s2">&quot;wsgi.py&quot;</span>&gt;
     Require all granted
 &lt;/Files&gt;
+&lt;/Directory&gt;
 
 Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
 
@@ -200,7 +202,6 @@ Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
     Require all granted
 &lt;/Directory&gt;
 
-&lt;/Directory&gt;
 WSGIDaemonProcess WEBPROJECT
 WSGIPythonHome /var/www/YOURPROJECT
 WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT

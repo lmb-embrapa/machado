@@ -50,6 +50,7 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
     <Files "wsgi.py">
         Require all granted
     </Files>
+    </Directory>
 
     Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
 
@@ -57,7 +58,6 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
         Require all granted
     </Directory>
 
-    </Directory>
     WSGIDaemonProcess WEBPROJECT
     WSGIPythonHome /var/www/YOURPROJECT
     WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT
