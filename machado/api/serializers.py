@@ -6,7 +6,7 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Cvterm, Feature, Featureloc
+from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship
 from rest_framework import serializers
 
@@ -78,12 +78,10 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def _get_subfeature(self, feature_id):
         """Get subfeature."""
-        feat_obj = Feature.objects.get(feature_id=feature_id)
-        # feature_loc = feat_obj.Featureloc_feature_Feature.first()
         feature_loc = Featureloc.objects.get(
             feature_id=feature_id, srcfeature_id=self.context['refseq'])
         return {
-            'type': Cvterm.objects.get(cvterm_id=feat_obj.type_id).name,
+            'type': Feature.objects.get(feature_id=feature_id).type.name,
             'start': feature_loc.fmin,
             'end': feature_loc.fmax,
             'strand': feature_loc.strand,
