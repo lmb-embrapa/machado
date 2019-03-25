@@ -7,6 +7,7 @@
 """Load coexpression data from LSTRAP output file pcc.mcl.txt."""
 
 from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.common import get_num_lines
 from machado.loaders.coexpression import CoexpressionLoader
 from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
@@ -75,7 +76,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # each line is an orthologous group
-        for line in tqdm(pairs, total=len(pairs)):
+        for line in tqdm(pairs, total=get_num_lines(file)):
             # a pair of features plus the PCC value
             nfields = 3
             fields = re.split(r'\s+', line.rstrip())

@@ -7,6 +7,7 @@
 """Load clusters of coexpression data from LSTRAP outfile mcl.clusters.txt."""
 
 from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.common import get_num_lines
 from machado.loaders.coexpression import CoexpressionLoader
 from machado.loaders.exceptions import ImportingError
 from django.db.utils import IntegrityError
@@ -76,7 +77,7 @@ The features need to be loaded previously or won't be registered."""
         # arbitrary naming...
         value = "MCL_CLUSTER"
         # each line is an orthologous group
-        for line in tqdm(clusters, total=len(clusters)):
+        for line in tqdm(clusters, total=get_num_lines(file)):
             # a pair of features plus the PCC value
             fields = re.split(r'\s+', line.rstrip())
             nfields = len(fields)
