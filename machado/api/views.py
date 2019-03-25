@@ -57,7 +57,7 @@ class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return
 
         queryset = Feature.objects.filter(
-            organism=organism, is_obsolete=0)
+            organism=organism, is_obsolete=0).only('feature_id')
 
         equals = self.request.query_params.get('equals')
         startswith = self.request.query_params.get('startswith')
@@ -103,8 +103,8 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
-        refseq_feature_obj = Feature.objects.get(
-            uniquename=self.kwargs.get('refseq'))
+        refseq_feature_obj = Feature.objects.filter(
+            uniquename=self.kwargs.get('refseq')).only('feature_id').first()
         soType = self.request.query_params.get('soType')
         return {
             'refseq': refseq_feature_obj,
@@ -114,8 +114,9 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         """Get queryset."""
         try:
-            refseq = Feature.objects.get(
-                uniquename=self.kwargs.get('refseq'))
+            refseq = Feature.objects.filter(
+                uniquename=self.kwargs.get('refseq')).only(
+                    'feature_id').first()
         except ObjectDoesNotExist:
             return
 
@@ -146,7 +147,7 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 return Feature.objects.filter(
                     type__cv__name='sequence', type__name=soType,
                     organism=organism, is_obsolete=0,
-                    feature_id__in=features_ids)
+                    feature_id__in=features_ids).only('feature_id')
 
             except ObjectDoesNotExist:
                 return None
