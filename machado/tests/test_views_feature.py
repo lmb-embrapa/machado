@@ -224,8 +224,6 @@ class FeatureTest(TestCase):
         self.assertEqual(1000, result[0]['end'])
         self.assertEqual(1, result[0]['strand'])
         self.assertEqual('chr1', result[0]['ref'])
-        self.assertIn('?data=data/Mus musculus&loc=chr1:-1199..2200',
-                      result[0]['jbrowse_url'])
 
     def test_retrieve_feature_dbxref(self):
         """Tests - retrieve_feature_dbxref."""
