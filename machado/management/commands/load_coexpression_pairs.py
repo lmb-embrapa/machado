@@ -6,13 +6,14 @@
 
 """Load coexpression data from LSTRAP output file pcc.mcl.txt."""
 
+from machado.models import Cvterm
 from machado.loaders.common import FileValidator, FieldsValidator
 from machado.loaders.common import get_num_lines
-from machado.loaders.coexpression import CoexpressionLoader
+from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
-from django.db.utils import IntegrityError
 from machado.loaders.common import retrieve_organism
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import re
@@ -55,8 +56,9 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                verbosity: int = 0,
                **options):
         """Execute the main function."""
+        filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
 
         try:
             organism = retrieve_organism(organism)
@@ -72,7 +74,15 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         except ImportingError as e:
             raise CommandError(e)
 
-        filename = os.path.basename(file)
+        cvterm_corel = Cvterm.objects.get(
+                name='correlated with', cv__name='relationship')
+        # feature source is not needed here
+        source = "null"
+        featureloader = FeatureLoader(
+                source=source,
+                filename=filename,
+                organism=organism)
+
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         # each line is an orthologous group
@@ -86,12 +96,11 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                 raise CommandError(e)
             # get corrected PCC value (last item from fields list)
             value = float(fields.pop()) + 0.7
-            pair = CoexpressionLoader(
-                    value=str(value),
-                    filename=filename,
-                    organism=organism)
             tasks.append(pool.submit(
-                       pair.store_coexpression_pairs, fields))
+                              featureloader.store_feature_relationships_group,
+                              fields,
+                              cvterm_corel,
+                              value))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -99,4 +108,5 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))

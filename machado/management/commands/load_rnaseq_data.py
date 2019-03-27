@@ -96,8 +96,9 @@ class Command(BaseCommand):
                verbosity: int = 0,
                **options):
         """Execute the main function."""
+        filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -109,7 +110,6 @@ class Command(BaseCommand):
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
-        filename = os.path.basename(file)
         header = 1
         # analysis_list = defaultdict(list)
         analysis_list = list()
@@ -187,5 +187,6 @@ class Command(BaseCommand):
             except ImportingError as e:
                 raise CommandError(e)
         pool.shutdown()
-        if verbosity >0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))

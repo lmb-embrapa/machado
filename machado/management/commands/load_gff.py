@@ -55,7 +55,6 @@ class Command(BaseCommand):
         """Execute the main function."""
         # retrieve only the file name
         filename = os.path.basename(file)
-
         if verbosity > 0:
             self.stdout.write('Processing file: {}'.format(filename))
 
@@ -106,4 +105,5 @@ class Command(BaseCommand):
                     feature_file.ignored_attrs)))
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))

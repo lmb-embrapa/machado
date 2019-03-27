@@ -45,7 +45,7 @@ class FeatureLoader(object):
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
         self.relationships: List[Dict[str, str]] = list()
-
+        self.cache = {}
         if isinstance(organism, Organism):
             self.organism = organism
         else:
@@ -430,30 +430,51 @@ class FeatureLoader(object):
                                value: str = None,
                                ontology: Union[str, Cv] = 'relationship',
                                ) -> None:
-        """Store Feature Relationship."""
+        """Store Feature Relationship Groups."""
         # check if retrieving cvterm is needed
         if isinstance(term, Cvterm):
             cvterm = term
         else:
             cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
         for member in group:
+            try:
+                member_feature = Feature.objects.get(
+                    type__cv__name='sequence',
+                    type__name='polypeptide',
+                    dbxref__accession=member,
+                    dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
+                subject_id = member_feature.feature_id
+                self.cache[member] = subject_id
+            except ObjectDoesNotExist:
+                break
+            except IntegrityError as e:
+                raise ImportingError(e)
             tempgroup = group.copy()
             tempgroup.remove(member)
             for othermember in tempgroup:
                 try:
-                    feature_relationship = FeatureRelationship.objects.create(
-                                            subject_id=member.feature_id,
-                                            object_id=othermember.feature_id,
-                                            type_id=cvterm.cvterm_id,
-                                            value=value,
-                                            rank=0)
+                    othermember_feature = Feature.objects.get(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=othermember,
+                        dbxref__db__name__in=['GFF_SOURCE',
+                                              'FASTA_SOURCE'])
+                    object_id = othermember_feature.feature_id
+                except ObjectDoesNotExist:
+                    continue
                 except IntegrityError as e:
                     raise ImportingError(e)
                 try:
+                    frelationship = FeatureRelationship.objects.create(
+                                            subject_id=subject_id,
+                                            object_id=object_id,
+                                            type=cvterm,
+                                            value=value,
+                                            rank=0)
                     FeatureRelationshipprop.objects.create(
-                                feature_relationship=feature_relationship,
-                                type_id=self.cvterm_contained_in.cvterm_id,
-                                value=self.filename,
-                                rank=0)
+                            feature_relationship=frelationship,
+                            type=self.cvterm_contained_in,
+                            value=self.filename,
+                            rank=0)
                 except IntegrityError as e:
                     raise ImportingError(e)

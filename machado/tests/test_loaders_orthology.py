@@ -9,7 +9,7 @@
 from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref, Feature
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.loaders.orthology import OrthologyLoader
+from machado.loaders.feature import FeatureLoader
 from django.core.management import call_command
 from django.test import TestCase
 from datetime import datetime, timezone
@@ -20,48 +20,52 @@ class OrthologyTest(TestCase):
 
     def test_orthology(self):
         """Tests - __init__."""
-        filename = 'groups.txt'
-        # global_db = Db.objects.create(name='_global')
+        # register multispecies organism
         so_db = Db.objects.create(name='SO')
+        so_cv = Cv.objects.create(name='sequence')
+        # creating test RO term
         ro_db = Db.objects.create(name='RO')
-        Db.objects.create(name='FASTA_source')
-        so_dbxref = Dbxref.objects.create(accession='00001', db=so_db)
-        so2_dbxref = Dbxref.objects.create(accession='00002', db=so_db)
-        # so3_dbxref = Dbxref.objects.create(accession='00003', db=so_db)
-        sequence_cv = Cv.objects.create(
-                name='sequence',
-                definition="so-xp/releases/2015-11-24/so-xp.owl")
-        Cvterm.objects.create(
-                name='assembly',
-                cv=sequence_cv, dbxref=so_dbxref, is_obsolete=0,
-                is_relationshiptype=0)
-        Cvterm.objects.create(
-                name='protein_match',
-                cv=sequence_cv, dbxref=so2_dbxref, is_obsolete=0,
-                is_relationshiptype=0)
-        # Cvterm.objects.create(
-        #         name='mRNA',
-        #         cv=sequence_cv, dbxref=so2_dbxref, is_obsolete=0,
-        #         is_relationshiptype=0)
-        ro_dbxref = Dbxref.objects.create(accession='00003', db=ro_db)
         ro_cv = Cv.objects.create(name='relationship')
+
+        # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
+        so_dbxref = Dbxref.objects.create(accession='357', db=so_db)
+        so_dbxref2 = Dbxref.objects.create(accession='358', db=so_db)
+        ro_dbxref = Dbxref.objects.create(accession='658', db=ro_db)
+        # creating test SO term
         cvterm_contained_in = Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
             is_obsolete=0, is_relationshiptype=1)
+
         ortho_dbxref = Dbxref.objects.create(
                 accession='in orthology relationship with',
                 db=ro_db)
-        poly_dbxref = Dbxref.objects.create(
-                accession='0000104',
-                db=so_db)
-        Cvterm.objects.create(
+        term = Cvterm.objects.create(
                 name='in orthology relationship with', cv=ro_cv,
                 dbxref=ortho_dbxref, is_obsolete=0,
                 is_relationshiptype=1)
         poly_cvterm = Cvterm.objects.create(
-                name='polypeptide', cv=sequence_cv,
-                dbxref=poly_dbxref,
-                is_obsolete=0, is_relationshiptype=0)
+            name='polypeptide',
+            cv=so_cv,
+            dbxref=so_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
+        Cvterm.objects.create(
+            name='protein_match',
+            cv=so_cv,
+            dbxref=so_dbxref2,
+            is_obsolete=0,
+            is_relationshiptype=0)
+        db_null = Db.objects.create(name='null')
+        null_dbxref = Dbxref.objects.create(
+            db=db_null, accession='null')
+        null_cv = Cv.objects.create(name='null')
+        Cvterm.objects.create(
+            cv=null_cv,
+            name='null',
+            definition='',
+            dbxref=null_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
         # need to insert organisms first
         organism1 = Organism.objects.create(species="coerulea",
                                             genus="Aquilegia",
@@ -98,11 +102,16 @@ class OrthologyTest(TestCase):
 
         # also need to insert Features from fasta file first.
         # inserting: Aqcoe0131s0001.1.v3.1
+        db = Db.objects.create(name='FASTA_SOURCE')
+        acc1 = "Aqcoe0131s0001.1.v3.1"
+        dbxref1 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc1)
         feature1 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref1,
                               organism=organism1,
                               uniquename="Aqcoe0131s0001.1.v3.1",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -110,24 +119,42 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                                  uniquename='Aqcoe0131s0001.1.v3.1').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc1,
+                        dbxref__db__name='FASTA_SOURCE',
+                        ).exists())
         # inserting: Bradi0180s00100.1.v3.1; Bradi2g20400.1.v3.1
+        acc2 = "Bradi0180s00100.1.v3.1"
+        dbxref2 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc2)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref2,
                               organism=organism2,
                               uniquename="Bradi0180s00100.1.v3.1",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc2,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc3 = "Bradi2g20400.1.v3.1"
+        dbxref3 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc3)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref3,
                               organism=organism2,
                               uniquename="Bradi2g20400.1.v3.1",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -135,38 +162,64 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                                 uniquename='Bradi0180s00100.1.v3.1').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='Bradi2g20400.1.v3.1').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc3,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: Ciclev10013963m.v1.0; Ciclev10013962m.v1.0;
         # Ciclev10013970m.v1.0
+        acc4 = "Ciclev10013963m.v1.0"
+        dbxref4 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc4)
         feature4 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref4,
                               organism=organism3,
                               uniquename="Ciclev10013963m.v1.0",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc4,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc5 = "Ciclev10013962m.v1.0"
+        dbxref5 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc5)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref5,
                               organism=organism3,
                               uniquename="Ciclev10013962m.v1.0",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc5,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc6 = "Ciclev10013970m.v1.0"
+        dbxref6 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc6)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref6,
                               organism=organism3,
                               uniquename="Ciclev10013970m.v1.0",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -174,51 +227,85 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                                 uniquename='Ciclev10013963m.v1.0').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='Ciclev10013962m.v1.0').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='Ciclev10013970m.v1.0').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc6,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: DCAR_032182.v1.0.388; DCAR_031986.v1.0.388;
         # DCAR_032223.v1.0.388; DCAR_000323.v1.0.388
+        acc7 = "DCAR_032182.v1.0.388"
+        dbxref7 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc7)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref7,
                               organism=organism4,
                               uniquename="DCAR_032182.v1.0.388",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc7,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc8 = "DCAR_031986.v1.0.388"
+        dbxref8 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc8)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref8,
                               organism=organism4,
                               uniquename="DCAR_031986.v1.0.388",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc8,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc9 = "DCAR_032223.v1.0.388"
+        dbxref9 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc9)
         feature9 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref9,
                               organism=organism4,
                               uniquename="DCAR_032223.v1.0.388",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc9,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc10 = "DCAR_000323.v1.0.388"
+        dbxref10 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc10)
         feature10 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref10,
                               organism=organism4,
                               uniquename="DCAR_000323.v1.0.388",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -226,19 +313,21 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                                 uniquename='DCAR_032182.v1.0.388').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='DCAR_031986.v1.0.388').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='DCAR_032223.v1.0.388').exists())
-        self.assertTrue(Feature.objects.filter(
-                                 uniquename='DCAR_000323.v1.0.388').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc10,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: Eucgr.L02820.1.v2.0
+        acc11 = "Eucgr.L02820.1.v2.0"
+        dbxref11 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc11)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref11,
                               organism=organism5,
                               uniquename="Eucgr.L02820.1.v2.0",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -246,13 +335,21 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                                 uniquename='Eucgr.L02820.1.v2.0').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc11,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: mrna13067.1-v1.0-hybrid.v1.1
+        acc12 = "mrna13067.1-v1.0-hybrid.v1.1"
+        dbxref12 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc12)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref12,
                               organism=organism6,
                               uniquename="mrna13067.1-v1.0-hybrid.v1.1",
-                              type_id=poly_cvterm.cvterm_id,
+                              type=poly_cvterm,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -260,11 +357,19 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                           uniquename='mrna13067.1-v1.0-hybrid.v1.1').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc12,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: Glyma.10G030500.1.Wm82.a2.v1; Glyma.10G053100.1.Wm82.a2.v1
         # Glyma.10G008400.1.Wm82.a2.v1
+        acc13 = "Glyma.10G030500.1.Wm82.a2.v1"
+        dbxref13 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc13)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref13,
                               organism=organism7,
                               uniquename="Glyma.10G030500.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -274,8 +379,18 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc13,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc14 = "Glyma.10G053100.1.Wm82.a2.v1"
+        dbxref14 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc14)
         feature14 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref14,
                               organism=organism7,
                               uniquename="Glyma.10G053100.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -285,8 +400,18 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc14,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc15 = "Glyma.10G008400.1.Wm82.a2.v1"
+        dbxref15 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc15)
         Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref15,
                               organism=organism7,
                               uniquename="Glyma.10G008400.1.Wm82.a2.v1",
                               type_id=poly_cvterm.cvterm_id,
@@ -297,14 +422,18 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                           uniquename='Glyma.10G030500.1.Wm82.a2.v1').exists())
-        self.assertTrue(Feature.objects.filter(
-                           uniquename='Glyma.10G053100.1.Wm82.a2.v1').exists())
-        self.assertTrue(Feature.objects.filter(
-                           uniquename='Glyma.10G008400.1.Wm82.a2.v1').exists())
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc15,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
         # inserting: Kaladp0598s0001.1.v1.1
+        acc16 = "Kaladp0598s0001.1.v1.1"
+        dbxref16 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc16)
         feature16 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref16,
                               organism=organism8,
                               uniquename="Kaladp0598s0001.1.v1.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -314,8 +443,18 @@ class OrthologyTest(TestCase):
                               now(timezone.utc),
                               timelastmodified=datetime.
                               now(timezone.utc))
+        self.assertTrue(Feature.objects.filter(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc16,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        acc17 = "Kaladp0598s0002.1.v1.1"
+        dbxref17 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=acc17)
         feature17 = Feature.objects.create(
-                              dbxref=poly_dbxref,
+                              dbxref=dbxref17,
                               organism=organism8,
                               uniquename="Kaladp0598s0002.1.v1.1",
                               type_id=poly_cvterm.cvterm_id,
@@ -326,46 +465,91 @@ class OrthologyTest(TestCase):
                               timelastmodified=datetime.
                               now(timezone.utc))
         self.assertTrue(Feature.objects.filter(
-                           uniquename='Kaladp0598s0001.1.v1.1').exists())
-        self.assertTrue(Feature.objects.filter(
-                           uniquename='Kaladp0598s0002.1.v1.1').exists())
-        # store orthologous groups:
-        group1 = OrthologyLoader('machado0001', filename)
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=acc17,
+                        dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
+                        ).exists())
+        # ########################
+        # store feature groups:
+        filename = 'groups.txt'
+        organism, created = Organism.objects.get_or_create(
+                    abbreviation='multispecies',
+                    genus='multispecies',
+                    species='multispecies',
+                    common_name='multispecies')
+        source = "null"
+        test_orthology_loader = FeatureLoader(
+                source=source,
+                filename=filename,
+                organism=organism)
+        # ####################
+        # test store groups
+        group1_name = 'machado0001'
         members1 = ['Aqcoe0131s0001.1.v3.1', 'Bradi0180s00100.1.v3.1',
                     'Bradi2g20400.1.v3.1', 'Ciclev10013963m.v1.0',
                     'DCAR_032223.v1.0.388', 'UnknownProtein.v1.1']
-        group1.store_orthologous_group(members1)
-        group2 = OrthologyLoader('machado0002', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members1,
+            term=term,
+            value=group1_name
+        )
+        group2_name = 'machado0002'
         members2 = ['Eucgr.L02820.1.v2.0',
                     'mrna13067.1-v1.0-hybrid.v1.1', 'Ciclev10013970m.v1.0',
                     'DCAR_031986.v1.0.388']
-        group2.store_orthologous_group(members2)
-        group3 = OrthologyLoader('machado0003', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members2,
+            term=term,
+            value=group2_name
+        )
+        group3_name = 'machado0003'
         members3 = ['Glyma.10G030500.1.Wm82.a2.v1',
                     'Glyma.10G053100.1.Wm82.a2.v1', 'DCAR_032182.v1.0.388']
-        group3.store_orthologous_group(members3)
-        group4 = OrthologyLoader('machado0004', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members3,
+            term=term,
+            value=group3_name
+        )
+        group4_name = 'machado0004'
         members4 = ['Glyma.10G008400.1.Wm82.a2.v1',
                     'Ciclev10013963m.v1.0', 'UnknownProtein.v1.2']
-        group4.store_orthologous_group(members4)
-        group5 = OrthologyLoader('machado0005', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members4,
+            term=term,
+            value=group4_name
+        )
+        group5_name = 'machado0005'
         members5 = ['DCAR_000323.v1.0.388', 'Kaladp0598s0002.1.v1.1']
-        group5.store_orthologous_group(members5)
-        group6 = OrthologyLoader('machado0006', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members5,
+            term=term,
+            value=group5_name,
+        )
+        group6_name = 'machado0006'
         members6 = ['Kaladp0598s0001.1.v1.1', 'UnknownProtein.v1.3']
-        group6.store_orthologous_group(members6)
-        group7 = OrthologyLoader('machado0007', filename)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members6,
+            term=term,
+            value=group6_name
+        )
+        group7_name = 'machado0007'
         members7 = ['UnknownProtein.v1.4']
-        group7.store_orthologous_group(members7)
+        test_orthology_loader.store_feature_relationships_group(
+            group=members7,
+            term=term,
+            value=group7_name
+        )
 
         # ###check if relationships exist###
         # in a group (machado0001 and machado0005)
         self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id).exists())
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id,
+                           value=group1_name).exists())
         frelationship9 = FeatureRelationship.objects.get(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id)
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=frelationship9,
                            type_id=cvterm_contained_in.cvterm_id,
@@ -373,20 +557,22 @@ class OrthologyTest(TestCase):
                            rank=0).exists())
         # same but in reverse
         self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id).exists())
+                           subject_id=feature9.feature_id,
+                           object_id=feature1.feature_id,
+                           value=group1_name).exists())
         frelationship1 = FeatureRelationship.objects.get(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id)
+                           subject_id=feature9.feature_id,
+                           object_id=feature1.feature_id)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=frelationship1,
                            type_id=cvterm_contained_in.cvterm_id,
                            value=filename,
                            rank=0).exists())
-        # another example:
+        # another example group5:
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=feature10.feature_id,
-                           object_id=feature17.feature_id).exists())
+                           object_id=feature17.feature_id,
+                           value=group5_name).exists())
         frelationship10 = FeatureRelationship.objects.get(
                            subject_id=feature10.feature_id,
                            object_id=feature17.feature_id)

@@ -8,7 +8,7 @@
 
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Feature
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.loaders.coexpression import CoexpressionLoader
+from machado.loaders.feature import FeatureLoader
 from datetime import datetime
 from django.test import TestCase
 from django.core.management import call_command
@@ -45,10 +45,9 @@ class CoexpressionTest(TestCase):
         test_dbxref2 = Dbxref.objects.create(accession='789', db=test_db2)
         test_dbxref3 = Dbxref.objects.create(accession='135', db=test_db)
         test_dbxref4 = Dbxref.objects.create(accession='246', db=test_db2)
-        test_dbxref5 = Dbxref.objects.create(accession='579', db=test_db2)
         test_dbxref6 = Dbxref.objects.create(accession='357', db=test_db)
         test_dbxref7 = Dbxref.objects.create(accession='468', db=test_db)
-        test_term = Cvterm.objects.create(
+        Cvterm.objects.create(
             name='mRNA', cv=test_cv, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=0)
         # Cvterm.objects.create(
@@ -58,16 +57,10 @@ class CoexpressionTest(TestCase):
         cvterm_contained_in = Cvterm.objects.create(
             name='contained in', cv=test_cv2, dbxref=test_dbxref2,
             is_obsolete=0, is_relationshiptype=1)
-        Cvterm.objects.create(
+        term = Cvterm.objects.create(
             name='correlated with', cv=test_cv2, dbxref=test_dbxref4,
             is_obsolete=0, is_relationshiptype=1)
-        Cvterm.objects.create(
-            name='in branching relationship with',
-            cv=test_cv2,
-            dbxref=test_dbxref5,
-            is_obsolete=0,
-            is_relationshiptype=1)
-        Cvterm.objects.create(
+        test_term = Cvterm.objects.create(
             name='polypeptide',
             cv=test_cv,
             dbxref=test_dbxref6,
@@ -79,27 +72,40 @@ class CoexpressionTest(TestCase):
             dbxref=test_dbxref7,
             is_obsolete=0,
             is_relationshiptype=0)
-        test_featurename1 = "AT2G44195.1.TAIR10"
-        test_featurename2 = "AT1G30080.1.TAIR10"
-        test_featurename3 = "AT5G24750.1.TAIR10"
+        db = Db.objects.create(name='FASTA_SOURCE')
         # creating test features
+        test_featurename1 = "AT2G44195.1.TAIR10"
+        dbxref1 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename1)
         test_feature1 = Feature.objects.create(
             organism=test_organism,
+            dbxref=dbxref1,
             uniquename=test_featurename1,
             is_analysis=False,
             type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename2 = "AT1G30080.1.TAIR10"
+        dbxref2 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename2)
         test_feature2 = Feature.objects.create(
             organism=test_organism,
+            dbxref=dbxref2,
             uniquename=test_featurename2,
             is_analysis=False,
             type_id=test_term.cvterm_id,
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename3 = "AT5G24750.1.TAIR10"
+        dbxref3 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename3)
         test_feature3 = Feature.objects.create(
+            dbxref=dbxref3,
             organism=test_organism,
             uniquename=test_featurename3,
             is_analysis=False,
@@ -115,16 +121,21 @@ class CoexpressionTest(TestCase):
         test_pcc_value2 = str(test_value2 + 0.7)
         # dummy coexpression variables
         test_filename = 'pcc.mcl.dummy.txt'
-        test_coexpression_loader1 = CoexpressionLoader(
+        source = "null"
+        test_coexpression_loader = FeatureLoader(
+                source=source,
                 filename=test_filename,
-                organism=test_organism,
-                value=test_pcc_value1)
-        test_coexpression_loader2 = CoexpressionLoader(
-                filename=test_filename,
-                organism=test_organism,
-                value=test_pcc_value2)
-        test_coexpression_loader1.store_coexpression_pairs(test_pair1)
-        test_coexpression_loader2.store_coexpression_pairs(test_pair2)
+                organism=test_organism)
+        test_coexpression_loader.store_feature_relationships_group(
+            group=test_pair1,
+            term=term,
+            value=test_pcc_value1,
+        )
+        test_coexpression_loader.store_feature_relationships_group(
+            group=test_pair2,
+            term=term,
+            value=test_pcc_value2,
+        )
         # start checking
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
@@ -173,9 +184,10 @@ class CoexpressionTest(TestCase):
         """Load 'mcl.clusters.txt' output result file from LSTrAP.
         The 'mcl.clusters.txt' is a tab separated, headless file and have the
         format as follows (each line is a cluster):
-        AT3G18715.1.TAIR10	AT3G08790.1.TAIR10	AT5G42230.1.TAIR10
-        AT1G27040.1.TAIR10	AT1G71692.1.TAIR10
-        AT5G24750.1.TAIR10
+        ath_coexpr_mcl_1:   AT3G18715.1.TAIR10 AT3G08790.1.TAIR10
+        AT5G42230.1.TAIR10
+        ath_coexpr_mcl_1:   AT1G27040.1.TAIR10 AT1G71692.1.TAIR10
+        ath_coexpr_mcl_1:   AT5G24750.1.TAIR10
         ...
         and so on.
         The features need to be loaded previously or won't be registered."""
@@ -199,7 +211,7 @@ class CoexpressionTest(TestCase):
         test_dbxref5 = Dbxref.objects.create(accession='579', db=test_db2)
         test_dbxref6 = Dbxref.objects.create(accession='357', db=test_db)
         test_dbxref7 = Dbxref.objects.create(accession='468', db=test_db)
-        test_term = Cvterm.objects.create(
+        Cvterm.objects.create(
             name='mRNA', cv=test_cv, dbxref=test_dbxref3,
             is_obsolete=0, is_relationshiptype=0)
         # Cvterm.objects.create(
@@ -212,13 +224,13 @@ class CoexpressionTest(TestCase):
         Cvterm.objects.create(
             name='correlated with', cv=test_cv2, dbxref=test_dbxref4,
             is_obsolete=0, is_relationshiptype=1)
-        Cvterm.objects.create(
+        term = Cvterm.objects.create(
             name='in branching relationship with',
             cv=test_cv2,
             dbxref=test_dbxref5,
             is_obsolete=0,
             is_relationshiptype=1)
-        Cvterm.objects.create(
+        test_term = Cvterm.objects.create(
             name='polypeptide',
             cv=test_cv,
             dbxref=test_dbxref6,
@@ -230,21 +242,14 @@ class CoexpressionTest(TestCase):
             dbxref=test_dbxref7,
             is_obsolete=0,
             is_relationshiptype=0)
+        db = Db.objects.create(name='FASTA_SOURCE')
+
         test_featurename1 = "AT3G18715.1.TAIR10"
-        test_featurename2 = "AT3G08790.1.TAIR10"
-        test_featurename3 = "AT5G42230.1.TAIR10"
-        test_cluster1 = [
-                test_featurename1,
-                test_featurename2,
-                test_featurename3]
-        test_featurename4 = "AT1G27040.1.TAIR10"
-        test_featurename5 = "AT1G71692.1.TAIR10"
-        test_cluster2 = [
-                test_featurename4,
-                test_featurename5]
-        test_featurename6 = "AT5G24750.1.TAIR10"
-        test_cluster3 = [test_featurename6]
+        dbxref1 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename1)
         test_feature1 = Feature.objects.create(
+            dbxref=dbxref1,
             organism=test_organism,
             uniquename=test_featurename1,
             is_analysis=False,
@@ -252,7 +257,12 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename2 = "AT3G08790.1.TAIR10"
+        dbxref2 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename2)
         test_feature2 = Feature.objects.create(
+            dbxref=dbxref2,
             organism=test_organism,
             uniquename=test_featurename2,
             is_analysis=False,
@@ -260,7 +270,12 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename3 = "AT5G42230.1.TAIR10"
+        dbxref3 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename3)
         test_feature3 = Feature.objects.create(
+            dbxref=dbxref3,
             organism=test_organism,
             uniquename=test_featurename3,
             is_analysis=False,
@@ -268,7 +283,12 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename4 = "AT1G27040.1.TAIR10"
+        dbxref4 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename4)
         test_feature4 = Feature.objects.create(
+            dbxref=dbxref4,
             organism=test_organism,
             uniquename=test_featurename4,
             is_analysis=False,
@@ -276,7 +296,12 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename5 = "AT1G71692.1.TAIR10"
+        dbxref5 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename5)
         test_feature5 = Feature.objects.create(
+            dbxref=dbxref5,
             organism=test_organism,
             uniquename=test_featurename5,
             is_analysis=False,
@@ -284,7 +309,12 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        test_featurename6 = "AT5G24750.1.TAIR10"
+        dbxref6 = Dbxref.objects.create(
+                                        db=db,
+                                        accession=test_featurename6)
         test_feature6 = Feature.objects.create(
+            dbxref=dbxref6,
             organism=test_organism,
             uniquename=test_featurename6,
             is_analysis=False,
@@ -292,48 +322,64 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+        # clusters setup
+        test_cluster1_name = 'ath_coexpr_mcl_1'
+        test_cluster1 = [
+                test_featurename1,
+                test_featurename2,
+                test_featurename3]
+        test_cluster2_name = 'ath_coexpr_mcl_2'
+        test_cluster2 = [
+                test_featurename4,
+                test_featurename5]
+        test_cluster3_name = 'ath_coexpr_mcl_3'
+        test_cluster3 = [test_featurename6]
         test_filename = 'mcl.clusters.dummy.txt'
-        test_value = 'MCL_CLUSTER'
-        test_coexpression_loader1 = CoexpressionLoader(
+        source = "null"
+        test_coexpression_loader = FeatureLoader(
+                source=source,
                 filename=test_filename,
-                organism=test_organism,
-                value=test_value)
-        test_coexpression_loader2 = CoexpressionLoader(
-                filename=test_filename,
-                organism=test_organism,
-                value=test_value)
-        test_coexpression_loader3 = CoexpressionLoader(
-                filename=test_filename,
-                organism=test_organism,
-                value=test_value)
-        test_coexpression_loader1.store_coexpression_clusters(test_cluster1)
-        test_coexpression_loader2.store_coexpression_clusters(test_cluster2)
-        test_coexpression_loader3.store_coexpression_clusters(test_cluster3)
+                organism=test_organism)
+        test_coexpression_loader.store_feature_relationships_group(
+            group=test_cluster1,
+            term=term,
+            value=test_cluster1_name,
+        )
+        test_coexpression_loader.store_feature_relationships_group(
+            group=test_cluster2,
+            term=term,
+            value=test_cluster2_name,
+        )
+        test_coexpression_loader.store_feature_relationships_group(
+            group=test_cluster3,
+            term=term,
+            value=test_cluster3_name,
+        )
         # check entire cluster1 relationships (not in reverse)
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature2.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature2.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         fr1 = FeatureRelationship.objects.get(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature2.feature_id,
-                           value=test_value)
+                           value=test_cluster1_name)
         fr2 = FeatureRelationship.objects.get(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value)
+                           value=test_cluster1_name)
         fr3 = FeatureRelationship.objects.get(
                            subject_id=test_feature2.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value)
+                           value=test_cluster1_name)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr1,
                            type_id=cvterm_contained_in.cvterm_id,
@@ -350,19 +396,19 @@ class CoexpressionTest(TestCase):
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature5.feature_id,
                            object_id=test_feature4.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster2_name).exists())
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=test_feature4.feature_id,
                            object_id=test_feature5.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster2_name).exists())
         fr4 = FeatureRelationship.objects.get(
                            subject_id=test_feature4.feature_id,
                            object_id=test_feature5.feature_id,
-                           value=test_value)
+                           value=test_cluster2_name)
         fr5 = FeatureRelationship.objects.get(
                            subject_id=test_feature5.feature_id,
                            object_id=test_feature4.feature_id,
-                           value=test_value)
+                           value=test_cluster2_name)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr4,
                            type_id=cvterm_contained_in.cvterm_id,
@@ -374,30 +420,30 @@ class CoexpressionTest(TestCase):
         # cluster3 is not supposed to generate any relationships
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature6.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster3_name).exists())
         call_command("remove_relationship",
                      "--file=mcl.clusters.dummy.txt",
                      "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature2.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature1.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature2.feature_id,
                            object_id=test_feature3.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster1_name).exists())
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature4.feature_id,
                            object_id=test_feature5.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster2_name).exists())
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature5.feature_id,
                            object_id=test_feature4.feature_id,
-                           value=test_value).exists())
+                           value=test_cluster2_name).exists())
         self.assertFalse(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr1,
                            value=test_filename).exists())

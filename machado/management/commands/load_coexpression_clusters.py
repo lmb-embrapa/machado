@@ -8,13 +8,14 @@
 
 from machado.loaders.common import FileValidator, FieldsValidator
 from machado.loaders.common import get_num_lines
-from machado.loaders.coexpression import CoexpressionLoader
-from machado.loaders.exceptions import ImportingError
-from django.db.utils import IntegrityError
 from machado.loaders.common import retrieve_organism
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from machado.loaders.feature import FeatureLoader
+from machado.loaders.exceptions import ImportingError
+from machado.models import Cvterm
+from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import os
 
@@ -25,9 +26,9 @@ class Command(BaseCommand):
     help = """Load 'mcl.clusters.txt' output result file from LSTrAP.
 The 'mcl.clusters.txt' is a tab separated, headless file and have the format
 as follows (each line is a cluster):
-AT3G18715.1.TAIR10	AT3G08790.1.TAIR10	AT5G42230.1.TAIR10
-AT1G27040.1.TAIR10	AT1G71692.1.TAIR10
-AT5G24750.1.TAIR10
+ath_coexpr_mcl_1:    AT3G18715.1.TAIR10	AT3G08790.1.TAIR10  AT5G42230.1.TAIR10
+ath_coexpr_mcl_2:    AT1G27040.1.TAIR10	AT1G71692.1.TAIR10
+ath_coexpr_mcl_3:    AT5G24750.1.TAIR10
 ...
 and so on.
 The features need to be loaded previously or won't be registered."""
@@ -54,8 +55,9 @@ The features need to be loaded previously or won't be registered."""
                verbosity: int = 0,
                **options):
         """Execute the main function."""
+        filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
 
         try:
             organism = retrieve_organism(organism)
@@ -71,26 +73,40 @@ The features need to be loaded previously or won't be registered."""
         except ImportingError as e:
             raise CommandError(e)
 
-        filename = os.path.basename(file)
-        pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        # arbitrary naming...
-        value = "MCL_CLUSTER"
-        # each line is an orthologous group
-        for line in tqdm(clusters, total=get_num_lines(file)):
-            # a pair of features plus the PCC value
-            fields = re.split(r'\s+', line.rstrip())
-            nfields = len(fields)
+        cvterm_cluster = Cvterm.objects.get(
+            name='in branching relationship with', cv__name='relationship')
+        # feature source is not needed here
+        source = "null"
+        featureloader = FeatureLoader(
+                source=source,
+                filename=filename,
+                organism=organism)
 
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        # each line is an coexpression cluster group
+        for line in tqdm(clusters, total=get_num_lines(file)):
+            name = ''
+            fields = re.split(r'\s+', line.strip())
+            nfields = len(fields)
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
                 raise CommandError(e)
-            cluster = CoexpressionLoader(value=value,
-                                         filename=filename,
-                                         organism=organism)
+
+            if re.search(r'^(\w+)\:', fields[0]):
+                group_field = re.match(r'^(\w+)\:', fields[0])
+                name = group_field.group(1)
+            else:
+                raise CommandError("Cluster identification has problems.")
+            # remove cluster name before loading
+            fields.pop(0)
+            # get cvterm for correlation
             tasks.append(pool.submit(
-                       cluster.store_coexpression_clusters, fields))
+                              featureloader.store_feature_relationships_group,
+                              fields,
+                              cvterm_cluster,
+                              name))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -98,4 +114,5 @@ The features need to be loaded previously or won't be registered."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))
