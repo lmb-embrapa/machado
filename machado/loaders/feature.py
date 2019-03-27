@@ -45,7 +45,6 @@ class FeatureLoader(object):
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
         self.relationships: List[Dict[str, str]] = list()
-        self.cache = {}
         if isinstance(organism, Organism):
             self.organism = organism
         else:
