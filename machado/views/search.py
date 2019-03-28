@@ -28,5 +28,17 @@ class FeatureSearchView(FacetedSearchView):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args,
                                                                   **kwargs)
+        print('#####################')
+        print(self.get_queryset())
+
+        selected_facets = list()
+        selected_facets_fields = list()
+        for facet in self.get_form_kwargs()['selected_facets']:
+            facet_field, facet_query = facet.split(':')
+            selected_facets_fields.append(facet_field)
+            selected_facets.append(facet)
+
+        context['selected_facets'] = selected_facets
+        context['selected_facets_fields'] = selected_facets_fields
         context['total_count'] = self.queryset.count()
         return context

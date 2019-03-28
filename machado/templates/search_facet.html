@@ -9,35 +9,49 @@
 {% load machado_extras %}
 
 
+<form action="{% url 'feature_search' %}" method="get" >
+<input type="hidden" name="q" value="{{ query }}">
+
 <h3>Filters</h3>
 
 {% for facet, data in facets.fields.items %}
 
 <div class="card">
     <div class="card-header">
-        <b>
-        {% if facet == "so_term" %}
-        Sequence type
-        {% elif facet == "match_part" %}
-        Similarity
-        {% else %}
-        {{ facet|capfirst }}
-        {% endif %}
-       </b>
+    <div class="row">
+        <div class="col">
+            <b>
+            {% if facet == "so_term" %}
+            Sequence type
+            {% elif facet == "match_part" %}
+            Similarity
+            {% else %}
+            {{ facet|capfirst }}
+            {% endif %}
+            </b>
+            </div>
+        <div class="col text-right">
+            <button class="btn btn-outline-primary btn-sm" type="submit"><small>Apply</small></button>
+        </div>
+    </div>
     </div>
     <div class="card-body">
     {% for item in data %}
-        {% with facet|add:"_exact:"|add:item.0 as item_filter %}
-        <a href="?{% param_replace selected_facets=item_filter %}">
-            {% if facet == "organism" %}
-                <i>{{ item.0|capfirst }}</i>
-            {% else %}
-                {{ item.0 }}
-            {% endif %}
-         </a> <small>({{ item.1 }})</small><br />
+        {% with facet|add:":"|add:item.0 as facet_item %}
+        <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
         {% endwith %}
+        {% if facet == "organism" %}
+            <i>{{ item.0|capfirst }}</i>
+        {% else %}
+            {{ item.0 }}
+        {% endif %}
+        <small>({{ item.1 }})</small><br />
     {% endfor %}
+    </select>
+    {% if facet in selected_facets_fields %}
     <small><a href="?{% remove_facet facet %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
+    {% endif %}
     </div>
 </div>
 {% endfor %}
+</form>

@@ -13,6 +13,7 @@ from machado.models import Featureloc, FeatureRelationship
 
 
 VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+VALID_PROGRAMS = ['interproscan', 'diamond', 'blast']
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -43,7 +44,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_match_part(self, obj):
         """Prepare match_part."""
-        programs = Analysis.objects.distinct('program').values_list('program')
+        programs = Analysis.objects.filter(
+            program__in=VALID_PROGRAMS).distinct(
+                'program').values_list('program')
 
         match_part_ids = Featureloc.objects.filter(
             srcfeature_id=obj.feature_id).filter(
