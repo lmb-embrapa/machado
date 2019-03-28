@@ -62,9 +62,10 @@ class Command(BaseCommand):
                verbosity: int = 0,
                **options):
         """Execute the main function."""
+        filename = os.path.basename(file)
         nfields = 7
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write('Processing file: {}'.format(filename))
         # instantiate project, biomaterial and assay
         try:
             project_file = ProjectLoader()
@@ -83,7 +84,6 @@ class Command(BaseCommand):
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
-        filename = os.path.basename(file)
         # each line is an RNA-seq experiment
         # e.g:
         # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
@@ -154,4 +154,5 @@ class Command(BaseCommand):
             except ImportingError as e:
                 raise CommandError(e)
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS(
+                'Done with {}'.format(filename)))
