@@ -8,12 +8,14 @@
 from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 
+FACET_FIELDS = ['organism', 'so_term', 'orthology', 'analyses']
+
 
 class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
     form_class = FeatureSearchForm
-    facet_fields = ['organism', 'so_term', 'match_part']
+    facet_fields = FACET_FIELDS
     template_name = 'search_result.html'
     paginate_by = 25
     context_object_name = 'object_list'
@@ -28,9 +30,6 @@ class FeatureSearchView(FacetedSearchView):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args,
                                                                   **kwargs)
-        print('#####################')
-        print(self.get_queryset())
-
         selected_facets = list()
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()['selected_facets']:
@@ -38,7 +37,7 @@ class FeatureSearchView(FacetedSearchView):
             selected_facets_fields.append(facet_field)
             selected_facets.append(facet)
 
+        context['facet_fields_order'] = FACET_FIELDS
         context['selected_facets'] = selected_facets
         context['selected_facets_fields'] = selected_facets_fields
-        context['total_count'] = self.queryset.count()
         return context

@@ -39,3 +39,9 @@ def remove_facet(context, *args):
         params.setlist('selected_facets', params_new)
 
     return params.urlencode()
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Return the dictionary value."""
+    return dictionary.get(key)

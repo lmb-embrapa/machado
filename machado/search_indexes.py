@@ -25,7 +25,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     so_term = indexes.CharField(model_attr='type__name', faceted=True)
     uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
     name = indexes.CharField(model_attr='name', faceted=True)
-    match_part = indexes.MultiValueField(faceted=True)
+    analyses = indexes.MultiValueField(faceted=True)
+    orthology = indexes.BooleanField(faceted=True)
+    orthology_group = indexes.CharField(faceted=True)
 
     def get_model(self):
         """Get model."""
@@ -42,23 +44,21 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         """Prepare organism."""
         return obj.organism.genus + ' ' + obj.organism.species
 
-    def prepare_match_part(self, obj):
-        """Prepare match_part."""
+    def prepare_analyses(self, obj):
+        """Prepare analyses."""
+        # similarity analyses
         programs = Analysis.objects.filter(
             program__in=VALID_PROGRAMS).distinct(
                 'program').values_list('program')
-
         match_part_ids = Featureloc.objects.filter(
-            srcfeature_id=obj.feature_id).filter(
+            srcfeature=obj).filter(
                 feature__organism_id=obj.organism_id).filter(
                     feature__type__name='match_part').filter(
                         feature__type__cv__name='sequence').values_list(
                             'feature_id')
-
         match_part_programs = Analysisfeature.objects.filter(
             feature_id__in=match_part_ids).values_list(
                 'analysis__program').distinct()
-
         result = list()
         for i in list(programs):
             if i in match_part_programs:
@@ -98,16 +98,26 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             if feature_relationship.subject.name is not None:
                 keywords.append(feature_relationship.subject.name)
 
-        # Orthologs
-        feature_relationships = FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship',
-            object=obj).distinct("value")
-        for feature_relationship in feature_relationships:
-            keywords.append(feature_relationship.value)
-
         self.temp = ' '.join(keywords)
         return ' '.join(keywords)
+
+    def prepare_orthology(self, obj):
+        """Prepare orthology."""
+        return FeatureRelationship.objects.filter(
+            type__name='in orthology relationship with',
+            type__cv__name='relationship',
+            object=obj).distinct("value").exists()
+
+    def prepare_orthology_group(self, obj):
+        """Prepare orthology."""
+        result = FeatureRelationship.objects.filter(
+            type__name='in orthology relationship with',
+            type__cv__name='relationship',
+            object=obj).distinct("value").values_list("value")
+        if result.exists():
+            return result[0][0]
+        else:
+            return None
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
