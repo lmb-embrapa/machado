@@ -90,6 +90,7 @@ The feature members need to be loaded previously."""
                 raise CommandError("Cluster has no identification, check.")
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
+                print("appending group: {} with members: {}".format(name, members))
                 tasks.append(
                     pool.submit(
                             featureloader.store_feature_relationships_group,
