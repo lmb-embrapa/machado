@@ -444,7 +444,7 @@ class FeatureLoader(object):
                     dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
                 subject_id = member_feature.feature_id
             except ObjectDoesNotExist:
-                break
+                continue
             except IntegrityError as e:
                 raise ImportingError(e)
             tempgroup = group.copy()
@@ -459,7 +459,7 @@ class FeatureLoader(object):
                                               'FASTA_SOURCE'])
                     object_id = othermember_feature.feature_id
                 except ObjectDoesNotExist:
-                    break
+                    continue
                 except IntegrityError as e:
                     raise ImportingError(e)
                 try:
