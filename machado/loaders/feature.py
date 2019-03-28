@@ -443,7 +443,6 @@ class FeatureLoader(object):
                     dbxref__accession=member,
                     dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
                 subject_id = member_feature.feature_id
-                self.cache[member] = subject_id
             except ObjectDoesNotExist:
                 break
             except IntegrityError as e:
