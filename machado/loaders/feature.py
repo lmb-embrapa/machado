@@ -435,7 +435,6 @@ class FeatureLoader(object):
             cvterm = term
         else:
             cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
-        print("group name: {}".format(value))
         for member in group:
             try:
                 member_feature = Feature.objects.get(
@@ -443,7 +442,6 @@ class FeatureLoader(object):
                     type__name='polypeptide',
                     dbxref__accession=member,
                     dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
-                print("subject id {}".format(member_feature.feature_id))
                 subject_id = member_feature.feature_id
             except ObjectDoesNotExist:
                 break
@@ -460,9 +458,7 @@ class FeatureLoader(object):
                         dbxref__db__name__in=['GFF_SOURCE',
                                               'FASTA_SOURCE'])
                     object_id = othermember_feature.feature_id
-                    print("object id {}".format(member_feature.feature_id))
                 except ObjectDoesNotExist:
-                    print("did not find othermember {}".format(othermember))
                     break
                 except IntegrityError as e:
                     raise ImportingError(e)
