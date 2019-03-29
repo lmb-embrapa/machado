@@ -184,7 +184,7 @@ class FeatureTest(TestCase):
         test_organism = Organism.objects.create(
             genus='Mus', species='musculus')
         # create a srcfeature
-        test_db = Db.objects.create(name='FASTA_source')
+        test_db = Db.objects.create(name='FASTA_SOURCE')
         test_dbxref = Dbxref.objects.create(
                 accession='contig1', db=test_db)
         feature = Feature.objects.create(
