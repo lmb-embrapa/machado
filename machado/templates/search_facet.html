@@ -14,7 +14,7 @@
 
 <h3>Filters</h3>
 
-{% for facet, data in facets.fields.items %}
+{% for facet in facet_fields_order %}
 
 <div class="card">
     <div class="card-header">
@@ -23,8 +23,6 @@
             <b>
             {% if facet == "so_term" %}
             Sequence type
-            {% elif facet == "match_part" %}
-            Similarity
             {% else %}
             {{ facet|capfirst }}
             {% endif %}
@@ -36,15 +34,24 @@
     </div>
     </div>
     <div class="card-body">
-    {% for item in data %}
-        {% with facet|add:":"|add:item.0 as facet_item %}
-        <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
-        {% endwith %}
+    {% for item in facets.fields|get_item:facet %}
+        {% with facet_item=facet|add:":"|add:item.0 %}
         {% if facet == "organism" %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
             <i>{{ item.0|capfirst }}</i>
+        {% elif facet == "orthology" %}
+            {% if item.0 == 0 %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:0" in selected_facets %}checked{% endif %}>
+            no orthology
+            {% else %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:1" in selected_facets %}checked{% endif %}>
+            orthology
+            {% endif %}
         {% else %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
             {{ item.0 }}
         {% endif %}
+        {% endwith %}
         <small>({{ item.1 }})</small><br />
     {% endfor %}
     </select>

@@ -34,20 +34,20 @@
                 <td>{{ result.object.get_display|default_if_none:"" }}</td>
                 <td>
                     {% for group in result.object.get_orthologs_groups %}
-                    <a href="{% url 'feature_search' %}?q={{ group }}">{{ group }}</a>
-                    {% endfor %}
-                </td>
-            </tr>
-            {% empty %}
-            <p>No results found.</p>
-            {% endfor %}
-            </table>
+                        <a href="{% url 'feature_search' %}?selected_facets=orthology_group:{{ group }}">{{ group }}</a>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <p>No results found.</p>
+                {% endfor %}
+                </table>
 
-            <br />
+                <br />
 
-            {% if page_obj.has_previous or page_obj.has_next %}
-            <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-left">
+                {% if page_obj.has_previous or page_obj.has_next %}
+                <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-left">
                 <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
                     <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
                 </li>
