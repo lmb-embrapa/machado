@@ -225,7 +225,7 @@ class FeatureLoader(object):
                 raise ImportingError(e)
 
         try:
-            srcdb = Db.objects.get(name="FASTA_source")
+            srcdb = Db.objects.get(name="FASTA_SOURCE")
             srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
                                            db=srcdb)
             srcfeature = Feature.objects.get(
