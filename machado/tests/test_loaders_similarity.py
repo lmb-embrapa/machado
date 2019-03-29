@@ -75,7 +75,7 @@ class SimilarityTest(TestCase):
             is_obsolete=0, is_relationshiptype=0)
 
         # creating test features
-        feature_db = Db.objects.create(name='FASTA_source')
+        feature_db = Db.objects.create(name='FASTA_SOURCE')
         feature_dbxref1 = Dbxref.objects.create(
             db=feature_db, accession='feat1')
         feature_dbxref2 = Dbxref.objects.create(
