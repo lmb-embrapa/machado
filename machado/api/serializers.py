@@ -135,17 +135,11 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_display(self, obj):
         """Get the display."""
-        try:
-            return obj.get_display()
-        except AttributeError:
-            return None
+        return obj.get_display()
 
     def get_product(self, obj):
         """Get the product."""
-        try:
-            return obj.get_product()
-        except AttributeError:
-            return None
+        return obj.get_product()
 
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
