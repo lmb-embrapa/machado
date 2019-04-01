@@ -42,6 +42,8 @@ class FeatureLoader(object):
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
+        self.cache = {}
+        self.usedcache = 0
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
         self.relationships: List[Dict[str, str]] = list()
@@ -425,7 +427,7 @@ class FeatureLoader(object):
     def store_feature_relationships_group(
                                self,
                                group: list,
-                               term:  Union[str, Cvterm],
+                               term: Union[str, Cvterm],
                                value: str = None,
                                ontology: Union[str, Cv] = 'relationship',
                                ) -> None:
@@ -437,29 +439,39 @@ class FeatureLoader(object):
             cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
         for member in group:
             try:
-                member_feature = Feature.objects.get(
-                    type__cv__name='sequence',
-                    type__name='polypeptide',
-                    dbxref__accession=member,
-                    dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
-                subject_id = member_feature.feature_id
-            except ObjectDoesNotExist:
-                continue
+                subject_id = self.cache[member]
+                self.usedcache += 1
+            except KeyError:
+                try:
+                    member_feature = Feature.objects.get(
+                        type__cv__name='sequence',
+                        type__name='polypeptide',
+                        dbxref__accession=member,
+                        dbxref__db__name__in=['GFF_SOURCE',
+                                              'FASTA_SOURCE'])
+                    subject_id = member_feature.feature_id
+                    self.cache[member] = subject_id
+                except ObjectDoesNotExist:
+                    continue
             except IntegrityError as e:
                 raise ImportingError(e)
             tempgroup = group.copy()
             tempgroup.remove(member)
             for othermember in tempgroup:
                 try:
-                    othermember_feature = Feature.objects.get(
-                        type__cv__name='sequence',
-                        type__name='polypeptide',
-                        dbxref__accession=othermember,
-                        dbxref__db__name__in=['GFF_SOURCE',
-                                              'FASTA_SOURCE'])
-                    object_id = othermember_feature.feature_id
-                except ObjectDoesNotExist:
-                    continue
+                    object_id = self.cache[othermember]
+                except KeyError:
+                    try:
+                        othermember_feature = Feature.objects.get(
+                            type__cv__name='sequence',
+                            type__name='polypeptide',
+                            dbxref__accession=othermember,
+                            dbxref__db__name__in=['GFF_SOURCE',
+                                                  'FASTA_SOURCE'])
+                        object_id = othermember_feature.feature_id
+                        self.cache[othermember] = object_id
+                    except ObjectDoesNotExist:
+                        continue
                 except IntegrityError as e:
                     raise ImportingError(e)
                 try:

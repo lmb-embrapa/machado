@@ -93,9 +93,9 @@ The feature members need to be loaded previously."""
                 tasks.append(
                     pool.submit(
                             featureloader.store_feature_relationships_group,
-                            members,
-                            cvterm_cluster,
-                            name))
+                            group=members,
+                            term=cvterm_cluster,
+                            value=name))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -103,5 +103,9 @@ The feature members need to be loaded previously."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
+            print("Stored in cache: {} features".format(len(
+                featureloader.cache)))
+            print("Used cache: {} times".format(
+                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

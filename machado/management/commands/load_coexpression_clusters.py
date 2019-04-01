@@ -104,9 +104,9 @@ The features need to be loaded previously or won't be registered."""
             # get cvterm for correlation
             tasks.append(pool.submit(
                               featureloader.store_feature_relationships_group,
-                              fields,
-                              cvterm_cluster,
-                              name))
+                              group=fields,
+                              term=cvterm_cluster,
+                              value=name))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -114,5 +114,9 @@ The features need to be loaded previously or won't be registered."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
+            print("Stored in cache: {}".format(len(
+                featureloader.cache)))
+            print("Used cache: {}".format(
+                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

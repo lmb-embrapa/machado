@@ -189,6 +189,22 @@ class FeatureView(View):
                     feature_relationship.object)
         return result
 
+    def retrieve_feature_coexp_clusters(self,
+                                        feature_id: int) -> Dict[str, Any]:
+        """Retrieve feature orthologs."""
+        result: Dict[str, List] = dict()
+        feature_relationships = FeatureRelationship.objects.filter(
+            type__name='in branching relationship with',
+            type__cv__name='relationship',
+            subject_id=feature_id)
+        for i in feature_relationships.distinct("value"):
+            result = {i.value: list()}
+        for feature_relationship in feature_relationships:
+            if feature_relationship.object.type.name in VALID_TYPES:
+                result[feature_relationship.value].append(
+                    feature_relationship.object)
+        return result
+
     def retrieve_feature_pub(self, feature_id: int) -> List[Pub]:
         """Retrieve feature publications."""
         return Pub.objects.filter(
@@ -215,6 +231,8 @@ class FeatureView(View):
             feature_id=feature_obj.feature_id,
             organism_id=feature_obj.organism_id)
         result['orthologs'] = self.retrieve_feature_orthologs(
+            feature_id=feature_obj.feature_id)
+        result['coexp_clusters'] = self.retrieve_feature_coexp_clusters(
             feature_id=feature_obj.feature_id)
         result['pubs'] = self.retrieve_feature_pub(
             feature_id=feature_obj.feature_id)

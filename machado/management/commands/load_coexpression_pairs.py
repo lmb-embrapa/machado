@@ -98,9 +98,9 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
             value = float(fields.pop()) + 0.7
             tasks.append(pool.submit(
                               featureloader.store_feature_relationships_group,
-                              fields,
-                              cvterm_corel,
-                              value))
+                              group=fields,
+                              term=cvterm_corel,
+                              value=value))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -108,5 +108,9 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
+            print("Stored in cache: {}".format(len(
+                featureloader.cache)))
+            print("Used cache: {}".format(
+                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))
