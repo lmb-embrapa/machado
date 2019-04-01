@@ -165,7 +165,6 @@ class FeatureView(View):
                 'unique': match_feat.uniquename,
                 'name': match_feat.name,
                 'display': match_feat.get_display,
-                'product': match_feat.get_product,
                 'query_start': query_start,
                 'query_end': query_end,
                 'score': score,
