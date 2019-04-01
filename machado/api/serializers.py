@@ -58,13 +58,14 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     subfeatures = serializers.SerializerMethodField()
     seq = serializers.SerializerMethodField()
     display = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
 
     class Meta:
         """Meta."""
 
         model = Feature
         fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
-                  'subfeatures', 'seq', 'display')
+                  'subfeatures', 'seq', 'display', 'product')
 
     def _get_location(self, obj):
         """Get the location."""
@@ -134,7 +135,17 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
 
     def get_display(self, obj):
         """Get the display."""
-        return obj.get_display()
+        try:
+            return obj.get_display()
+        except AttributeError:
+            return None
+
+    def get_product(self, obj):
+        """Get the product."""
+        try:
+            return obj.get_product()
+        except AttributeError:
+            return None
 
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
