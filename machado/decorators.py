@@ -47,12 +47,12 @@ def get_feature_display(self):
             type__name='display',
             type__cv__name='feature_property').value
     except ObjectDoesNotExist:
-        if self.get_product is not None:
-            return self.get_product
-        elif self.get_description is not None:
-            return self.get_description
-        elif self.get_note is not None:
-            return self.get_note
+        if self.get_product() is not None:
+            return self.get_product()
+        elif self.get_description() is not None:
+            return self.get_description()
+        elif self.get_note() is not None:
+            return self.get_note()
         else:
             return None
 
