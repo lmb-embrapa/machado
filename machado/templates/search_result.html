@@ -31,7 +31,7 @@
             <tr>
                 <td>{{ result.object.type.name }}</td>
                 <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
-                <td>{{ result.object.get_display|default_if_none:"" }}</td>
+                <td>{{ result.object.get_display|default_if_none:result.get_product|default_if_none:'' }}</td>
                 <td>
                     {% for group in result.object.get_orthologs_groups %}
                         <a href="{% url 'feature_search' %}?selected_facets=orthology_group:{{ group }}">{{ group }}</a>
