@@ -3,7 +3,7 @@ Loading taxonomy
 
 Every data file you'll load (eg. fasta, gff, blast) must belong to an organism.
 These are instructions to load the NCBI taxonomy, that contains most organisms you'll need.
-This step is recommended, but is optional.
+This step is optional.
 If you decide to skip this step, you should insert the organisms individually using the command *insert_organism*.
 
 NCBI Taxonomy
