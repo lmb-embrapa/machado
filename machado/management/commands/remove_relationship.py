@@ -33,12 +33,11 @@ class Command(BaseCommand):
                             type=int)
 
     def remove_fr(self,
-                  frp: FeatureRelationshipprop):
+                  fr_id: str):
         try:
             FeatureRelationship.objects.filter(
-                   feature_relationship_id=frp.feature_relationship_id
+                   feature_relationship_id=fr_id
                    ).delete()
-            frp.delete()
         except Exception as e:
             raise(e)
 
@@ -68,14 +67,16 @@ class Command(BaseCommand):
                     for frp in tqdm(frps, total=len(frps)):
                         tasks.append(pool.submit(
                                   self.remove_fr,
-                                  frp=frp,
+                                  frp=frp.feature_relationship_id,
                                   ))
+                        frp.delete()
                 else:
                     for frp in frps:
                         tasks.append(pool.submit(
                                   self.remove_fr,
-                                  frp=frp,
+                                  frp=frp.feature_relationship_id,
                                   ))
+                        frp.delete()
                 if verbosity > 0:
                     self.stdout.write('Removing (using {} cpu)...'.format(cpu))
                     for task in tqdm(as_completed(tasks), total=len(tasks)):
