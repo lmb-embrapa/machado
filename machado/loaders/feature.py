@@ -26,7 +26,7 @@ from Bio.SearchIO._model import Hit
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = ['dbxref', 'note', 'display', 'alias', 'ontology_term',
                'orf_classification', 'synonym', 'is_circular',
-               'gene_synonym', 'description']
+               'gene_synonym', 'description', 'product']
 
 
 class FeatureLoader(object):
