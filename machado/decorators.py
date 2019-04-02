@@ -10,15 +10,6 @@ from django.db.models import Value
 from django.db.models.functions import Concat
 
 
-def get_feature_display(self):
-    """Get the display feature prop."""
-    try:
-        return self.Featureprop_feature_Feature.get(
-            type__name='display',
-            type__cv__name='feature_property').value
-    except ObjectDoesNotExist:
-        return None
-
 def get_feature_product(self):
     """Get the product feature prop."""
     try:
@@ -27,6 +18,7 @@ def get_feature_product(self):
             type__cv__name='feature_property').value
     except ObjectDoesNotExist:
         return None
+
 
 def get_feature_description(self):
     """Get the description feature prop."""
@@ -46,6 +38,23 @@ def get_feature_note(self):
             type__cv__name='feature_property').value
     except ObjectDoesNotExist:
         return None
+
+
+def get_feature_display(self):
+    """Get the display feature prop."""
+    try:
+        return self.Featureprop_feature_Feature.get(
+            type__name='display',
+            type__cv__name='feature_property').value
+    except ObjectDoesNotExist:
+        if self.get_product() is not None:
+            return self.get_product()
+        elif self.get_description() is not None:
+            return self.get_description()
+        elif self.get_note() is not None:
+            return self.get_note()
+        else:
+            return None
 
 
 def get_feature_orthologs_groups(self):
