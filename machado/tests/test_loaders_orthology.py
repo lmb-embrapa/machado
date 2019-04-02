@@ -547,28 +547,20 @@ class OrthologyTest(TestCase):
                            subject_id=feature1.feature_id,
                            object_id=feature9.feature_id,
                            value=group1_name).exists())
-        frelationship9 = FeatureRelationship.objects.get(
+        frelationship1 = FeatureRelationship.objects.get(
                            subject_id=feature1.feature_id,
                            object_id=feature9.feature_id)
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship9,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
-        # same but in reverse
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id,
-                           value=group1_name).exists())
-        frelationship1 = FeatureRelationship.objects.get(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=frelationship1,
                            type_id=cvterm_contained_in.cvterm_id,
                            value=filename,
                            rank=0).exists())
-        # another example group5:
+        # reverse should not work
+        self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=feature9.feature_id,
+                           object_id=feature1.feature_id,
+                           value=group1_name).exists())
+        # another example group5
         self.assertTrue(FeatureRelationship.objects.filter(
                            subject_id=feature10.feature_id,
                            object_id=feature17.feature_id,
@@ -595,19 +587,15 @@ class OrthologyTest(TestCase):
                      "--file=groups.txt",
                      "--verbosity=0")
         self.assertFalse(FeatureRelationship.objects.filter(
+                           subject_id=feature1.feature_id,
+                           object_id=feature9.feature_id).exists())
+        # reverse should never have existed
+        self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature9.feature_id,
                            object_id=feature1.feature_id).exists())
         self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature10.feature_id,
                            object_id=feature17.feature_id).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship9,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
         self.assertFalse(FeatureRelationshipprop.objects.filter(
                            feature_relationship=frelationship1,
                            type_id=cvterm_contained_in.cvterm_id,
