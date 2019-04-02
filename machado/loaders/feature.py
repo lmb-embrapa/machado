@@ -430,13 +430,16 @@ class FeatureLoader(object):
                                term: Union[str, Cvterm],
                                value: str = None,
                                ontology: Union[str, Cv] = 'relationship',
+                               cache: int = 0
                                ) -> None:
         """Store Feature Relationship Groups."""
+        frelationshipsp = list()
         # check if retrieving cvterm is needed
         if isinstance(term, Cvterm):
             cvterm = term
         else:
             cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
+        buffer_group = group.copy()
         for member in group:
             try:
                 subject_id = self.cache[member]
@@ -455,9 +458,8 @@ class FeatureLoader(object):
                     continue
             except IntegrityError as e:
                 raise ImportingError(e)
-            tempgroup = group.copy()
-            tempgroup.remove(member)
-            for othermember in tempgroup:
+            buffer_group.remove(member)
+            for othermember in buffer_group:
                 try:
                     object_id = self.cache[othermember]
                 except KeyError:
@@ -481,10 +483,11 @@ class FeatureLoader(object):
                                             type=cvterm,
                                             value=value,
                                             rank=0)
-                    FeatureRelationshipprop.objects.create(
+                    frelationshipsp.append(FeatureRelationshipprop(
                             feature_relationship=frelationship,
                             type=self.cvterm_contained_in,
                             value=self.filename,
-                            rank=0)
+                            rank=0))
                 except IntegrityError as e:
                     raise ImportingError(e)
+        FeatureRelationshipprop.objects.bulk_create(frelationshipsp)

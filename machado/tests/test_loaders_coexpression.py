@@ -258,6 +258,7 @@ class CoexpressionTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         test_featurename2 = "AT3G08790.1.TAIR10"
+
         dbxref2 = Dbxref.objects.create(
                                         db=db,
                                         accession=test_featurename2)
@@ -271,6 +272,7 @@ class CoexpressionTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
         test_featurename3 = "AT5G42230.1.TAIR10"
+
         dbxref3 = Dbxref.objects.create(
                                         db=db,
                                         accession=test_featurename3)
@@ -283,6 +285,7 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+
         test_featurename4 = "AT1G27040.1.TAIR10"
         dbxref4 = Dbxref.objects.create(
                                         db=db,
@@ -296,6 +299,7 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+
         test_featurename5 = "AT1G71692.1.TAIR10"
         dbxref5 = Dbxref.objects.create(
                                         db=db,
@@ -309,6 +313,7 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+
         test_featurename6 = "AT5G24750.1.TAIR10"
         dbxref6 = Dbxref.objects.create(
                                         db=db,
@@ -322,6 +327,7 @@ class CoexpressionTest(TestCase):
             is_obsolete=False,
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now())
+
         # clusters setup
         test_cluster1_name = 'ath_coexpr_mcl_1'
         test_cluster1 = [
@@ -392,8 +398,8 @@ class CoexpressionTest(TestCase):
                            feature_relationship=fr3,
                            type_id=cvterm_contained_in.cvterm_id,
                            value=test_filename).exists())
-        # check cluster2 relationships in reverse
-        self.assertTrue(FeatureRelationship.objects.filter(
+        # check cluster2 relationships in reverse (false)
+        self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature5.feature_id,
                            object_id=test_feature4.feature_id,
                            value=test_cluster2_name).exists())
@@ -405,16 +411,8 @@ class CoexpressionTest(TestCase):
                            subject_id=test_feature4.feature_id,
                            object_id=test_feature5.feature_id,
                            value=test_cluster2_name)
-        fr5 = FeatureRelationship.objects.get(
-                           subject_id=test_feature5.feature_id,
-                           object_id=test_feature4.feature_id,
-                           value=test_cluster2_name)
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr4,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr5,
                            type_id=cvterm_contained_in.cvterm_id,
                            value=test_filename).exists())
         # cluster3 is not supposed to generate any relationships
@@ -455,7 +453,4 @@ class CoexpressionTest(TestCase):
                            value=test_filename).exists())
         self.assertFalse(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr4,
-                           value=test_filename).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr5,
                            value=test_filename).exists())

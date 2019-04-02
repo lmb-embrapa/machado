@@ -97,6 +97,7 @@ class Command(BaseCommand):
                 raise CommandError(
                         'Cannot remove \'{}\' (not registered)'.format(
                             filename))
+        # *** if executing machado tests, do not use --cpu in call_command ***
         else:
             try:
                 frps = FeatureRelationshipprop.objects.filter(
