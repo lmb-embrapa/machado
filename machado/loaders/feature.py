@@ -446,13 +446,12 @@ class FeatureLoader(object):
                 self.usedcache += 1
             except KeyError:
                 try:
-                    member_feature = Feature.objects.get(
+                    subject_id = Feature.objects.get(
                         type__cv__name='sequence',
                         type__name='polypeptide',
                         dbxref__accession=member,
                         dbxref__db__name__in=['GFF_SOURCE',
-                                              'FASTA_SOURCE'])
-                    subject_id = member_feature.feature_id
+                                              'FASTA_SOURCE']).feature_id
                     self.cache[member] = subject_id
                 except ObjectDoesNotExist:
                     continue
@@ -464,13 +463,12 @@ class FeatureLoader(object):
                     object_id = self.cache[othermember]
                 except KeyError:
                     try:
-                        othermember_feature = Feature.objects.get(
+                        object_id = Feature.objects.get(
                             type__cv__name='sequence',
                             type__name='polypeptide',
                             dbxref__accession=othermember,
                             dbxref__db__name__in=['GFF_SOURCE',
-                                                  'FASTA_SOURCE'])
-                        object_id = othermember_feature.feature_id
+                                                  'FASTA_SOURCE']).feature_id
                         self.cache[othermember] = object_id
                     except ObjectDoesNotExist:
                         continue
