@@ -33,10 +33,10 @@ class Command(BaseCommand):
                             type=int)
 
     def remove_fr(self,
-                  frp: str):
+                  fr_id: str):
         try:
             FeatureRelationship.objects.filter(
-                   feature_relationship_id=frp
+                   feature_relationship_id=fr_id
                    ).delete()
         except Exception as e:
             raise(e)
