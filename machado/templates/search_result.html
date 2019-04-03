@@ -25,18 +25,20 @@
                 <th>SO term</th>
                 <th>Feature ID</th>
                 <th>Display</th>
-                <th>Orthologs Group</th>
+                {% if orthologs %}<th>Orthologs Group</th>{% endif%}
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
                 <td>{{ result.object.type.name }}</td>
                 <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
                 <td>{{ result.object.get_display|default_if_none:'' }}</td>
-                <td>
+                {% if orthologs %}
+                    <td>
                     {% for group in result.object.get_orthologs_groups %}
                         <a href="{% url 'feature_search' %}?selected_facets=orthology_group:{{ group }}">{{ group }}</a>
                         {% endfor %}
                     </td>
+                {% endif%}
                 </tr>
                 {% empty %}
                 <p>No results found.</p>
