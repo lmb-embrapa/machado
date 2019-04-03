@@ -69,14 +69,12 @@ class Command(BaseCommand):
                                   self.remove_fr,
                                   frp=frp.feature_relationship_id,
                                   ))
-                        frp.delete()
                 else:
                     for frp in frps:
                         tasks.append(pool.submit(
                                   self.remove_fr,
                                   frp=frp.feature_relationship_id,
                                   ))
-                        frp.delete()
                 if verbosity > 0:
                     self.stdout.write('Removing (using {} cpu)...'.format(cpu))
                     for task in tqdm(as_completed(tasks), total=len(tasks)):
@@ -88,6 +86,7 @@ class Command(BaseCommand):
                             raise(task.result())
                 if verbosity > 0:
                     self.stdout.write(self.style.SUCCESS('Done'))
+                frps.delete()
                 pool.shutdown()
             except IntegrityError as e:
                 raise CommandError(
@@ -110,13 +109,12 @@ class Command(BaseCommand):
                         FeatureRelationship.objects.filter(
                             feature_relationship_id=frp.feature_relationship_id
                             ).delete()
-                        frp.delete()
                 else:
                     for frp in frps:
                         FeatureRelationship.objects.filter(
                             feature_relationship_id=frp.feature_relationship_id
                             ).delete()
-                        frp.delete()
+                frps.delete()
                 if verbosity > 0:
                     self.stdout.write(self.style.SUCCESS('Done'))
             except IntegrityError as e:

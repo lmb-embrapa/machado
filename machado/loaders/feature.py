@@ -433,7 +433,6 @@ class FeatureLoader(object):
                                cache: int = 0
                                ) -> None:
         """Store Feature Relationship Groups."""
-        frelationshipsp = list()
         # check if retrieving cvterm is needed
         if isinstance(term, Cvterm):
             cvterm = term
@@ -475,17 +474,16 @@ class FeatureLoader(object):
                 except IntegrityError as e:
                     raise ImportingError(e)
                 try:
-                    frelationship = FeatureRelationship.objects.create(
+                    frelationship_id = FeatureRelationship.objects.create(
                                             subject_id=subject_id,
                                             object_id=object_id,
                                             type=cvterm,
                                             value=value,
-                                            rank=0)
-                    frelationshipsp.append(FeatureRelationshipprop(
-                            feature_relationship=frelationship,
+                                            rank=0).feature_relationship_id
+                    FeatureRelationshipprop.objects.create(
+                            feature_relationship_id=frelationship_id,
                             type=self.cvterm_contained_in,
                             value=self.filename,
-                            rank=0))
+                            rank=0)
                 except IntegrityError as e:
                     raise ImportingError(e)
-        FeatureRelationshipprop.objects.bulk_create(frelationshipsp)
