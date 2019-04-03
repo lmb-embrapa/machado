@@ -42,7 +42,7 @@ class FeatureLoader(object):
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
-        self.cache = {}
+        self.cache: Dict[str, str] = dict()
         self.usedcache = 0
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
@@ -185,33 +185,37 @@ class FeatureLoader(object):
 
     def store_tabix_feature(self, tabix_feature: GTFProxy) -> None:
         """Store tabix feature."""
-        attrs = self.get_attributes(tabix_feature.attributes)
-        for key in attrs:
+        for key in self.get_attributes(tabix_feature.attributes):
             if key not in VALID_ATTRS and key not in ['id', 'name', 'parent']:
                 self.ignored_attrs.add(key)
 
         cvterm = Cvterm.objects.get(
             name=tabix_feature.feature, cv__name='sequence')
 
+        attrs_id = self.get_attributes(tabix_feature.attributes).get('id')
+        attrs_name = self.get_attributes(tabix_feature.attributes).get('name')
+        attrs_parent = self.get_attributes(
+            tabix_feature.attributes).get('parent')
+
         # set id = auto# for features that lack it
-        if attrs.get('id') is None:
-            attrs['id'] = 'auto{}'.format(str(time()))
+        if attrs_id is None:
+            attrs_id = 'auto{}'.format(str(time()))
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=attrs['id'])
+                db=self.db, accession=attrs_id)
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
             feature_id = Feature.objects.create(
-                organism=self.organism, uniquename=attrs.get('id'),
-                type_id=cvterm.cvterm_id, name=attrs.get('name'),
+                organism=self.organism, uniquename=attrs_id,
+                type_id=cvterm.cvterm_id, name=attrs_name,
                 dbxref=dbxref, is_analysis=False, is_obsolete=False,
                 timeaccessioned=datetime.now(timezone.utc),
                 timelastmodified=datetime.now(timezone.utc)).feature_id
         except IntegrityError as e:
             raise ImportingError(
-                    'ID {} already registered. {}'.format(attrs.get('id'), e))
+                    'ID {} already registered. {}'.format(attrs_id, e))
 
         # DOI: try to link feature to publication's DOI
         if (feature_id and self.pub_dbxref_doi):
@@ -264,7 +268,7 @@ class FeatureLoader(object):
                 locgroup=0,
                 rank=0)
         except IntegrityError as e:
-            print(attrs.get('id'),
+            print(attrs_id,
                   srcdbxref,
                   tabix_feature.start,
                   tabix_feature.end,
@@ -272,11 +276,13 @@ class FeatureLoader(object):
                   phase)
             raise ImportingError(e)
 
-        self.process_attributes(feature_id, attrs)
+        self.process_attributes(
+            feature_id=feature_id,
+            attrs=self.get_attributes(tabix_feature.attributes))
 
-        if attrs.get('parent') is not None:
-            self.relationships.append({'object_id': attrs['id'],
-                                       'subject_id': attrs['parent']})
+        if attrs_parent is not None:
+            self.relationships.append({'object_id': attrs_id,
+                                       'subject_id': attrs_parent})
 
         # Additional protrein record for each mRNA with the exact same ID
         if tabix_feature.feature == 'mRNA':
@@ -284,9 +290,9 @@ class FeatureLoader(object):
                 name='translation_of', cv__name='sequence')
             feature_mRNA_translation_id = Feature.objects.create(
                     organism=self.organism,
-                    uniquename=attrs.get('id'),
+                    uniquename=attrs_id,
                     type_id=self.aa_cvterm.cvterm_id,
-                    name=attrs.get('name'),
+                    name=attrs_name,
                     dbxref=dbxref,
                     is_analysis=False,
                     is_obsolete=False,
