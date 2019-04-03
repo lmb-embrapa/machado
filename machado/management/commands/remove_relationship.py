@@ -67,13 +67,13 @@ class Command(BaseCommand):
                     for frp in tqdm(frps, total=len(frps)):
                         tasks.append(pool.submit(
                                   self.remove_fr,
-                                  frp=frp.feature_relationship_id,
+                                  fr_id=frp.feature_relationship_id,
                                   ))
                 else:
                     for frp in frps:
                         tasks.append(pool.submit(
                                   self.remove_fr,
-                                  frp=frp.feature_relationship_id,
+                                  fr_id=frp.feature_relationship_id,
                                   ))
                 if verbosity > 0:
                     self.stdout.write('Removing (using {} cpu)...'.format(cpu))
@@ -84,9 +84,9 @@ class Command(BaseCommand):
                     for task in as_completed(tasks):
                         if task.result():
                             raise(task.result())
+                frps.delete()
                 if verbosity > 0:
                     self.stdout.write(self.style.SUCCESS('Done'))
-                frps.delete()
                 pool.shutdown()
             except IntegrityError as e:
                 raise CommandError(
