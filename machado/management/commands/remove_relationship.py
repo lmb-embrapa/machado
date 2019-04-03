@@ -107,7 +107,7 @@ class Command(BaseCommand):
                     self.stdout.write('Removing...')
                     for frp in tqdm(frps, total=len(frps)):
                         FeatureRelationship.objects.filter(
-                            feature_relationship=frp.feature_relationship_id
+                            feature_relationship_id=frp.feature_relationship_id
                             ).delete()
                 else:
                     for frp in frps:
