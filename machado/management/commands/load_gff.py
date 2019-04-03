@@ -6,7 +6,7 @@
 
 """Load GFF file."""
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -75,23 +75,28 @@ class Command(BaseCommand):
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
 
+        chunk_size = cpu*2
+        bar_format = '{percentage:3.0f}%|{bar}| [{elapsed}<{remaining}, '\
+                     '{rate_fmt}{postfix}]'
+
         # Load the GFF3 file
         with open(file) as tbx_file:
-            # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
-            for row in tbx.fetch(parser=pysam.asGTF()):
-                if ignore is not None and row.feature in ignore:
-                    continue
-                tasks.append(pool.submit(
-                    feature_file.store_tabix_feature, row))
+            tbx_generator = tbx.fetch(parser=pysam.asGTF())
+            for chunk in tqdm(zip(*[tbx_generator]*chunk_size),
+                              total=int(get_num_lines(file)/chunk_size),
+                              bar_format=bar_format):
+                for row in chunk:
+                    if ignore is not None and row.feature in ignore:
+                        continue
+                    tasks.append(pool.submit(
+                        feature_file.store_tabix_feature, row))
 
-        if verbosity > 0:
-            self.stdout.write('Loading features')
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
-            try:
-                task.result()
-            except ImportingError as e:
-                raise CommandError(e)
+                for task in as_completed(tasks):
+                    try:
+                        task.result()
+                    except ImportingError as e:
+                        raise CommandError(e)
         pool.shutdown()
 
         if verbosity > 0:

@@ -80,7 +80,8 @@ class Command(BaseCommand):
                     Featureloc.objects.filter(
                         feature_id__in=feature_ids).delete()
                     Feature.objects.filter(
-                        feature_id__in=feature_ids).delete()
+                        feature_id__in=feature_ids,
+                        type__name='match_part').delete()
                     Analysisfeature.objects.filter(analysis=analysis).delete()
                 except ObjectDoesNotExist:
                     pass

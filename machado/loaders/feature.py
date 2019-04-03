@@ -102,8 +102,11 @@ class FeatureLoader(object):
         result = dict()
         fields = attributes.split(";")
         for field in fields:
-            key, value = field.split("=")
-            result[key.lower()] = unquote(value)
+            try:
+                key, value = field.split("=")
+                result[key.lower()] = unquote(value)
+            except ValueError:
+                pass
         return result
 
     def process_attributes(self,
