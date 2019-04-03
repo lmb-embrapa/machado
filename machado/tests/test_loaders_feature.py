@@ -107,8 +107,8 @@ class FeatureTest(TestCase):
             'orf_classification=1;ontology_term=GO:12345,GO:54321;parent=2;'
             'alias=Feature1;dbxref=GI:12345,NC:12345;noecziste=True')
         # running process_attributes
-        test_feature_file.process_attributes(feature=test_feature,
-                                             attrs=test_attrs)
+        test_feature_file.process_attributes(
+            feature_id=test_feature.feature_id, attrs=test_attrs)
         # creating feature_property cvterm
         cv_feature_property = Cv.objects.get(name='feature_property')
         # asserting note
