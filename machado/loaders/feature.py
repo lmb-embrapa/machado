@@ -230,8 +230,8 @@ class FeatureLoader(object):
             srcdb = Db.objects.get(name="FASTA_SOURCE")
             srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
                                            db=srcdb)
-            srcfeature = Feature.objects.get(
-                dbxref=srcdbxref, organism=self.organism)
+            srcfeature_id = Feature.objects.get(
+                dbxref=srcdbxref, organism=self.organism).feature_id
         except ObjectDoesNotExist:
             raise ImportingError(
                 "Parent not found: {}. It's required to load "
@@ -258,7 +258,7 @@ class FeatureLoader(object):
         try:
             Featureloc.objects.get_or_create(
                 feature=feature,
-                srcfeature_id=srcfeature.feature_id,
+                srcfeature_id=srcfeature_id,
                 fmin=tabix_feature.start,
                 is_fmin_partial=False,
                 fmax=tabix_feature.end,
@@ -269,7 +269,7 @@ class FeatureLoader(object):
                 rank=0)
         except IntegrityError as e:
             print(feature.uniquename,
-                  srcfeature.uniquename,
+                  srcdbxref,
                   tabix_feature.start,
                   tabix_feature.end,
                   strand,
