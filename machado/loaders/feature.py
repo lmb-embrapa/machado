@@ -203,25 +203,21 @@ class FeatureLoader(object):
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
-            feature = Feature.objects.create(
-                    organism=self.organism,
-                    uniquename=attrs.get('id'),
-                    type_id=cvterm.cvterm_id,
-                    name=attrs.get('name'),
-                    dbxref=dbxref,
-                    is_analysis=False,
-                    is_obsolete=False,
-                    timeaccessioned=datetime.now(timezone.utc),
-                    timelastmodified=datetime.now(timezone.utc))
+            feature_id = Feature.objects.create(
+                organism=self.organism, uniquename=attrs.get('id'),
+                type_id=cvterm.cvterm_id, name=attrs.get('name'),
+                dbxref=dbxref, is_analysis=False, is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc)).feature_id
         except IntegrityError as e:
             raise ImportingError(
                     'ID {} already registered. {}'.format(attrs.get('id'), e))
 
         # DOI: try to link feature to publication's DOI
-        if (feature and self.pub_dbxref_doi):
+        if (feature_id and self.pub_dbxref_doi):
             try:
                 FeaturePub.objects.get_or_create(
-                        feature=feature,
+                        feature_id=feature_id,
                         pub_id=self.pub_dbxref_doi.pub_id)
             except IntegrityError as e:
                 raise ImportingError(e)
@@ -257,7 +253,7 @@ class FeatureLoader(object):
 
         try:
             Featureloc.objects.get_or_create(
-                feature=feature,
+                feature_id=feature_id,
                 srcfeature_id=srcfeature_id,
                 fmin=tabix_feature.start,
                 is_fmin_partial=False,
@@ -268,7 +264,7 @@ class FeatureLoader(object):
                 locgroup=0,
                 rank=0)
         except IntegrityError as e:
-            print(feature.uniquename,
+            print(attrs.get('id'),
                   srcdbxref,
                   tabix_feature.start,
                   tabix_feature.end,
@@ -276,7 +272,7 @@ class FeatureLoader(object):
                   phase)
             raise ImportingError(e)
 
-        self.process_attributes(feature.feature_id, attrs)
+        self.process_attributes(feature_id, attrs)
 
         if attrs.get('parent') is not None:
             self.relationships.append({'object_id': attrs['id'],
@@ -286,7 +282,7 @@ class FeatureLoader(object):
         if tabix_feature.feature == 'mRNA':
             translation_of = Cvterm.objects.get(
                 name='translation_of', cv__name='sequence')
-            feature_mRNA_translation = Feature.objects.create(
+            feature_mRNA_translation_id = Feature.objects.create(
                     organism=self.organism,
                     uniquename=attrs.get('id'),
                     type_id=self.aa_cvterm.cvterm_id,
@@ -295,11 +291,10 @@ class FeatureLoader(object):
                     is_analysis=False,
                     is_obsolete=False,
                     timeaccessioned=datetime.now(timezone.utc),
-                    timelastmodified=datetime.now(timezone.utc))
-            FeatureRelationship.objects.create(object=feature_mRNA_translation,
-                                               subject=feature,
-                                               type=translation_of,
-                                               rank=0)
+                    timelastmodified=datetime.now(timezone.utc)).feature_id
+            FeatureRelationship.objects.create(
+                object_id=feature_mRNA_translation_id, subject_id=feature_id,
+                type=translation_of, rank=0)
 
     def store_relationships(self) -> None:
         """Store the relationships."""
