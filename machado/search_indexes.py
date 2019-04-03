@@ -26,8 +26,11 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
     name = indexes.CharField(model_attr='name', faceted=True)
     analyses = indexes.MultiValueField(faceted=True)
-    orthology = indexes.BooleanField(faceted=True)
-    orthology_group = indexes.CharField(faceted=True)
+    if FeatureRelationship.objects.filter(
+            type__name='in orthology relationship with',
+            type__cv__name='relationship').exists():
+        orthology = indexes.BooleanField(faceted=True)
+        orthology_group = indexes.CharField(faceted=True)
 
     def get_model(self):
         """Get model."""
