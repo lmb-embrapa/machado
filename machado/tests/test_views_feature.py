@@ -12,7 +12,6 @@ from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
 from machado.models import FeatureRelationship
 from machado.views import feature
 from django.test import TestCase, RequestFactory
-from django.urls.exceptions import NoReverseMatch
 from datetime import datetime, timezone
 
 
@@ -310,10 +309,7 @@ class FeatureTest(TestCase):
             '/feature/?feature_id={}'.format(f.feature_id))
         fv = feature.FeatureView()
 
-        try:
-            response = fv.get(request)
-        except NoReverseMatch:
-            return
+        response = fv.get(request)
 
         self.assertEqual(response.status_code, 200)
 
@@ -322,10 +318,7 @@ class FeatureTest(TestCase):
             '/feature/?feature_id={}'.format(f.feature_id))
         fv = feature.FeatureView()
 
-        try:
-            response = fv.get(request)
-        except NoReverseMatch:
-            return
+        response = fv.get(request)
 
         self.assertContains(response, 'Invalid feature type.')
 

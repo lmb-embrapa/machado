@@ -10,7 +10,6 @@ from machado.models import Db, Dbxref, Cv, Cvterm, Organism
 from machado.models import Feature
 from machado.views import common
 from django.test import TestCase, RequestFactory
-from django.urls.exceptions import NoReverseMatch
 from datetime import datetime, timezone
 
 
@@ -26,10 +25,7 @@ class DataSummaryTest(TestCase):
 
         request = self.factory.get('/data/')
         ds = common.DataSummaryView()
-        try:
-            response = ds.get(request)
-        except NoReverseMatch:
-            return
+        response = ds.get(request)
 
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Arabidopsis thaliana')
