@@ -11,7 +11,6 @@ from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.feature import FeatureLoader
 from datetime import datetime
 from django.test import TestCase
-from django.core.management import call_command
 
 
 class CoexpressionTest(TestCase):
@@ -160,23 +159,6 @@ class CoexpressionTest(TestCase):
         self.assertTrue(FeatureRelationshipprop.objects.filter(
                            feature_relationship=fr2,
                            type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        call_command("remove_relationship",
-                     "--file=pcc.mcl.dummy.txt",
-                     "--verbosity=0")
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature2.feature_id,
-                           value=test_pcc_value1).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature3.feature_id,
-                           value=test_pcc_value2).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr1,
-                           value=test_filename).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr2,
                            value=test_filename).exists())
 
     def test_load_coexpression_clusters(self):
@@ -419,38 +401,3 @@ class CoexpressionTest(TestCase):
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=test_feature6.feature_id,
                            value=test_cluster3_name).exists())
-        call_command("remove_relationship",
-                     "--file=mcl.clusters.dummy.txt",
-                     "--verbosity=0")
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature2.feature_id,
-                           value=test_cluster1_name).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature3.feature_id,
-                           value=test_cluster1_name).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature2.feature_id,
-                           object_id=test_feature3.feature_id,
-                           value=test_cluster1_name).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature4.feature_id,
-                           object_id=test_feature5.feature_id,
-                           value=test_cluster2_name).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature5.feature_id,
-                           object_id=test_feature4.feature_id,
-                           value=test_cluster2_name).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr1,
-                           value=test_filename).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr2,
-                           value=test_filename).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr3,
-                           value=test_filename).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr4,
-                           value=test_filename).exists())

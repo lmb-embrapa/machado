@@ -42,7 +42,7 @@ class FeatureLoader(object):
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
-        self.cache = {}
+        self.cache: Dict[str, str] = dict()
         self.usedcache = 0
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
@@ -102,12 +102,15 @@ class FeatureLoader(object):
         result = dict()
         fields = attributes.split(";")
         for field in fields:
-            key, value = field.split("=")
-            result[key.lower()] = unquote(value)
+            try:
+                key, value = field.split("=")
+                result[key.lower()] = unquote(value)
+            except ValueError:
+                pass
         return result
 
     def process_attributes(self,
-                           feature: object,
+                           feature_id: int,
                            attrs: Dict[str, str]) -> None:
         """Process the VALID_ATTRS attributes."""
         try:
@@ -130,7 +133,7 @@ class FeatureLoader(object):
                         dbxref = Dbxref.objects.get(
                             db=term_db, accession=aux_term)
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
-                        FeatureCvterm.objects.create(feature=feature,
+                        FeatureCvterm.objects.create(feature_id=feature_id,
                                                      cvterm=cvterm,
                                                      pub=self.pub,
                                                      is_not=False,
@@ -151,7 +154,7 @@ class FeatureLoader(object):
                     db, created = Db.objects.get_or_create(name=aux_db.upper())
                     dbxref, created = Dbxref.objects.get_or_create(
                         db=db, accession=aux_dbxref)
-                    FeatureDbxref.objects.create(feature=feature,
+                    FeatureDbxref.objects.create(feature_id=feature_id,
                                                  dbxref=dbxref,
                                                  is_current=1)
             elif key in ['alias', 'gene_synonym', 'synonym']:
@@ -160,7 +163,7 @@ class FeatureLoader(object):
                     defaults={'type_id': cvterm_exact.cvterm_id,
                               'synonym_sgml': attrs.get(key)})
                 FeatureSynonym.objects.create(synonym=synonym,
-                                              feature=feature,
+                                              feature_id=feature_id,
                                               pub=self.pub,
                                               is_current=True,
                                               is_internal=False)
@@ -177,51 +180,51 @@ class FeatureLoader(object):
                               'is_relationshiptype': 0,
                               'is_obsolete': 0})
                 featureprop_obj, created = Featureprop.objects.get_or_create(
-                    feature=feature, type_id=note_cvterm.cvterm_id, rank=0,
-                    defaults={'value': attrs.get(key)})
+                    feature_id=feature_id, type_id=note_cvterm.cvterm_id,
+                    rank=0, defaults={'value': attrs.get(key)})
                 if not created:
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()
 
     def store_tabix_feature(self, tabix_feature: GTFProxy) -> None:
         """Store tabix feature."""
-        attrs = self.get_attributes(tabix_feature.attributes)
-        for key in attrs:
+        for key in self.get_attributes(tabix_feature.attributes):
             if key not in VALID_ATTRS and key not in ['id', 'name', 'parent']:
                 self.ignored_attrs.add(key)
 
         cvterm = Cvterm.objects.get(
             name=tabix_feature.feature, cv__name='sequence')
 
+        attrs_id = self.get_attributes(tabix_feature.attributes).get('id')
+        attrs_name = self.get_attributes(tabix_feature.attributes).get('name')
+        attrs_parent = self.get_attributes(
+            tabix_feature.attributes).get('parent')
+
         # set id = auto# for features that lack it
-        if attrs.get('id') is None:
-            attrs['id'] = 'auto{}'.format(str(time()))
+        if attrs_id is None:
+            attrs_id = 'auto{}'.format(str(time()))
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=attrs['id'])
+                db=self.db, accession=attrs_id)
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
-            feature = Feature.objects.create(
-                    organism=self.organism,
-                    uniquename=attrs.get('id'),
-                    type_id=cvterm.cvterm_id,
-                    name=attrs.get('name'),
-                    dbxref=dbxref,
-                    is_analysis=False,
-                    is_obsolete=False,
-                    timeaccessioned=datetime.now(timezone.utc),
-                    timelastmodified=datetime.now(timezone.utc))
+            feature_id = Feature.objects.create(
+                organism=self.organism, uniquename=attrs_id,
+                type_id=cvterm.cvterm_id, name=attrs_name,
+                dbxref=dbxref, is_analysis=False, is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc)).feature_id
         except IntegrityError as e:
             raise ImportingError(
-                    'ID {} already registered. {}'.format(attrs.get('id'), e))
+                    'ID {} already registered. {}'.format(attrs_id, e))
 
         # DOI: try to link feature to publication's DOI
-        if (feature and self.pub_dbxref_doi):
+        if (feature_id and self.pub_dbxref_doi):
             try:
                 FeaturePub.objects.get_or_create(
-                        feature=feature,
+                        feature_id=feature_id,
                         pub_id=self.pub_dbxref_doi.pub_id)
             except IntegrityError as e:
                 raise ImportingError(e)
@@ -230,8 +233,8 @@ class FeatureLoader(object):
             srcdb = Db.objects.get(name="FASTA_SOURCE")
             srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
                                            db=srcdb)
-            srcfeature = Feature.objects.get(
-                dbxref=srcdbxref, organism=self.organism)
+            srcfeature_id = Feature.objects.get(
+                dbxref=srcdbxref, organism=self.organism).feature_id
         except ObjectDoesNotExist:
             raise ImportingError(
                 "Parent not found: {}. It's required to load "
@@ -257,8 +260,8 @@ class FeatureLoader(object):
 
         try:
             Featureloc.objects.get_or_create(
-                feature=feature,
-                srcfeature_id=srcfeature.feature_id,
+                feature_id=feature_id,
+                srcfeature_id=srcfeature_id,
                 fmin=tabix_feature.start,
                 is_fmin_partial=False,
                 fmax=tabix_feature.end,
@@ -268,38 +271,39 @@ class FeatureLoader(object):
                 locgroup=0,
                 rank=0)
         except IntegrityError as e:
-            print(feature.uniquename,
-                  srcfeature.uniquename,
+            print(attrs_id,
+                  srcdbxref,
                   tabix_feature.start,
                   tabix_feature.end,
                   strand,
                   phase)
             raise ImportingError(e)
 
-        self.process_attributes(feature, attrs)
+        self.process_attributes(
+            feature_id=feature_id,
+            attrs=self.get_attributes(tabix_feature.attributes))
 
-        if attrs.get('parent') is not None:
-            self.relationships.append({'object_id': attrs['id'],
-                                       'subject_id': attrs['parent']})
+        if attrs_parent is not None:
+            self.relationships.append({'object_id': attrs_id,
+                                       'subject_id': attrs_parent})
 
         # Additional protrein record for each mRNA with the exact same ID
         if tabix_feature.feature == 'mRNA':
             translation_of = Cvterm.objects.get(
                 name='translation_of', cv__name='sequence')
-            feature_mRNA_translation = Feature.objects.create(
+            feature_mRNA_translation_id = Feature.objects.create(
                     organism=self.organism,
-                    uniquename=attrs.get('id'),
+                    uniquename=attrs_id,
                     type_id=self.aa_cvterm.cvterm_id,
-                    name=attrs.get('name'),
+                    name=attrs_name,
                     dbxref=dbxref,
                     is_analysis=False,
                     is_obsolete=False,
                     timeaccessioned=datetime.now(timezone.utc),
-                    timelastmodified=datetime.now(timezone.utc))
-            FeatureRelationship.objects.create(object=feature_mRNA_translation,
-                                               subject=feature,
-                                               type=translation_of,
-                                               rank=0)
+                    timelastmodified=datetime.now(timezone.utc)).feature_id
+            FeatureRelationship.objects.create(
+                object_id=feature_mRNA_translation_id, subject_id=feature_id,
+                type=translation_of, rank=0)
 
     def store_relationships(self) -> None:
         """Store the relationships."""
@@ -399,7 +403,7 @@ class FeatureLoader(object):
             raise ImportingError('{} not found.'.format(feature))
 
         for feature_obj in features:
-            self.process_attributes(feature_obj, attrs)
+            self.process_attributes(feature_obj.feature_id, attrs)
 
     def store_feature_publication(self,
                                   feature: str,

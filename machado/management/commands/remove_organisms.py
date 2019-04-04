@@ -7,7 +7,7 @@
 """Remove organisms file."""
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Db, Dbxref, Organism, Organismprop, OrganismDbxref
+from machado.models import Db, Dbxref, Organism, OrganismDbxref
 
 
 class Command(BaseCommand):
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self,
                dbname: str,
-               verbosity: int=1,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
         try:
@@ -34,8 +34,6 @@ class Command(BaseCommand):
             organism_ids = list(OrganismDbxref.objects.filter(
                 dbxref_id__in=dbxref_ids).values_list(
                     'organism_id', flat=True))
-            Organismprop.objects.filter(organism_id__in=organism_ids).delete()
-            OrganismDbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
             Organism.objects.filter(organism_id__in=organism_ids).delete()
             Dbxref.objects.filter(db=db).delete()
             db.delete()

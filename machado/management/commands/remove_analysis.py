@@ -79,8 +79,11 @@ class Command(BaseCommand):
                                 'feature_id', flat=True))
                     Featureloc.objects.filter(
                         feature_id__in=feature_ids).delete()
+                    # remove only features created by load_similarity
+                    # type == match_part
                     Feature.objects.filter(
-                        feature_id__in=feature_ids).delete()
+                        feature_id__in=feature_ids,
+                        type__name='match_part').delete()
                     Analysisfeature.objects.filter(analysis=analysis).delete()
                 except ObjectDoesNotExist:
                     pass
