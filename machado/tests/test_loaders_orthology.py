@@ -10,7 +10,6 @@ from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref, Feature
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.feature import FeatureLoader
-from django.core.management import call_command
 from django.test import TestCase
 from datetime import datetime, timezone
 
@@ -582,27 +581,3 @@ class OrthologyTest(TestCase):
         # in orphaned groups (machado0006)
         self.assertFalse(FeatureRelationship.objects.filter(
                            subject_id=feature16.feature_id).exists())
-        # removing all relationships
-        call_command("remove_relationship",
-                     "--file=groups.txt",
-                     "--verbosity=0")
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id).exists())
-        # reverse should never have existed
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id).exists())
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature10.feature_id,
-                           object_id=feature17.feature_id).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship1,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
-        self.assertFalse(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship10,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
