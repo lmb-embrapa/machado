@@ -10,13 +10,28 @@ from django.shortcuts import render
 from django.db.models import Count
 from django.views import View
 from django.views.generic import TemplateView
-from machado.models import Feature, Pub
+from machado.models import Cv, Organism, Feature, Pub
 
 
 class HomeView(TemplateView):
     """Home view."""
 
     template_name = "index.html"
+
+
+class CongratsView(TemplateView):
+    """Congrats view."""
+
+    def get(self, request):
+        """General data numbers."""
+        data = dict()
+
+        data['cv'] = Cv.objects.count()
+        data['organism'] = Organism.objects.count()
+        data['feature'] = Feature.objects.count()
+        data['pub'] = Pub.objects.count()
+
+        return render(request, 'congrats.html', {'context': data})
 
 
 class DataSummaryView(View):

@@ -9,6 +9,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.views.decorators.cache import cache_page
+from machado.views import common
 
 
 try:
@@ -22,7 +23,7 @@ urlpatterns = [
 ]
 
 if 'haystack' in settings.INSTALLED_APPS:
-    from machado.views import common, feature, search
+    from machado.views import feature, search
 
     urlpatterns += [
         url(r'feature/', cache_page(CACHE_TIMEOUT)(
@@ -34,4 +35,9 @@ if 'haystack' in settings.INSTALLED_APPS:
             name='feature_search'),
         url(r'^$', cache_page(CACHE_TIMEOUT)(
             common.HomeView.as_view()), name='home')
+    ]
+else:
+    urlpatterns += [
+        url(r'^$', cache_page(CACHE_TIMEOUT)(
+            common.CongratsView.as_view()), name='home')
     ]
