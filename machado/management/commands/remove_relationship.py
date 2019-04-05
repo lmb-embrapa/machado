@@ -54,10 +54,10 @@ class Command(BaseCommand):
         try:
             tasks = list()
             pool = ThreadPoolExecutor(max_workers=cpu)
-            fr_ids = FeatureRelationshipprop.objects.filter(
+            fr_ids = list(FeatureRelationshipprop.objects.filter(
                      value=filename,
                      type_id=cvterm_contained_in.cvterm_id).values_list(
-                     'feature_relationship_id', flat=True)
+                     'feature_relationship_id', flat=True))
             if verbosity > 1:
                 self.stdout.write(
                     'Preprocessing (using {} cpu)...'.format(cpu))

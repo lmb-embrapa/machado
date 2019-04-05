@@ -74,8 +74,9 @@ The features need to be loaded previously or won't be registered."""
             raise CommandError(e)
 
         tasks = list()
-        cvterm_cluster = Cvterm.objects.get(
-            name='in branching relationship with', cv__name='relationship')
+        cvterm_cluster_id = Cvterm.objects.get(
+            name='in branching relationship with',
+            cv__name='relationship').cvterm_id
         # feature source is not needed here
         source = "null"
         featureloader = FeatureLoader(
@@ -105,7 +106,7 @@ The features need to be loaded previously or won't be registered."""
             tasks.append(pool.submit(
                               featureloader.store_feature_relationships_group,
                               group=fields,
-                              term=cvterm_cluster,
+                              term=cvterm_cluster_id,
                               value=name))
         if verbosity > 0:
             self.stdout.write('Loading')
@@ -114,9 +115,5 @@ The features need to be loaded previously or won't be registered."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
-            print("Stored in cache: {}".format(len(
-                featureloader.cache)))
-            print("Used cache: {}".format(
-                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))
