@@ -456,7 +456,6 @@ class FeatureLoader(object):
                                   'FASTA_SOURCE'],
 
             ).distinct('feature_id').values_list('feature_id', flat=True))
-        print("group {} with members: {}".format(value, feature_list))
         buffer_group = feature_list.copy()
         for member in feature_list:
             buffer_group.remove(member)

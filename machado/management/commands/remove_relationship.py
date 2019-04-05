@@ -11,8 +11,6 @@ from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
 import os
 
 
@@ -27,19 +25,9 @@ class Command(BaseCommand):
                             help="name of the file (e.g.: groups.txt",
                             required=True,
                             type=str)
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            required=False,
-                            type=int)
-
-    def remove_fr(self, fr_id: str):
-        """Remove FeatureRelationship."""
-        FeatureRelationship.objects.filter(
-            feature_relationship_id=fr_id).delete()
 
     def handle(self,
                file: str,
-               cpu: int = 0,
                verbosity: int = 0,
                **options):
         """Execute the main function."""
@@ -51,28 +39,17 @@ class Command(BaseCommand):
             raise ImportingError(e)
         filename = os.path.basename(file)
 
+        if verbosity > 0:
+            self.stdout.write('Removing ...')
         try:
-            tasks = list()
-            pool = ThreadPoolExecutor(max_workers=cpu)
             fr_ids = list(FeatureRelationshipprop.objects.filter(
                      value=filename,
                      type_id=cvterm_contained_in.cvterm_id).values_list(
                      'feature_relationship_id', flat=True))
-            if verbosity > 1:
-                self.stdout.write(
-                    'Preprocessing (using {} cpu)...'.format(cpu))
-            for fr_id in tqdm(fr_ids, total=len(fr_ids),
-                              disable=False if verbosity > 1 else True):
-                tasks.append(pool.submit(self.remove_fr, fr_id))
-            if verbosity > 0:
-                self.stdout.write('Removing (using {} cpu)...'.format(cpu))
-            for task in tqdm(as_completed(tasks), total=len(tasks),
-                             disable=False if verbosity > 0 else True):
-                if task.result():
-                    raise(task.result())
+            FeatureRelationship.objects.filter(
+                feature_relationship_id__in=fr_ids).delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))
-            pool.shutdown()
         except IntegrityError as e:
             raise CommandError(
                     'It\'s not possible to delete every record. You must '
