@@ -229,18 +229,19 @@ class FeatureLoader(object):
             except IntegrityError as e:
                 raise ImportingError(e)
 
-        try:
-            srcdb = Db.objects.get(name="FASTA_SOURCE")
-            srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
-                                           db=srcdb)
-            srcfeature_id = Feature.objects.filter(
-                dbxref=srcdbxref, organism=self.organism).values(
-                    'feature_id').first()['feature_id']
-        except KeyError:
+        srcdb = Db.objects.get(name="FASTA_SOURCE")
+        srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
+                                       db=srcdb)
+        srcfeature = Feature.objects.filter(
+            dbxref=srcdbxref, organism=self.organism).values_list(
+                'feature_id', flat=True)
+        if len(srcfeature) == 1:
+            srcfeature_id = srcfeature.first()
+        else:
             raise ImportingError(
-                "Parent not found: {}. It's required to load "
-                "a reference FASTA file before loading features."
-                .format(tabix_feature.contig))
+                    "Parent not found: {}. It's required to load "
+                    "a reference FASTA file before loading features."
+                    .format(tabix_feature.contig))
 
         # the database requires -1, 0, and +1 for strand
         if tabix_feature.strand == '+':
@@ -398,7 +399,8 @@ class FeatureLoader(object):
         features = Feature.objects.filter(
             organism=self.organism,
             dbxref__accession=feature,
-            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
+            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
+                'feature_id')
 
         if len(features) == 0:
             raise ImportingError('{} not found.'.format(feature))
@@ -413,7 +415,8 @@ class FeatureLoader(object):
         features = Feature.objects.filter(
             organism=self.organism,
             dbxref__accession=feature,
-            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
+            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
+                'feature_id')
 
         if len(features) == 0:
             raise ImportingError('{} not found.'.format(feature))
@@ -450,16 +453,14 @@ class FeatureLoader(object):
                 self.usedcache += 1
             except KeyError:
                 try:
-                    subject = Feature.objects.filter(
+                    subject_id = Feature.objects.get(
                         type__cv__name='sequence',
                         type__name='polypeptide',
                         dbxref__accession=member,
                         dbxref__db__name__in=['GFF_SOURCE',
-                                              'FASTA_SOURCE'])
-                    subject_id = subject.values(
-                        'feature_id').first()['feature_id']
+                                              'FASTA_SOURCE']).feature_id
                     self.cache[member] = subject_id
-                except TypeError:
+                except ObjectDoesNotExist:
                     continue
             except IntegrityError as e:
                 raise ImportingError(e)
@@ -469,16 +470,14 @@ class FeatureLoader(object):
                     object_id = self.cache[othermember]
                 except KeyError:
                     try:
-                        object = Feature.objects.filter(
+                        object_id = Feature.objects.get(
                             type__cv__name='sequence',
                             type__name='polypeptide',
                             dbxref__accession=othermember,
                             dbxref__db__name__in=['GFF_SOURCE',
-                                                  'FASTA_SOURCE'])
-                        object_id = object.values(
-                            'feature_id').first()['feature_id']
+                                                  'FASTA_SOURCE']).feature_id
                         self.cache[othermember] = object_id
-                    except TypeError:
+                    except ObjectDoesNotExist:
                         continue
                 except IntegrityError as e:
                     raise ImportingError(e)
