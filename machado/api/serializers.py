@@ -35,8 +35,9 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             return None
 
-        ref = Feature.objects.get(
-            feature_id=location.srcfeature_id).uniquename
+        ref = Feature.objects.filter(
+            feature_id=location.srcfeature_id).values_list(
+                'uniquename', flat=True).first()
 
         return {
             'ref': ref,
@@ -81,7 +82,9 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         feature_loc = Featureloc.objects.get(
             feature_id=feature_id, srcfeature_id=self.context['refseq'])
         return {
-            'type': Feature.objects.get(feature_id=feature_id).type.name,
+            'type': Feature.objects.filter(
+                feature_id=feature_id).values_list(
+                    'type__name', flat=True).first(),
             'start': feature_loc.fmin,
             'end': feature_loc.fmax,
             'strand': feature_loc.strand,
