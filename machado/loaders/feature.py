@@ -233,9 +233,10 @@ class FeatureLoader(object):
             srcdb = Db.objects.get(name="FASTA_SOURCE")
             srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
                                            db=srcdb)
-            srcfeature_id = Feature.objects.get(
-                dbxref=srcdbxref, organism=self.organism).feature_id
-        except ObjectDoesNotExist:
+            srcfeature_id = Feature.objects.filter(
+                dbxref=srcdbxref, organism=self.organism).values(
+                    'feature_id').first()['feature_id']
+        except KeyError:
             raise ImportingError(
                 "Parent not found: {}. It's required to load "
                 "a reference FASTA file before loading features."
@@ -449,14 +450,16 @@ class FeatureLoader(object):
                 self.usedcache += 1
             except KeyError:
                 try:
-                    subject_id = Feature.objects.get(
+                    subject = Feature.objects.filter(
                         type__cv__name='sequence',
                         type__name='polypeptide',
                         dbxref__accession=member,
                         dbxref__db__name__in=['GFF_SOURCE',
-                                              'FASTA_SOURCE']).feature_id
+                                              'FASTA_SOURCE'])
+                    subject_id = subject.values(
+                        'feature_id').first()['feature_id']
                     self.cache[member] = subject_id
-                except ObjectDoesNotExist:
+                except TypeError:
                     continue
             except IntegrityError as e:
                 raise ImportingError(e)
@@ -466,14 +469,16 @@ class FeatureLoader(object):
                     object_id = self.cache[othermember]
                 except KeyError:
                     try:
-                        object_id = Feature.objects.get(
+                        object = Feature.objects.filter(
                             type__cv__name='sequence',
                             type__name='polypeptide',
                             dbxref__accession=othermember,
                             dbxref__db__name__in=['GFF_SOURCE',
-                                                  'FASTA_SOURCE']).feature_id
+                                                  'FASTA_SOURCE'])
+                        object_id = object.values(
+                            'feature_id').first()['feature_id']
                         self.cache[othermember] = object_id
-                    except ObjectDoesNotExist:
+                    except TypeError:
                         continue
                 except IntegrityError as e:
                     raise ImportingError(e)
