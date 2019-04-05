@@ -1,0 +1,62 @@
+<!--
+ Copyright 2018 by Embrapa.  All rights reserved.
+
+ This code is part of the machado distribution and governed by its
+ license. Please see the LICENSE.txt and README.md files that should
+ have been included as part of this package for licensing information.
+ -->
+
+<!doctype html>
+
+{% load static %}
+
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+
+  <title>machado</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="{% static 'machado.css' %}">
+</head>
+
+
+  <body style="background-color: #d8d8dd">
+
+  <br />
+
+  <div class="container-fluid" name="content">
+    <div class="rounded bg-light p-5">
+        <h1><i class="fas fa-star"></i> <i class="fas fa-medal"></i> Congratulations <i class="fas fa-trophy"></i> <i class="fas fa-award"></i></h1>
+
+        <br />
+
+        <p>It seems good so far. <i class="far fa-grin-beam-sweat"></i></p>
+        <p>
+          Now you can start loading data to your database (<a href="https://machado.readthedocs.io/en/latest/dataload.html">Data loading</a>).
+          <br />
+          This page will be replaced by a full website once you configure a few packages (<a href="https://machado.readthedocs.io/en/latest/index_search.html">Visualization</a>).
+        </p>
+
+        <hr />
+
+        <h4>Your database contents</h4>
+        <ul class="list-group w-25">
+            <li class="list-group-item d-flex justify-content-between align-items-center ">
+                Controlled Vocabularies <span class="badge badge-primary badge-pill">{{ context.cv }}</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Organisms <span class="badge badge-primary badge-pill">{{ context.organism }}</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Features <span class="badge badge-primary badge-pill">{{ context.feature }}</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Publications <span class="badge badge-primary badge-pill">{{ context.pub }}</span></li>
+        </ul>
+
+    </div>
+  </div>
+
+</body>
+</html>
