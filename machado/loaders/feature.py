@@ -443,49 +443,29 @@ class FeatureLoader(object):
         """Store Feature Relationship Groups."""
         # check if retrieving cvterm is needed
         if isinstance(term, Cvterm):
-            cvterm = term
+            cvterm = term.cvterm_id
         else:
-            cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
-        buffer_group = group.copy()
-        for member in group:
-            try:
-                subject_id = self.cache[member]
-                self.usedcache += 1
-            except KeyError:
-                try:
-                    subject_id = Feature.objects.get(
-                        type__cv__name='sequence',
-                        type__name='polypeptide',
-                        dbxref__accession=member,
-                        dbxref__db__name__in=['GFF_SOURCE',
-                                              'FASTA_SOURCE']).feature_id
-                    self.cache[member] = subject_id
-                except ObjectDoesNotExist:
-                    continue
-            except IntegrityError as e:
-                raise ImportingError(e)
+            cvterm = term
+            # cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
+        # lets get every feature that is in the db
+        feature_list = list(Feature.objects.filter(
+            type__cv__name='sequence',
+            type__name='polypeptide',
+            dbxref__accession__in=group,
+            dbxref__db__name__in=['GFF_SOURCE',
+                                  'FASTA_SOURCE'],
+
+            ).distinct('feature_id').values_list('feature_id', flat=True))
+        buffer_group = feature_list.copy()
+        for member in feature_list:
             buffer_group.remove(member)
+            # print(buffer_group)
             for othermember in buffer_group:
                 try:
-                    object_id = self.cache[othermember]
-                except KeyError:
-                    try:
-                        object_id = Feature.objects.get(
-                            type__cv__name='sequence',
-                            type__name='polypeptide',
-                            dbxref__accession=othermember,
-                            dbxref__db__name__in=['GFF_SOURCE',
-                                                  'FASTA_SOURCE']).feature_id
-                        self.cache[othermember] = object_id
-                    except ObjectDoesNotExist:
-                        continue
-                except IntegrityError as e:
-                    raise ImportingError(e)
-                try:
                     frelationship_id = FeatureRelationship.objects.create(
-                                            subject_id=subject_id,
-                                            object_id=object_id,
-                                            type=cvterm,
+                                            subject_id=member,
+                                            object_id=othermember,
+                                            type_id=cvterm,
                                             value=value,
                                             rank=0).feature_relationship_id
                     FeatureRelationshipprop.objects.create(
