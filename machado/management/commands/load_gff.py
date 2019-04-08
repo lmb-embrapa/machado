@@ -76,8 +76,6 @@ class Command(BaseCommand):
         tasks = list()
 
         chunk_size = cpu*2
-        bar_format = '{percentage:3.0f}%|{bar}| [{elapsed}<{remaining}, '\
-                     '{rate_fmt}{postfix}]'
 
         # Load the GFF3 file
         with open(file) as tbx_file:
@@ -85,7 +83,7 @@ class Command(BaseCommand):
             tbx_generator = tbx.fetch(parser=pysam.asGTF())
             for chunk in tqdm(zip(*[tbx_generator]*chunk_size),
                               total=int(get_num_lines(file)/chunk_size),
-                              bar_format=bar_format):
+                              unit='chunk'):
                 for row in chunk:
                     if ignore is not None and row.feature in ignore:
                         continue
