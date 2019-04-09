@@ -41,21 +41,41 @@ To load such a table, one can run the command below:
 
 \* example output file from LSTrAP software.
 
+Remove coexpression pairs
+-------------------------
+
+If, by any reason, you need to remove coexpression pair analyzes, all you need to do is pass
+the filename used to load the analyzes to the remove_relationships command: remove_relationship --file <coexpression_file>'
+**Every coexpression relations from coexpression_file (e.g. 'pcc.mcl.txt' from LSTrAP) will be deleted on cascade**.
+
+.. code-block:: bash
+
+    python manage.py remove_relationship --help
+
+=============   ==================================================================================
+--file           'mcl.clusters.txt' file *
+=============   ==================================================================================
+
+\* example output file from LSTrAP software.
+
+
 Load Coexpression clusters
 ---------------------------
 
 Other type of coexpression analyzes involve clustering features using its correlation values.
 LSTrAP does that using the 'mcl' software. To load data from such analyzes, the input file must be
 headless and fields tab separated, with each line representing one cluster, and each column representing
-one gene/feature from that cluster. Three-cluster sample from such a file is shown below, the first line
+one gene/feature from that cluster. The first column should represent the cluster name and must have the
+format: "<cluster_name>:".
+Three-cluster sample from such a file is shown below, the first line
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
-orphaned cluster with only one individual:
+orphaned cluster with only one individual (obs: orphaned clusters are discarded). :
 
 .. code-block:: bash
 
-    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
-    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-    AT5G24750.1.TAIR10
+ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+ath_3:    AT5G24750.1.TAIR10
 
 Note: The genes/features from each column must be loaded previously.
 
@@ -79,21 +99,20 @@ To load such a file, one can run the command below:
 
 \* example output file from LSTrAP software.
 
+Remove coexpression clusters
+----------------------------
 
-Remove coexpression
--------------------
+If, by any reason, you need to remove coexpression cluster analyzes, you need to pass
+the controlled vocabulary term 'coexpression group' and the organism scientific name to
+the command remove_feature_group: *remove_feature_group --term 'coexpression group' --organism 'Arabidopsis thaliana'* *
 
-If, by any reason, you need to remove coexpression analyzes, from pairs or clusters, all you need to do is pass
-the filename used to load the analyzes to the remove_relationships command: remove_relationship --file <coexpression_file>'
-**Every coexpression relations from coexpression_file (e.g. 'pcc.mcl.txt' or 'mcl.clusters.txt' from LSTrAP) will be deleted on cascade**.
+\*Every coexpression group relations from that organism will be deleted on cascade**.
 
 .. code-block:: bash
 
-    python manage.py remove_relationship --help
+    python manage.py remove_feature_group --help
 
-=============   ==================================================================================
---file           'mcl.clusters.txt' file *
-=============   ==================================================================================
-
-\* example output file from LSTrAP software.
-
+====================  ========================================
+--term TERM            mandatory: 'coexpression group'
+--organism ORGANISM    Scientific name (e.g.: 'Oryza sativa')
+====================  ========================================
