@@ -312,7 +312,8 @@ class FeatureLoader(object):
         part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
         features = Feature.objects.filter(
-            organism=self.organism).exclude(type=self.aa_cvterm)
+            organism=self.organism).exclude(type=self.aa_cvterm).only(
+                'feature_id')
         for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created
