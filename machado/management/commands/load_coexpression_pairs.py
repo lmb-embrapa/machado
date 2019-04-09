@@ -107,6 +107,12 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                         if task.result():
                             raise(task.result())
                     tasks.clear()
+            else:
+                for task in (as_completed(tasks)):
+                    if task.result():
+                        raise(task.result())
+                tasks.clear()
+            pool.shutdown()
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

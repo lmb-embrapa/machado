@@ -113,9 +113,5 @@ The feature members need to be loaded previously."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
-            print("Stored in cache: {} features".format(len(
-                featureloader.cache)))
-            print("Used cache: {} times".format(
-                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

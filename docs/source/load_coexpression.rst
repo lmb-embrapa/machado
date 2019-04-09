@@ -104,15 +104,15 @@ Remove coexpression clusters
 
 If, by any reason, you need to remove coexpression cluster analyzes, you need to pass
 the controlled vocabulary term 'coexpression group' and the organism scientific name to
-the command remove_feature_group: *remove_feature_group --term 'coexpression group' --organism 'Arabidopsis thaliana'* *
+the command remove_feature_group: *remove_feature_group --cvterm 'coexpression group' --organism 'Arabidopsis thaliana'* *
 
 \*Every coexpression group relations from that organism will be deleted on cascade**.
 
 .. code-block:: bash
 
-    python manage.py remove_feature_group --help
+    python manage.py remove_feature_annotation --help
 
 ====================  ========================================
---term TERM            mandatory: 'coexpression group'
+--cvterm TERM            mandatory: 'coexpression group'
 --organism ORGANISM    Scientific name (e.g.: 'Oryza sativa')
 ====================  ========================================

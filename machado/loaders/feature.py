@@ -501,11 +501,10 @@ class FeatureLoader(object):
 
             ).distinct('feature_id').values_list('feature_id', flat=True))
         # only stores clusters with 2 or more members
-        if len(feature_list) > 1:
-            for member in feature_list:
-                featureprops.append(Featureprop(
-                               feature_id=member,
-                               type_id=cvterm,
-                               value=value,
-                               rank=0))
-            Featureprop.objects.bulk_create(featureprops)
+        for member in feature_list:
+            featureprops.append(Featureprop(
+                           feature_id=member,
+                           type_id=cvterm,
+                           value=value,
+                           rank=0))
+        Featureprop.objects.bulk_create(featureprops)
