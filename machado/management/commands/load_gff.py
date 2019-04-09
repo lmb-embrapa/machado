@@ -79,22 +79,22 @@ class Command(BaseCommand):
 
         # Load the GFF3 file
         with open(file) as tbx_file:
+            # print(str(tbx_file.name))
             tbx = pysam.TabixFile(tbx_file.name)
-            tbx_generator = tbx.fetch(parser=pysam.asGTF())
-            for chunk in tqdm(zip(*[tbx_generator]*chunk_size),
-                              total=int(get_num_lines(file)/chunk_size),
-                              unit='chunk'):
-                for row in chunk:
-                    if ignore is not None and row.feature in ignore:
-                        continue
-                    tasks.append(pool.submit(
-                        feature_file.store_tabix_feature, row))
+            for row in tqdm(tbx.fetch(parser=pysam.asGTF()),
+                            total=get_num_lines(file)):
+                if ignore is not None and row.feature in ignore:
+                    continue
+                tasks.append(pool.submit(
+                    feature_file.store_tabix_feature, row))
 
-                for task in as_completed(tasks):
-                    try:
-                        task.result()
-                    except ImportingError as e:
-                        raise CommandError(e)
+                if len(tasks) >= chunk_size:
+                    for task in as_completed(tasks):
+                        try:
+                            task.result()
+                        except ImportingError as e:
+                            raise CommandError(e)
+                    tasks.clear()
         pool.shutdown()
 
         if verbosity > 0:
