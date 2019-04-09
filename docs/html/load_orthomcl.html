@@ -199,9 +199,9 @@
 </div>
 <div class="section" id="remove-orthology">
 <h2>2.12.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
-<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_feature_group –organism ‘multispecies multispecies’ –term ‘orthologous group’.</em> *</p>
+<p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_feature_annotation –organism ‘multispecies multispecies’ –cvterm ‘orthologous group’.</em> *</p>
 <p>*Every orthologous relations will be deleted.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_group --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
 <table border="1" class="docutils">
@@ -210,11 +210,11 @@
 <col width="67%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>–term TERM</td>
+<tr class="row-odd"><td>–cvterm TERM</td>
 <td>mandatory: ‘orthologous group’</td>
 </tr>
 <tr class="row-even"><td>–organism ORGANISM</td>
-<td>mandatory: ‘Multispecies multispecies’</td>
+<td>mandatory: ‘multispecies multispecies’</td>
 </tr>
 </tbody>
 </table>
