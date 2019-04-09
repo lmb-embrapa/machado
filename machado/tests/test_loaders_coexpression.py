@@ -127,12 +127,12 @@ class CoexpressionTest(TestCase):
                 filename=test_filename,
                 organism=test_organism)
         test_coexpression_loader.store_feature_pairs(
-            group=test_pair1,
+            pair=test_pair1,
             term=term,
             value=test_pcc_value1,
         )
         test_coexpression_loader.store_feature_pairs(
-            group=test_pair2,
+            pair=test_pair2,
             term=term,
             value=test_pcc_value2,
         )
