@@ -95,6 +95,14 @@ class Command(BaseCommand):
                         except ImportingError as e:
                             raise CommandError(e)
                     tasks.clear()
+            else:
+                for task in as_completed(tasks):
+                    try:
+                        task.result()
+                    except ImportingError as e:
+                        raise CommandError(e)
+                tasks.clear()
+
         pool.shutdown()
 
         if verbosity > 0:
