@@ -25,10 +25,15 @@ Load OrthoMCL
 Remove orthology
 ----------------
 
-If, by any reason, you need to remove orthology relationships, you should use the command *remove_relationship --file*. **Every orthologous relations from file (e.g. 'groups.txt' from OrthoMCL) will be deleted on cascade**.
+If, by any reason, you need to remove orthology relationships, you should use the command *remove_feature_annotation --organism 'multispecies multispecies' --cvterm 'orthologous group'.* *
+
+\*Every orthologous relations will be deleted.
 
 .. code-block:: bash
 
-    python manage.py remove_relationship --help
+    python manage.py remove_feature_annotation --help
 
-* This command requires the file name 'groups.txt' used before as input to load orthologies.
+====================  ========================================
+--cvterm TERM          mandatory: 'orthologous group'
+--organism ORGANISM    mandatory: 'multispecies multispecies'
+====================  ========================================

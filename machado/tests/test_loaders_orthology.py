@@ -8,7 +8,7 @@
 
 from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref, Feature
-from machado.models import FeatureRelationship, FeatureRelationshipprop
+from machado.models import Featureprop
 from machado.loaders.feature import FeatureLoader
 from django.test import TestCase
 from datetime import datetime, timezone
@@ -25,23 +25,25 @@ class OrthologyTest(TestCase):
         # creating test RO term
         ro_db = Db.objects.create(name='RO')
         ro_cv = Cv.objects.create(name='relationship')
+        fo_db = Db.objects.create(name='ORTHOMCL_SOURCE')
+        fo_cv = Cv.objects.create(name='feature_property')
 
         # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         so_dbxref = Dbxref.objects.create(accession='357', db=so_db)
         so_dbxref2 = Dbxref.objects.create(accession='358', db=so_db)
         ro_dbxref = Dbxref.objects.create(accession='658', db=ro_db)
         # creating test SO term
-        cvterm_contained_in = Cvterm.objects.create(
+        Cvterm.objects.create(
             name='contained in', cv=ro_cv, dbxref=ro_dbxref,
             is_obsolete=0, is_relationshiptype=1)
 
         ortho_dbxref = Dbxref.objects.create(
-                accession='in orthology relationship with',
-                db=ro_db)
+                accession='ORTHOMCL_SOURCE',
+                db=fo_db)
         term = Cvterm.objects.create(
-                name='in orthology relationship with', cv=ro_cv,
+                name='orthologous group', cv=fo_cv,
                 dbxref=ortho_dbxref, is_obsolete=0,
-                is_relationshiptype=1)
+                is_relationshiptype=0)
         poly_cvterm = Cvterm.objects.create(
             name='polypeptide',
             cv=so_cv,
@@ -362,7 +364,6 @@ class OrthologyTest(TestCase):
                         dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'],
                         ).exists())
         # inserting: Glyma.10G030500.1.Wm82.a2.v1; Glyma.10G053100.1.Wm82.a2.v1
-        # Glyma.10G008400.1.Wm82.a2.v1
         acc13 = "Glyma.10G030500.1.Wm82.a2.v1"
         dbxref13 = Dbxref.objects.create(
                                         db=db,
@@ -488,7 +489,7 @@ class OrthologyTest(TestCase):
         members1 = ['Aqcoe0131s0001.1.v3.1', 'Bradi0180s00100.1.v3.1',
                     'Bradi2g20400.1.v3.1', 'Ciclev10013963m.v1.0',
                     'DCAR_032223.v1.0.388', 'UnknownProtein.v1.1']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members1,
             term=term,
             value=group1_name
@@ -497,7 +498,7 @@ class OrthologyTest(TestCase):
         members2 = ['Eucgr.L02820.1.v2.0',
                     'mrna13067.1-v1.0-hybrid.v1.1', 'Ciclev10013970m.v1.0',
                     'DCAR_031986.v1.0.388']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members2,
             term=term,
             value=group2_name
@@ -505,36 +506,36 @@ class OrthologyTest(TestCase):
         group3_name = 'machado0003'
         members3 = ['Glyma.10G030500.1.Wm82.a2.v1',
                     'Glyma.10G053100.1.Wm82.a2.v1', 'DCAR_032182.v1.0.388']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members3,
             term=term,
             value=group3_name
         )
         group4_name = 'machado0004'
         members4 = ['Glyma.10G008400.1.Wm82.a2.v1',
-                    'Ciclev10013963m.v1.0', 'UnknownProtein.v1.2']
-        test_orthology_loader.store_feature_relationships_group(
+                    '', 'UnknownProtein.v1.2']
+        test_orthology_loader.store_feature_groups(
             group=members4,
             term=term,
             value=group4_name
         )
         group5_name = 'machado0005'
         members5 = ['DCAR_000323.v1.0.388', 'Kaladp0598s0002.1.v1.1']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members5,
             term=term,
             value=group5_name,
         )
         group6_name = 'machado0006'
         members6 = ['Kaladp0598s0001.1.v1.1', 'UnknownProtein.v1.3']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members6,
             term=term,
             value=group6_name
         )
         group7_name = 'machado0007'
         members7 = ['UnknownProtein.v1.4']
-        test_orthology_loader.store_feature_relationships_group(
+        test_orthology_loader.store_feature_groups(
             group=members7,
             term=term,
             value=group7_name
@@ -542,42 +543,39 @@ class OrthologyTest(TestCase):
 
         # ###check if relationships exist###
         # in a group (machado0001 and machado0005)
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=feature1.feature_id,
+                           type_id=term,
                            value=group1_name).exists())
-        frelationship1 = FeatureRelationship.objects.get(
-                           subject_id=feature1.feature_id,
-                           object_id=feature9.feature_id)
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship1,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
-        # reverse should not work
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature9.feature_id,
-                           object_id=feature1.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=feature9.feature_id,
+                           type_id=term,
+                           value=group1_name).exists())
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=feature4.feature_id,
+                           type_id=term,
                            value=group1_name).exists())
         # another example group5
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=feature10.feature_id,
-                           object_id=feature17.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=feature10.feature_id,
+                           type_id=term,
                            value=group5_name).exists())
-        frelationship10 = FeatureRelationship.objects.get(
-                           subject_id=feature10.feature_id,
-                           object_id=feature17.feature_id)
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=frelationship10,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=filename,
-                           rank=0).exists())
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=feature17.feature_id,
+                           type_id=term,
+                           value=group5_name).exists())
         # another example:
         # ###check if a relationship does not exist###
         # between features from different groups (machado0004 and machado0003)
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature4.feature_id,
-                           object_id=feature14.feature_id).exists())
-        # in orphaned groups (machado0006)
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=feature16.feature_id).exists())
+        self.assertFalse(Featureprop.objects.filter(
+                           feature_id=feature16.feature_id,
+                           type_id=term,
+                           value=group6_name).exists())
+        self.assertFalse(Featureprop.objects.filter(
+                           feature_id=feature4.feature_id,
+                           type_id=term,
+                           value=group2_name).exists())
+        self.assertFalse(Featureprop.objects.filter(
+                           feature_id=feature14.feature_id,
+                           type_id=term,
+                           value=group1_name).exists())

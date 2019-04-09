@@ -10,7 +10,7 @@ from machado.loaders.common import FileValidator
 from machado.loaders.common import get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from machado.models import Cvterm, Organism
+from machado.models import Cv, Cvterm, Organism, Dbxref, Db
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
@@ -59,8 +59,18 @@ The feature members need to be loaded previously."""
             raise CommandError(e)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        cvterm_cluster = Cvterm.objects.get(
-            name='in orthology relationship with', cv__name='relationship')
+        cv, created = Cv.objects.get_or_create(name='feature_property')
+        ortho_db, created = Db.objects.get_or_create(
+                name='ORTHOMCL_SOURCE')
+        ortho_dbxref, created = Dbxref.objects.get_or_create(
+                accession='ORTHOMCL_SOURCE',
+                db=ortho_db)
+        cvterm_cluster, created = Cvterm.objects.get_or_create(
+            name='orthologous group',
+            cv=cv,
+            dbxref=ortho_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
         organism, created = Organism.objects.get_or_create(
                     abbreviation='multispecies',
                     genus='multispecies',
@@ -92,9 +102,9 @@ The feature members need to be loaded previously."""
             if len(members) > 1:
                 tasks.append(
                     pool.submit(
-                            featureloader.store_feature_relationships_group,
+                            featureloader.store_feature_groups,
                             group=members,
-                            term=cvterm_cluster,
+                            term=cvterm_cluster.cvterm_id,
                             value=name))
         if verbosity > 0:
             self.stdout.write('Loading')
@@ -103,9 +113,5 @@ The feature members need to be loaded previously."""
                 raise(task.result())
         pool.shutdown()
         if verbosity > 0:
-            print("Stored in cache: {} features".format(len(
-                featureloader.cache)))
-            print("Used cache: {} times".format(
-                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

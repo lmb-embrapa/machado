@@ -6,7 +6,7 @@
 
 """Remove relationship."""
 
-from machado.models import Cvterm, FeatureRelationship, FeatureRelationshipprop
+from machado.models import Cvterm, FeatureRelationship
 from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,21 +33,18 @@ class Command(BaseCommand):
         """Execute the main function."""
         # get cvterm for contained in
         try:
-            cvterm_contained_in = Cvterm.objects.get(
+            cvterm = Cvterm.objects.get(
                 name='contained in', cv__name='relationship')
         except IntegrityError as e:
             raise ImportingError(e)
         filename = os.path.basename(file)
-
         if verbosity > 0:
             self.stdout.write('Removing ...')
         try:
-            fr_ids = list(FeatureRelationshipprop.objects.filter(
-                     value=filename,
-                     type_id=cvterm_contained_in.cvterm_id).values_list(
-                     'feature_relationship_id', flat=True))
             FeatureRelationship.objects.filter(
-                feature_relationship_id__in=fr_ids).delete()
+                FeatureRelationshipprop_feature_relationship_FeatureRelationship__value=filename,
+                FeatureRelationshipprop_feature_relationship_FeatureRelationship__type=cvterm
+                                              ).delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('Done'))
         except IntegrityError as e:
@@ -57,5 +54,4 @@ class Command(BaseCommand):
                     'depend on it. {}'.format(filename, e))
         except ObjectDoesNotExist:
             raise CommandError(
-                    'Cannot remove \'{}\' (not registered)'.format(
-                        filename))
+                    'Cannot remove \'{}\' (not registered)'.format(filename))

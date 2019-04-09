@@ -6,7 +6,8 @@
 
 """Tests coexpression data loader."""
 
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Feature
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism
+from machado.models import Feature, Featureprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.feature import FeatureLoader
 from datetime import datetime
@@ -125,13 +126,13 @@ class CoexpressionTest(TestCase):
                 source=source,
                 filename=test_filename,
                 organism=test_organism)
-        test_coexpression_loader.store_feature_relationships_group(
-            group=test_pair1,
+        test_coexpression_loader.store_feature_pairs(
+            pair=test_pair1,
             term=term,
             value=test_pcc_value1,
         )
-        test_coexpression_loader.store_feature_relationships_group(
-            group=test_pair2,
+        test_coexpression_loader.store_feature_pairs(
+            pair=test_pair2,
             term=term,
             value=test_pcc_value2,
         )
@@ -185,9 +186,10 @@ class CoexpressionTest(TestCase):
         # creating test RO term
         test_db2 = Db.objects.create(name='RO')
         test_cv2 = Cv.objects.create(name='relationship')
+        test_cv3 = Cv.objects.create(name='feature_property')
 
         # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
-        test_dbxref2 = Dbxref.objects.create(accession='789', db=test_db2)
+        test_dbxref2 = Dbxref.objects.create(accession='028', db=test_db)
         test_dbxref3 = Dbxref.objects.create(accession='135', db=test_db)
         test_dbxref4 = Dbxref.objects.create(accession='246', db=test_db2)
         test_dbxref5 = Dbxref.objects.create(accession='579', db=test_db2)
@@ -200,18 +202,18 @@ class CoexpressionTest(TestCase):
         #     name='polypeptide', cv=test_cv, dbxref=test_dbxref,
         #    is_obsolete=0, is_relationshiptype=0)
         # register features.
-        cvterm_contained_in = Cvterm.objects.create(
+        Cvterm.objects.create(
             name='contained in', cv=test_cv2, dbxref=test_dbxref2,
             is_obsolete=0, is_relationshiptype=1)
         Cvterm.objects.create(
             name='correlated with', cv=test_cv2, dbxref=test_dbxref4,
             is_obsolete=0, is_relationshiptype=1)
         term = Cvterm.objects.create(
-            name='in branching relationship with',
-            cv=test_cv2,
+            name='coexpression group',
+            cv=test_cv3,
             dbxref=test_dbxref5,
             is_obsolete=0,
-            is_relationshiptype=1)
+            is_relationshiptype=0)
         test_term = Cvterm.objects.create(
             name='polypeptide',
             cv=test_cv,
@@ -328,76 +330,44 @@ class CoexpressionTest(TestCase):
                 source=source,
                 filename=test_filename,
                 organism=test_organism)
-        test_coexpression_loader.store_feature_relationships_group(
+        test_coexpression_loader.store_feature_groups(
             group=test_cluster1,
             term=term,
             value=test_cluster1_name,
         )
-        test_coexpression_loader.store_feature_relationships_group(
+        test_coexpression_loader.store_feature_groups(
             group=test_cluster2,
             term=term,
             value=test_cluster2_name,
         )
-        test_coexpression_loader.store_feature_relationships_group(
+        test_coexpression_loader.store_feature_groups(
             group=test_cluster3,
             term=term,
             value=test_cluster3_name,
         )
         # check entire cluster1 relationships (not in reverse)
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature2.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=test_feature1.feature_id,
+                           type=term,
                            value=test_cluster1_name).exists())
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature3.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=test_feature3.feature_id,
+                           type=term,
                            value=test_cluster1_name).exists())
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=test_feature2.feature_id,
-                           object_id=test_feature3.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=test_feature2.feature_id,
+                           type=term,
                            value=test_cluster1_name).exists())
-        fr1 = FeatureRelationship.objects.get(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature2.feature_id,
-                           value=test_cluster1_name)
-        fr2 = FeatureRelationship.objects.get(
-                           subject_id=test_feature1.feature_id,
-                           object_id=test_feature3.feature_id,
-                           value=test_cluster1_name)
-        fr3 = FeatureRelationship.objects.get(
-                           subject_id=test_feature2.feature_id,
-                           object_id=test_feature3.feature_id,
-                           value=test_cluster1_name)
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr1,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr2,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr3,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        # check cluster2 relationships in reverse (false)
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature5.feature_id,
-                           object_id=test_feature4.feature_id,
+        # check cluster2 relationships
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=test_feature5.feature_id,
+                           type=term,
                            value=test_cluster2_name).exists())
-        self.assertTrue(FeatureRelationship.objects.filter(
-                           subject_id=test_feature4.feature_id,
-                           object_id=test_feature5.feature_id,
+        self.assertTrue(Featureprop.objects.filter(
+                           feature_id=test_feature4.feature_id,
+                           type=term,
                            value=test_cluster2_name).exists())
-        fr4 = FeatureRelationship.objects.get(
-                           subject_id=test_feature4.feature_id,
-                           object_id=test_feature5.feature_id,
-                           value=test_cluster2_name)
-        self.assertTrue(FeatureRelationshipprop.objects.filter(
-                           feature_relationship=fr4,
-                           type_id=cvterm_contained_in.cvterm_id,
-                           value=test_filename).exists())
-        # cluster3 is not supposed to generate any relationships
-        self.assertFalse(FeatureRelationship.objects.filter(
-                           subject_id=test_feature6.feature_id,
+        self.assertFalse(Featureprop.objects.filter(
+                           feature_id=test_feature6.feature_id,
+                           type=term,
                            value=test_cluster3_name).exists())

@@ -433,22 +433,66 @@ class FeatureLoader(object):
                     feature=feature_obj,
                     pub=pub_obj)
 
-    def store_feature_relationships_group(
+    def store_feature_pairs(
+                            self,
+                            pair: list,
+                            term: Union[str, Cvterm],
+                            value: str = None,
+                            cache: int = 0
+                            ) -> None:
+        """Store Feature Relationship Pairs."""
+        # only cvterm_id allowed
+        if isinstance(term, Cvterm):
+            cvterm_id = term.cvterm_id
+        else:
+            cvterm_id = term
+        # lets get feature_ids from the pair
+        try:
+            subject_id = Feature.objects.filter(
+                type__cv__name='sequence',
+                type__name='polypeptide',
+                dbxref__accession=pair[0],
+                dbxref__db__name__in=['GFF_SOURCE',
+                                      'FASTA_SOURCE'],
+                ).values_list('feature_id', flat=True).first()
+            object_id = Feature.objects.filter(
+                type__cv__name='sequence',
+                type__name='polypeptide',
+                dbxref__accession=pair[1],
+                dbxref__db__name__in=['GFF_SOURCE',
+                                      'FASTA_SOURCE'],
+                ).values_list('feature_id', flat=True).first()
+            frelationship_id = FeatureRelationship.objects.create(
+                                    subject_id=subject_id,
+                                    object_id=object_id,
+                                    type_id=cvterm_id,
+                                    value=value,
+                                    rank=0).feature_relationship_id
+            FeatureRelationshipprop.objects.create(
+                    feature_relationship_id=frelationship_id,
+                    type_id=self.cvterm_contained_in.cvterm_id,
+                    value=self.filename,
+                    rank=0)
+        except ObjectDoesNotExist:
+            print('Feature from pair ({}/{}) not registered.'
+                  .format(pair[0], pair[1]))
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+    def store_feature_groups(
                                self,
                                group: list,
                                term: Union[str, Cvterm],
                                value: str = None,
-                               ontology: Union[str, Cv] = 'relationship',
                                cache: int = 0
                                ) -> None:
         """Store Feature Relationship Groups."""
-        # check if retrieving cvterm is needed
+        # only cvterm_id allowed
         if isinstance(term, Cvterm):
             cvterm = term.cvterm_id
         else:
             cvterm = term
-            # cvterm = Cvterm.objects.get(name=term, cv__name=ontology)
-        # lets get every feature that is in the db
+        featureprops = list()
         feature_list = list(Feature.objects.filter(
             type__cv__name='sequence',
             type__name='polypeptide',
@@ -457,22 +501,12 @@ class FeatureLoader(object):
                                   'FASTA_SOURCE'],
 
             ).distinct('feature_id').values_list('feature_id', flat=True))
-        buffer_group = feature_list.copy()
-        for member in feature_list:
-            buffer_group.remove(member)
-            # print(buffer_group)
-            for othermember in buffer_group:
-                try:
-                    frelationship_id = FeatureRelationship.objects.create(
-                                            subject_id=member,
-                                            object_id=othermember,
-                                            type_id=cvterm,
-                                            value=value,
-                                            rank=0).feature_relationship_id
-                    FeatureRelationshipprop.objects.create(
-                            feature_relationship_id=frelationship_id,
-                            type=self.cvterm_contained_in,
-                            value=self.filename,
-                            rank=0)
-                except IntegrityError as e:
-                    raise ImportingError(e)
+        # only stores clusters with 2 or more members
+        if len(feature_list) > 1:
+            for member in feature_list:
+                featureprops.append(Featureprop(
+                               feature_id=member,
+                               type_id=cvterm,
+                               value=value,
+                               rank=0))
+            Featureprop.objects.bulk_create(featureprops)
