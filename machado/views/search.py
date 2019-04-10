@@ -47,3 +47,23 @@ class FeatureSearchView(FacetedSearchView):
             type__cv__name='relationship').distinct("value").exists()
 
         return context
+
+
+class FeatureSearchExportView(FacetedSearchView):
+    """Export search results view."""
+
+    form_class = FeatureSearchForm
+    facet_fields = FACET_FIELDS
+    template_name = 'search_result.tsv'
+    paginate_by = False
+    context_object_name = 'object_list'
+    content_type = 'text/tsv'
+
+    def dispatch(self, *args, **kwargs):
+        """Create response."""
+        response = super(FeatureSearchExportView,
+                         self).dispatch(*args, **kwargs)
+        filename = 'machado_search_results.tsv'
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(
+            filename)
+        return response
