@@ -19,7 +19,14 @@
         </div>
 
         <div class="col py-2 mx-1 rounded bg-light">
-            <h3>Results</h3>
+            <div class="row">
+                <div class="col">
+                    <h3>Results</h3>
+                </div>
+                <div class="col text-right">
+                    <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}" title="Download results"></a>
+                </div>
+            </div>
             <table class="table table-hover table-sm">
             <tr>
                 <th>SO term</th>
