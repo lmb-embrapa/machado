@@ -25,15 +25,15 @@ Load OrthoMCL
 Remove orthology
 ----------------
 
-If, by any reason, you need to remove orthology relationships, you should use the command *remove_feature_group --organism 'multispecies multispecies' --term 'orthologous group'.* *
+If, by any reason, you need to remove orthology relationships, you should use the command *remove_feature_annotation --organism 'multispecies multispecies' --cvterm 'orthologous group'.* *
 
 \*Every orthologous relations will be deleted.
 
 .. code-block:: bash
 
-    python manage.py remove_feature_group --help
+    python manage.py remove_feature_annotation --help
 
 ====================  ========================================
---term TERM            mandatory: 'orthologous group'
---organism ORGANISM    mandatory: 'Multispecies multispecies'
+--cvterm TERM          mandatory: 'orthologous group'
+--organism ORGANISM    mandatory: 'multispecies multispecies'
 ====================  ========================================
