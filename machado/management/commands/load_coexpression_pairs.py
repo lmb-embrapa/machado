@@ -75,42 +75,44 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
             raise CommandError(e)
 
         cvterm_corel = Cvterm.objects.get(
-                name='correlated with', cv__name='relationship')
+            name='correlated with',
+            cv__name='relationship').cvterm_id
         # feature source is not needed here
         source = "null"
         featureloader = FeatureLoader(
                 source=source,
                 filename=filename,
                 organism=organism)
-
-        pool = ThreadPoolExecutor(max_workers=cpu)
-        tasks = list()
-        # each line is an orthologous group
-        for line in tqdm(pairs, total=get_num_lines(file)):
-            # a pair of features plus the PCC value
-            nfields = 3
-            fields = re.split(r'\s+', line.rstrip())
-            try:
-                FieldsValidator().validate(nfields, fields)
-            except ImportingError as e:
-                raise CommandError(e)
-            # get corrected PCC value (last item from fields list)
-            value = float(fields.pop()) + 0.7
-            tasks.append(pool.submit(
-                              featureloader.store_feature_relationships_group,
-                              group=fields,
-                              term=cvterm_corel,
-                              value=value))
+        size = get_num_lines(file)
+        # every cpu should be able to handle 5 tasks
+        chunk = cpu * 5
+        with ThreadPoolExecutor(max_workers=cpu) as pool:
+            tasks = list()
+            for line in tqdm(pairs, total=size):
+                nfields = 3
+                fields = re.split(r'\s+', line.rstrip())
+                try:
+                    FieldsValidator().validate(nfields, fields)
+                except ImportingError as e:
+                    raise CommandError(e)
+                # get corrected PCC value (last item from fields list)
+                value = float(fields.pop()) + 0.7
+                tasks.append(pool.submit(
+                    featureloader.store_feature_pairs,
+                    pair=fields,
+                    term=cvterm_corel,
+                    value=value))
+                if (len(tasks) >= chunk):
+                    for task in (as_completed(tasks)):
+                        if task.result():
+                            raise(task.result())
+                    tasks.clear()
+            else:
+                for task in (as_completed(tasks)):
+                    if task.result():
+                        raise(task.result())
+                tasks.clear()
+            pool.shutdown()
         if verbosity > 0:
-            self.stdout.write('Loading')
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
-            if task.result():
-                raise(task.result())
-        pool.shutdown()
-        if verbosity > 0:
-            print("Stored in cache: {}".format(len(
-                featureloader.cache)))
-            print("Used cache: {}".format(
-                featureloader.usedcache))
             self.stdout.write(self.style.SUCCESS(
                 'Done with {}'.format(filename)))

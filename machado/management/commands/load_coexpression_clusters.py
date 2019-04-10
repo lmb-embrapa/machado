@@ -11,7 +11,7 @@ from machado.loaders.common import get_num_lines
 from machado.loaders.common import retrieve_organism
 from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
-from machado.models import Cvterm
+from machado.models import Cv, Cvterm, Dbxref, Db
 from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
@@ -74,9 +74,18 @@ The features need to be loaded previously or won't be registered."""
             raise CommandError(e)
 
         tasks = list()
-        cvterm_cluster_id = Cvterm.objects.get(
-            name='in branching relationship with',
-            cv__name='relationship').cvterm_id
+        cv, created = Cv.objects.get_or_create(name='feature_property')
+        coexp_db, created = Db.objects.get_or_create(
+                name='LSTRAP_SOURCE')
+        coexp_dbxref, created = Dbxref.objects.get_or_create(
+                accession='LSTRAP_SOURCE',
+                db=coexp_db)
+        cvterm_cluster, created = Cvterm.objects.get_or_create(
+            name='coexpression group',
+            cv=cv,
+            dbxref=coexp_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0)
         # feature source is not needed here
         source = "null"
         featureloader = FeatureLoader(
@@ -104,9 +113,9 @@ The features need to be loaded previously or won't be registered."""
             fields.pop(0)
             # get cvterm for correlation
             tasks.append(pool.submit(
-                              featureloader.store_feature_relationships_group,
+                              featureloader.store_feature_groups,
                               group=fields,
-                              term=cvterm_cluster_id,
+                              term=cvterm_cluster.cvterm_id,
                               value=name))
         if verbosity > 0:
             self.stdout.write('Loading')
