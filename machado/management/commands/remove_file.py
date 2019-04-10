@@ -35,9 +35,8 @@ class Command(BaseCommand):
                               'child record (CASCADE)'
                               .format(name))
         try:
-            dbxref_ids = list(Dbxrefprop.objects.filter(
-                value=name).values_list('dbxref_id', flat=True))
-            Feature.objects.filter(dbxref_id__in=dbxref_ids).delete()
+            Feature.objects.filter(
+                dbxref__Dbxrefprop_dbxref_Dbxref__value=name).delete()
             Dbxrefprop.objects.filter(value=name).delete()
         except ObjectDoesNotExist:
             raise CommandError(

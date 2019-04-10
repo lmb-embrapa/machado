@@ -33,6 +33,9 @@ if 'haystack' in settings.INSTALLED_APPS:
         url(r'find/', cache_page(CACHE_TIMEOUT)(
             search.FeatureSearchView.as_view()),
             name='feature_search'),
+        url(r'export/', cache_page(CACHE_TIMEOUT)(
+            search.FeatureSearchExportView.as_view()),
+            name='feature_search_export'),
         url(r'^$', cache_page(CACHE_TIMEOUT)(
             common.HomeView.as_view()), name='home')
     ]
