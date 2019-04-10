@@ -197,8 +197,11 @@ class FeatureLoader(object):
 
         attrs_id = self.get_attributes(tabix_feature.attributes).get('id')
         attrs_name = self.get_attributes(tabix_feature.attributes).get('name')
-        attrs_parent = self.get_attributes(
-            tabix_feature.attributes).get('parent')
+        try:
+            attrs_parent = self.get_attributes(
+                tabix_feature.attributes).get('parent').split(',')
+        except AttributeError:
+            attrs_parent = list()
 
         # set id = auto# for features that lack it
         if attrs_id is None:
@@ -285,9 +288,9 @@ class FeatureLoader(object):
             feature_id=feature_id,
             attrs=self.get_attributes(tabix_feature.attributes))
 
-        if attrs_parent is not None:
+        for parent in attrs_parent:
             self.relationships.append({'object_id': attrs_id,
-                                       'subject_id': attrs_parent})
+                                       'subject_id': parent})
 
         # Additional protrein record for each mRNA with the exact same ID
         if tabix_feature.feature == 'mRNA':
@@ -313,7 +316,7 @@ class FeatureLoader(object):
         relationships = list()
         features = Feature.objects.filter(
             organism=self.organism).exclude(type=self.aa_cvterm).only(
-                'feature_id')
+                'feature_id', 'uniquename', 'organism')
         for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created
