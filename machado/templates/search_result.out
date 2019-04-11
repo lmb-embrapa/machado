@@ -1,0 +1,5 @@
+{% if file_format == 'tsv' %}SO term	Feature ID	Display	Orthologous group
+{% for result in object_list %}{{ result.object.type.name }}	{{ result.uniquename }}	{{ result.object.get_display|default_if_none:'' }}	{{ result.object.get_orthologs_groups|safe|default_if_none:'' }}{% endfor %}
+{% elif file_format == 'fasta' %}{% for result in object_list %}>{{ result.object.dbxref.accession }} {{ result.object.get_display|default_if_none:'' }}
+{{ result.object.residues }}{% endfor %}
+{% else %}Unknown format.{% endif %}
