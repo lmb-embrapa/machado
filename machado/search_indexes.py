@@ -7,6 +7,7 @@
 """Search indexes."""
 from haystack import indexes
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from machado.models import Analysis, Analysisfeature
 from machado.models import Feature, FeatureCvterm, Featureprop
 from machado.models import Featureloc, FeatureRelationship
@@ -26,11 +27,11 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     uniquename = indexes.CharField(model_attr='uniquename', faceted=True)
     name = indexes.CharField(model_attr='name', faceted=True)
     analyses = indexes.MultiValueField(faceted=True)
-    if FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship').exists():
+    if Featureprop.objects.filter(
+            type__name='orthologous group',
+            type__cv__name='feature_property').exists():
         orthology = indexes.BooleanField(faceted=True)
-        orthology_group = indexes.CharField(faceted=True)
+        orthologous_group = indexes.CharField(faceted=True)
 
     def get_model(self):
         """Get model."""
@@ -106,20 +107,19 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_orthology(self, obj):
         """Prepare orthology."""
-        return FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship',
-            object=obj).distinct("value").exists()
+        return Featureprop.objects.filter(
+            type__cv__name='feature_property',
+            type__name='orthologous group',
+            feature=obj).exists()
 
-    def prepare_orthology_group(self, obj):
+    def prepare_orthologous_group(self, obj):
         """Prepare orthology."""
-        result = FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship',
-            object=obj).distinct("value").values_list("value")
-        if result.exists():
-            return result[0][0]
-        else:
+        try:
+            return Featureprop.objects.get(
+                type__cv__name='feature_property',
+                type__name='orthologous group',
+                feature=obj).value
+        except ObjectDoesNotExist:
             return None
 
     def prepare_autocomplete(self, obj):

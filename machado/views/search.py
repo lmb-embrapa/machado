@@ -7,7 +7,7 @@
 
 from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
-from machado.models import FeatureRelationship
+from machado.models import Featureprop
 
 FACET_FIELDS = ['organism', 'so_term', 'orthology', 'analyses']
 
@@ -36,9 +36,9 @@ class FeatureSearchView(FacetedSearchView):
         context['selected_facets'] = selected_facets
         context['selected_facets_fields'] = selected_facets_fields
 
-        context['orthologs'] = FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship').distinct("value").exists()
+        context['orthologs'] = Featureprop.objects.filter(
+            type__name='orthologous group',
+            type__cv__name='feature_property').exists()
 
         return context
 
