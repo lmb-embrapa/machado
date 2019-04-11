@@ -69,13 +69,13 @@ one gene/feature from that cluster. The first column should represent the cluste
 format: "<cluster_name>:".
 Three-cluster sample from such a file is shown below, the first line
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
-orphaned cluster with only one individual (obs: orphaned clusters are discarded). :
+orphaned cluster with only one individual (obs: orphaned clusters are discarded).:
 
 .. code-block:: bash
 
-ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
-ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-ath_3:    AT5G24750.1.TAIR10
+    ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+    ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+    ath_3:    AT5G24750.1.TAIR10
 
 Note: The genes/features from each column must be loaded previously.
 

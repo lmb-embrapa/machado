@@ -244,13 +244,12 @@ one gene/feature from that cluster. The first column should represent the cluste
 format: “&lt;cluster_name&gt;:”.
 Three-cluster sample from such a file is shown below, the first line
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
-orphaned cluster with only one individual (obs: orphaned clusters are discarded). :</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+orphaned cluster with only one individual (obs: orphaned clusters are discarded).:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
+ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
+ath_3:    AT5G24750.1.TAIR10
 </pre></div>
 </div>
-<p>ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
-ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-ath_3:    AT5G24750.1.TAIR10</p>
 <p>Note: The genes/features from each column must be loaded previously.</p>
 <p>To load such a file, one can run the command below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --file mcl.clusters.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
@@ -285,9 +284,9 @@ ath_3:    AT5G24750.1.TAIR10</p>
 <h2>2.14.4. Remove coexpression clusters<a class="headerlink" href="#remove-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove coexpression cluster analyzes, you need to pass
 the controlled vocabulary term ‘coexpression group’ and the organism scientific name to
-the command remove_feature_group: <em>remove_feature_group –term ‘coexpression group’ –organism ‘Arabidopsis thaliana’</em> *</p>
+the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpression group’ –organism ‘Arabidopsis thaliana’</em> *</p>
 <p>*Every coexpression group relations from that organism will be deleted on cascade**.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_group --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
 <table border="1" class="docutils">
@@ -296,7 +295,7 @@ the command remove_feature_group: <em>remove_feature_group –term ‘coexpressi
 <col width="67%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>–term TERM</td>
+<tr class="row-odd"><td>–cvterm TERM</td>
 <td>mandatory: ‘coexpression group’</td>
 </tr>
 <tr class="row-even"><td>–organism ORGANISM</td>
