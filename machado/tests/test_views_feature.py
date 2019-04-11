@@ -9,7 +9,7 @@
 from machado.models import Analysis, Analysisfeature
 from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
-from machado.models import FeatureRelationship
+from machado.models import Featureprop, FeatureRelationship
 from machado.views import feature
 from django.test import TestCase, RequestFactory
 from django.urls.exceptions import NoReverseMatch
@@ -40,10 +40,12 @@ class FeatureTest(TestCase):
         similarity_cvterm = Cvterm.objects.create(
             name='in similarity relationship with', cv=ro_cv,
             dbxref=similarity_dbxref, is_obsolete=0, is_relationshiptype=0)
+        fp_db = Db.objects.create(name='feature_property')
+        fp_cv = Cv.objects.create(name='feature_property')
         orthology_dbxref = Dbxref.objects.create(
-            accession='in orthology relationship with', db=ro_db)
+            accession='orthologous group', db=fp_db)
         orthology_cvterm = Cvterm.objects.create(
-            name='in orthology relationship with', cv=ro_cv,
+            name='orthologous group', cv=fp_cv,
             dbxref=orthology_dbxref, is_obsolete=0, is_relationshiptype=0)
 
         so_db = Db.objects.create(name='SO')
@@ -208,12 +210,12 @@ class FeatureTest(TestCase):
             fmin=30, is_fmin_partial=False, fmax=3000, is_fmax_partial=False,
             locgroup=1, rank=0)
 
-        FeatureRelationship.objects.create(
-            object=polypeptide_feat1, subject=polypeptide_feat2,
-            type=orthology_cvterm, rank=0, value='orthomcl1')
-        FeatureRelationship.objects.create(
-            object=polypeptide_feat2, subject=polypeptide_feat1,
-            type=orthology_cvterm, rank=0, value='orthomcl1')
+        Featureprop.objects.create(
+            feature=polypeptide_feat1, type=orthology_cvterm, rank=0,
+            value='orthomcl1')
+        Featureprop.objects.create(
+            feature=polypeptide_feat2, type=orthology_cvterm, rank=0,
+            value='orthomcl1')
 
     def test_retrieve_feature_location(self):
         """Tests - retrieve_feature_location."""
@@ -285,7 +287,7 @@ class FeatureTest(TestCase):
         f = Feature.objects.get(uniquename='feat1', type__name='polypeptide')
         result = fv.retrieve_feature_orthologs(feature_id=f.feature_id)
         self.assertTrue('orthomcl1' in result)
-        self.assertEquals('feat2', result['orthomcl1'][0].uniquename)
+        self.assertEquals('feat2', result['orthomcl1'][1].uniquename)
 
     def test_retrieve_feature_data(self):
         """Tests - retrieve_feature_data."""
