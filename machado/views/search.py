@@ -66,16 +66,12 @@ class FeatureSearchExportView(FacetedSearchView):
         self.file_format = file_format
         context['file_format'] = file_format
 
-#        filename = 'machado_search_results.{}'.format(file_format)
-#        response['Content-Disposition'] = 'attachment; filename="{}"'.format(
-#            filename)
         return context
 
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         response = super(FeatureSearchExportView, self).dispatch(
             *args, **kwargs)
-
         filename = 'machado_search_results.{}'.format(self.file_format)
         response['Content-Disposition'] = 'attachment; filename="{}"'.format(
             filename)
