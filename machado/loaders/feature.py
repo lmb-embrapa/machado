@@ -317,7 +317,7 @@ class FeatureLoader(object):
         features = Feature.objects.filter(
             organism=self.organism).exclude(type=self.aa_cvterm).only(
                 'feature_id', 'uniquename', 'organism')
-        for item in self.relationships:
+        for i, item in enumerate(self.relationships):
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
@@ -333,8 +333,11 @@ class FeatureLoader(object):
             except ObjectDoesNotExist:
                 print('Parent/Feature ({}/{}) not registered.'
                       .format(item['object_id'], item['subject_id']))
-
-        FeatureRelationship.objects.bulk_create(relationships)
+            if i % 100000 == 0:
+                FeatureRelationship.objects.bulk_create(relationships)
+                relationships = list()
+        else:
+            FeatureRelationship.objects.bulk_create(relationships)
 
     def store_bio_searchio_hit(self,
                                searchio_hit: Hit,
