@@ -67,7 +67,6 @@ class Command(BaseCommand):
         try:
             sequence_file = SequenceLoader(
                 filename=filename,
-                soterm=soterm,
                 description=description,
                 url=url,
                 doi=doi)
