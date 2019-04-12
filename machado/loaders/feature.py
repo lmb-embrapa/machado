@@ -317,7 +317,7 @@ class FeatureLoader(object):
         features = Feature.objects.filter(
             organism=self.organism).exclude(type=self.aa_cvterm).only(
                 'feature_id', 'uniquename', 'organism')
-        for item in self.relationships:
+        for i, item in enumerate(self.relationships):
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
@@ -333,8 +333,11 @@ class FeatureLoader(object):
             except ObjectDoesNotExist:
                 print('Parent/Feature ({}/{}) not registered.'
                       .format(item['object_id'], item['subject_id']))
-
-        FeatureRelationship.objects.bulk_create(relationships)
+            if i % 100000 == 0:
+                FeatureRelationship.objects.bulk_create(relationships)
+                relationships = list()
+        else:
+            FeatureRelationship.objects.bulk_create(relationships)
 
     def store_bio_searchio_hit(self,
                                searchio_hit: Hit,
@@ -411,6 +414,28 @@ class FeatureLoader(object):
 
         for feature_obj in features:
             self.process_attributes(feature_obj.feature_id, attrs)
+
+    def store_feature_dbxref(
+            self, feature: str, so_term: str, dbxref: str) -> None:
+        """Store feature dbxref."""
+        feature_ids = Feature.objects.filter(
+            organism=self.organism,
+            type__cv__name='sequence',
+            type__name=so_term,
+            dbxref__accession=feature,
+            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
+                'feature_id').values_list('feature_id', flat=True)
+
+        if len(feature_ids) == 0:
+            raise ImportingError('{} not found.'.format(feature))
+
+        db_name, dbxref_accession = dbxref.split(':')
+        db_obj, created = Db.objects.get_or_create(name=db_name)
+        dbxref_obj, created = Dbxref.objects.get_or_create(
+            db=db_obj, accession=dbxref_accession)
+        for feature_id in feature_ids:
+            FeatureDbxref.objects.get_or_create(
+                feature_id=feature_id, dbxref=dbxref_obj, is_current=True)
 
     def store_feature_publication(self,
                                   feature: str,
