@@ -134,7 +134,7 @@ class AnalysisLoader(object):
         if isinstance(feature, Feature):
             feature_id = feature.feature_id
         else:
-            feature_id = retrieve_feature_id(accession=feature, cvterm='mRNA')
+            feature_id = retrieve_feature_id(accession=feature, soterm='mRNA')
         # finally create analysisfeature
         try:
             Analysisfeature.objects.create(

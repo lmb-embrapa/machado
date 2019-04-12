@@ -14,7 +14,6 @@
 from machado.loaders.exceptions import ImportingError
 from machado.models import Feature, Organism
 from django.core.exceptions import ObjectDoesNotExist
-from typing import Optional
 import os
 import gzip
 
@@ -122,6 +121,9 @@ def retrieve_organism(organism: str) -> Organism:
     except ValueError:
         raise ValueError('The organism genus and species should be '
                          'separated by a single space')
+    except AttributeError as e:
+        raise AttributeError(e)
+
     try:
         organism_obj = Organism.objects.get(
             genus=genus,
@@ -133,12 +135,12 @@ def retrieve_organism(organism: str) -> Organism:
 
 
 def retrieve_feature_id(
-        accession: str, cvterm: str, cv: str = "sequence") -> Optional[int]:
+        accession: str, soterm: str) -> int:
     """Retrieve feature object."""
     # cvterm is mandatory
     features = Feature.objects.filter(
-        uniquename=accession, type__cv__name=cv,
-        type__name=cvterm).values_list('feature_id', flat=True)
+        uniquename=accession, type__cv__name='sequence',
+        type__name=soterm).values_list('feature_id', flat=True)
 
     if len(features) == 1:
         return features.first()
@@ -147,8 +149,8 @@ def retrieve_feature_id(
             "Multiple entries found ({}).").format(' '.join(features))
     else:
         features = Feature.objects.filter(
-            dbxref__accession=accession, type__cv__name=cv,
-            type__name=cvterm).values_list('feature_id', flat=True)
+            dbxref__accession=accession, type__cv__name='sequence',
+            type__name=soterm).values_list('feature_id', flat=True)
         if len(features) == 1:
             return features.first()
         elif len(features) > 1:
@@ -157,7 +159,7 @@ def retrieve_feature_id(
         else:
             features = Feature.objects.filter(
                 FeatureDbxref_feature_Feature__accession=accession,
-                type__cv__name=cv, type__name=cvterm).values_list(
+                type__cv__name='sequence', type__name=soterm).values_list(
                     'feature_id', flat=True)
             if len(features) == 1:
                 return features.first()
@@ -165,4 +167,5 @@ def retrieve_feature_id(
                 raise ImportingError(
                     "Multiple entries found ({}).").format(' '.join(features))
             else:
-                return None
+                raise ImportingError(
+                    "{} not found.").format(' '.join(accession))

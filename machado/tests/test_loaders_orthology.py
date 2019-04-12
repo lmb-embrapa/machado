@@ -481,8 +481,7 @@ class OrthologyTest(TestCase):
         source = "null"
         test_orthology_loader = FeatureLoader(
                 source=source,
-                filename=filename,
-                organism=organism)
+                filename=filename)
         # ####################
         # test store groups
         group1_name = 'machado0001'

@@ -9,7 +9,6 @@
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from machado.models import Organism
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
@@ -54,20 +53,12 @@ class Command(BaseCommand):
         elif format == 'interproscan-xml':
             source = 'InterproScan_source'
         else:
-            raise ("Format allowed options are blast-xml or interproscan-xml"
-                   " only, not {}".format(format))
-
-        organism, created = Organism.objects.get_or_create(
-            abbreviation='multispecies', genus='multispecies',
-            species='multispecies', common_name='multispecies')
+            raise CommandError("Format allowed options are blast-xml or "
+                               "interproscan-xml only, not {}".format(format))
 
         filename = os.path.basename(file)
         try:
-            feature_file = FeatureLoader(
-                filename=filename,
-                source=source,
-                organism=organism,
-            )
+            feature_file = FeatureLoader(filename=filename, source=source)
         except ImportingError as e:
             raise CommandError(e)
 

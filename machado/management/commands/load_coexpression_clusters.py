@@ -90,8 +90,7 @@ The features need to be loaded previously or won't be registered."""
         source = "null"
         featureloader = FeatureLoader(
                 source=source,
-                filename=filename,
-                organism=organism)
+                filename=filename)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         # each line is an coexpression cluster group

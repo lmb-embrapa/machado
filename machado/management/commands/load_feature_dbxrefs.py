@@ -33,9 +33,7 @@ class Command(BaseCommand):
                             required=True,
                             type=str)
         parser.add_argument("--soterm", help="SO Sequence Ontology Term "
-                            "(eg. mRNA, polypeptide)",
-                            required=True,
-                            type=str)
+                            "(eg. mRNA, polypeptide)", required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
@@ -62,7 +60,6 @@ class Command(BaseCommand):
             feature_file = FeatureLoader(
                 filename=filename,
                 source='GFF_source',
-                organism=organism,
             )
         except ImportingError as e:
             raise CommandError(e)

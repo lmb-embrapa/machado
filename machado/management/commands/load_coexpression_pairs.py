@@ -11,9 +11,7 @@ from machado.loaders.common import FileValidator, FieldsValidator
 from machado.loaders.common import get_num_lines
 from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.common import retrieve_organism
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 import re
@@ -40,10 +38,6 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                             help="'pcc.mcl.txt' File",
                             required=True,
                             type=str)
-        parser.add_argument("--organism",
-                            help="Scientific name (e.g.: 'Oryza sativa')",
-                            required=True,
-                            type=str)
         parser.add_argument("--cpu",
                             help="Number of threads",
                             default=1,
@@ -51,7 +45,6 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
 
     def handle(self,
                file: str,
-               organism: str,
                cpu: int = 1,
                verbosity: int = 0,
                **options):
@@ -60,10 +53,6 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         if verbosity > 0:
             self.stdout.write('Processing file: {}'.format(filename))
 
-        try:
-            organism = retrieve_organism(organism)
-        except IntegrityError as e:
-            raise ImportingError(e)
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -81,8 +70,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         source = "null"
         featureloader = FeatureLoader(
                 source=source,
-                filename=filename,
-                organism=organism)
+                filename=filename)
         size = get_num_lines(file)
         # every cpu should be able to handle 5 tasks
         chunk = cpu * 5
