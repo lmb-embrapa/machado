@@ -12,9 +12,9 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
-from django.db.utils import IntegrityError
-from machado.models import Cvterm, Feature, Organism
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from machado.models import Feature, Organism
+from django.core.exceptions import ObjectDoesNotExist
+from typing import Optional
 import os
 import gzip
 
@@ -132,23 +132,37 @@ def retrieve_organism(organism: str) -> Organism:
     return organism_obj
 
 
-def retrieve_feature(featureacc: str,
-                     organism: Organism = None,
-                     cvterm: str = "mRNA",
-                     ontology: str = "sequence",
-                     ) -> Feature:
+def retrieve_feature_id(
+        accession: str, cvterm: str, cv: str = "sequence") -> Optional[int]:
     """Retrieve feature object."""
     # cvterm is mandatory
-    cvterm_obj = Cvterm.objects.get(name=cvterm, cv__name=ontology)
-    try:
-        feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm_obj.cvterm_id)
-    except MultipleObjectsReturned:
-        feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm_obj.cvterm_id,
-                                      organism=organism)
-    except ObjectDoesNotExist:
-        feature = None
-    except IntegrityError as e:
-        raise ImportingError(e)
-    return feature
+    features = Feature.objects.filter(
+        uniquename=accession, type__cv__name=cv,
+        type__name=cvterm).values_list('feature_id', flat=True)
+
+    if len(features) == 1:
+        return features.first()
+    elif len(features) > 1:
+        raise ImportingError(
+            "Multiple entries found ({}).").format(' '.join(features))
+    else:
+        features = Feature.objects.filter(
+            dbxref__accession=accession, type__cv__name=cv,
+            type__name=cvterm).values_list('feature_id', flat=True)
+        if len(features) == 1:
+            return features.first()
+        elif len(features) > 1:
+            raise ImportingError(
+                "Multiple entries found ({}).").format(' '.join(features))
+        else:
+            features = Feature.objects.filter(
+                FeatureDbxref_feature_Feature__accession=accession,
+                type__cv__name=cv, type__name=cvterm).values_list(
+                    'feature_id', flat=True)
+            if len(features) == 1:
+                return features.first()
+            elif len(features) > 1:
+                raise ImportingError(
+                    "Multiple entries found ({}).").format(' '.join(features))
+            else:
+                return None
