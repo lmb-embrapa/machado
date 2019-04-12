@@ -7,7 +7,7 @@
 """Sequence."""
 
 from Bio.SeqRecord import SeqRecord
-from machado.loaders.common import retrieve_organism
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
 from machado.models import PubDbxref
@@ -24,25 +24,16 @@ class SequenceLoader(object):
 
     def __init__(self,
                  filename: str,
-                 organism: str,
-                 soterm: str,
                  doi: str = None,
                  description: str = None,
                  url: str = None) -> None:
         """Execute the init function."""
-        # Retrieve organism object
-        try:
-            self.organism = retrieve_organism(organism)
-        except ObjectDoesNotExist as e:
-            raise ImportingError(e)
-
         # Save DB file info
         self.db, created = Db.objects.get_or_create(
             name='FASTA_SOURCE', description=description, url=url)
         self.filename = filename
 
         # Retrieve sequence ontology object
-        self.soterm = Cvterm.objects.get(name=soterm, cv__name='sequence')
         self.cvterm_contained_in = Cvterm.objects.get(
             name='contained in', cv__name='relationship')
 
@@ -61,19 +52,22 @@ class SequenceLoader(object):
 
     def store_biopython_seq_record(self,
                                    seq_obj: SeqRecord,
+                                   soterm: str,
+                                   organism: str,
                                    ignore_residues: bool = False) -> None:
         """Store Biopython SeqRecord."""
+        soterm_obj = Cvterm.objects.get(name=soterm, cv__name='sequence')
+        organism_obj = retrieve_organism(organism)
+
         try:
             dbxref, created = Dbxref.objects.get_or_create(
                 db=self.db, accession=seq_obj.id)
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
-            feature = Feature.objects.get(dbxref__accession=seq_obj.id,
-                                          organism=self.organism)
-            if feature is not None:
-                raise ImportingError('The sequence {} is already '
-                                     'registered.'.format(seq_obj.id))
+            retrieve_feature_id(accession=seq_obj.id, soterm=soterm)
+            raise ImportingError('The sequence {} is already '
+                                 'registered.'.format(seq_obj.id))
         except ObjectDoesNotExist:
             residues = seq_obj.seq
 
@@ -87,13 +81,13 @@ class SequenceLoader(object):
 
             # storing feature
             feature = Feature(dbxref=dbxref,
-                              organism=self.organism,
+                              organism=organism_obj,
                               uniquename=seq_obj.id,
                               name=name,
                               residues=residues,
                               seqlen=len(seq_obj.seq),
                               md5checksum=m,
-                              type=self.soterm,
+                              type=soterm_obj,
                               is_analysis=False,
                               is_obsolete=False,
                               timeaccessioned=datetime.
@@ -122,17 +116,20 @@ class SequenceLoader(object):
                 pass
         return None
 
-    def add_sequence_to_feature(
-            self, seq_obj: SeqRecord) -> None:
+    def add_sequence_to_feature(self, seq_obj: SeqRecord,
+                                soterm: str, organism: str) -> None:
         """Store Biopython SeqRecord."""
+        print(soterm)
+        soterm_obj = Cvterm.objects.get(name=soterm, cv__name='sequence')
+        organism_obj = retrieve_organism(organism)
         try:
             description_id = self.retrieve_id_from_description(
                 description=seq_obj.description)
             feature_obj = Feature.objects.get(
                 Q(dbxref__accession=seq_obj.id) |
                 Q(dbxref__accession=description_id),
-                organism=self.organism,
-                type=self.soterm,
+                organism=organism_obj,
+                type=soterm_obj,
                 dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE'])
         except ObjectDoesNotExist:
             raise ImportingError(

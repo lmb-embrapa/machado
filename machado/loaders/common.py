@@ -12,8 +12,8 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
-from machado.models import Feature, Organism
-from django.core.exceptions import ObjectDoesNotExist
+from machado.models import Feature, FeatureDbxref, Organism
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
 import gzip
 
@@ -137,35 +137,23 @@ def retrieve_organism(organism: str) -> Organism:
 def retrieve_feature_id(
         accession: str, soterm: str) -> int:
     """Retrieve feature object."""
-    # cvterm is mandatory
-    features = Feature.objects.filter(
-        uniquename=accession, type__cv__name='sequence',
-        type__name=soterm).values_list('feature_id', flat=True)
+    # feature.uniquename
+    try:
+        return Feature.objects.get(
+            uniquename=accession, type__cv__name='sequence',
+            type__name=soterm).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
 
-    if len(features) == 1:
-        return features.first()
-    elif len(features) > 1:
-        raise ImportingError(
-            "Multiple entries found ({}).").format(' '.join(features))
-    else:
-        features = Feature.objects.filter(
+    # feature.dbxref.accession
+    try:
+        return Feature.objects.get(
             dbxref__accession=accession, type__cv__name='sequence',
-            type__name=soterm).values_list('feature_id', flat=True)
-        if len(features) == 1:
-            return features.first()
-        elif len(features) > 1:
-            raise ImportingError(
-                "Multiple entries found ({}).").format(' '.join(features))
-        else:
-            features = Feature.objects.filter(
-                FeatureDbxref_feature_Feature__accession=accession,
-                type__cv__name='sequence', type__name=soterm).values_list(
-                    'feature_id', flat=True)
-            if len(features) == 1:
-                return features.first()
-            elif len(features) > 1:
-                raise ImportingError(
-                    "Multiple entries found ({}).").format(' '.join(features))
-            else:
-                raise ImportingError(
-                    "{} not found.").format(' '.join(accession))
+            type__name=soterm).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
+
+    # featuredbxref.dbxref.accession
+    return FeatureDbxref.objects.get(
+        dbxref__accession=accession, feature__type__cv__name='sequence',
+        feature__type__name=soterm).feature_id

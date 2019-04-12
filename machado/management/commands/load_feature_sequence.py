@@ -53,7 +53,6 @@ class Command(BaseCommand):
         try:
             sequence_file = SequenceLoader(
                 filename=filename,
-                organism=organism,
                 soterm=soterm)
         except ImportingError as e:
             raise CommandError(e)
@@ -66,7 +65,7 @@ class Command(BaseCommand):
         tasks = list()
         for fasta in fasta_sequences:
             tasks.append(pool.submit(sequence_file.add_sequence_to_feature,
-                                     fasta))
+                                     fasta, soterm, organism))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
