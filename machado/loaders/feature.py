@@ -479,16 +479,16 @@ class FeatureLoader(object):
     def store_feature_groups(
                                self,
                                group: list,
-                               term: Union[str, Cvterm],
+                               term: Union[int, Cvterm],
                                value: str = None,
                                cache: int = 0
                                ) -> None:
         """Store Feature Relationship Groups."""
         # only cvterm_id allowed
         if isinstance(term, Cvterm):
-            cvterm = term.cvterm_id
+            cvterm_id = term.cvterm_id
         else:
-            cvterm = term
+            cvterm_id = term
         featureprops = list()
         feature_list = list(Feature.objects.filter(
             type__cv__name='sequence',
@@ -502,8 +502,11 @@ class FeatureLoader(object):
         if len(feature_list) > 1:
             for member in feature_list:
                 featureprops.append(Featureprop(
-                               feature_id=member,
-                               type_id=cvterm,
+                               feature=member,
+                               type_id=cvterm_id,
                                value=value,
                                rank=0))
-            Featureprop.objects.bulk_create(featureprops)
+            try:
+                Featureprop.objects.bulk_create(featureprops)
+            except IntegrityError as e:
+                raise ImportingError(e)
