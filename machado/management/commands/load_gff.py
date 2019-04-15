@@ -64,11 +64,7 @@ class Command(BaseCommand):
             raise CommandError(e)
         try:
             feature_file = FeatureLoader(
-                filename=filename,
-                source='GFF_source',
-                organism=organism,
-                doi=doi
-            )
+                filename=filename, source='GFF_source', doi=doi)
         except ImportingError as e:
             raise CommandError(e)
 
@@ -86,7 +82,7 @@ class Command(BaseCommand):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(pool.submit(
-                    feature_file.store_tabix_feature, row))
+                    feature_file.store_tabix_feature, row, organism))
 
                 if len(tasks) >= chunk_size:
                     for task in as_completed(tasks):
@@ -108,7 +104,7 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write('Loading relationships')
 
-        feature_file.store_relationships()
+        feature_file.store_relationships(organism=organism)
 
         if feature_file.ignored_attrs is not None:
             self.stdout.write(

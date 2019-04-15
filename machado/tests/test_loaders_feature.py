@@ -43,7 +43,6 @@ class FeatureTest(TestCase):
 
         Organism.objects.create(genus='Mus', species='musculus')
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
                                           source='GFF_loader')
         test_attrs = test_feature_file.get_attributes('ID=1;name=feat1')
         self.assertEqual('1', test_attrs.get('id'))
@@ -99,7 +98,6 @@ class FeatureTest(TestCase):
 
         # new FeatureLoader
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
                                           source='GFF_source')
         # running get_attributes
         test_attrs = test_feature_file.get_attributes(
@@ -260,14 +258,17 @@ class FeatureTest(TestCase):
 
         # instantiate the loader
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
                                           source='GFF_source')
+
+        organism = 'Mus musculus'
         # store the tabix feature
-        test_feature_file.store_tabix_feature(test_tabix_feature1)
-        test_feature_file.store_tabix_feature(test_tabix_feature2)
+        test_feature_file.store_tabix_feature(
+            test_tabix_feature1, organism)
+        test_feature_file.store_tabix_feature(
+            test_tabix_feature2, organism)
 
         # store the relationships
-        test_feature_file.store_relationships()
+        test_feature_file.store_relationships(organism)
 
         test_feature = Feature.objects.get(uniquename='id2')
         test_featureloc = Featureloc.objects.get(feature=test_feature)
@@ -316,12 +317,10 @@ class FeatureTest(TestCase):
         test_searchio_hit.dbxrefs = ['GO:1234', 'IPR:IPR012345',
                                      'Reactome:R-HSA-12345']
 
-        test_organism = Organism.objects.create(
-            genus='test', species='organism')
+        Organism.objects.create(genus='test', species='organism')
 
         # instantiate the loader
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism=test_organism,
                                           source='InterproScan_source')
         # store the bio searchio hit
         # From interproscan
@@ -389,24 +388,26 @@ class FeatureTest(TestCase):
             timelastmodified=datetime.now(timezone.utc))
 
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
                                           source='GFF_loader')
 
         # store the feature annotation
         test_feature_file.store_feature_annotation(
-            feature='feat2', cvterm='display', annotation='feature one')
+            feature='feat2', soterm='polypeptide', cvterm='display',
+            annotation='feature one')
         test_featureprop = Featureprop.objects.get(feature=test_feature)
         self.assertEqual('feature one', test_featureprop.value)
 
         # replace the feature annotation
         test_feature_file.store_feature_annotation(
-            feature='feat2', cvterm='display', annotation='feature new')
+            feature='feat2', soterm='polypeptide', cvterm='display',
+            annotation='feature new')
         test_featureprop = Featureprop.objects.get(feature=test_feature)
         self.assertEqual('feature new', test_featureprop.value)
 
         # store the ontology_term
         test_feature_file.store_feature_annotation(
-            feature='feat2', cvterm='ontology_term', annotation='GO:12345')
+            feature='feat2', soterm='polypeptide', cvterm='ontology_term',
+            annotation='GO:12345')
         test_cvterm = Cvterm.objects.get(name='go test term')
         test_feature_cvterm = FeatureCvterm.objects.get(
             feature=test_feature, cvterm=test_cvterm)
@@ -414,7 +415,8 @@ class FeatureTest(TestCase):
 
         # store the dbxref
         test_feature_file.store_feature_annotation(
-            feature='feat2', cvterm='dbxref', annotation='GEO:123456')
+            feature='feat2', soterm='polypeptide', cvterm='dbxref',
+            annotation='GEO:123456')
         test_db = Db.objects.get(name='GEO')
         test_dbxref = Dbxref.objects.get(db=test_db, accession='123456')
         test_feature_dbxref = FeatureDbxref.objects.get(feature=test_feature,
@@ -480,11 +482,57 @@ class FeatureTest(TestCase):
             bibtest.store_bibtex_entry(entry)
 
         test_feature_file = FeatureLoader(filename='file.name',
-                                          organism='Mus musculus',
                                           source='GFF_loader')
 
         test_feature_file.store_feature_publication(
-            feature='feat_gene', doi='10.1186/s12864-016-2535-300002')
+            feature='feat_gene', soterm='gene',
+            doi='10.1186/s12864-016-2535-300002')
         test_featurepub = FeaturePub.objects.get(feature=test_feature)
         self.assertEqual('An amazing title',
                          test_featurepub.pub.title)
+
+    def test_store_feature_dbxref(self):
+        """Tests - store feature dbxref."""
+        # creating exact term
+        test_db_global = Db.objects.create(name='_global')
+        test_dbxref = Dbxref.objects.create(accession='exact',
+                                            db=test_db_global)
+        test_db = Db.objects.create(name='RO')
+        test_dbxref = Dbxref.objects.create(accession='00002', db=test_db)
+        test_cv = Cv.objects.create(name='relationship')
+        Cvterm.objects.create(
+            name='contained in', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+
+        test_db = Db.objects.create(name='SO')
+        test_dbxref = Dbxref.objects.create(accession='12345', db=test_db)
+        test_cv = Cv.objects.create(name='sequence')
+        test_so_term = Cvterm.objects.create(
+            name='polypeptide', cv=test_cv, dbxref=test_dbxref,
+            is_obsolete=0, is_relationshiptype=0)
+        test_dbxref = Dbxref.objects.create(accession='123455', db=test_db)
+        Cvterm.objects.create(name='protein_match', cv=test_cv,
+                              dbxref=test_dbxref, is_obsolete=0,
+                              is_relationshiptype=0)
+
+        test_organism = Organism.objects.create(
+            genus='Mus', species='musculus')
+
+        test_db = Db.objects.create(name='GFF_SOURCE')
+        test_dbxref = Dbxref.objects.create(accession='feat2', db=test_db)
+        test_feature = Feature.objects.create(
+            organism=test_organism, uniquename='feat2', dbxref=test_dbxref,
+            is_analysis=False, type_id=test_so_term.cvterm_id,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc))
+
+        test_feature_file = FeatureLoader(filename='file.name',
+                                          source='GFF_loader')
+
+        # store the feature annotation
+        test_feature_file.store_feature_dbxref(
+            feature='feat2', soterm='polypeptide', dbxref='GI:12345')
+        test_featuredbxref = FeatureDbxref.objects.get(feature=test_feature)
+        self.assertEqual('GI', test_featuredbxref.dbxref.db.name)
+        self.assertEqual('12345', test_featuredbxref.dbxref.accession)

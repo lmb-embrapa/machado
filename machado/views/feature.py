@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.views import View
 from machado.models import Analysis, Analysisfeature, Pub
-from machado.models import Feature, Featureloc
+from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
 from typing import Any, Dict, List
 
@@ -177,16 +177,19 @@ class FeatureView(View):
     def retrieve_feature_orthologs(self, feature_id: int) -> Dict[str, Any]:
         """Retrieve feature orthologs."""
         result: Dict[str, List] = dict()
-        feature_relationships = FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship',
-            subject_id=feature_id)
-        for i in feature_relationships.distinct("value"):
-            result = {i.value: list()}
-        for feature_relationship in feature_relationships:
-            if feature_relationship.object.type.name in VALID_TYPES:
-                result[feature_relationship.value].append(
-                    feature_relationship.object)
+        try:
+            orthologous_group = Featureprop.objects.get(
+                type__name='orthologous group',
+                type__cv__name='feature_property',
+                feature_id=feature_id).value
+            for feature in Feature.objects.filter(
+                    Featureprop_feature_Feature__value=orthologous_group).only(
+                        'feature_id', 'uniquename', 'type'):
+                if feature.type.name in VALID_TYPES:
+                    result.setdefault(orthologous_group, []).append(feature)
+        except ObjectDoesNotExist:
+            pass
+
         return result
 
     def retrieve_feature_coexp_clusters(self,

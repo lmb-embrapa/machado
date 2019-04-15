@@ -32,6 +32,8 @@ class Command(BaseCommand):
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
+        parser.add_argument("--soterm", help="SO Sequence Ontology Term "
+                            "(eg. mRNA, polypeptide)", required=True, type=str)
         parser.add_argument("--cvterm", help="cvterm.name from cv "
                             "feature_property. (eg. display, note, product, "
                             "alias, ontology_term)",
@@ -44,6 +46,7 @@ class Command(BaseCommand):
                file: str,
                cvterm: str,
                organism: str,
+               soterm: str,
                verbosity: int = 1,
                cpu: int = 1,
                **options):
@@ -63,7 +66,6 @@ class Command(BaseCommand):
             feature_file = FeatureLoader(
                 filename=filename,
                 source='GFF_source',
-                organism=organism,
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -77,7 +79,7 @@ class Command(BaseCommand):
                 feature, annotation = line.strip().split('\t')
                 tasks.append(pool.submit(
                     feature_file.store_feature_annotation,
-                    feature, cvterm, annotation))
+                    feature, soterm, cvterm, annotation))
 
         if verbosity > 0:
             self.stdout.write('Loading feature annotations')

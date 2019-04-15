@@ -6,7 +6,7 @@ Load OrthoMCL
 
 .. code-block:: bash
 
-    python manage.py load_orthomcl --file groups.tx
+    python manage.py load_orthomcl --file groups.txt
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -15,25 +15,25 @@ Load OrthoMCL
     python manage.py load_orthomcl --help
 
 =============   ==================================================================================
---file    		groups.txt file *
+--file    		Output result from OrthoMCL software.*
 --cpu 			Number of threads
 =============   ==================================================================================
 
-\* output result from OrthoMCL software. Mandatory.
+\* required fields.
 
 
 Remove orthology
 ----------------
 
-If, by any reason, you need to remove orthology relationships, you should use the command *remove_feature_annotation --organism 'multispecies multispecies' --cvterm 'orthologous group'.* *
-
-\*Every orthologous relations will be deleted.
+If, by any reason, you need to remove orthology relationships, you should use the command *remove_feature_annotation*.
 
 .. code-block:: bash
 
     python manage.py remove_feature_annotation --help
 
-====================  ========================================
---cvterm TERM          mandatory: 'orthologous group'
---organism ORGANISM    mandatory: 'multispecies multispecies'
-====================  ========================================
+====================  ===============================================
+--cvterm TERM         'orthologous group'*
+--organism ORGANISM   Species name. (eg. Homo sapiens, Mus musculus)
+====================  ===============================================
+
+\* required fields

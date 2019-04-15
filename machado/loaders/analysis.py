@@ -6,7 +6,7 @@
 
 """Analysis."""
 
-from machado.loaders.common import retrieve_organism, retrieve_feature
+from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.loaders.exceptions import ImportingError
 from machado.models import Assay, Acquisition, Quantification
 from machado.models import Analysis, Analysisfeature, Analysisprop
@@ -70,7 +70,7 @@ class AnalysisLoader(object):
     def store_analysisprop(self,
                            analysis: Analysis,
                            type_id: int,
-                           value: str,
+                           value: str = None,
                            rank: int = 0) -> None:
         """Store analysisprop."""
         try:
@@ -132,14 +132,13 @@ class AnalysisLoader(object):
                 raise ImportingError(e)
         # retrieve feature
         if isinstance(feature, Feature):
-            pass
+            feature_id = feature.feature_id
         else:
-            feature = retrieve_feature(organism=organism,
-                                       featureacc=feature)
+            feature_id = retrieve_feature_id(accession=feature, soterm='mRNA')
         # finally create analysisfeature
         try:
             Analysisfeature.objects.create(
-                                    feature=feature,
+                                    feature_id=feature_id,
                                     analysis=analysis,
                                     rawscore=rawscore,
                                     normscore=normscore,

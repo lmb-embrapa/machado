@@ -124,8 +124,7 @@ class CoexpressionTest(TestCase):
         source = "null"
         test_coexpression_loader = FeatureLoader(
                 source=source,
-                filename=test_filename,
-                organism=test_organism)
+                filename=test_filename)
         test_coexpression_loader.store_feature_pairs(
             pair=test_pair1,
             term=term,
@@ -328,8 +327,7 @@ class CoexpressionTest(TestCase):
         source = "null"
         test_coexpression_loader = FeatureLoader(
                 source=source,
-                filename=test_filename,
-                organism=test_organism)
+                filename=test_filename)
         test_coexpression_loader.store_feature_groups(
             group=test_cluster1,
             term=term,

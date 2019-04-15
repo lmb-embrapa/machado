@@ -140,14 +140,15 @@ class JBrowseTests(APITestCase, URLPatternsTestCase):
 
         # instantiate the loader
         test_feat_file = FeatureLoader(filename='file.name',
-                                       organism='Mus musculus',
                                        source='GFF_source')
         # store the tabix feature
-        test_feat_file.store_tabix_feature(test_feat1)
-        test_feat_file.store_tabix_feature(test_feat2)
-        test_feat_file.store_tabix_feature(test_feat3)
+        organism = 'Mus musculus'
 
-        test_feat_file.store_relationships()
+        test_feat_file.store_tabix_feature(test_feat1, organism)
+        test_feat_file.store_tabix_feature(test_feat2, organism)
+        test_feat_file.store_tabix_feature(test_feat3, organism)
+
+        test_feat_file.store_relationships(organism)
 
     def test_jbrowse_api_global(self):
         """Retrieve JBrowse data from the global API endpoint."""

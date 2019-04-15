@@ -67,8 +67,6 @@ class Command(BaseCommand):
         try:
             sequence_file = SequenceLoader(
                 filename=filename,
-                organism=organism,
-                soterm=soterm,
                 description=description,
                 url=url,
                 doi=doi)
@@ -81,8 +79,7 @@ class Command(BaseCommand):
         tasks = list()
         for fasta in fasta_sequences:
             tasks.append(pool.submit(sequence_file.store_biopython_seq_record,
-                                     fasta,
-                                     nosequence))
+                                     fasta, soterm, organism, nosequence))
         if verbosity > 0:
             self.stdout.write('Loading')
         for task in tqdm(as_completed(tasks), total=len(tasks)):

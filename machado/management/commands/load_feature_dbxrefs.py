@@ -4,12 +4,11 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load feature sequence file."""
+"""Load feature dbxrefs file."""
 
-from Bio import SeqIO
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.sequence import SequenceLoader
+from machado.loaders.feature import FeatureLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
@@ -17,21 +16,24 @@ import os
 
 
 class Command(BaseCommand):
-    """Load feature sequence file."""
+    """Load feature annotation file."""
 
-    help = 'Load FASTA file and add sequences to existing features'
+    help = 'Load two-column tab separated file containing feature name and '
+    'dbxref. Current annotation will be replaced.'
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file", help="FASTA File", required=True,
-                            type=str)
-        parser.add_argument("--soterm", help="SO Sequence Ontology Term (eg. "
-                            "chromosome, assembly)", required=True,
+        parser.add_argument("--file",
+                            help="Two-column tab separated file. "
+                            "(feature.dbxref\\tdb:dbxref)",
+                            required=True,
                             type=str)
         parser.add_argument("--organism", help="Species name (eg. Homo "
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
+        parser.add_argument("--soterm", help="SO Sequence Ontology Term "
+                            "(eg. mRNA, polypeptide)", required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
@@ -43,6 +45,9 @@ class Command(BaseCommand):
                cpu: int = 1,
                **options):
         """Execute the main function."""
+        if verbosity > 0:
+            self.stdout.write('Preprocessing')
+
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -50,29 +55,34 @@ class Command(BaseCommand):
 
         # retrieve only the file name
         filename = os.path.basename(file)
+
         try:
-            sequence_file = SequenceLoader(
+            feature_file = FeatureLoader(
                 filename=filename,
-                soterm=soterm)
+                source='GFF_source',
+            )
         except ImportingError as e:
             raise CommandError(e)
 
-        if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
-
-        fasta_sequences = SeqIO.parse(open(file), 'fasta')
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        for fasta in fasta_sequences:
-            tasks.append(pool.submit(sequence_file.add_sequence_to_feature,
-                                     fasta, soterm, organism))
+
+        # Load the dbxrefs file
+        with open(file) as tab_file:
+            for line in tab_file:
+                feature, dbxref = line.strip().split('\t')
+                tasks.append(pool.submit(
+                    feature_file.store_feature_dbxref,
+                    feature, soterm, dbxref))
+
         if verbosity > 0:
-            self.stdout.write('Loading')
+            self.stdout.write('Loading features DBxRefs')
         for task in tqdm(as_completed(tasks), total=len(tasks)):
-            if task.result():
-                raise(task.result())
+            try:
+                task.result()
+            except ImportingError as e:
+                raise CommandError(e)
         pool.shutdown()
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS(
-                'Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS('Done'))

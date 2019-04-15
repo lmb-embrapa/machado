@@ -57,15 +57,14 @@ def get_feature_display(self):
             return None
 
 
-def get_feature_orthologs_groups(self):
+def get_feature_orthologous_group(self):
     """Get the orthologous group id."""
-    result = list()
-    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
-        type__name='in orthology relationship with',
-        type__cv__name='relationship').distinct("value")
-    for feature_relationship in feature_relationships:
-        result.append(feature_relationship.value)
-    return result
+    try:
+        return self.Featureprop_feature_Feature.get(
+            type__cv__name='feature_property',
+            type__name='orthologous group').value
+    except ObjectDoesNotExist:
+        return None
 
 
 def machadoFeatureMethods():
@@ -75,7 +74,7 @@ def machadoFeatureMethods():
         setattr(cls, 'get_product', get_feature_product)
         setattr(cls, 'get_description', get_feature_description)
         setattr(cls, 'get_note', get_feature_note)
-        setattr(cls, 'get_orthologs_groups', get_feature_orthologs_groups)
+        setattr(cls, 'get_orthologous_group', get_feature_orthologous_group)
         return cls
     return wrapper
 

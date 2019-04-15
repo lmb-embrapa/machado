@@ -7,7 +7,7 @@
 
 from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
-from machado.models import FeatureRelationship
+from machado.models import Featureprop
 
 FACET_FIELDS = ['organism', 'so_term', 'orthology', 'analyses']
 
@@ -21,16 +21,10 @@ class FeatureSearchView(FacetedSearchView):
     paginate_by = 25
     context_object_name = 'object_list'
 
-    def get_queryset(self):
-        """Get queryset."""
-        queryset = super(FeatureSearchView, self).get_queryset()
-        # further filter queryset based on some set of criteria
-        return queryset
-
     def get_context_data(self, *args, **kwargs):
         """Get context data."""
-        context = super(FeatureSearchView, self).get_context_data(*args,
-                                                                  **kwargs)
+        context = super(FeatureSearchView, self).get_context_data(
+            *args, **kwargs)
         selected_facets = list()
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()['selected_facets']:
@@ -42,9 +36,9 @@ class FeatureSearchView(FacetedSearchView):
         context['selected_facets'] = selected_facets
         context['selected_facets_fields'] = selected_facets_fields
 
-        context['orthologs'] = FeatureRelationship.objects.filter(
-            type__name='in orthology relationship with',
-            type__cv__name='relationship').distinct("value").exists()
+        context['orthologs'] = Featureprop.objects.filter(
+            type__name='orthologous group',
+            type__cv__name='feature_property').exists()
 
         return context
 
@@ -54,16 +48,31 @@ class FeatureSearchExportView(FacetedSearchView):
 
     form_class = FeatureSearchForm
     facet_fields = FACET_FIELDS
-    template_name = 'search_result.tsv'
+    template_name = 'search_result.out'
     paginate_by = False
     context_object_name = 'object_list'
-    content_type = 'text/tsv'
+    content_type = 'text'
+
+    def get_context_data(self, *args, **kwargs):
+        """Get context data."""
+        context = super(FeatureSearchExportView, self).get_context_data(
+            *args, **kwargs)
+
+        if self.get_form_kwargs()['data'].get('export') in ['tsv', 'fasta']:
+            file_format = self.get_form_kwargs()['data'].get('export')
+        else:
+            file_format = 'tsv'
+
+        self.file_format = file_format
+        context['file_format'] = file_format
+
+        return context
 
     def dispatch(self, *args, **kwargs):
-        """Create response."""
-        response = super(FeatureSearchExportView,
-                         self).dispatch(*args, **kwargs)
-        filename = 'machado_search_results.tsv'
+        """Dispatch."""
+        response = super(FeatureSearchExportView, self).dispatch(
+            *args, **kwargs)
+        filename = 'machado_search_results.{}'.format(self.file_format)
         response['Content-Disposition'] = 'attachment; filename="{}"'.format(
             filename)
         return response
