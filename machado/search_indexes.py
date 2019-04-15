@@ -122,6 +122,23 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         except ObjectDoesNotExist:
             return None
 
+    def prepare_coexpression(self, obj):
+        """Prepare coexpression."""
+        return Featureprop.objects.filter(
+            type__cv__name='feature_property',
+            type__name='coexpression group',
+            feature=obj).exists()
+
+    def prepare_coexpression_group(self, obj):
+        """Prepare coepxression group."""
+        try:
+            return Featureprop.objects.get(
+                type__cv__name='feature_property',
+                type__name='coexpression group',
+                feature=obj).value
+        except ObjectDoesNotExist:
+            return None
+
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
         return self.temp

@@ -67,6 +67,16 @@ def get_feature_orthologous_group(self):
         return None
 
 
+def get_feature_coexpression_group(self):
+    """Get the coexpression group id."""
+    try:
+        return self.Featureprop_feature_Feature.get(
+            type__cv__name='feature_property',
+            type__name='coexpression group').value
+    except ObjectDoesNotExist:
+        return None
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
     def wrapper(cls):
@@ -75,6 +85,7 @@ def machadoFeatureMethods():
         setattr(cls, 'get_description', get_feature_description)
         setattr(cls, 'get_note', get_feature_note)
         setattr(cls, 'get_orthologous_group', get_feature_orthologous_group)
+        setattr(cls, 'get_coexpression_group', get_feature_coexpression_group)
         return cls
     return wrapper
 
