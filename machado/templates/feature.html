@@ -166,14 +166,14 @@
   </div>
   {% endif %}
 
-  {% if data.coexp_clusters %}
+  {% if data.coexp_groups %}
   <div class="card m-1">
     <div class="card-header">
-        <h3 class="card-title">Clusters coexpression)</h3>
+        <h3 class="card-title">Coexp. Groups)</h3>
     </div>
     <div class="card-body">
       <div class="card-text">
-        {% for group_id, group in data.coexp_clusters.items %}
+        {% for group_id, group in data.coexp_groups.items %}
             <ul class="list-group list-group-flush">
             <li class="list-group-item list-group-item-secondary"><a href="{% url 'feature_search' %}?q={{ group_id }}">{{ group_id }}</a></li>
             {% for clustfeature in group  %}

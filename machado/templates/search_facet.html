@@ -49,6 +49,14 @@
             <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:1" in selected_facets %}checked{% endif %}>
             orthology
             {% endif %}
+        {% elif facet == "coexp_groups" %}
+            {% if item.0 == 0 %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexp_groups:0" in selected_facets %}checked{% endif %}>
+            no orthology
+            {% else %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexp_groups:1" in selected_facets %}checked{% endif %}>
+            orthology
+            {% endif %}
         {% else %}
             <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
             {{ item.0 }}

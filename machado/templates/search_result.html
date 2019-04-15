@@ -36,6 +36,7 @@
                 <th>Feature ID</th>
                 <th>Display</th>
                 {% if orthologs %}<th>Orthologous Group</th>{% endif%}
+                {% if coexp_groups %}<th>Coexpression Group</th>{% endif%}
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
@@ -45,6 +46,11 @@
                 {% if orthologs %}
                     <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.object.get_orthologous_group }}">{{ result.object.get_orthologous_group|default_if_none:'' }}</a></td>
                 {% endif%}
+                {% if coexp_groups %}
+                    <td><a href="{% url 'feature_search' %}?selected_facets=coexp_groups:{{ result.object.get_coexpression_group }}">{{ result.object.get_coexpression_group|default_if_none:'' }}</a></td>
+                {% endif%}
+                </tr>
+                </tr>
                 </tr>
                 {% empty %}
                 <p>No results found.</p>

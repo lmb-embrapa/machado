@@ -9,7 +9,7 @@ from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 
-FACET_FIELDS = ['organism', 'so_term', 'orthology', 'analyses']
+FACET_FIELDS = ['organism', 'so_term', 'orthology', 'coexp_groups', 'analyses']
 
 
 class FeatureSearchView(FacetedSearchView):
@@ -38,6 +38,10 @@ class FeatureSearchView(FacetedSearchView):
 
         context['orthologs'] = Featureprop.objects.filter(
             type__name='orthologous group',
+            type__cv__name='feature_property').exists()
+
+        context['coexp_groups'] = Featureprop.objects.filter(
+            type__name='coexpression group',
             type__cv__name='feature_property').exists()
 
         return context
