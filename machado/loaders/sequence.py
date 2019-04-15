@@ -119,7 +119,6 @@ class SequenceLoader(object):
     def add_sequence_to_feature(self, seq_obj: SeqRecord,
                                 soterm: str, organism: str) -> None:
         """Store Biopython SeqRecord."""
-        print(soterm)
         soterm_obj = Cvterm.objects.get(name=soterm, cv__name='sequence')
         organism_obj = retrieve_organism(organism)
         try:
