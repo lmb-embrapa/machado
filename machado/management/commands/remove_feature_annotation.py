@@ -20,7 +20,7 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument("--organism", help="Species name (eg. Homo "
                             "sapiens, Mus musculus)",
-                            required=True,
+                            required=False,
                             type=str)
         parser.add_argument("--cvterm", help="cvterm.name from cv "
                             "feature_property. (eg. display, note, product, "
@@ -29,24 +29,23 @@ class Command(BaseCommand):
                             type=str)
 
     def handle(self,
-               organism: str,
                cvterm: str,
-               verbosity: int=1,
+               organism: str = None,
+               verbosity: int = 1,
                **options):
         """Execute the main function."""
-        try:
-            organism_obj = retrieve_organism(organism)
-        except ObjectDoesNotExist:
-                raise CommandError('Organism does not exist in database!')
-
         try:
             cvterm_obj = Cvterm.objects.get(name=cvterm,
                                             cv__name='feature_property')
         except ObjectDoesNotExist:
-                raise CommandError('cvterm does not exist in database!')
+            raise CommandError('cvterm does not exist in database!')
 
-        feature_props = Featureprop.objects.filter(
-            type=cvterm_obj, feature__organism=organism_obj)
+        try:
+            organism_obj = retrieve_organism(organism)
+            feature_props = Featureprop.objects.filter(
+                type=cvterm_obj, feature__organism=organism_obj)
+        except ObjectDoesNotExist:
+            feature_props = Featureprop.objects.filter(type=cvterm_obj)
 
         count = feature_props.count()
         feature_props.delete()
