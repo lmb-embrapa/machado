@@ -76,8 +76,11 @@ def get_num_lines(file_path):
     else:
         fp = open(file_path, "r+")
 
-    for i, l in enumerate(fp):
-        pass
+    i = 0
+    for line in fp:
+        if line.startswith("#"):
+            continue
+        i += 1
     return i
 
 
