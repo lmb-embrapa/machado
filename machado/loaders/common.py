@@ -12,8 +12,7 @@
 
 """loaders common library."""
 from machado.loaders.exceptions import ImportingError
-from django.db.utils import IntegrityError
-from machado.models import Cvterm, Feature, Organism
+from machado.models import Feature, FeatureDbxref, Organism
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
 import gzip
@@ -77,8 +76,11 @@ def get_num_lines(file_path):
     else:
         fp = open(file_path, "r+")
 
-    for i, l in enumerate(fp):
-        pass
+    i = 0
+    for line in fp:
+        if line.startswith("#"):
+            continue
+        i += 1
     return i
 
 
@@ -122,6 +124,9 @@ def retrieve_organism(organism: str) -> Organism:
     except ValueError:
         raise ValueError('The organism genus and species should be '
                          'separated by a single space')
+    except AttributeError as e:
+        raise AttributeError(e)
+
     try:
         organism_obj = Organism.objects.get(
             genus=genus,
@@ -132,23 +137,26 @@ def retrieve_organism(organism: str) -> Organism:
     return organism_obj
 
 
-def retrieve_feature(featureacc: str,
-                     organism: Organism = None,
-                     cvterm: str = "mRNA",
-                     ontology: str = "sequence",
-                     ) -> Feature:
+def retrieve_feature_id(
+        accession: str, soterm: str) -> int:
     """Retrieve feature object."""
-    # cvterm is mandatory
-    cvterm_obj = Cvterm.objects.get(name=cvterm, cv__name=ontology)
+    # feature.uniquename
     try:
-        feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm_obj.cvterm_id)
-    except MultipleObjectsReturned:
-        feature = Feature.objects.get(uniquename=featureacc,
-                                      type_id=cvterm_obj.cvterm_id,
-                                      organism=organism)
-    except ObjectDoesNotExist:
-        feature = None
-    except IntegrityError as e:
-        raise ImportingError(e)
-    return feature
+        return Feature.objects.get(
+            uniquename=accession, type__cv__name='sequence',
+            type__name=soterm).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
+
+    # feature.dbxref.accession
+    try:
+        return Feature.objects.get(
+            dbxref__accession=accession, type__cv__name='sequence',
+            type__name=soterm).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
+
+    # featuredbxref.dbxref.accession
+    return FeatureDbxref.objects.get(
+        dbxref__accession=accession, feature__type__cv__name='sequence',
+        feature__type__name=soterm).feature_id

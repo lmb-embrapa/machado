@@ -6,12 +6,12 @@
 
 """Load feature file."""
 
-from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop
+from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
 from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from machado.models import Featureprop, FeatureSynonym
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.models import Organism, Pub, PubDbxref, FeaturePub, Synonym
-from machado.loaders.common import retrieve_organism
+from machado.models import Pub, PubDbxref, FeaturePub, Synonym
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -26,7 +26,7 @@ from Bio.SearchIO._model import Hit
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = ['dbxref', 'note', 'display', 'alias', 'ontology_term',
                'orf_classification', 'synonym', 'is_circular',
-               'gene_synonym', 'description', 'product']
+               'gene_synonym', 'description', 'product', 'pacid']
 
 
 class FeatureLoader(object):
@@ -37,7 +37,6 @@ class FeatureLoader(object):
     def __init__(self,
                  source: str,
                  filename: str,
-                 organism: Union[str, Organism],
                  doi: str = None) -> None:
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
@@ -47,13 +46,6 @@ class FeatureLoader(object):
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
         self.relationships: List[Dict[str, str]] = list()
-        if isinstance(organism, Organism):
-            self.organism = organism
-        else:
-            try:
-                self.organism = retrieve_organism(organism)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
 
         try:
             self.db, created = Db.objects.get_or_create(name=source.upper())
@@ -157,6 +149,13 @@ class FeatureLoader(object):
                     FeatureDbxref.objects.create(feature_id=feature_id,
                                                  dbxref=dbxref,
                                                  is_current=1)
+            elif key in ['pacid']:
+                db, created = Db.objects.get_or_create(name='PACID')
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=db, accession=attrs[key])
+                FeatureDbxref.objects.create(feature_id=feature_id,
+                                             dbxref=dbxref,
+                                             is_current=1)
             elif key in ['alias', 'gene_synonym', 'synonym']:
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
@@ -186,8 +185,10 @@ class FeatureLoader(object):
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()
 
-    def store_tabix_feature(self, tabix_feature: GTFProxy) -> None:
+    def store_tabix_feature(
+            self, tabix_feature: GTFProxy, organism: str) -> None:
         """Store tabix feature."""
+        organism_obj = retrieve_organism(organism)
         for key in self.get_attributes(tabix_feature.attributes):
             if key not in VALID_ATTRS and key not in ['id', 'name', 'parent']:
                 self.ignored_attrs.add(key)
@@ -214,7 +215,7 @@ class FeatureLoader(object):
                 dbxref=dbxref, type_id=self.cvterm_contained_in.cvterm_id,
                 value=self.filename, rank=0)
             feature_id = Feature.objects.create(
-                organism=self.organism, uniquename=attrs_id,
+                organism=organism_obj, uniquename=attrs_id,
                 type_id=cvterm.cvterm_id, name=attrs_name,
                 dbxref=dbxref, is_analysis=False, is_obsolete=False,
                 timeaccessioned=datetime.now(timezone.utc),
@@ -236,7 +237,7 @@ class FeatureLoader(object):
         srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig,
                                        db=srcdb)
         srcfeature = Feature.objects.filter(
-            dbxref=srcdbxref, organism=self.organism).values_list(
+            dbxref=srcdbxref, organism=organism_obj).values_list(
                 'feature_id', flat=True)
         if len(srcfeature) == 1:
             srcfeature_id = srcfeature.first()
@@ -297,7 +298,7 @@ class FeatureLoader(object):
             translation_of = Cvterm.objects.get(
                 name='translation_of', cv__name='sequence')
             feature_mRNA_translation_id = Feature.objects.create(
-                    organism=self.organism,
+                    organism=organism_obj,
                     uniquename=attrs_id,
                     type_id=self.aa_cvterm.cvterm_id,
                     name=attrs_name,
@@ -310,21 +311,22 @@ class FeatureLoader(object):
                 object_id=feature_mRNA_translation_id, subject_id=feature_id,
                 type=translation_of, rank=0)
 
-    def store_relationships(self) -> None:
+    def store_relationships(self, organism: str) -> None:
         """Store the relationships."""
+        organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name='part_of', cv__name='sequence')
         relationships = list()
         features = Feature.objects.filter(
-            organism=self.organism).exclude(type=self.aa_cvterm).only(
+            organism=organism_obj).exclude(type=self.aa_cvterm).only(
                 'feature_id', 'uniquename', 'organism')
         for i, item in enumerate(self.relationships):
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
                 object = features.get(uniquename=item['object_id'],
-                                      organism=self.organism)
+                                      organism=organism_obj)
                 subject = features.get(uniquename=item['subject_id'],
-                                       organism=self.organism)
+                                       organism=organism_obj)
                 relationships.append(FeatureRelationship(
                     subject_id=subject.feature_id,
                     object_id=object.feature_id,
@@ -339,10 +341,12 @@ class FeatureLoader(object):
         else:
             FeatureRelationship.objects.bulk_create(relationships)
 
-    def store_bio_searchio_hit(self,
-                               searchio_hit: Hit,
-                               target: str) -> None:
+    def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""
+        organism_obj, created = Organism.objects.get_or_create(
+            abbreviation='multispecies', genus='multispecies',
+            species='multispecies', common_name='multispecies')
+
         if not hasattr(searchio_hit, 'accession'):
             searchio_hit.accession = None
 
@@ -357,7 +361,7 @@ class FeatureLoader(object):
         dbxref, created = Dbxref.objects.get_or_create(
             db=db, accession=searchio_hit.id)
         feature, created = Feature.objects.get_or_create(
-                organism=self.organism,
+                organism=organism_obj,
                 uniquename=searchio_hit.id,
                 type_id=self.so_term_protein_match.cvterm_id,
                 name=searchio_hit.accession,
@@ -395,6 +399,7 @@ class FeatureLoader(object):
 
     def store_feature_annotation(self,
                                  feature: str,
+                                 soterm: str,
                                  cvterm: str,
                                  annotation: str) -> None:
         """Store feature annotation."""
@@ -403,63 +408,34 @@ class FeatureLoader(object):
             if key not in VALID_ATTRS:
                 self.ignored_attrs.add(key)
 
-        features = Feature.objects.filter(
-            organism=self.organism,
-            dbxref__accession=feature,
-            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
-                'feature_id')
-
-        if len(features) == 0:
-            raise ImportingError('{} not found.'.format(feature))
-
-        for feature_obj in features:
-            self.process_attributes(feature_obj.feature_id, attrs)
+        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
+        self.process_attributes(feature_id, attrs)
 
     def store_feature_dbxref(
-            self, feature: str, so_term: str, dbxref: str) -> None:
+            self, feature: str, soterm: str, dbxref: str) -> None:
         """Store feature dbxref."""
-        feature_ids = Feature.objects.filter(
-            organism=self.organism,
-            type__cv__name='sequence',
-            type__name=so_term,
-            dbxref__accession=feature,
-            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
-                'feature_id').values_list('feature_id', flat=True)
-
-        if len(feature_ids) == 0:
-            raise ImportingError('{} not found.'.format(feature))
+        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
 
         db_name, dbxref_accession = dbxref.split(':')
         db_obj, created = Db.objects.get_or_create(name=db_name)
         dbxref_obj, created = Dbxref.objects.get_or_create(
             db=db_obj, accession=dbxref_accession)
-        for feature_id in feature_ids:
-            FeatureDbxref.objects.get_or_create(
-                feature_id=feature_id, dbxref=dbxref_obj, is_current=True)
+        FeatureDbxref.objects.get_or_create(
+            feature_id=feature_id, dbxref=dbxref_obj, is_current=True)
 
     def store_feature_publication(self,
                                   feature: str,
+                                  soterm: str,
                                   doi: str) -> None:
         """Store feature publication."""
-        features = Feature.objects.filter(
-            organism=self.organism,
-            dbxref__accession=feature,
-            dbxref__db__name__in=['GFF_SOURCE', 'FASTA_SOURCE']).only(
-                'feature_id')
-
-        if len(features) == 0:
-            raise ImportingError('{} not found.'.format(feature))
-
+        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
         try:
             doi_obj = Dbxref.objects.get(accession=doi, db__name='DOI')
             pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
         except ObjectDoesNotExist:
             raise ImportingError('{} not registered.', doi)
 
-        for feature_obj in features:
-            FeaturePub.objects.get_or_create(
-                    feature=feature_obj,
-                    pub=pub_obj)
+        FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
 
     def store_feature_pairs(
                             self,
@@ -510,31 +486,33 @@ class FeatureLoader(object):
     def store_feature_groups(
                                self,
                                group: list,
-                               term: Union[str, Cvterm],
+                               term: Union[int, Cvterm],
                                value: str = None,
                                cache: int = 0
                                ) -> None:
         """Store Feature Relationship Groups."""
         # only cvterm_id allowed
         if isinstance(term, Cvterm):
-            cvterm = term.cvterm_id
+            cvterm_id = term.cvterm_id
         else:
-            cvterm = term
+            cvterm_id = term
         featureprops = list()
-        feature_list = list(Feature.objects.filter(
+        feature_id_list = list(Feature.objects.filter(
             type__cv__name='sequence',
             type__name='polypeptide',
             dbxref__accession__in=group,
             dbxref__db__name__in=['GFF_SOURCE',
                                   'FASTA_SOURCE'],
-
             ).distinct('feature_id').values_list('feature_id', flat=True))
         # only stores clusters with 2 or more members
-        if len(feature_list) > 1:
-            for member in feature_list:
+        if len(feature_id_list) > 1:
+            for feature_id in feature_id_list:
                 featureprops.append(Featureprop(
-                               feature_id=member,
-                               type_id=cvterm,
+                               feature_id=feature_id,
+                               type_id=cvterm_id,
                                value=value,
                                rank=0))
-            Featureprop.objects.bulk_create(featureprops)
+            try:
+                Featureprop.objects.bulk_create(featureprops)
+            except IntegrityError as e:
+                raise ImportingError(e)

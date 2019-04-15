@@ -7,10 +7,9 @@
 """Load OrthoMCL groups.txt result."""
 
 from machado.loaders.common import FileValidator
-from machado.loaders.common import get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from machado.models import Cv, Cvterm, Organism, Dbxref, Db
+from machado.models import Cv, Cvterm, Dbxref, Db
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
@@ -71,18 +70,10 @@ The feature members need to be loaded previously."""
             dbxref=ortho_dbxref,
             is_obsolete=0,
             is_relationshiptype=0)
-        organism, created = Organism.objects.get_or_create(
-                    abbreviation='multispecies',
-                    genus='multispecies',
-                    species='multispecies',
-                    common_name='multispecies')
         source = "null"
-        featureloader = FeatureLoader(
-                source=source,
-                filename=filename,
-                organism=organism)
+        featureloader = FeatureLoader(source=source, filename=filename)
         # each line is an orthologous group
-        for line in tqdm(groups, total=get_num_lines(file)):
+        for line in groups:
             members = []
             name = ''
             fields = re.split(r'\s+', line.strip())
@@ -103,8 +94,7 @@ The feature members need to be loaded previously."""
                 tasks.append(
                     pool.submit(
                             featureloader.store_feature_groups,
-                            group=members,
-                            term=cvterm_cluster.cvterm_id,
+                            group=members, term=cvterm_cluster.cvterm_id,
                             value=name))
         if verbosity > 0:
             self.stdout.write('Loading')

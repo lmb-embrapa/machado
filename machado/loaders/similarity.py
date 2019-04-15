@@ -11,7 +11,7 @@ from machado.models import FeatureCvterm, FeatureCvtermprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.common import retrieve_organism
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -47,10 +47,8 @@ class SimilarityLoader(object):
             self.org_query = retrieve_organism(org_query)
             self.org_subject = retrieve_organism(org_subject)
             self.input_format = input_format
-            self.so_term_query = Cvterm.objects.get(
-                name=so_query, cv__name='sequence')
-            self.so_term_subject = Cvterm.objects.get(
-                name=so_subject, cv__name='sequence')
+            self.so_query = so_query
+            self.so_subject = so_subject
             self.so_term_match_part = Cvterm.objects.get(
                 name='match_part', cv__name='sequence')
             self.ro_term_similarity = Cvterm.objects.get(
@@ -85,54 +83,44 @@ class SimilarityLoader(object):
         return None
 
     def retrieve_query_from_hsp(
-            self, hsp: hsp.HSP) -> Feature:
+            self, hsp: hsp.HSP) -> int:
         """Retrieve the query feature from searchio hsp."""
         try:
-            query_feature = Feature.objects.get(
-                    dbxref__accession=hsp.query_id,
-                    organism=self.org_query,
-                    type_id=self.so_term_query.cvterm_id)
+            query_feature_id = retrieve_feature_id(
+                accession=hsp.query_id, soterm=self.so_query)
         except ObjectDoesNotExist as e1:
             try:
                 query_id = self.retrieve_id_from_description(
                         hsp.query_description)
-                query_feature = Feature.objects.get(
-                        dbxref__accession=query_id,
-                        organism=self.org_query,
-                        type_id=self.so_term_query.cvterm_id)
+                query_feature_id = retrieve_feature_id(
+                    accession=query_id, soterm=self.so_query)
             except ObjectDoesNotExist as e2:
                 raise ImportingError(
                     e1, e2, 'Query {} {}'.format(
                         hsp.query_id, hsp.query_description))
-
-        return query_feature
+        return query_feature_id
 
     def retrieve_subject_from_hsp(
-            self, hsp: hsp.HSP) -> Feature:
+            self, hsp: hsp.HSP) -> int:
         """Retrieve the subject feature from searchio hsp."""
         try:
-            subject_feature = Feature.objects.get(
-                    dbxref__accession=hsp.hit_id,
-                    organism=self.org_subject,
-                    type_id=self.so_term_subject.cvterm_id)
+            subject_feature_id = retrieve_feature_id(
+                accession=hsp.hit_id, soterm=self.so_subject)
         except ObjectDoesNotExist as e1:
             try:
                 subject_id = self.retrieve_id_from_description(
                     hsp.hit_description)
-                subject_feature = Feature.objects.get(
-                        dbxref__accession=subject_id,
-                        organism=self.org_subject,
-                        type_id=self.so_term_subject.cvterm_id)
+                subject_feature_id = retrieve_feature_id(
+                    accession=subject_id, soterm=self.so_subject)
             except ObjectDoesNotExist as e2:
                 raise ImportingError(
                     e1, e2, 'Subject {} {}'.format(
                         hsp.hit_id, hsp.hit_description))
-
-        return subject_feature
+        return subject_feature_id
 
     def store_match_part(self,
-                         query_feature: Feature,
-                         subject_feature: Feature,
+                         query_feature_id: int,
+                         subject_feature_id: int,
                          identity: float = None,
                          rawscore: float = None,
                          normscore: float = None,
@@ -144,19 +132,19 @@ class SimilarityLoader(object):
         """Store hsp record."""
         # set id = auto# for match_part features
         match_part_id = 'match_part_{}{}{}'.format(
-            str(time()), query_feature.feature_id, subject_feature.feature_id)
+            str(time()), query_feature_id, subject_feature_id)
         try:
             match_part_feature = Feature.objects.create(
-                    organism=query_feature.organism,
+                    organism=self.org_query,
                     uniquename=match_part_id,
-                    type_id=self.so_term_match_part.cvterm_id,
+                    type=self.so_term_match_part,
                     is_analysis=True,
                     is_obsolete=False,
                     timeaccessioned=datetime.now(),
                     timelastmodified=datetime.now())
             # Analysisfeature.objects.create(analysis=self.analysis,
             self.analysis_loader.store_analysisfeature(
-                    organism=query_feature.organism,
+                    organism=self.org_query,
                     analysis=self.analysis,
                     feature=match_part_feature,
                     identity=identity,
@@ -167,7 +155,7 @@ class SimilarityLoader(object):
             raise ImportingError(e)
 
         Featureloc.objects.create(feature=match_part_feature,
-                                  srcfeature=query_feature,
+                                  srcfeature_id=query_feature_id,
                                   fmax=query_end,
                                   fmin=query_start,
                                   is_fmax_partial=False,
@@ -176,7 +164,7 @@ class SimilarityLoader(object):
                                   rank=0)
 
         Featureloc.objects.create(feature=match_part_feature,
-                                  srcfeature=subject_feature,
+                                  srcfeature_id=subject_feature_id,
                                   fmax=subject_end,
                                   fmin=subject_start,
                                   is_fmax_partial=False,
@@ -184,11 +172,11 @@ class SimilarityLoader(object):
                                   locgroup=0,
                                   rank=1)
 
-    def store_feature_relationship(self, query_feature: Feature,
-                                   subject_feature: Feature) -> None:
+    def store_feature_relationship(self, query_feature_id: int,
+                                   subject_feature_id: int) -> None:
         """Store feature_relationship."""
         feature_relation, create = FeatureRelationship.objects.get_or_create(
-            object=query_feature, subject=subject_feature,
+            object_id=query_feature_id, subject_id=subject_feature_id,
             type=self.ro_term_similarity,
             defaults={'rank': 0})
         FeatureRelationshipprop.objects.get_or_create(
@@ -199,10 +187,10 @@ class SimilarityLoader(object):
 
         # ontology terms
         subject_feature_cvterms = FeatureCvterm.objects.filter(
-            feature=subject_feature)
+            feature_id=subject_feature_id)
         for subject_feature_cvterm in subject_feature_cvterms:
             query_feature_cvterm, c = FeatureCvterm.objects.get_or_create(
-                feature=query_feature,
+                feature_id=query_feature_id,
                 cvterm=subject_feature_cvterm.cvterm,
                 pub=subject_feature_cvterm.pub,
                 is_not=subject_feature_cvterm.is_not,
@@ -217,8 +205,8 @@ class SimilarityLoader(object):
             self, query_result: query.QueryResult) -> None:
         """Store bio_searchio_query_result."""
         for hsp_item in query_result.hsps:
-            query_feature = self.retrieve_query_from_hsp(hsp_item)
-            subject_feature = self.retrieve_subject_from_hsp(hsp_item)
+            query_feature_id = self.retrieve_query_from_hsp(hsp_item)
+            subject_feature_id = self.retrieve_subject_from_hsp(hsp_item)
             if not hasattr(hsp_item, 'ident_num'):
                 hsp_item.ident_num = None
             if not hasattr(hsp_item, 'bitscore'):
@@ -227,8 +215,8 @@ class SimilarityLoader(object):
                 hsp_item.bitscore_raw = None
             if not hasattr(hsp_item, 'evalue'):
                 hsp_item.evalue = None
-            self.store_match_part(query_feature=query_feature,
-                                  subject_feature=subject_feature,
+            self.store_match_part(query_feature_id=query_feature_id,
+                                  subject_feature_id=subject_feature_id,
                                   identity=hsp_item.ident_num,
                                   rawscore=hsp_item.bitscore_raw,
                                   normscore=hsp_item.bitscore,
@@ -239,5 +227,5 @@ class SimilarityLoader(object):
                                   subject_end=hsp_item.hit_end)
             if self.input_format == 'interproscan-xml':
                 self.store_feature_relationship(
-                    query_feature=query_feature,
-                    subject_feature=subject_feature)
+                    query_feature_id=query_feature_id,
+                    subject_feature_id=subject_feature_id)

@@ -32,12 +32,16 @@ class Command(BaseCommand):
                             "sapiens, Mus musculus)",
                             required=True,
                             type=str)
+        parser.add_argument("--soterm", help="SO Sequence Ontology Term "
+                            "(eg. mRNA, polypeptide)", required=True,
+                            type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1,
                             type=int)
 
     def handle(self,
                file: str,
                organism: str,
+               soterm: str,
                verbosity: int = 1,
                cpu: int = 1,
                **options):
@@ -57,7 +61,6 @@ class Command(BaseCommand):
             feature_file = FeatureLoader(
                 filename=filename,
                 source='PUBLICATION',
-                organism=organism,
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -71,7 +74,7 @@ class Command(BaseCommand):
                 feature, doi = line.strip().split('\t')
                 tasks.append(pool.submit(
                     feature_file.store_feature_publication,
-                    feature, doi))
+                    feature, soterm, doi))
 
         if verbosity > 0:
             self.stdout.write('Loading feature publications')
