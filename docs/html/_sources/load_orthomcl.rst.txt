@@ -33,7 +33,7 @@ If, by any reason, you need to remove orthology relationships, you should use th
 
 ====================  ===============================================
 --cvterm TERM         'orthologous group'*
---organism ORGANISM   Species name. (eg. Homo sapiens, Mus musculus)*
+--organism ORGANISM   Species name. (eg. Homo sapiens, Mus musculus)
 ====================  ===============================================
 
 \* required fields
