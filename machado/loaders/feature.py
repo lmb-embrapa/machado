@@ -26,7 +26,7 @@ from Bio.SearchIO._model import Hit
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = ['dbxref', 'note', 'display', 'alias', 'ontology_term',
                'orf_classification', 'synonym', 'is_circular',
-               'gene_synonym', 'description', 'product']
+               'gene_synonym', 'description', 'product', 'pacid']
 
 
 class FeatureLoader(object):
@@ -149,6 +149,13 @@ class FeatureLoader(object):
                     FeatureDbxref.objects.create(feature_id=feature_id,
                                                  dbxref=dbxref,
                                                  is_current=1)
+            elif key in ['pacid']:
+                db, created = Db.objects.get_or_create(name='PACID'
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=db, accession=attrs[key])
+                FeatureDbxref.objects.create(feature_id=feature_id,
+                                             dbxref=dbxref,
+                                             is_current=1)
             elif key in ['alias', 'gene_synonym', 'synonym']:
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),

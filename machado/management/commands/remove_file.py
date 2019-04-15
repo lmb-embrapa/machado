@@ -30,7 +30,7 @@ class Command(BaseCommand):
                **options):
         """Execute the main function."""
         # Handling Features
-        if verbosity > 0:
+        if verbosity > 1:
             self.stdout.write('Features: deleting {} and every '
                               'child record (CASCADE)'
                               .format(name))
@@ -42,21 +42,34 @@ class Command(BaseCommand):
             raise CommandError(
                 'Features: cannot remove {} (not registered)'.format(name))
         # Handling Projects
-        if verbosity > 0:
+        if verbosity > 1:
             self.stdout.write('Projects: deleting {} and every '
                               'child record (CASCADE)'
                               .format(name))
         try:
             project_ids = list(Projectprop.objects.filter(
                 value=name).values_list('project_id', flat=True))
-            Project.objects.filter(project_id__in=project_ids).delete()
             AssayProject.objects.filter(project_id__in=project_ids).delete()
+            Project.objects.filter(project_id__in=project_ids).delete()
             Projectprop.objects.filter(value=name).delete()
         except ObjectDoesNotExist:
             raise CommandError(
                 'Projects: cannot remove {} (not registered)'.format(name))
+        # Handling Assay
+        if verbosity > 1:
+            self.stdout.write('Assay: deleting {} and every '
+                              'child record (CASCADE)'
+                              .format(name))
+        try:
+            assay_ids = list(Assayprop.objects.filter(
+                value=name).values_list('assay_id', flat=True))
+            AssayProject.objects.filter(assay_id__in=assay_ids).delete()
+            Assay.objects.filter(assay_id__in=assay_ids).delete()
+        except ObjectDoesNotExist:
+            raise CommandError(
+                'Assays: cannot remove {} (not registered)'.format(name))
         # Handling Biomaterial
-        if verbosity > 0:
+        if verbosity > 1:
             self.stdout.write('Biomaterial: deleting {} and every '
                               'child record (CASCADE)'
                               .format(name))
@@ -69,21 +82,8 @@ class Command(BaseCommand):
         except ObjectDoesNotExist:
             raise CommandError(
                 'Biomaterials: cannot remove {} (not registered)'.format(name))
-        # Handling Assay
-        if verbosity > 0:
-            self.stdout.write('Assay: deleting {} and every '
-                              'child record (CASCADE)'
-                              .format(name))
-        try:
-            assay_ids = list(Assayprop.objects.filter(
-                value=name).values_list('assay_id', flat=True))
-            Assay.objects.filter(assay_id__in=assay_ids).delete()
-            AssayProject.objects.filter(assay_id__in=assay_ids).delete()
-        except ObjectDoesNotExist:
-            raise CommandError(
-                'Assays: cannot remove {} (not registered)'.format(name))
         # Handling Analysis
-        if verbosity > 0:
+        if verbosity > 1:
             self.stdout.write('Analysis: deleting {} and every '
                               'child record (CASCADE)'
                               .format(name))
