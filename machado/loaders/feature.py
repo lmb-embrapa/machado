@@ -150,7 +150,7 @@ class FeatureLoader(object):
                                                  dbxref=dbxref,
                                                  is_current=1)
             elif key in ['pacid']:
-                db, created = Db.objects.get_or_create(name='PACID'
+                db, created = Db.objects.get_or_create(name='PACID')
                 dbxref, created = Dbxref.objects.get_or_create(
                     db=db, accession=attrs[key])
                 FeatureDbxref.objects.create(feature_id=feature_id,
