@@ -7,7 +7,6 @@
 """Load OrthoMCL groups.txt result."""
 
 from machado.loaders.common import FileValidator
-from machado.loaders.common import get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 from machado.models import Cv, Cvterm, Dbxref, Db
@@ -74,7 +73,7 @@ The feature members need to be loaded previously."""
         source = "null"
         featureloader = FeatureLoader(source=source, filename=filename)
         # each line is an orthologous group
-        for line in tqdm(groups, total=get_num_lines(file)):
+        for line in groups:
             members = []
             name = ''
             fields = re.split(r'\s+', line.strip())

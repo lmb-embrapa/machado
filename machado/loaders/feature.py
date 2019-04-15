@@ -490,19 +490,18 @@ class FeatureLoader(object):
         else:
             cvterm_id = term
         featureprops = list()
-        feature_list = list(Feature.objects.filter(
+        feature_id_list = list(Feature.objects.filter(
             type__cv__name='sequence',
             type__name='polypeptide',
             dbxref__accession__in=group,
             dbxref__db__name__in=['GFF_SOURCE',
                                   'FASTA_SOURCE'],
-
             ).distinct('feature_id').values_list('feature_id', flat=True))
         # only stores clusters with 2 or more members
-        if len(feature_list) > 1:
-            for member in feature_list:
+        if len(feature_id_list) > 1:
+            for feature_id in feature_id_list:
                 featureprops.append(Featureprop(
-                               feature=member,
+                               feature_id=feature_id,
                                type_id=cvterm_id,
                                value=value,
                                rank=0))
