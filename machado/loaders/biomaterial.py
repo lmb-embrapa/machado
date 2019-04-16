@@ -17,20 +17,23 @@ from typing import Union
 class BiomaterialLoader(object):
     """Load biomaterial."""
 
-    help = 'Load biomaterial record.'
+    help = "Load biomaterial record."
 
     def __init__(self) -> None:
         """Execute the init function."""
         self.cvterm_contained_in = Cvterm.objects.get(
-            name='contained in', cv__name='relationship')
+            name="contained in", cv__name="relationship"
+        )
 
-    def store_biomaterial(self,
-                          name: str,
-                          filename: str,
-                          db: str = None,
-                          acc: str = None,
-                          organism: Union[str, Organism] = None,
-                          description: str = None) -> Biomaterial:
+    def store_biomaterial(
+        self,
+        name: str,
+        filename: str,
+        db: str = None,
+        acc: str = None,
+        organism: Union[str, Organism] = None,
+        description: str = None,
+    ) -> Biomaterial:
         """Store biomaterial."""
         # db is not mandatory
         try:
@@ -39,9 +42,7 @@ class BiomaterialLoader(object):
             biodb = None
         # e.g.: acc is the "GSMxxxx" sample accession from GEO
         try:
-            biodbxref, created = Dbxref.objects.get_or_create(
-                                                       db=biodb,
-                                                       accession=acc)
+            biodbxref, created = Dbxref.objects.get_or_create(db=biodb, accession=acc)
         except IntegrityError:
             biodbxref = None
         # organism is mandatory
@@ -62,48 +63,43 @@ class BiomaterialLoader(object):
         try:
             # made name mandatory (it is not regarding the schema definition)
             biomaterial, created = Biomaterial.objects.get_or_create(
-                                        name=name,
-                                        taxon_id=organism_id,
-                                        dbxref=biodbxref,
-                                        description=description,
-                                        defaults={
-                                            'biosourceprovider_id': None,
-                                            }
-                                        )
+                name=name,
+                taxon_id=organism_id,
+                dbxref=biodbxref,
+                description=description,
+                defaults={"biosourceprovider_id": None},
+            )
             self.store_biomaterialprop(
                 biomaterial=biomaterial,
                 type_id=self.cvterm_contained_in.cvterm_id,
-                value=filename)
+                value=filename,
+            )
         except IntegrityError as e:
             raise ImportingError(e)
         return biomaterial
 
-    def store_biomaterial_treatment(self,
-                                    biomaterial: Biomaterial,
-                                    treatment: Treatment,
-                                    rank: int = 0) -> None:
+    def store_biomaterial_treatment(
+        self, biomaterial: Biomaterial, treatment: Treatment, rank: int = 0
+    ) -> None:
         """Store biomaterial_treatment."""
         # treatment and biomaterial are mandatory
         try:
-            (biomaterialtreatment,
-             created) = BiomaterialTreatment.objects.get_or_create(
-                                biomaterial=biomaterial,
-                                treatment=treatment,
-                                rank=rank)
+            (
+                biomaterialtreatment,
+                created,
+            ) = BiomaterialTreatment.objects.get_or_create(
+                biomaterial=biomaterial, treatment=treatment, rank=rank
+            )
         except IntegrityError as e:
             raise ImportingError(e)
 
-    def store_biomaterialprop(self,
-                              biomaterial: Biomaterial,
-                              type_id: int,
-                              value: str,
-                              rank: int = 0) -> None:
+    def store_biomaterialprop(
+        self, biomaterial: Biomaterial, type_id: int, value: str, rank: int = 0
+    ) -> None:
         """Store analysisprop."""
         try:
             biomaterialprop, created = Biomaterialprop.objects.get_or_create(
-                                           biomaterial=biomaterial,
-                                           type_id=type_id,
-                                           value=value,
-                                           rank=rank)
+                biomaterial=biomaterial, type_id=type_id, value=value, rank=rank
+            )
         except IntegrityError as e:
             raise ImportingError(e)

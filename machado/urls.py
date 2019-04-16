@@ -18,29 +18,37 @@ except AttributeError:
     CACHE_TIMEOUT = 60 * 60
 
 
-urlpatterns = [
-        url(r'api/', include('machado.api.urls'))
-]
+urlpatterns = [url(r"api/", include("machado.api.urls"))]
 
-if 'haystack' in settings.INSTALLED_APPS:
+if "haystack" in settings.INSTALLED_APPS:
     from machado.views import feature, search
 
     urlpatterns += [
-        url(r'feature/', cache_page(CACHE_TIMEOUT)(
-            feature.FeatureView.as_view()), name='feature'),
-        url(r'data/', cache_page(CACHE_TIMEOUT)(
-            common.DataSummaryView.as_view()), name='data_numbers'),
-        url(r'find/', cache_page(CACHE_TIMEOUT)(
-            search.FeatureSearchView.as_view()),
-            name='feature_search'),
-        url(r'export/', cache_page(CACHE_TIMEOUT)(
-            search.FeatureSearchExportView.as_view()),
-            name='feature_search_export'),
-        url(r'^$', cache_page(CACHE_TIMEOUT)(
-            common.HomeView.as_view()), name='home')
+        url(
+            r"feature/",
+            cache_page(CACHE_TIMEOUT)(feature.FeatureView.as_view()),
+            name="feature",
+        ),
+        url(
+            r"data/",
+            cache_page(CACHE_TIMEOUT)(common.DataSummaryView.as_view()),
+            name="data_numbers",
+        ),
+        url(
+            r"find/",
+            cache_page(CACHE_TIMEOUT)(search.FeatureSearchView.as_view()),
+            name="feature_search",
+        ),
+        url(
+            r"export/",
+            cache_page(CACHE_TIMEOUT)(search.FeatureSearchExportView.as_view()),
+            name="feature_search_export",
+        ),
+        url(r"^$", cache_page(CACHE_TIMEOUT)(common.HomeView.as_view()), name="home"),
     ]
 else:
     urlpatterns += [
-        url(r'^$', cache_page(CACHE_TIMEOUT)(
-            common.CongratsView.as_view()), name='home')
+        url(
+            r"^$", cache_page(CACHE_TIMEOUT)(common.CongratsView.as_view()), name="home"
+        )
     ]

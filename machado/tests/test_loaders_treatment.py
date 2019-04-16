@@ -11,6 +11,7 @@ from machado.models import Cv, Cvterm, Treatment
 from machado.loaders.treatment import TreatmentLoader
 from django.test import TestCase
 
+
 class TreatmentTest(TestCase):
     """Tests Loaders - TreatmentLoader."""
 
@@ -22,7 +23,11 @@ class TreatmentTest(TestCase):
         # Treatment name
         treatment_name = "Title"
         test_treatment = test_treatment_file.store_treatment(
-                name=treatment_name,
-                biomaterial=test_biomaterial)
-        self.assertEqual(True, Treatment.objects.filter(
-            biomaterial=test_biomaterial, name=treatment_name).exists())
+            name=treatment_name, biomaterial=test_biomaterial
+        )
+        self.assertEqual(
+            True,
+            Treatment.objects.filter(
+                biomaterial=test_biomaterial, name=treatment_name
+            ).exists(),
+        )

@@ -19,27 +19,28 @@ class MachadoExtrasTest(TestCase):
 
     def test_param_replace(self):
         """Tests - param_replace."""
-        request = self.factory.get('/find/?q=&page=1')
-        context = {'request': request}
-        result = machado_extras.param_replace(
-            context, page=2)
-        self.assertEqual('q=&page=2', result)
+        request = self.factory.get("/find/?q=&page=1")
+        context = {"request": request}
+        result = machado_extras.param_replace(context, page=2)
+        self.assertEqual("q=&page=2", result)
 
-        request = self.factory.get(
-            '/find/?q=&selected_facets=so_term_exact:gene')
-        context = {'request': request}
+        request = self.factory.get("/find/?q=&selected_facets=so_term_exact:gene")
+        context = {"request": request}
         result = machado_extras.param_replace(
-            context, selected_facets='organism:Arabidopsis thaliana')
+            context, selected_facets="organism:Arabidopsis thaliana"
+        )
         self.assertEqual(
-            'q=&selected_facets=so_term_exact%3Agene&'
-            'selected_facets=organism%3AArabidopsis+thaliana', result)
+            "q=&selected_facets=so_term_exact%3Agene&"
+            "selected_facets=organism%3AArabidopsis+thaliana",
+            result,
+        )
 
     def test_remove_facet(self):
         """Tests - test_remove_facet."""
         request = self.factory.get(
-            '/find/?q=&selected_facets=so_term_exact:gene&'
-            'selected_facets=organism:Arabidopsis thaliana')
-        context = {'request': request}
-        result = machado_extras.remove_facet(context, 'organism')
-        self.assertEqual(
-            'q=&selected_facets=so_term_exact%3Agene', result)
+            "/find/?q=&selected_facets=so_term_exact:gene&"
+            "selected_facets=organism:Arabidopsis thaliana"
+        )
+        context = {"request": request}
+        result = machado_extras.remove_facet(context, "organism")
+        self.assertEqual("q=&selected_facets=so_term_exact%3Agene", result)

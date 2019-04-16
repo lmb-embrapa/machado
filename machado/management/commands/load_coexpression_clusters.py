@@ -35,29 +35,24 @@ The features need to be loaded previously or won't be registered."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="'mcl.clusters.txt' File",
-                            required=True,
-                            type=str)
-        parser.add_argument("--organism",
-                            help="Scientific name (e.g.: 'Oryza sativa')",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            default=1,
-                            type=int)
+        parser.add_argument(
+            "--file", help="'mcl.clusters.txt' File", required=True, type=str
+        )
+        parser.add_argument(
+            "--organism",
+            help="Scientific name (e.g.: 'Oryza sativa')",
+            required=True,
+            type=str,
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               organism: str,
-               cpu: int = 1,
-               verbosity: int = 0,
-               **options):
+    def handle(
+        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
+    ):
         """Execute the main function."""
         filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
+            self.stdout.write("Processing file: {}".format(filename))
 
         try:
             organism = retrieve_organism(organism)
@@ -68,60 +63,60 @@ The features need to be loaded previously or won't be registered."""
         except ImportingError as e:
             raise CommandError(e)
         try:
-            clusters = open(file, 'r')
+            clusters = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
 
         tasks = list()
-        cv, created = Cv.objects.get_or_create(name='feature_property')
-        coexp_db, created = Db.objects.get_or_create(
-                name='LSTRAP_SOURCE')
+        cv, created = Cv.objects.get_or_create(name="feature_property")
+        coexp_db, created = Db.objects.get_or_create(name="LSTRAP_SOURCE")
         coexp_dbxref, created = Dbxref.objects.get_or_create(
-                accession='LSTRAP_SOURCE',
-                db=coexp_db)
+            accession="LSTRAP_SOURCE", db=coexp_db
+        )
         cvterm_cluster, created = Cvterm.objects.get_or_create(
-            name='coexpression group',
+            name="coexpression group",
             cv=cv,
             dbxref=coexp_dbxref,
             is_obsolete=0,
-            is_relationshiptype=0)
+            is_relationshiptype=0,
+        )
         # feature source is not needed here
         source = "null"
-        featureloader = FeatureLoader(
-                source=source,
-                filename=filename)
+        featureloader = FeatureLoader(source=source, filename=filename)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         # each line is an coexpression cluster group
         for line in tqdm(clusters, total=get_num_lines(file)):
-            name = ''
-            fields = re.split(r'\s+', line.strip())
+            name = ""
+            fields = re.split(r"\s+", line.strip())
             nfields = len(fields)
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
                 raise CommandError(e)
 
-            if re.search(r'^(\w+)\:', fields[0]):
-                group_field = re.match(r'^(\w+)\:', fields[0])
+            if re.search(r"^(\w+)\:", fields[0]):
+                group_field = re.match(r"^(\w+)\:", fields[0])
                 name = group_field.group(1)
             else:
                 raise CommandError("Cluster identification has problems.")
             # remove cluster name before loading
             fields.pop(0)
             # get cvterm for correlation
-            tasks.append(pool.submit(
-                              featureloader.store_feature_groups,
-                              group=fields,
-                              term=cvterm_cluster.cvterm_id,
-                              value=name))
+            tasks.append(
+                pool.submit(
+                    featureloader.store_feature_groups,
+                    group=fields,
+                    term=cvterm_cluster.cvterm_id,
+                    value=name,
+                )
+            )
         if verbosity > 0:
-            self.stdout.write('Loading')
+            self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                raise(task.result())
+                raise (task.result())
         pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS(
-                'Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

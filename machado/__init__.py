@@ -4,5 +4,5 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-default_app_config = 'machado.apps.MachadoConfig'
-urls = 'machado.urls'
+default_app_config = "machado.apps.MachadoConfig"
+urls = "machado.urls"

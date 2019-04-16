@@ -40,7 +40,7 @@ class FileValidator(object):
     def _is_readable(self, file_path: str) -> None:
         """Check file is readable."""
         try:
-            f = open(file_path, 'r')
+            f = open(file_path, "r")
             f.close()
         except IOError:
             raise ImportingError("{} is not readable".format(file_path))
@@ -57,21 +57,25 @@ class FieldsValidator(object):
     def _nfields(self, nfields: int, fields: list) -> None:
         """Check if number of fields are correct."""
         if len(fields) != nfields:
-            raise ImportingError("Provided number of fields {} differ from {}"
-                                 .format(nfields, len(fields)))
+            raise ImportingError(
+                "Provided number of fields {} differ from {}".format(
+                    nfields, len(fields)
+                )
+            )
 
     def _nullfields(self, fields: list) -> None:
         counter = 0
         for field in fields:
-            if (field is None or field == ""):
-                raise ImportingError("Found null or empty field in position {}"
-                                     .format(counter))
+            if field is None or field == "":
+                raise ImportingError(
+                    "Found null or empty field in position {}".format(counter)
+                )
             counter += 1
 
 
 def get_num_lines(file_path):
     """Count number of lines in a text file."""
-    if file_path.endswith('.gz'):
+    if file_path.endswith(".gz"):
         fp = gzip.open(file_path, "r+")
     else:
         fp = open(file_path, "r+")
@@ -84,20 +88,23 @@ def get_num_lines(file_path):
     return i
 
 
-def insert_organism(genus: str,
-                    species: str = 'spp.',
-                    infraspecific_name: str = None,
-                    abbreviation: str = None,
-                    common_name: str = None,
-                    comment: str = None) -> None:
+def insert_organism(
+    genus: str,
+    species: str = "spp.",
+    infraspecific_name: str = None,
+    abbreviation: str = None,
+    common_name: str = None,
+    comment: str = None,
+) -> None:
     """Insert organism."""
     try:
         spp = Organism.objects.get(
-            genus=genus, species=species,
-            infraspecific_name=infraspecific_name)
-        if (spp is not None):
-            raise ImportingError('Organism already registered ({} {})!'
-                                 .format(genus, species))
+            genus=genus, species=species, infraspecific_name=infraspecific_name
+        )
+        if spp is not None:
+            raise ImportingError(
+                "Organism already registered ({} {})!".format(genus, species)
+            )
     except ObjectDoesNotExist:
         organism = Organism.objects.create(
             abbreviation=abbreviation,
@@ -105,58 +112,60 @@ def insert_organism(genus: str,
             species=species,
             common_name=common_name,
             infraspecific_name=infraspecific_name,
-            comment=comment)
+            comment=comment,
+        )
         organism.save()
 
 
 def retrieve_organism(organism: str) -> Organism:
     """Retrieve organism object."""
     try:
-        aux = organism.split(' ')
+        aux = organism.split(" ")
         genus = aux[0]
-        species = 'spp.'
+        species = "spp."
         infraspecific_name = None
         if len(aux) == 2:
             species = aux[1]
         elif len(aux) > 2:
             species = aux[1]
-            infraspecific_name = ' '.join(aux[2:])
+            infraspecific_name = " ".join(aux[2:])
     except ValueError:
-        raise ValueError('The organism genus and species should be '
-                         'separated by a single space')
+        raise ValueError(
+            "The organism genus and species should be " "separated by a single space"
+        )
     except AttributeError as e:
         raise AttributeError(e)
 
     try:
         organism_obj = Organism.objects.get(
-            genus=genus,
-            species=species,
-            infraspecific_name=infraspecific_name)
+            genus=genus, species=species, infraspecific_name=infraspecific_name
+        )
     except ObjectDoesNotExist:
-        raise ObjectDoesNotExist('{} not registered.'.format(organism))
+        raise ObjectDoesNotExist("{} not registered.".format(organism))
     return organism_obj
 
 
-def retrieve_feature_id(
-        accession: str, soterm: str) -> int:
+def retrieve_feature_id(accession: str, soterm: str) -> int:
     """Retrieve feature object."""
     # feature.uniquename
     try:
         return Feature.objects.get(
-            uniquename=accession, type__cv__name='sequence',
-            type__name=soterm).feature_id
+            uniquename=accession, type__cv__name="sequence", type__name=soterm
+        ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
 
     # feature.dbxref.accession
     try:
         return Feature.objects.get(
-            dbxref__accession=accession, type__cv__name='sequence',
-            type__name=soterm).feature_id
+            dbxref__accession=accession, type__cv__name="sequence", type__name=soterm
+        ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
 
     # featuredbxref.dbxref.accession
     return FeatureDbxref.objects.get(
-        dbxref__accession=accession, feature__type__cv__name='sequence',
-        feature__type__name=soterm).feature_id
+        dbxref__accession=accession,
+        feature__type__cv__name="sequence",
+        feature__type__name=soterm,
+    ).feature_id

@@ -34,71 +34,73 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="tabular text file with gene counts",
-                            required=True,
-                            type=str)
-        parser.add_argument("--organism",
-                            help="Scientific name (e.g.: 'Oryza sativa')",
-                            required=True,
-                            type=str)
-        parser.add_argument("--programversion",
-                            help="Version of the software (e.g.: '1.3')",
-                            required=True,
-                            type=str)
-        parser.add_argument("--name",
-                            help="Name",
-                            required=False,
-                            type=str)
-        parser.add_argument("--description",
-                            help="Description",
-                            required=False,
-                            type=str)
-        parser.add_argument("--algorithm",
-                            help="Algorithm",
-                            required=False,
-                            type=str)
-        parser.add_argument("--assaydb",
-                            help="Assay database info (e.g.: 'SRA')",
-                            required=False,
-                            type=str)
-        parser.add_argument("--timeexecuted",
-                            help="Time software was run. "
-                            "Mandatory format: e.g.: 'Oct-16-2016'",
-                            required=False,
-                            type=str)
-        parser.add_argument("--program",
-                            help="Name of the software (e.g.: 'LSTrAP')",
-                            default="LSTrAP",
-                            type=str)
-        parser.add_argument("--norm",
-                            help="Normalized data: 1-yes (tpm, fpkm, etc.); "
-                            "0-no (raw counts); default is 1)",
-                            default=1,
-                            type=int)
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            default=1,
-                            type=int)
+        parser.add_argument(
+            "--file", help="tabular text file with gene counts", required=True, type=str
+        )
+        parser.add_argument(
+            "--organism",
+            help="Scientific name (e.g.: 'Oryza sativa')",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--programversion",
+            help="Version of the software (e.g.: '1.3')",
+            required=True,
+            type=str,
+        )
+        parser.add_argument("--name", help="Name", required=False, type=str)
+        parser.add_argument(
+            "--description", help="Description", required=False, type=str
+        )
+        parser.add_argument("--algorithm", help="Algorithm", required=False, type=str)
+        parser.add_argument(
+            "--assaydb",
+            help="Assay database info (e.g.: 'SRA')",
+            required=False,
+            type=str,
+        )
+        parser.add_argument(
+            "--timeexecuted",
+            help="Time software was run. " "Mandatory format: e.g.: 'Oct-16-2016'",
+            required=False,
+            type=str,
+        )
+        parser.add_argument(
+            "--program",
+            help="Name of the software (e.g.: 'LSTrAP')",
+            default="LSTrAP",
+            type=str,
+        )
+        parser.add_argument(
+            "--norm",
+            help="Normalized data: 1-yes (tpm, fpkm, etc.); "
+            "0-no (raw counts); default is 1)",
+            default=1,
+            type=int,
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               organism: str,
-               program: str,
-               programversion: str,
-               name: str = None,
-               description: str = None,
-               algorithm: str = None,
-               assaydb: str = 'SRA',
-               timeexecuted: str = None,
-               norm: int = 1,
-               cpu: int = 1,
-               verbosity: int = 0,
-               **options):
+    def handle(
+        self,
+        file: str,
+        organism: str,
+        program: str,
+        programversion: str,
+        name: str = None,
+        description: str = None,
+        algorithm: str = None,
+        assaydb: str = "SRA",
+        timeexecuted: str = None,
+        norm: int = 1,
+        cpu: int = 1,
+        verbosity: int = 0,
+        **options
+    ):
         """Execute the main function."""
         filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
+            self.stdout.write("Processing file: {}".format(filename))
         try:
             FileValidator().validate(file)
         except ImportingError as e:
@@ -106,7 +108,7 @@ class Command(BaseCommand):
 
         # start reading file
         try:
-            rnaseq_data = open(file, 'r')
+            rnaseq_data = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
@@ -118,7 +120,7 @@ class Command(BaseCommand):
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for line in rnaseq_data:
-            fields = re.split('\t', line.rstrip())
+            fields = re.split("\t", line.rstrip())
             nfields = len(fields)
             # validate fields within line
             try:
@@ -133,7 +135,7 @@ class Command(BaseCommand):
                 for i in range(len(fields)):
                     # parse field to get SRA ID. e.g.: SRR5167848.htseq
                     # try to remove ".htseq" part of string
-                    string = re.match(r'(\w+)\.(\w+)', fields[i])
+                    string = re.match(r"(\w+)\.(\w+)", fields[i])
                     try:
                         assay = string.group(1)
                     except IntegrityError as e:
@@ -141,21 +143,22 @@ class Command(BaseCommand):
                     # store analysis
                     try:
                         analysis = analysis_file.store_analysis(
-                             program=program,
-                             sourcename=fields[i],
-                             programversion=programversion,
-                             timeexecuted=timeexecuted,
-                             algorithm=algorithm,
-                             name=assay,
-                             description=description,
-                             filename=filename)
+                            program=program,
+                            sourcename=fields[i],
+                            programversion=programversion,
+                            timeexecuted=timeexecuted,
+                            algorithm=algorithm,
+                            name=assay,
+                            description=description,
+                            filename=filename,
+                        )
                     except ImportingError as e:
                         raise CommandError(e)
                     # store quantification
                     try:
                         analysis_file.store_quantification(
-                                analysis=analysis,
-                                assayacc=assay)
+                            analysis=analysis, assayacc=assay
+                        )
                     except ImportingError as e:
                         raise CommandError(e)
                     # finally, store each analysis in a list.
@@ -172,15 +175,18 @@ class Command(BaseCommand):
                         normscore = None
                         rawscore = fields[i]
                     # store analysis feature for each value
-                    tasks.append(pool.submit(
-                      analysis_file.store_analysisfeature,
-                      analysis_list[i],
-                      feature_name,
-                      organism,
-                      rawscore,
-                      normscore))
+                    tasks.append(
+                        pool.submit(
+                            analysis_file.store_analysisfeature,
+                            analysis_list[i],
+                            feature_name,
+                            organism,
+                            rawscore,
+                            normscore,
+                        )
+                    )
         if verbosity > 0:
-            self.stdout.write('Loading')
+            self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
@@ -188,5 +194,4 @@ class Command(BaseCommand):
                 raise CommandError(e)
         pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS(
-                'Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

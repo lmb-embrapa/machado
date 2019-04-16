@@ -29,20 +29,10 @@ The feature members need to be loaded previously."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="'groups.txt' File",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            default=1,
-                            type=int)
+        parser.add_argument("--file", help="'groups.txt' File", required=True, type=str)
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               cpu: int = 1,
-               verbosity: int = 0,
-               **options):
+    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
@@ -50,40 +40,40 @@ The feature members need to be loaded previously."""
             raise CommandError(e)
         filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
+            self.stdout.write("Processing file: {}".format(filename))
         try:
-            groups = open(file, 'r')
+            groups = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
-        cv, created = Cv.objects.get_or_create(name='feature_property')
-        ortho_db, created = Db.objects.get_or_create(
-                name='ORTHOMCL_SOURCE')
+        cv, created = Cv.objects.get_or_create(name="feature_property")
+        ortho_db, created = Db.objects.get_or_create(name="ORTHOMCL_SOURCE")
         ortho_dbxref, created = Dbxref.objects.get_or_create(
-                accession='ORTHOMCL_SOURCE',
-                db=ortho_db)
+            accession="ORTHOMCL_SOURCE", db=ortho_db
+        )
         cvterm_cluster, created = Cvterm.objects.get_or_create(
-            name='orthologous group',
+            name="orthologous group",
             cv=cv,
             dbxref=ortho_dbxref,
             is_obsolete=0,
-            is_relationshiptype=0)
+            is_relationshiptype=0,
+        )
         source = "null"
         featureloader = FeatureLoader(source=source, filename=filename)
         # each line is an orthologous group
         for line in groups:
             members = []
-            name = ''
-            fields = re.split(r'\s+', line.strip())
-            if re.search(r'^(\w+)\:', fields[0]):
-                group_field = re.match(r'^(\w+)\:', fields[0])
+            name = ""
+            fields = re.split(r"\s+", line.strip())
+            if re.search(r"^(\w+)\:", fields[0]):
+                group_field = re.match(r"^(\w+)\:", fields[0])
                 name = group_field.group(1)
                 fields.pop(0)
                 for field in fields:
-                    if re.search(r'^(\w+)\|(\S+)', field):
-                        member_field = re.match(r'^(\w+)\|(\S+)', field)
+                    if re.search(r"^(\w+)\|(\S+)", field):
+                        member_field = re.match(r"^(\w+)\|(\S+)", field)
                         # species = member_field.group(1)
                         ident = member_field.group(2)
                         members.append(ident)
@@ -93,15 +83,17 @@ The feature members need to be loaded previously."""
             if len(members) > 1:
                 tasks.append(
                     pool.submit(
-                            featureloader.store_feature_groups,
-                            group=members, term=cvterm_cluster.cvterm_id,
-                            value=name))
+                        featureloader.store_feature_groups,
+                        group=members,
+                        term=cvterm_cluster.cvterm_id,
+                        value=name,
+                    )
+                )
         if verbosity > 0:
-            self.stdout.write('Loading')
+            self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                raise(task.result())
+                raise (task.result())
         pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS(
-                'Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

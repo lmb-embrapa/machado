@@ -17,27 +17,24 @@ from tqdm import tqdm
 class Command(BaseCommand):
     """Load organism publication file."""
 
-    help = 'Load two-column tab separated file containing organism and '
-    'publication DOI.'
+    help = "Load two-column tab separated file containing organism and "
+    "publication DOI."
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="Two-column tab separated file. "
-                            "(organism.dbxref\\tpublication DOI)",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cpu", help="Number of threads", default=1,
-                            type=int)
+        parser.add_argument(
+            "--file",
+            help="Two-column tab separated file. "
+            "(organism.dbxref\\tpublication DOI)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               verbosity: int = 1,
-               cpu: int = 1,
-               **options):
+    def handle(self, file: str, verbosity: int = 1, cpu: int = 1, **options):
         """Execute the main function."""
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
@@ -50,13 +47,15 @@ class Command(BaseCommand):
         # Load the publication file
         with open(file) as tab_file:
             for line in tab_file:
-                organism, doi = line.strip().split('\t')
-                tasks.append(pool.submit(
-                    OrganismLoader().store_organism_publication,
-                    organism, doi))
+                organism, doi = line.strip().split("\t")
+                tasks.append(
+                    pool.submit(
+                        OrganismLoader().store_organism_publication, organism, doi
+                    )
+                )
 
         if verbosity > 0:
-            self.stdout.write('Loading organism publications')
+            self.stdout.write("Loading organism publications")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
@@ -65,4 +64,4 @@ class Command(BaseCommand):
         pool.shutdown()
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS("Done"))

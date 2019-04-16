@@ -19,43 +19,58 @@ import os
 class Command(BaseCommand):
     """Load FASTA file."""
 
-    help = 'Load FASTA file'
+    help = "Load FASTA file"
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file", help="FASTA File", required=True,
-                            type=str)
-        parser.add_argument("--organism", help="Species name (eg. Homo "
-                            "sapiens, Mus musculus)", required=True, type=str)
-        parser.add_argument("--soterm", help="SO Sequence Ontology Term (eg. "
-                            "chromosome, assembly)", required=True,
-                            type=str)
-        parser.add_argument("--nosequence", help="Don't load the sequence",
-                            required=False, action='store_true')
-        parser.add_argument("--cpu", help="Number of threads", default=1,
-                            type=int)
-        parser.add_argument("--description", help="Description",
-                            required=False, type=str)
-        parser.add_argument("--url", help="URL",
-                            required=False, type=str)
-        parser.add_argument("--doi", help="DOI of the article reference to "
-                            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
-                            required=False, type=str)
+        parser.add_argument("--file", help="FASTA File", required=True, type=str)
+        parser.add_argument(
+            "--organism",
+            help="Species name (eg. Homo " "sapiens, Mus musculus)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--soterm",
+            help="SO Sequence Ontology Term (eg. " "chromosome, assembly)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--nosequence",
+            help="Don't load the sequence",
+            required=False,
+            action="store_true",
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
+        parser.add_argument(
+            "--description", help="Description", required=False, type=str
+        )
+        parser.add_argument("--url", help="URL", required=False, type=str)
+        parser.add_argument(
+            "--doi",
+            help="DOI of the article reference to "
+            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
+            required=False,
+            type=str,
+        )
 
-    def handle(self,
-               file: str,
-               organism: str,
-               soterm: str,
-               nosequence: bool = False,
-               cpu: int = 1,
-               description: str = None,
-               url: str = None,
-               doi: str = None,
-               verbosity: int = 1,
-               **options) -> None:
+    def handle(
+        self,
+        file: str,
+        organism: str,
+        soterm: str,
+        nosequence: bool = False,
+        cpu: int = 1,
+        description: str = None,
+        url: str = None,
+        doi: str = None,
+        verbosity: int = 1,
+        **options
+    ) -> None:
         """Execute the main function."""
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
@@ -66,26 +81,31 @@ class Command(BaseCommand):
         filename = os.path.basename(file)
         try:
             sequence_file = SequenceLoader(
-                filename=filename,
-                description=description,
-                url=url,
-                doi=doi)
+                filename=filename, description=description, url=url, doi=doi
+            )
         except ImportingError as e:
             raise CommandError(e)
 
-        fasta_sequences = SeqIO.parse(open(file), 'fasta')
+        fasta_sequences = SeqIO.parse(open(file), "fasta")
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
         for fasta in fasta_sequences:
-            tasks.append(pool.submit(sequence_file.store_biopython_seq_record,
-                                     fasta, soterm, organism, nosequence))
+            tasks.append(
+                pool.submit(
+                    sequence_file.store_biopython_seq_record,
+                    fasta,
+                    soterm,
+                    organism,
+                    nosequence,
+                )
+            )
         if verbosity > 0:
-            self.stdout.write('Loading')
+            self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                raise(task.result())
+                raise (task.result())
         pool.shutdown()
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS("Done"))

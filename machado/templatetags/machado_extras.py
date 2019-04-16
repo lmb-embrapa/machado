@@ -14,10 +14,10 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def param_replace(context, **kwargs):
     """Return the encoded URL parameters. Replace if the parameter exists."""
-    params = context['request'].GET.copy()
+    params = context["request"].GET.copy()
 
     for k, v in kwargs.items():
-        if k == 'selected_facets':
+        if k == "selected_facets":
             params.appendlist(k, v)
         else:
             params[k] = v
@@ -28,15 +28,15 @@ def param_replace(context, **kwargs):
 @register.simple_tag(takes_context=True)
 def remove_facet(context, *args):
     """Return the encoded URL parameters. Remove facet."""
-    params = context['request'].GET.copy()
+    params = context["request"].GET.copy()
 
     for facet in args:
         params_new = list()
-        for i in params.getlist('selected_facets'):
-            k, v = i.split(':')
+        for i in params.getlist("selected_facets"):
+            k, v = i.split(":")
             if not k.startswith(facet):
                 params_new.append(i)
-        params.setlist('selected_facets', params_new)
+        params.setlist("selected_facets", params_new)
 
     return params.urlencode()
 

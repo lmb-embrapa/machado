@@ -15,35 +15,36 @@ from django.db.utils import IntegrityError
 class TreatmentLoader(object):
     """Load treatment."""
 
-    help = 'Load treatment record.'
+    help = "Load treatment record."
 
     def __init__(self) -> None:
         """Execute the init function."""
         # will not use type_id - TODO - load specific ontology for treatment
-        db_null, created = Db.objects.get_or_create(name='null')
+        db_null, created = Db.objects.get_or_create(name="null")
         dbxref_null, created = Dbxref.objects.get_or_create(
-            db=db_null, accession='null')
-        cv_null, created = Cv.objects.get_or_create(name='null')
+            db=db_null, accession="null"
+        )
+        cv_null, created = Cv.objects.get_or_create(name="null")
         self.cvterm_null, created = Cvterm.objects.get_or_create(
             cv=cv_null,
-            name='null',
-            definition='',
+            name="null",
+            definition="",
             dbxref=dbxref_null,
             is_obsolete=0,
-            is_relationshiptype=0)
+            is_relationshiptype=0,
+        )
 
-    def store_treatment(self,
-                        name: str,
-                        biomaterial: Biomaterial,
-                        rank: int = 0) -> Treatment:
+    def store_treatment(
+        self, name: str, biomaterial: Biomaterial, rank: int = 0
+    ) -> Treatment:
         """Store treatment."""
         try:
             treatment = Treatment.objects.create(
-                                    biomaterial=biomaterial,
-                                    type_id=self.cvterm_null.cvterm_id,
-                                    name=name,
-                                    rank=rank,
-                                    )
+                biomaterial=biomaterial,
+                type_id=self.cvterm_null.cvterm_id,
+                name=name,
+                rank=rank,
+            )
         except IntegrityError as e:
             raise ImportingError(e)
         return treatment
