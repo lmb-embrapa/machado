@@ -13,26 +13,19 @@ from machado.models import Pub, PubDbxref, Dbxref
 class Command(BaseCommand):
     """Remove publication."""
 
-    help = 'Remove publication'
+    help = "Remove publication"
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--doi",
-                            help="doi",
-                            required=True,
-                            type=str)
+        parser.add_argument("--doi", help="doi", required=True, type=str)
 
-    def handle(self,
-               doi: str,
-               verbosity: int = 1,
-               **options):
+    def handle(self, doi: str, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
             dbxref = Dbxref.objects.get(accession=doi)
             pub_dbxref = PubDbxref.objects.get(dbxref=dbxref)
             Pub.objects.get(pub_id=pub_dbxref.pub_id).delete()
             if verbosity > 0:
-                self.stdout.write(self.style.SUCCESS(
-                   '{} removed'.format(doi)))
+                self.stdout.write(self.style.SUCCESS("{} removed".format(doi)))
         except ObjectDoesNotExist:
-            raise CommandError('DOI does not exist in database!')
+            raise CommandError("DOI does not exist in database!")

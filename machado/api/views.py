@@ -23,20 +23,18 @@ class StandardResultSetPagination(PageNumberPagination):
     """Set the pagination parameters."""
 
     page_size = 100
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = 1000
 
 
 class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view JBrowse global settings."""
 
-    renderer_classes = (JSONRenderer, )
+    renderer_classes = (JSONRenderer,)
 
     def list(self, request):
         """List."""
-        data = {
-            'featureDensity': 0.02
-        }
+        data = {"featureDensity": 0.02}
         serializer = JBrowseGlobalSerializer(data)
         return Response(serializer.data)
 
@@ -44,23 +42,23 @@ class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to JBrowse names."""
 
-    renderer_classes = (JSONRenderer, )
+    renderer_classes = (JSONRenderer,)
 
     serializer_class = JBrowseNamesSerializer
 
     def get_queryset(self):
         """Get queryset."""
         try:
-            organism = retrieve_organism(
-                self.request.query_params.get('organism'))
+            organism = retrieve_organism(self.request.query_params.get("organism"))
         except (ObjectDoesNotExist, AttributeError):
             return
 
-        queryset = Feature.objects.filter(
-            organism=organism, is_obsolete=0).only('feature_id')
+        queryset = Feature.objects.filter(organism=organism, is_obsolete=0).only(
+            "feature_id"
+        )
 
-        equals = self.request.query_params.get('equals')
-        startswith = self.request.query_params.get('startswith')
+        equals = self.request.query_params.get("equals")
+        startswith = self.request.query_params.get("startswith")
         if equals is not None:
             queryset = queryset.filter(uniquename=equals)
         elif startswith is not None:
@@ -74,21 +72,23 @@ class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to JBrowse refSeqs.json."""
 
-    renderer_classes = (JSONRenderer, )
+    renderer_classes = (JSONRenderer,)
     serializer_class = JBrowseRefseqSerializer
 
     def get_queryset(self):
         """Get queryset."""
         try:
-            organism = retrieve_organism(
-                self.request.query_params.get('organism'))
+            organism = retrieve_organism(self.request.query_params.get("organism"))
         except (ObjectDoesNotExist, AttributeError):
             return
 
         try:
             queryset = Feature.objects.filter(
-                organism=organism, is_obsolete=0, type__cv__name='sequence',
-                type__name=self.request.query_params.get('soType'))
+                organism=organism,
+                is_obsolete=0,
+                type__cv__name="sequence",
+                type__name=self.request.query_params.get("soType"),
+            )
         except ObjectDoesNotExist:
             return
 
@@ -98,63 +98,65 @@ class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
-    renderer_classes = (JSONRenderer, )
+    renderer_classes = (JSONRenderer,)
     serializer_class = JBrowseFeatureSerializer
 
     def get_serializer_context(self):
         """Get the serializer context."""
-        refseq_feature_obj = Feature.objects.filter(
-            uniquename=self.kwargs.get('refseq')).only('feature_id').first()
-        soType = self.request.query_params.get('soType')
-        return {
-            'refseq': refseq_feature_obj,
-            'soType': soType,
-        }
+        refseq_feature_obj = (
+            Feature.objects.filter(uniquename=self.kwargs.get("refseq"))
+            .only("feature_id")
+            .first()
+        )
+        soType = self.request.query_params.get("soType")
+        return {"refseq": refseq_feature_obj, "soType": soType}
 
     def get_queryset(self):
         """Get queryset."""
         try:
-            refseq = Feature.objects.filter(
-                uniquename=self.kwargs.get('refseq')).only(
-                    'feature_id').first()
+            refseq = (
+                Feature.objects.filter(uniquename=self.kwargs.get("refseq"))
+                .only("feature_id")
+                .first()
+            )
         except ObjectDoesNotExist:
             return
 
-        soType = self.request.query_params.get('soType')
+        soType = self.request.query_params.get("soType")
         if soType is None:
             queryset = list()
             queryset.append(refseq)
             return queryset
         else:
             try:
-                organism = retrieve_organism(
-                    self.request.query_params.get('organism'))
+                organism = retrieve_organism(self.request.query_params.get("organism"))
             except (ObjectDoesNotExist, AttributeError):
                 return
 
             try:
-                soType = self.request.query_params.get('soType')
-                start = self.request.query_params.get('start', 1)
-                end = self.request.query_params.get('end', refseq.seqlen)
+                soType = self.request.query_params.get("soType")
+                start = self.request.query_params.get("start", 1)
+                end = self.request.query_params.get("end", refseq.seqlen)
 
                 features_locs = Featureloc.objects.filter(srcfeature=refseq)
                 if end is not None:
                     features_locs = features_locs.filter(fmin__lte=end)
                 features_locs = features_locs.filter(fmax__gte=start)
-                features_ids = features_locs.values_list('feature_id',
-                                                         flat=True)
+                features_ids = features_locs.values_list("feature_id", flat=True)
 
                 return Feature.objects.filter(
-                    type__cv__name='sequence', type__name=soType,
-                    organism=organism, is_obsolete=0,
-                    feature_id__in=features_ids).only('feature_id')
+                    type__cv__name="sequence",
+                    type__name=soType,
+                    organism=organism,
+                    is_obsolete=0,
+                    feature_id__in=features_ids,
+                ).only("feature_id")
 
             except ObjectDoesNotExist:
                 return None
 
     def list(self, request, *args, **kwargs):
         """Override return the list inside a dict."""
-        response = super(JBrowseFeatureViewSet,
-                         self).list(request, *args, **kwargs)
+        response = super(JBrowseFeatureViewSet, self).list(request, *args, **kwargs)
         response.data = {"features": response.data}
         return response

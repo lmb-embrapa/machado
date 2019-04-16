@@ -34,43 +34,33 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="'pcc.mcl.txt' File",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            default=1,
-                            type=int)
+        parser.add_argument(
+            "--file", help="'pcc.mcl.txt' File", required=True, type=str
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               cpu: int = 1,
-               verbosity: int = 0,
-               **options):
+    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
         """Execute the main function."""
         filename = os.path.basename(file)
         if verbosity > 0:
-            self.stdout.write('Processing file: {}'.format(filename))
+            self.stdout.write("Processing file: {}".format(filename))
 
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
         try:
-            pairs = open(file, 'r')
+            pairs = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
             raise CommandError(e)
 
         cvterm_corel = Cvterm.objects.get(
-            name='correlated with',
-            cv__name='relationship').cvterm_id
+            name="correlated with", cv__name="relationship"
+        ).cvterm_id
         # feature source is not needed here
         source = "null"
-        featureloader = FeatureLoader(
-                source=source,
-                filename=filename)
+        featureloader = FeatureLoader(source=source, filename=filename)
         size = get_num_lines(file)
         # every cpu should be able to handle 5 tasks
         chunk = cpu * 5
@@ -78,29 +68,31 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
             tasks = list()
             for line in tqdm(pairs, total=size):
                 nfields = 3
-                fields = re.split(r'\s+', line.rstrip())
+                fields = re.split(r"\s+", line.rstrip())
                 try:
                     FieldsValidator().validate(nfields, fields)
                 except ImportingError as e:
                     raise CommandError(e)
                 # get corrected PCC value (last item from fields list)
                 value = float(fields.pop()) + 0.7
-                tasks.append(pool.submit(
-                    featureloader.store_feature_pairs,
-                    pair=fields,
-                    term=cvterm_corel,
-                    value=value))
-                if (len(tasks) >= chunk):
-                    for task in (as_completed(tasks)):
+                tasks.append(
+                    pool.submit(
+                        featureloader.store_feature_pairs,
+                        pair=fields,
+                        term=cvterm_corel,
+                        value=value,
+                    )
+                )
+                if len(tasks) >= chunk:
+                    for task in as_completed(tasks):
                         if task.result():
-                            raise(task.result())
+                            raise (task.result())
                     tasks.clear()
             else:
-                for task in (as_completed(tasks)):
+                for task in as_completed(tasks):
                     if task.result():
-                        raise(task.result())
+                        raise (task.result())
                 tasks.clear()
             pool.shutdown()
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS(
-                'Done with {}'.format(filename)))
+            self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

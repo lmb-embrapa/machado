@@ -26,12 +26,12 @@ class CongratsView(TemplateView):
         """General data numbers."""
         data = dict()
 
-        data['cv'] = Cv.objects.count()
-        data['organism'] = Organism.objects.count()
-        data['feature'] = Feature.objects.count()
-        data['pub'] = Pub.objects.count()
+        data["cv"] = Cv.objects.count()
+        data["organism"] = Organism.objects.count()
+        data["feature"] = Feature.objects.count()
+        data["pub"] = Pub.objects.count()
 
-        return render(request, 'congrats.html', {'context': data})
+        return render(request, "congrats.html", {"context": data})
 
 
 class DataSummaryView(View):
@@ -41,27 +41,30 @@ class DataSummaryView(View):
         """General data numbers."""
         data = dict()
 
-        VALID_TYPES = ['chromosome', 'assembly', 'gene', 'mRNA', 'polypeptide']
+        VALID_TYPES = ["chromosome", "assembly", "gene", "mRNA", "polypeptide"]
 
-        counts = Feature.objects.filter(
-            type__name__in=VALID_TYPES, type__cv__name='sequence').values(
-                'organism__genus', 'organism__species',
-                'type__name').annotate(count=Count(
-                    'type__name')).order_by('organism__genus',
-                                            'organism__species')
+        counts = (
+            Feature.objects.filter(
+                type__name__in=VALID_TYPES, type__cv__name="sequence"
+            )
+            .values("organism__genus", "organism__species", "type__name")
+            .annotate(count=Count("type__name"))
+            .order_by("organism__genus", "organism__species")
+        )
 
         for item in counts:
-            organism_name = '{} {}'.format(item['organism__genus'],
-                                           item['organism__species'])
-            data.setdefault(organism_name, {}).setdefault(
-                'counts', []).append(item)
+            organism_name = "{} {}".format(
+                item["organism__genus"], item["organism__species"]
+            )
+            data.setdefault(organism_name, {}).setdefault("counts", []).append(item)
 
         for key, value in data.items():
             genus, species = key.split()
             pubs = Pub.objects.filter(
                 OrganismPub_pub_Pub__organism__genus=genus,
-                OrganismPub_pub_Pub__organism__species=species)
+                OrganismPub_pub_Pub__organism__species=species,
+            )
             if pubs:
-                data[key].update({'pubs': pubs})
+                data[key].update({"pubs": pubs})
 
-        return render(request, 'data-numbers.html', {'context': data})
+        return render(request, "data-numbers.html", {"context": data})

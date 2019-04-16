@@ -16,29 +16,30 @@ class FeatureSearchForm(FacetedSearchForm):
     def search(self):
         """Search."""
         # sqs = super(FeatureSearchForm, self).search()
-        q = self.cleaned_data.get('q')
+        q = self.cleaned_data.get("q")
         sqs = self.searchqueryset
 
         if not self.is_valid():
             return self.no_query_found()
 
         selected_facets = dict()
-        if 'selected_facets' in self.data:
-            for facet in self.data.getlist('selected_facets'):
-                facet_field, facet_query = facet.split(':')
+        if "selected_facets" in self.data:
+            for facet in self.data.getlist("selected_facets"):
+                facet_field, facet_query = facet.split(":")
                 selected_facets.setdefault(facet_field, []).append(facet_query)
 
             for k, v in selected_facets.items():
-                k += '_exact__in'
+                k += "_exact__in"
                 sqs &= self.searchqueryset.filter_and(**{k: v})
 
-        if q == '':
+        if q == "":
             return sqs.load_all()
 
         result = sqs.filter(
-            SQ(uniquename_exact=Exact(q)) |
-            SQ(name_exact=Exact(q)) |
-            SQ(organism_exact=Exact(q)))
+            SQ(uniquename_exact=Exact(q))
+            | SQ(name_exact=Exact(q))
+            | SQ(organism_exact=Exact(q))
+        )
 
         for i in q.split():
             result |= sqs.filter(text__startswith=i)

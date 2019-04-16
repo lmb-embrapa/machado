@@ -14,8 +14,8 @@ import warnings
 class MachadoConfig(AppConfig):
     """Machado config."""
 
-    name = 'machado'
-    verbose_name = 'machado'
+    name = "machado"
+    verbose_name = "machado"
 
     def ready(self):
         """Ready."""

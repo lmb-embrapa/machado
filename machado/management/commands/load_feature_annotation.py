@@ -18,41 +18,52 @@ import os
 class Command(BaseCommand):
     """Load feature annotation file."""
 
-    help = 'Load two-column tab separated file containing feature name and '
-    'annotation. Current annotation will be replaced.'
+    help = "Load two-column tab separated file containing feature name and "
+    "annotation. Current annotation will be replaced."
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--file",
-                            help="Two-column tab separated file. "
-                            "(feature.dbxref\\tannotation text)",
-                            required=True,
-                            type=str)
-        parser.add_argument("--organism", help="Species name (eg. Homo "
-                            "sapiens, Mus musculus)",
-                            required=True,
-                            type=str)
-        parser.add_argument("--soterm", help="SO Sequence Ontology Term "
-                            "(eg. mRNA, polypeptide)", required=True, type=str)
-        parser.add_argument("--cvterm", help="cvterm.name from cv "
-                            "feature_property. (eg. display, note, product, "
-                            "alias, ontology_term)",
-                            required=True,
-                            type=str)
-        parser.add_argument("--cpu", help="Number of threads", default=1,
-                            type=int)
+        parser.add_argument(
+            "--file",
+            help="Two-column tab separated file. " "(feature.dbxref\\tannotation text)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--organism",
+            help="Species name (eg. Homo " "sapiens, Mus musculus)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--soterm",
+            help="SO Sequence Ontology Term " "(eg. mRNA, polypeptide)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--cvterm",
+            help="cvterm.name from cv "
+            "feature_property. (eg. display, note, product, "
+            "alias, ontology_term)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               cvterm: str,
-               organism: str,
-               soterm: str,
-               verbosity: int = 1,
-               cpu: int = 1,
-               **options):
+    def handle(
+        self,
+        file: str,
+        cvterm: str,
+        organism: str,
+        soterm: str,
+        verbosity: int = 1,
+        cpu: int = 1,
+        **options
+    ):
         """Execute the main function."""
         if verbosity > 0:
-            self.stdout.write('Preprocessing')
+            self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
@@ -63,10 +74,7 @@ class Command(BaseCommand):
         filename = os.path.basename(file)
 
         try:
-            feature_file = FeatureLoader(
-                filename=filename,
-                source='GFF_source',
-            )
+            feature_file = FeatureLoader(filename=filename, source="GFF_source")
         except ImportingError as e:
             raise CommandError(e)
 
@@ -76,13 +84,19 @@ class Command(BaseCommand):
         # Load the annotation file
         with open(file) as tab_file:
             for line in tab_file:
-                feature, annotation = line.strip().split('\t')
-                tasks.append(pool.submit(
-                    feature_file.store_feature_annotation,
-                    feature, soterm, cvterm, annotation))
+                feature, annotation = line.strip().split("\t")
+                tasks.append(
+                    pool.submit(
+                        feature_file.store_feature_annotation,
+                        feature,
+                        soterm,
+                        cvterm,
+                        annotation,
+                    )
+                )
 
         if verbosity > 0:
-            self.stdout.write('Loading feature annotations')
+            self.stdout.write("Loading feature annotations")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
@@ -91,4 +105,4 @@ class Command(BaseCommand):
         pool.shutdown()
 
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS('Done'))
+            self.stdout.write(self.style.SUCCESS("Done"))

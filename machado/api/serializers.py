@@ -26,7 +26,7 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Feature
-        fields = ('name', 'location')
+        fields = ("name", "location")
 
     def get_location(self, obj):
         """Get the location."""
@@ -35,16 +35,18 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             return None
 
-        ref = Feature.objects.filter(
-            feature_id=location.srcfeature_id).values_list(
-                'uniquename', flat=True).first()
+        ref = (
+            Feature.objects.filter(feature_id=location.srcfeature_id)
+            .values_list("uniquename", flat=True)
+            .first()
+        )
 
         return {
-            'ref': ref,
-            'start': location.fmin,
-            'end': location.fmax,
-            'tracks': [],
-            'objectName': obj.name
+            "ref": ref,
+            "start": location.fmin,
+            "end": location.fmax,
+            "tracks": [],
+            "objectName": obj.name,
         }
 
 
@@ -64,15 +66,24 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Feature
-        fields = ('uniqueID', 'name', 'type', 'start', 'end', 'strand',
-                  'subfeatures', 'seq', 'display')
+        fields = (
+            "uniqueID",
+            "name",
+            "type",
+            "start",
+            "end",
+            "strand",
+            "subfeatures",
+            "seq",
+            "display",
+        )
 
     def _get_location(self, obj):
         """Get the location."""
         try:
             feature_loc = Featureloc.objects.get(
-                feature_id=obj.feature_id,
-                srcfeature_id=self.context.get('refseq'))
+                feature_id=obj.feature_id, srcfeature_id=self.context.get("refseq")
+            )
             return feature_loc
         except ObjectDoesNotExist:
             pass
@@ -80,27 +91,28 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     def _get_subfeature(self, feature_id):
         """Get subfeature."""
         feature_loc = Featureloc.objects.get(
-            feature_id=feature_id, srcfeature_id=self.context['refseq'])
+            feature_id=feature_id, srcfeature_id=self.context["refseq"]
+        )
         return {
-            'type': Feature.objects.filter(
-                feature_id=feature_id).values_list(
-                    'type__name', flat=True).first(),
-            'start': feature_loc.fmin,
-            'end': feature_loc.fmax,
-            'strand': feature_loc.strand,
-            'phase': feature_loc.phase
+            "type": Feature.objects.filter(feature_id=feature_id)
+            .values_list("type__name", flat=True)
+            .first(),
+            "start": feature_loc.fmin,
+            "end": feature_loc.fmax,
+            "strand": feature_loc.strand,
+            "phase": feature_loc.phase,
         }
 
     def get_start(self, obj):
         """Get the start location."""
-        if self.context.get('soType'):
+        if self.context.get("soType"):
             return self._get_location(obj).fmin
         else:
             return 1
 
     def get_end(self, obj):
         """Get the end location."""
-        if self.context.get('soType'):
+        if self.context.get("soType"):
             return self._get_location(obj).fmax
         else:
             return obj.seqlen
@@ -124,8 +136,8 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     def get_subfeatures(self, obj):
         """Get the subfeatures."""
         relationship = FeatureRelationship.objects.filter(
-            subject_id=obj.feature_id,
-            type__name='part_of', type__cv__name='sequence')
+            subject_id=obj.feature_id, type__name="part_of", type__cv__name="sequence"
+        )
         result = list()
         for feat in relationship:
             result.append(self._get_subfeature(feat.object_id))
@@ -151,7 +163,7 @@ class JBrowseRefseqSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Feature
-        fields = ('name', 'start', 'end')
+        fields = ("name", "start", "end")
 
     def get_start(self, obj):
         """Get the start location."""
