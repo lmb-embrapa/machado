@@ -28,8 +28,9 @@ class FeatureSearchView(FacetedSearchView):
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()["selected_facets"]:
             facet_field, facet_query = facet.split(":")
-            selected_facets_fields.append(facet_field)
-            selected_facets.append(facet)
+            if facet_field not in ['orthologous_group', 'coexpression_group']:
+                selected_facets_fields.append(facet_field)
+                selected_facets.append(facet)
 
         context["facet_fields_order"] = FACET_FIELDS
         context["selected_facets"] = selected_facets
