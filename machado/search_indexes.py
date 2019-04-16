@@ -32,6 +32,11 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             type__cv__name='feature_property').exists():
         orthology = indexes.BooleanField(faceted=True)
         orthologous_group = indexes.CharField(faceted=True)
+    if Featureprop.objects.filter(
+            type__name='coexpression group',
+            type__cv__name='feature_property').exists():
+        coexpression = indexes.BooleanField(faceted=True)
+        coexpression_group = indexes.CharField(faceted=True)
 
     def get_model(self):
         """Get model."""

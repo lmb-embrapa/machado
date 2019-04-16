@@ -192,20 +192,20 @@ class FeatureView(View):
 
         return result
 
-    def retrieve_feature_coexp_groups(self,
-                                      feature_id: int) -> Dict[str, Any]:
+    def retrieve_feature_coexpression_groups(
+            self, feature_id: int) -> Dict[str, Any]:
         """Retrieve feature coexpression groups."""
         result: Dict[str, List] = dict()
         try:
-            coexp_group = Featureprop.objects.get(
+            coexpression_group = Featureprop.objects.get(
                 type__name='coexpression group',
                 type__cv__name='feature_property',
                 feature_id=feature_id).value
             for feature in Feature.objects.filter(
-                        Featureprop_feature_Feature__value=coexp_group).only(
-                            'feature_id', 'uniquename', 'type'):
+                    Featureprop_feature_Feature__value=coexpression_group).only(
+                        'feature_id', 'uniquename', 'type'):
                 if feature.type.name in VALID_TYPES:
-                    result.setdefault(coexp_group, []).append(feature)
+                    result.setdefault(coexpression_group, []).append(feature)
         except ObjectDoesNotExist:
             pass
 
@@ -237,7 +237,7 @@ class FeatureView(View):
             organism_id=feature_obj.organism_id)
         result['orthologs'] = self.retrieve_feature_orthologs(
             feature_id=feature_obj.feature_id)
-        result['coexp_groups'] = self.retrieve_feature_coexp_groups(
+        result['coexpression_groups'] = self.retrieve_feature_coexpression_groups(
             feature_id=feature_obj.feature_id)
         result['pubs'] = self.retrieve_feature_pub(
             feature_id=feature_obj.feature_id)
