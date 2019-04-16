@@ -17,35 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3. Visualization" href="visualization.html" />
     <link rel="prev" title="2.13. Loading RNA-seq data" href="load_rnaseq.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -185,7 +186,7 @@ AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779
 </div>
 <p>Note: The feature pairs from columns 1 and 2 need to be loaded previously.</p>
 <p>To load such a table, one can run the command below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --file pcc.mcl.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --file pcc.mcl.txt
 </pre></div>
 </div>
 <ul class="simple">
@@ -203,10 +204,7 @@ AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779
 <tr class="row-odd"><td>–file</td>
 <td>‘pcc.mcl.txt’ File *</td>
 </tr>
-<tr class="row-even"><td>–organism</td>
-<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
-</tr>
-<tr class="row-odd"><td>–cpu</td>
+<tr class="row-even"><td>–cpu</td>
 <td>Number of threads</td>
 </tr>
 </tbody>
@@ -316,7 +314,7 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
         <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_rnaseq.html" class="btn btn-neutral" title="2.13. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_rnaseq.html" class="btn btn-neutral float-left" title="2.13. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -325,7 +323,7 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa.
+        &copy; Copyright 2018, Embrapa
 
     </p>
   </div>
@@ -342,36 +340,16 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

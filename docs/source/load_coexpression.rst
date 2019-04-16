@@ -25,7 +25,7 @@ To load such a table, one can run the command below:
 
 .. code-block:: bash
 
-    python manage.py load_coexpression_pairs --file pcc.mcl.txt --organism 'Arabidopsis thaliana'
+    python manage.py load_coexpression_pairs --file pcc.mcl.txt
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -35,7 +35,6 @@ To load such a table, one can run the command below:
 
 =============   ==================================================================================
 --file           'pcc.mcl.txt' File *
---organism        Scientific name (e.g.: 'Arabidopsis thaliana')
 --cpu 	          Number of threads
 =============   ==================================================================================
 
