@@ -450,22 +450,11 @@ class FeatureLoader(object):
             cvterm_id = term.cvterm_id
         else:
             cvterm_id = term
+        soterm = 'polypeptide'
         # lets get feature_ids from the pair
         try:
-            subject_id = Feature.objects.filter(
-                type__cv__name='sequence',
-                type__name='polypeptide',
-                dbxref__accession=pair[0],
-                dbxref__db__name__in=['GFF_SOURCE',
-                                      'FASTA_SOURCE'],
-                ).values_list('feature_id', flat=True).first()
-            object_id = Feature.objects.filter(
-                type__cv__name='sequence',
-                type__name='polypeptide',
-                dbxref__accession=pair[1],
-                dbxref__db__name__in=['GFF_SOURCE',
-                                      'FASTA_SOURCE'],
-                ).values_list('feature_id', flat=True).first()
+            subject_id = retrieve_feature_id(accession=pair[0], soterm=soterm)
+            object_id = retrieve_feature_id(accession=pair[1], soterm=soterm)
             frelationship_id = FeatureRelationship.objects.create(
                                     subject_id=subject_id,
                                     object_id=object_id,
