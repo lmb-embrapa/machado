@@ -47,6 +47,11 @@ class FeatureTest(TestCase):
         orthology_cvterm = Cvterm.objects.create(
             name='orthologous group', cv=fp_cv,
             dbxref=orthology_dbxref, is_obsolete=0, is_relationshiptype=0)
+        coexpgroup_dbxref = Dbxref.objects.create(
+            accession='coexpression group', db=fp_db)
+        coexpgroup_cvterm = Cvterm.objects.create(
+            name='coexpression group', cv=fp_cv,
+            dbxref=coexpgroup_dbxref, is_obsolete=0, is_relationshiptype=0)
 
         so_db = Db.objects.create(name='SO')
         so_cv = Cv.objects.create(name='sequence')
@@ -216,6 +221,12 @@ class FeatureTest(TestCase):
         Featureprop.objects.create(
             feature=polypeptide_feat2, type=orthology_cvterm, rank=0,
             value='orthomcl1')
+        Featureprop.objects.create(
+            feature=polypeptide_feat1, type=coexpgroup_cvterm, rank=0,
+            value='coexpgroup1')
+        Featureprop.objects.create(
+            feature=polypeptide_feat2, type=coexpgroup_cvterm, rank=0,
+            value='coexpgroup1')
 
     def test_retrieve_feature_location(self):
         """Tests - retrieve_feature_location."""
@@ -288,6 +299,15 @@ class FeatureTest(TestCase):
         result = fv.retrieve_feature_orthologs(feature_id=f.feature_id)
         self.assertTrue('orthomcl1' in result)
         self.assertEquals('feat2', result['orthomcl1'][1].uniquename)
+
+    def test_retrieve_coexp_groups(self):
+        """Tests - retrieve_feature_coexpgroups."""
+        fv = feature.FeatureView()
+        f = Feature.objects.get(uniquename='feat1', type__name='polypeptide')
+        result = fv.retrieve_feature_coexpression_groups(
+            feature_id=f.feature_id)
+        self.assertTrue('coexpgroup1' in result)
+        self.assertEquals('feat2', result['coexpgroup1'][1].uniquename)
 
     def test_retrieve_feature_data(self):
         """Tests - retrieve_feature_data."""
