@@ -16,12 +16,8 @@ def param_replace(context, **kwargs):
     """Return the encoded URL parameters. Replace if the parameter exists."""
     params = context["request"].GET.copy()
 
-    IGNORE_FACETS = ['orthologous_group', 'coexpression_group']
-
     for k, v in kwargs.items():
-        if k in IGNORE_FACETS:
-            continue
-        elif k == "selected_facets":
+        if k == "selected_facets":
             params.appendlist(k, v)
         else:
             params[k] = v
