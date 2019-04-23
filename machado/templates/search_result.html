@@ -24,9 +24,7 @@
                 </div>
                 <div class="col text-right">
                     <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=tsv" title="Download TSV" onclick="return confirm('Download results in TSV format')"></a>
-                    {% if facets.fields|get_item:'so_term'|length == 1 %}
                     <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')"></a>
-                    {% endif %}
                 </div>
             </div>
             <table class="table table-hover table-sm">
