@@ -21,6 +21,14 @@ class FeatureSearchView(FacetedSearchView):
     paginate_by = 25
     context_object_name = "object_list"
 
+    def get_queryset(self, *args, **kwargs):
+        """Get queryset."""
+        qs = super(FeatureSearchView, self).get_queryset(*args, **kwargs)
+
+        for field in self.facet_fields:
+            qs = qs.facet(field, min_doc_count=0)
+        return qs
+
     def get_context_data(self, *args, **kwargs):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args, **kwargs)

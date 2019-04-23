@@ -42,6 +42,6 @@ def remove_facet(context, *args):
 
 
 @register.filter
-def get_item(dictionary, key):
+def get_item(self, key):
     """Return the dictionary value."""
-    return dictionary.get(key)
+    return self.get(key)

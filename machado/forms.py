@@ -28,9 +28,14 @@ class FeatureSearchForm(FacetedSearchForm):
                 facet_field, facet_query = facet.split(":")
                 selected_facets.setdefault(facet_field, []).append(facet_query)
 
-            for k, v in selected_facets.items():
-                k += "_exact__in"
-                sqs &= self.searchqueryset.filter_and(**{k: v})
+            for key, values in selected_facets.items():
+                if key == "analyses":
+                    for item in values:
+                        key += "_exact__in"
+                        sqs &= self.searchqueryset.filter_and(**{key: values})
+                else:
+                    key += "_exact__in"
+                    sqs &= self.searchqueryset.filter_and(**{key: values})
 
         if q == "":
             return sqs.load_all()
