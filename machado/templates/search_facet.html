@@ -36,7 +36,7 @@
     </div>
     </div>
     <div class="card-body">
-    {% for item in facets.fields|get_item:facet %}
+    {% for item in facets.fields|get_item:facet|dictsort:0 %}
         {% with facet_item=facet|add:":"|add:item.0 %}
         {% if facet == "organism" %}
             <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
