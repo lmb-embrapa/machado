@@ -35,28 +35,24 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
     def add_arguments(self, parser):
         """Define the arguments."""
         parser.add_argument(
-            "--file",
-            help="'pcc.mcl.txt' File",
-            required=True,
-            type=str
+            "--file", help="'pcc.mcl.txt' File", required=True, type=str
         )
         parser.add_argument(
             "--soterm",
             help="sequence ontology term 'e.g. mRNA'",
             required=False,
-            type=str
+            type=str,
         )
-        parser.add_argument("--cpu",
-                            help="Number of threads",
-                            default=1,
-                            type=int)
+        parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self,
-               file: str,
-               cpu: int = 1,
-               soterm: str = 'mRNA',
-               verbosity: int = 0,
-               **options):
+    def handle(
+        self,
+        file: str,
+        cpu: int = 1,
+        soterm: str = "mRNA",
+        verbosity: int = 0,
+        **options
+    ):
         """Execute the main function."""
         filename = os.path.basename(file)
         if verbosity > 0:

@@ -42,7 +42,7 @@ The features need to be loaded previously or won't be registered."""
             "--soterm",
             help="sequence ontology term 'e.g. mRNA'",
             required=False,
-            type=str
+            type=str,
         )
         parser.add_argument(
             "--organism",
@@ -53,13 +53,13 @@ The features need to be loaded previously or won't be registered."""
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-            self,
-            file: str,
-            organism: str,
-            soterm: str = 'mRNA',
-            cpu: int = 1,
-            verbosity: int = 0,
-            **options
+        self,
+        file: str,
+        organism: str,
+        soterm: str = "mRNA",
+        cpu: int = 1,
+        verbosity: int = 0,
+        **options
     ):
         """Execute the main function."""
         filename = os.path.basename(file)

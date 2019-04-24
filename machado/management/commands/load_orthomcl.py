@@ -62,7 +62,7 @@ The feature members need to be loaded previously."""
         )
 
         # hardcoded as orthomcl uses protein input
-        soterm = 'polypeptide'
+        soterm = "polypeptide"
 
         source = "null"
         featureloader = FeatureLoader(source=source, filename=filename)

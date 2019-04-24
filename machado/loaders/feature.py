@@ -492,12 +492,12 @@ class FeatureLoader(object):
         FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
 
     def store_feature_pairs(
-            self,
-            pair: list,
-            term: Union[str, Cvterm],
-            soterm: str = 'mRNA',
-            value: str = None,
-            cache: int = 0
+        self,
+        pair: list,
+        term: Union[str, Cvterm],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
     ) -> None:
         """Store Feature Relationship Pairs."""
         # only cvterm_id allowed
@@ -528,12 +528,12 @@ class FeatureLoader(object):
             raise ImportingError(e)
 
     def store_feature_groups(
-            self,
-            group: list,
-            term: Union[int, Cvterm],
-            soterm: str = 'mRNA',
-            value: str = None,
-            cache: int = 0
+        self,
+        group: list,
+        term: Union[int, Cvterm],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
     ) -> None:
         """Store Feature Relationship Groups."""
         # only cvterm_id allowed

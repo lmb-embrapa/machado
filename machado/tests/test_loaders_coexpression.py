@@ -134,7 +134,7 @@ class CoexpressionTest(TestCase):
         # dummy coexpression variables
         test_filename = "pcc.mcl.dummy.txt"
         source = "null"
-        soterm = 'polypeptide'
+        soterm = "polypeptide"
         test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
         test_coexpression_loader.store_feature_pairs(
             pair=test_pair1, soterm=soterm, term=term, value=test_pcc_value1
@@ -352,7 +352,7 @@ class CoexpressionTest(TestCase):
         test_filename = "mcl.clusters.dummy.txt"
         source = "null"
         test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
-        soterm = 'polypeptide'
+        soterm = "polypeptide"
         test_coexpression_loader.store_feature_groups(
             group=test_cluster1, soterm=soterm, term=term, value=test_cluster1_name
         )

@@ -470,7 +470,7 @@ class OrthologyTest(TestCase):
             common_name="multispecies",
         )
         source = "null"
-        soterm = 'polypeptide'
+        soterm = "polypeptide"
         test_orthology_loader = FeatureLoader(source=source, filename=filename)
         # ####################
         # test store groups
