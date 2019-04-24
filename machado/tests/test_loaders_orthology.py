@@ -470,6 +470,7 @@ class OrthologyTest(TestCase):
             common_name="multispecies",
         )
         source = "null"
+        soterm = 'polypeptide'
         test_orthology_loader = FeatureLoader(source=source, filename=filename)
         # ####################
         # test store groups
@@ -483,7 +484,7 @@ class OrthologyTest(TestCase):
             "UnknownProtein.v1.1",
         ]
         test_orthology_loader.store_feature_groups(
-            group=members1, term=term, value=group1_name
+            group=members1, soterm=soterm, term=term, value=group1_name
         )
         group2_name = "machado0002"
         members2 = [
@@ -493,7 +494,7 @@ class OrthologyTest(TestCase):
             "DCAR_031986.v1.0.388",
         ]
         test_orthology_loader.store_feature_groups(
-            group=members2, term=term, value=group2_name
+            group=members2, soterm=soterm, term=term, value=group2_name
         )
         group3_name = "machado0003"
         members3 = [
@@ -502,27 +503,27 @@ class OrthologyTest(TestCase):
             "DCAR_032182.v1.0.388",
         ]
         test_orthology_loader.store_feature_groups(
-            group=members3, term=term, value=group3_name
+            group=members3, soterm=soterm, term=term, value=group3_name
         )
         group4_name = "machado0004"
         members4 = ["Glyma.10G008400.1.Wm82.a2.v1", "", "UnknownProtein.v1.2"]
         test_orthology_loader.store_feature_groups(
-            group=members4, term=term, value=group4_name
+            group=members4, soterm=soterm, term=term, value=group4_name
         )
         group5_name = "machado0005"
         members5 = ["DCAR_000323.v1.0.388", "Kaladp0598s0002.1.v1.1"]
         test_orthology_loader.store_feature_groups(
-            group=members5, term=term, value=group5_name
+            group=members5, soterm=soterm, term=term, value=group5_name
         )
         group6_name = "machado0006"
         members6 = ["Kaladp0598s0001.1.v1.1", "UnknownProtein.v1.3"]
         test_orthology_loader.store_feature_groups(
-            group=members6, term=term, value=group6_name
+            group=members6, soterm=soterm, term=term, value=group6_name
         )
         group7_name = "machado0007"
         members7 = ["UnknownProtein.v1.4"]
         test_orthology_loader.store_feature_groups(
-            group=members7, term=term, value=group7_name
+            group=members7, soterm=soterm, term=term, value=group7_name
         )
 
         # ###check if relationships exist###
