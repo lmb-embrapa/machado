@@ -60,6 +60,10 @@ The feature members need to be loaded previously."""
             is_obsolete=0,
             is_relationshiptype=0,
         )
+
+        # hardcoded as orthomcl uses protein input
+        soterm = "polypeptide"
+
         source = "null"
         featureloader = FeatureLoader(source=source, filename=filename)
         # each line is an orthologous group
@@ -84,6 +88,7 @@ The feature members need to be loaded previously."""
                 tasks.append(
                     pool.submit(
                         featureloader.store_feature_groups,
+                        soterm=soterm,
                         group=members,
                         term=cvterm_cluster.cvterm_id,
                         value=name,
