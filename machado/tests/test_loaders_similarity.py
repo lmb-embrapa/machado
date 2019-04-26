@@ -6,17 +6,18 @@
 
 """Tests similarity data loader."""
 
-from machado.models import Analysis, Analysisfeature
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Pub
-from machado.models import Feature, Featureloc, FeatureCvterm
-from machado.loaders.exceptions import ImportingError
-from machado.loaders.similarity import SimilarityLoader
 from datetime import datetime
-from django.test import TestCase
-from django.core.management import call_command
 
 from Bio.Alphabet import generic_protein
 from Bio.SearchIO._model import QueryResult, Hit, HSP, HSPFragment
+from django.core.management import call_command
+from django.test import TestCase
+
+from machado.loaders.exceptions import ImportingError
+from machado.loaders.similarity import SimilarityLoader
+from machado.models import Analysis, Analysisfeature
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Pub
+from machado.models import Feature, Featureloc, FeatureCvterm
 
 
 class SimilarityTest(TestCase):

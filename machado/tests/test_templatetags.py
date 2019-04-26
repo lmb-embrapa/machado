@@ -6,8 +6,9 @@
 
 """Tests feature view."""
 
-from machado.templatetags import machado_extras
 from django.test import TestCase, RequestFactory
+
+from machado.templatetags import machado_extras
 
 
 class MachadoExtrasTest(TestCase):

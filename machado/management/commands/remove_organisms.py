@@ -5,8 +5,9 @@
 # have been included as part of this package for licensing information.
 
 """Remove organisms file."""
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+
 from machado.models import Db, Dbxref, Organism, OrganismDbxref
 
 

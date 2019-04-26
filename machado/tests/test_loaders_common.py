@@ -6,12 +6,14 @@
 
 """Tests Loaders - Common."""
 
-from machado.loaders.common import insert_organism, retrieve_organism
+import os
+
+from django.test import TestCase
+
 from machado.loaders.common import FileValidator
+from machado.loaders.common import insert_organism, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
-from django.test import TestCase
-import os
 
 
 class CommonTest(TestCase):

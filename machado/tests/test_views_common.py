@@ -6,12 +6,14 @@
 
 """Tests common view."""
 
+from datetime import datetime, timezone
+
+from django.test import TestCase, RequestFactory
+from django.urls.exceptions import NoReverseMatch
+
 from machado.models import Db, Dbxref, Cv, Cvterm, Organism
 from machado.models import Feature
 from machado.views import common
-from django.test import TestCase, RequestFactory
-from django.urls.exceptions import NoReverseMatch
-from datetime import datetime, timezone
 
 
 class DataSummaryTest(TestCase):

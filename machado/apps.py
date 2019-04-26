@@ -5,10 +5,12 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-from django.apps import AppConfig
-from machado import settings as dt_settings
-from django.db.utils import ProgrammingError
 import warnings
+
+from django.apps import AppConfig
+from django.db.utils import ProgrammingError
+
+from machado import settings as dt_settings
 
 
 class MachadoConfig(AppConfig):

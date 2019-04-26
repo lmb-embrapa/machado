@@ -6,12 +6,13 @@
 
 """Remove file."""
 
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from machado.models import Project, Projectprop, AssayProject
+from django.core.management.base import BaseCommand, CommandError
+
 from machado.models import Assay, Assayprop, Analysis, Analysisprop
 from machado.models import Biomaterial, Biomaterialprop
 from machado.models import Feature, Dbxrefprop
+from machado.models import Project, Projectprop, AssayProject
 
 
 class Command(BaseCommand):

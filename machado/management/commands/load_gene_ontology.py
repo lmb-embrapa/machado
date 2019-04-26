@@ -6,14 +6,16 @@
 
 """Load Gene Ontology."""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Lock
+
+from django.core.management.base import BaseCommand, CommandError
+from obonet import read_obo
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.ontology import OntologyLoader
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand, CommandError
-from multiprocessing import Lock
-from obonet import read_obo
-from tqdm import tqdm
 
 
 class Command(BaseCommand):

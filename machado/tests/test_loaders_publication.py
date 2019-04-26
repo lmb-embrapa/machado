@@ -6,11 +6,12 @@
 
 """Tests publicationtion loader."""
 
-from machado.models import Pub, Dbxref, PubDbxref
-from machado.loaders.publication import PublicationLoader
+from bibtexparser.bibdatabase import BibDatabase
 from django.core.management import call_command
 from django.test import TestCase
-from bibtexparser.bibdatabase import BibDatabase
+
+from machado.loaders.publication import PublicationLoader
+from machado.models import Pub, Dbxref, PubDbxref
 
 
 class PublicationTest(TestCase):

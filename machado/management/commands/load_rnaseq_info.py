@@ -6,17 +6,19 @@
 
 """Load RNA-seq information .csv file."""
 
-from machado.loaders.common import FileValidator, FieldsValidator
-from machado.loaders.common import retrieve_organism
-from machado.loaders.assay import AssayLoader
-from machado.loaders.project import ProjectLoader
-from machado.loaders.biomaterial import BiomaterialLoader
-from machado.loaders.treatment import TreatmentLoader
-from machado.loaders.exceptions import ImportingError
-from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
 import os
 import re
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+
+from machado.loaders.assay import AssayLoader
+from machado.loaders.biomaterial import BiomaterialLoader
+from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.common import retrieve_organism
+from machado.loaders.exceptions import ImportingError
+from machado.loaders.project import ProjectLoader
+from machado.loaders.treatment import TreatmentLoader
 
 
 class Command(BaseCommand):

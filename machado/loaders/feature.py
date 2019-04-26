@@ -6,21 +6,23 @@
 
 """Load feature file."""
 
-from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
-from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
-from machado.models import Featureprop, FeatureSynonym
-from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.models import Pub, PubDbxref, FeaturePub, Synonym
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
-from machado.loaders.exceptions import ImportingError
 from datetime import datetime, timezone
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
-from pysam.libctabixproxies import GTFProxy
 from time import time
 from typing import Dict, List, Set, Union
 from urllib.parse import unquote
+
 from Bio.SearchIO._model import Hit
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+from pysam.libctabixproxies import GTFProxy
+
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.exceptions import ImportingError
+from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
+from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
+from machado.models import FeatureRelationship, FeatureRelationshipprop
+from machado.models import Featureprop, FeatureSynonym
+from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent

@@ -9,8 +9,8 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.views.decorators.cache import cache_page
-from machado.views import common
 
+from machado.views import common
 
 try:
     CACHE_TIMEOUT = settings.CACHE_TIMEOUT

@@ -4,6 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 from django.db import models
+
 from machado.decorators import machadoFeatureMethods, machadoPubMethods
 
 
@@ -1534,6 +1535,7 @@ class FeaturePubprop(models.Model):
 
 
 class FeatureRelationship(models.Model):
+    objects = None
     feature_relationship_id = models.BigAutoField(primary_key=True)
     subject = models.ForeignKey(
         Feature,

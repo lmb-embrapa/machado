@@ -2,6 +2,7 @@
 
 
 import os
+
 from setuptools import find_packages, setup
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
@@ -41,7 +42,7 @@ setup(
         'typing>=3.6.4',
         'bibtexparser>=1.0.1',
         'djangorestframework>=3.9.0',
-        'drf-nested-routers>-0.90.2',
+        'drf-nested-routers>0.90.2',
         'coreapi>=2.3.3',
         'django-cors-headers>=2.4.0',
     ],

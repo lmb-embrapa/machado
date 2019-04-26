@@ -6,11 +6,12 @@
 
 """Tests phylotree loader."""
 
-from machado.loaders.phylotree import PhylotreeLoader
-from machado.loaders.organism import OrganismLoader
-from machado.models import Organism, Phylonode, Phylotree
-from django.test import TestCase
 from django.core.management import call_command
+from django.test import TestCase
+
+from machado.loaders.organism import OrganismLoader
+from machado.loaders.phylotree import PhylotreeLoader
+from machado.models import Organism, Phylonode, Phylotree
 
 
 class PhylotreeTest(TestCase):

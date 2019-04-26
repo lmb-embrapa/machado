@@ -6,12 +6,14 @@
 
 """Biomaterial."""
 
+from typing import Union
+
+from django.db.utils import IntegrityError
+
 from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Biomaterial, Cvterm, Db, Dbxref, Organism
 from machado.models import Treatment, BiomaterialTreatment, Biomaterialprop
-from django.db.utils import IntegrityError
-from typing import Union
 
 
 class BiomaterialLoader(object):

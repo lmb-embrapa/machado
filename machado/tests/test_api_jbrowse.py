@@ -7,11 +7,13 @@
 """Tests JBrowse API."""
 
 from datetime import datetime, timezone
+
 from django.urls import include, path, reverse
-from machado.loaders.feature import FeatureLoader
-from machado.models import Cv, Cvterm, Db, Dbxref, Feature, Organism
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
+
+from machado.loaders.feature import FeatureLoader
+from machado.models import Cv, Cvterm, Db, Dbxref, Feature, Organism
 
 
 class JBrowseTests(APITestCase, URLPatternsTestCase):

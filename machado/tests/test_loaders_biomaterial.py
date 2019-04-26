@@ -6,12 +6,13 @@
 
 """Tests biomaterial loader."""
 
-from machado.models import Biomaterial, Db, Dbxref, Organism
-from machado.models import Cv, Cvterm, BiomaterialTreatment, Biomaterialprop
+from django.core.management import call_command
+from django.test import TestCase
+
 from machado.loaders.biomaterial import BiomaterialLoader
 from machado.loaders.treatment import TreatmentLoader
-from django.test import TestCase
-from django.core.management import call_command
+from machado.models import Biomaterial, Db, Dbxref, Organism
+from machado.models import Cv, Cvterm, BiomaterialTreatment, Biomaterialprop
 
 
 class BiomaterialTest(TestCase):

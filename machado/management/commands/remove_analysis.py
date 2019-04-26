@@ -6,14 +6,15 @@
 
 """Remove analysis."""
 
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.models import Analysisprop, Analysis, Analysisfeature
 from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureCvtermprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Quantification, Acquisition
-from tqdm import tqdm
 
 
 class Command(BaseCommand):

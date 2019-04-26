@@ -6,12 +6,14 @@
 
 """Remove relationship."""
 
-from machado.models import Cvterm, FeatureRelationship
-from machado.loaders.exceptions import ImportingError
-from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
 import os
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
+
+from machado.loaders.exceptions import ImportingError
+from machado.models import Cvterm, FeatureRelationship
 
 
 class Command(BaseCommand):

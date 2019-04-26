@@ -6,11 +6,11 @@
 
 """URLs."""
 
-from machado.api import views
 from django.conf.urls import include, url
-from rest_framework_nested import routers
 from rest_framework.documentation import include_docs_urls
+from rest_framework_nested import routers
 
+from machado.api import views
 
 router = routers.SimpleRouter(trailing_slash=False)
 

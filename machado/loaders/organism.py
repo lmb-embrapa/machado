@@ -6,14 +6,16 @@
 
 """Organism."""
 
-from machado.loaders.exceptions import ImportingError
+from typing import List, Optional, Tuple
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
 from machado.loaders.common import retrieve_organism
+from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Db, Dbxref
 from machado.models import Organism, OrganismDbxref, Organismprop
 from machado.models import OrganismPub, Pub
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
-from typing import List, Optional, Tuple
 
 
 class OrganismLoader(object):

@@ -6,18 +6,20 @@
 
 """Load clusters of coexpression data from LSTRAP outfile mcl.clusters.txt."""
 
+import os
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator, FieldsValidator
 from machado.loaders.common import get_num_lines
 from machado.loaders.common import retrieve_organism
-from machado.loaders.feature import FeatureLoader
 from machado.loaders.exceptions import ImportingError
+from machado.loaders.feature import FeatureLoader
 from machado.models import Cv, Cvterm, Dbxref, Db
-from django.db.utils import IntegrityError
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import re
-import os
 
 
 class Command(BaseCommand):

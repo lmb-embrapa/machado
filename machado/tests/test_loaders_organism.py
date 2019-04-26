@@ -6,13 +6,14 @@
 
 """Tests organism loader."""
 
+from bibtexparser.bibdatabase import BibDatabase
+from django.core.management import call_command
+from django.test import TestCase
+
 from machado.loaders.organism import OrganismLoader
 from machado.loaders.publication import PublicationLoader
 from machado.models import Db, Dbxref
 from machado.models import Organism, OrganismDbxref, Organismprop, OrganismPub
-from django.test import TestCase
-from django.core.management import call_command
-from bibtexparser.bibdatabase import BibDatabase
 
 
 class OrganismTest(TestCase):

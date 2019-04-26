@@ -6,15 +6,17 @@
 
 """Load Publication file."""
 
-from machado.loaders.common import FileValidator
-from machado.loaders.exceptions import ImportingError
-from machado.loaders.publication import PublicationLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import bibtexparser
 from django.core.management.base import BaseCommand, CommandError
 
 # import os
 from tqdm import tqdm
-import bibtexparser
+
+from machado.loaders.common import FileValidator
+from machado.loaders.exceptions import ImportingError
+from machado.loaders.publication import PublicationLoader
 
 
 class Command(BaseCommand):

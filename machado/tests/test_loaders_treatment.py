@@ -6,10 +6,11 @@
 
 """Tests treatment loader."""
 
-from machado.models import Biomaterial, Db, Dbxref, Organism
-from machado.models import Cv, Cvterm, Treatment
-from machado.loaders.treatment import TreatmentLoader
 from django.test import TestCase
+
+from machado.loaders.treatment import TreatmentLoader
+from machado.models import Biomaterial
+from machado.models import Treatment
 
 
 class TreatmentTest(TestCase):

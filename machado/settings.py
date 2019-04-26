@@ -6,8 +6,9 @@
 
 """App settings file."""
 
-from django.conf import settings
 from importlib import import_module
+
+from django.conf import settings
 
 
 def patch_installed_apps():

@@ -6,12 +6,14 @@
 
 """Tests orthology loaders."""
 
+from datetime import datetime, timezone
+
+from django.test import TestCase
+
+from machado.loaders.feature import FeatureLoader
 from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref, Feature
 from machado.models import Featureprop
-from machado.loaders.feature import FeatureLoader
-from django.test import TestCase
-from datetime import datetime, timezone
 
 
 class OrthologyTest(TestCase):

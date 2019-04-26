@@ -6,13 +6,15 @@
 
 """Assay."""
 
+from datetime import datetime
+
+from django.db.utils import IntegrityError
+
 from machado.loaders.exceptions import ImportingError
+from machado.models import Arraydesign, Contact
 from machado.models import Assay, AssayBiomaterial, AssayProject, Assayprop
 from machado.models import Biomaterial, Db, Dbxref
-from machado.models import Arraydesign, Contact
 from machado.models import Cv, Cvterm, Project
-from django.db.utils import IntegrityError
-from datetime import datetime
 
 
 class AssayLoader(object):

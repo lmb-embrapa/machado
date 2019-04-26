@@ -5,8 +5,9 @@
 # have been included as part of this package for licensing information.
 
 """Remove feature annotation."""
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+
 from machado.loaders.common import retrieve_organism
 from machado.models import Cvterm, Featureprop
 

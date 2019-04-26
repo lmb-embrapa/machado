@@ -5,13 +5,13 @@
 # have been included as part of this package for licensing information.
 
 """Search indexes."""
-from haystack import indexes
-from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+from haystack import indexes
+
 from machado.models import Analysis, Analysisfeature
 from machado.models import Feature, FeatureCvterm, Featureprop
 from machado.models import Featureloc, FeatureRelationship
-
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]

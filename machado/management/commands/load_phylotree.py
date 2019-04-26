@@ -6,14 +6,16 @@
 
 """Load phylonodes file."""
 
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict
+
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.phylotree import PhylotreeLoader
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
-from typing import Any, Dict
-import re
 
 
 class Command(BaseCommand):

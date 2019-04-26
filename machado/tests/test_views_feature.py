@@ -6,14 +6,16 @@
 
 """Tests feature view."""
 
+from datetime import datetime, timezone
+
+from django.test import TestCase, RequestFactory
+from django.urls.exceptions import NoReverseMatch
+
 from machado.models import Analysis, Analysisfeature
 from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
 from machado.models import Featureprop, FeatureRelationship
 from machado.views import feature
-from django.test import TestCase, RequestFactory
-from django.urls.exceptions import NoReverseMatch
-from datetime import datetime, timezone
 
 
 class FeatureTest(TestCase):

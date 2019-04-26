@@ -6,20 +6,21 @@
 
 """Load similarity."""
 
-from machado.models import Cvterm, Feature, Featureloc
-from machado.models import FeatureCvterm, FeatureCvtermprop
-from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.loaders.analysis import AnalysisLoader
-from machado.loaders.exceptions import ImportingError
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
+import warnings
 from datetime import datetime
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
 from time import time
 from typing import Optional
 
-import warnings
 from Bio import BiopythonWarning
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
+from machado.loaders.analysis import AnalysisLoader
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.exceptions import ImportingError
+from machado.models import Cvterm, Feature, Featureloc
+from machado.models import FeatureCvterm, FeatureCvtermprop
+from machado.models import FeatureRelationship, FeatureRelationshipprop
 
 warnings.simplefilter("ignore", BiopythonWarning)
 with warnings.catch_warnings():

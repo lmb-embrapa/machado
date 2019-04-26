@@ -6,8 +6,9 @@
 
 """Remove phylotree."""
 
-from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+
 from machado.models import Phylotree, Phylonode, PhylonodeOrganism
 
 

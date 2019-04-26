@@ -6,12 +6,13 @@
 
 """Tests project loader."""
 
-from machado.models import Db, Dbxref
-from machado.loaders.project import ProjectLoader
-from django.test import TestCase
-from machado.models import Project, Projectprop
-from machado.models import Cv, Cvterm
 from django.core.management import call_command
+from django.test import TestCase
+
+from machado.loaders.project import ProjectLoader
+from machado.models import Cv, Cvterm
+from machado.models import Db, Dbxref
+from machado.models import Project, Projectprop
 
 
 class ProjectTest(TestCase):

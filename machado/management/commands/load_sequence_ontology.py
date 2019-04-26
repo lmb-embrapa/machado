@@ -6,12 +6,13 @@
 
 """Load Sequence Ontology."""
 
+import obonet
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.ontology import OntologyLoader
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
-import obonet
 
 
 class Command(BaseCommand):
