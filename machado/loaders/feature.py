@@ -494,7 +494,12 @@ class FeatureLoader(object):
         FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
 
     def store_feature_pairs(
-        self, pair: list, term: Union[str, Cvterm], value: str = None, cache: int = 0
+        self,
+        pair: list,
+        term: Union[str, Cvterm],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
     ) -> None:
         """Store Feature Relationship Pairs."""
         # only cvterm_id allowed
@@ -502,7 +507,6 @@ class FeatureLoader(object):
             cvterm_id = term.cvterm_id
         else:
             cvterm_id = term
-        soterm = "polypeptide"
         # lets get feature_ids from the pair
         try:
             subject_id = retrieve_feature_id(accession=pair[0], soterm=soterm)
@@ -526,7 +530,12 @@ class FeatureLoader(object):
             raise ImportingError(e)
 
     def store_feature_groups(
-        self, group: list, term: Union[int, Cvterm], value: str = None, cache: int = 0
+        self,
+        group: list,
+        term: Union[int, Cvterm],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
     ) -> None:
         """Store Feature Relationship Groups."""
         # only cvterm_id allowed
@@ -538,7 +547,7 @@ class FeatureLoader(object):
         feature_id_list = list(
             Feature.objects.filter(
                 type__cv__name="sequence",
-                type__name="polypeptide",
+                type__name=soterm,
                 dbxref__accession__in=group,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
             )

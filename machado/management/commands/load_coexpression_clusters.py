@@ -41,6 +41,12 @@ The features need to be loaded previously or won't be registered."""
             "--file", help="'mcl.clusters.txt' File", required=True, type=str
         )
         parser.add_argument(
+            "--soterm",
+            help="sequence ontology term 'e.g. mRNA'",
+            required=False,
+            type=str,
+        )
+        parser.add_argument(
             "--organism",
             help="Scientific name (e.g.: 'Oryza sativa')",
             required=True,
@@ -49,7 +55,13 @@ The features need to be loaded previously or won't be registered."""
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
+        self,
+        file: str,
+        organism: str,
+        soterm: str = "mRNA",
+        cpu: int = 1,
+        verbosity: int = 0,
+        **options
     ):
         """Execute the main function."""
         filename = os.path.basename(file)
@@ -110,6 +122,7 @@ The features need to be loaded previously or won't be registered."""
                 pool.submit(
                     featureloader.store_feature_groups,
                     group=fields,
+                    soterm=soterm,
                     term=cvterm_cluster.cvterm_id,
                     value=name,
                 )

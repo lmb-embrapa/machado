@@ -14,6 +14,9 @@ from machado.models import Biomaterial, Biomaterialprop
 from machado.models import Feature, Dbxrefprop
 from machado.models import Project, Projectprop, AssayProject
 
+import os
+
+
 
 class Command(BaseCommand):
     """Remove file."""
@@ -26,84 +29,85 @@ class Command(BaseCommand):
 
     def handle(self, name: str, verbosity: int = 0, **options):
         """Execute the main function."""
+        filename = os.path.basename(name)
         # Handling Features
         if verbosity > 1:
             self.stdout.write(
-                "Features: deleting {} and every " "child record (CASCADE)".format(name)
+                "Features: deleting {} and every " "child record (CASCADE)".format(filename)
             )
         try:
             Feature.objects.filter(
-                dbxref__Dbxrefprop_dbxref_Dbxref__value=name
+                dbxref__Dbxrefprop_dbxref_Dbxref__value=filename
             ).delete()
-            Dbxrefprop.objects.filter(value=name).delete()
+            Dbxrefprop.objects.filter(value=filename).delete()
         except ObjectDoesNotExist:
             raise CommandError(
-                "Features: cannot remove {} (not registered)".format(name)
+                "Features: cannot remove {} (not registered)".format(filename)
             )
         # Handling Projects
         if verbosity > 1:
             self.stdout.write(
-                "Projects: deleting {} and every " "child record (CASCADE)".format(name)
+                "Projects: deleting {} and every " "child record (CASCADE)".format(filename)
             )
         try:
             project_ids = list(
-                Projectprop.objects.filter(value=name).values_list(
+                Projectprop.objects.filter(value=filename).values_list(
                     "project_id", flat=True
                 )
             )
             AssayProject.objects.filter(project_id__in=project_ids).delete()
             Project.objects.filter(project_id__in=project_ids).delete()
-            Projectprop.objects.filter(value=name).delete()
+            Projectprop.objects.filter(value=filename).delete()
         except ObjectDoesNotExist:
             raise CommandError(
-                "Projects: cannot remove {} (not registered)".format(name)
+                "Projects: cannot remove {} (not registered)".format(filename)
             )
         # Handling Assay
         if verbosity > 1:
             self.stdout.write(
-                "Assay: deleting {} and every " "child record (CASCADE)".format(name)
+                "Assay: deleting {} and every " "child record (CASCADE)".format(filename)
             )
         try:
             assay_ids = list(
-                Assayprop.objects.filter(value=name).values_list("assay_id", flat=True)
+                Assayprop.objects.filter(value=filename).values_list("assay_id", flat=True)
             )
             AssayProject.objects.filter(assay_id__in=assay_ids).delete()
             Assay.objects.filter(assay_id__in=assay_ids).delete()
         except ObjectDoesNotExist:
-            raise CommandError("Assays: cannot remove {} (not registered)".format(name))
+            raise CommandError("Assays: cannot remove {} (not registered)".format(filename))
         # Handling Biomaterial
         if verbosity > 1:
             self.stdout.write(
                 "Biomaterial: deleting {} and every "
-                "child record (CASCADE)".format(name)
+                "child record (CASCADE)".format(filename)
             )
         try:
             biomaterial_ids = list(
-                Biomaterialprop.objects.filter(value=name).values_list(
+                Biomaterialprop.objects.filter(value=filename).values_list(
                     "biomaterial_id", flat=True
                 )
             )
             Biomaterial.objects.filter(biomaterial_id__in=biomaterial_ids).delete()
-            Biomaterialprop.objects.filter(value=name).delete()
+            Biomaterialprop.objects.filter(value=filename).delete()
         except ObjectDoesNotExist:
             raise CommandError(
-                "Biomaterials: cannot remove {} (not registered)".format(name)
+                "Biomaterials: cannot remove {} (not registered)".format(filename)
             )
         # Handling Analysis
         if verbosity > 1:
             self.stdout.write(
-                "Analysis: deleting {} and every " "child record (CASCADE)".format(name)
+                "Analysis: deleting {} and every " "child record (CASCADE)".format(filename)
             )
         try:
             analysis_ids = list(
-                Analysisprop.objects.filter(value=name).values_list(
+                Analysisprop.objects.filter(value=filename).values_list(
                     "analysis_id", flat=True
                 )
             )
             Analysis.objects.filter(analysis_id__in=analysis_ids).delete()
         except ObjectDoesNotExist:
             raise CommandError(
-                "Analysis: cannot remove {} (not registered)".format(name)
+                "Analysis: cannot remove {} (not registered)".format(filename)
             )
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))

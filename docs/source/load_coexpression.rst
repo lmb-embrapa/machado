@@ -35,6 +35,7 @@ To load such a table, one can run the command below:
 
 =============   ==================================================================================
 --file           'pcc.mcl.txt' File *
+--soterm         'mRNA' sequence ontology term *default*
 --cpu 	          Number of threads
 =============   ==================================================================================
 
@@ -93,6 +94,7 @@ To load such a file, one can run the command below:
 =============   ==================================================================================
 --file           'mcl.clusters.txt' file *
 --organism        Scientific name (e.g.: 'Arabidopsis thaliana')
+--soterm         'mRNA' sequence ontology term *default*
 --cpu 	          Number of threads
 =============   ==================================================================================
 

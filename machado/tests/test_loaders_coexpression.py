@@ -136,12 +136,13 @@ class CoexpressionTest(TestCase):
         # dummy coexpression variables
         test_filename = "pcc.mcl.dummy.txt"
         source = "null"
+        soterm = "polypeptide"
         test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
         test_coexpression_loader.store_feature_pairs(
-            pair=test_pair1, term=term, value=test_pcc_value1
+            pair=test_pair1, soterm=soterm, term=term, value=test_pcc_value1
         )
         test_coexpression_loader.store_feature_pairs(
-            pair=test_pair2, term=term, value=test_pcc_value2
+            pair=test_pair2, soterm=soterm, term=term, value=test_pcc_value2
         )
         # start checking
         self.assertTrue(
@@ -353,14 +354,15 @@ class CoexpressionTest(TestCase):
         test_filename = "mcl.clusters.dummy.txt"
         source = "null"
         test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
+        soterm = "polypeptide"
         test_coexpression_loader.store_feature_groups(
-            group=test_cluster1, term=term, value=test_cluster1_name
+            group=test_cluster1, soterm=soterm, term=term, value=test_cluster1_name
         )
         test_coexpression_loader.store_feature_groups(
-            group=test_cluster2, term=term, value=test_cluster2_name
+            group=test_cluster2, soterm=soterm, term=term, value=test_cluster2_name
         )
         test_coexpression_loader.store_feature_groups(
-            group=test_cluster3, term=term, value=test_cluster3_name
+            group=test_cluster3, soterm=soterm, term=term, value=test_cluster3_name
         )
         # check entire cluster1 relationships (not in reverse)
         self.assertTrue(

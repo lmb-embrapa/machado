@@ -40,7 +40,7 @@ class TreatmentLoader(object):
     ) -> Treatment:
         """Store treatment."""
         try:
-            treatment = Treatment.objects.create(
+            treatment, created = Treatment.objects.get_or_create(
                 biomaterial=biomaterial,
                 type_id=self.cvterm_null.cvterm_id,
                 name=name,
