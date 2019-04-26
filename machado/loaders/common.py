@@ -11,11 +11,13 @@
 # have been included as part of this package for licensing information.
 
 """loaders common library."""
+import gzip
+import os
+
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+
 from machado.loaders.exceptions import ImportingError
 from machado.models import Feature, FeatureDbxref, Organism
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-import os
-import gzip
 
 
 class FileValidator(object):
@@ -82,7 +84,7 @@ def get_num_lines(file_path):
 
     i = 0
     for line in fp:
-        if line.startswith("#"):
+        if str(line).startswith('#'):
             continue
         i += 1
     return i
