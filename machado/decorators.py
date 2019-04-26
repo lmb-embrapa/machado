@@ -6,7 +6,7 @@
 
 """Decorators."""
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Value
+from django.db.models import Value, F
 from django.db.models.functions import Concat
 
 
@@ -77,9 +77,45 @@ def get_feature_coexpression_group(self):
         return None
 
 
+def get_feature_expression_samples(self):
+    """Get the expression samples and treatments."""
+    try:
+        return list(
+            self.Analysisfeature_feature_Feature.annotate(
+                assay_name=F(
+                    "analysis__Quantification_analysis_Analysis__acquisition__assay__name"
+                )
+            )
+            .annotate(
+                biomaterial_name=F(
+                    "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__name"
+                )
+            )
+            .annotate(
+                biomaterial_description=F(
+                    "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__description"
+                )
+            )
+            .annotate(
+                treatment_name=F(
+                    "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__Treatment_biomaterial_Biomaterial__name"
+                )
+            )
+            .values(
+                "analysis__sourcename",
+                "normscore",
+                "assay_name",
+                "biomaterial_name",
+                "biomaterial_description",
+                "treatment_name",
+            )
+        )
+    except ObjectDoesNotExist:
+        return None
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
-
     def wrapper(cls):
         setattr(cls, "get_display", get_feature_display)
         setattr(cls, "get_product", get_feature_product)
@@ -87,6 +123,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_note", get_feature_note)
         setattr(cls, "get_orthologous_group", get_feature_orthologous_group)
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
+        setattr(cls, "get_expression_samples", get_feature_expression_samples)
         return cls
 
     return wrapper
@@ -110,7 +147,6 @@ def get_pub_doi(self):
 
 def machadoPubMethods():
     """Add methods to machado.models.Pub."""
-
     def wrapper(cls):
         setattr(cls, "get_authors", get_pub_authors)
         setattr(cls, "get_doi", get_pub_doi)
