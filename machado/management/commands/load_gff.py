@@ -81,7 +81,7 @@ class Command(BaseCommand):
         except ImportingError as e:
             try:
                 index_file = "{}.csi".format(file)
-                FileValidator().validate(file)
+                FileValidator().validate(index_file)
             except ImportingError as e:
                 raise CommandError("No index found (.tbi/.csi).".format(e))
 
