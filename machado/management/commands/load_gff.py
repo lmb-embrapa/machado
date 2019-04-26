@@ -6,14 +6,16 @@
 
 """Load GFF file."""
 
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import pysam
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator, get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
-import os
-import pysam
 
 
 class Command(BaseCommand):
@@ -72,6 +74,17 @@ class Command(BaseCommand):
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
+
+        try:
+            index_file = '{}.tbi'.format(file)
+            FileValidator().validate(index_file)
+        except ImportingError as e:
+            try:
+                index_file = '{}.csi'.format(file)
+                FileValidator().validate(file)
+            except ImportingError as e:
+                raise CommandError('No index found (.tbi/.csi).'.format(e))
+
         try:
             feature_file = FeatureLoader(
                 filename=filename, source="GFF_source", doi=doi
@@ -86,8 +99,7 @@ class Command(BaseCommand):
 
         # Load the GFF3 file
         with open(file) as tbx_file:
-            # print(str(tbx_file.name))
-            tbx = pysam.TabixFile(tbx_file.name)
+            tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
             for row in tqdm(tbx.fetch(parser=pysam.asGTF()), total=get_num_lines(file)):
                 if ignore is not None and row.feature in ignore:
                     continue
