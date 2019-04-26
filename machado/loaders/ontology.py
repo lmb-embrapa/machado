@@ -5,15 +5,17 @@
 # have been included as part of this package for licensing information.
 
 """Ontology."""
+import re
+from multiprocessing.synchronize import Lock
+from typing import Any, Dict, Optional
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Cvtermprop, CvtermDbxref, Cvtermsynonym
 from machado.models import CvtermRelationship
 from machado.models import Db, Dbxref
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
-from multiprocessing.synchronize import Lock
-from typing import Any, Dict, Optional
-import re
 
 
 class OntologyLoader(object):

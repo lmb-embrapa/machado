@@ -6,15 +6,17 @@
 
 """Analysis."""
 
-from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.loaders.exceptions import ImportingError
-from machado.models import Assay, Acquisition, Quantification
-from machado.models import Analysis, Analysisfeature, Analysisprop
-from machado.models import Cvterm, Db, Dbxref, Organism, Feature
-from django.db.utils import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 from typing import Union
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
+from machado.loaders.common import retrieve_organism, retrieve_feature_id
+from machado.loaders.exceptions import ImportingError
+from machado.models import Analysis, Analysisfeature, Analysisprop
+from machado.models import Assay, Acquisition, Quantification
+from machado.models import Cvterm, Db, Dbxref, Organism, Feature
 
 
 class AnalysisLoader(object):

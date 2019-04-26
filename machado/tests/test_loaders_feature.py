@@ -6,17 +6,19 @@
 
 """Tests feature loader."""
 
+from datetime import datetime, timezone
+
+from Bio.SearchIO._model import Hit
+from bibtexparser.bibdatabase import BibDatabase
+from django.test import TestCase
+
+from machado.loaders.feature import FeatureLoader
+from machado.loaders.publication import PublicationLoader
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
-from machado.models import Pub, PubDbxref, FeaturePub
 from machado.models import Feature, Featureprop, FeatureSynonym
 from machado.models import FeatureCvterm, FeatureDbxref
 from machado.models import Featureloc, FeatureRelationship
-from machado.loaders.feature import FeatureLoader
-from machado.loaders.publication import PublicationLoader
-from django.test import TestCase
-from datetime import datetime, timezone
-from bibtexparser.bibdatabase import BibDatabase
-from Bio.SearchIO._model import Hit
+from machado.models import Pub, PubDbxref, FeaturePub
 
 
 class FeatureTest(TestCase):

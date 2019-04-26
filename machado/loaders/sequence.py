@@ -6,17 +6,19 @@
 
 """Sequence."""
 
+from datetime import datetime, timezone
+from hashlib import md5
+from typing import Optional
+
 from Bio.SeqRecord import SeqRecord
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+from django.db.utils import IntegrityError
+
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
 from machado.models import PubDbxref
-from datetime import datetime, timezone
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
-from django.db.utils import IntegrityError
-from hashlib import md5
-from typing import Optional
 
 
 class SequenceLoader(object):

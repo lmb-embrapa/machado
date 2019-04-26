@@ -6,6 +6,7 @@
 """Search views."""
 
 from haystack.generic_views import FacetedSearchView
+
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 

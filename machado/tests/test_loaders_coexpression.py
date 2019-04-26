@@ -6,12 +6,14 @@
 
 """Tests coexpression data loader."""
 
+from datetime import datetime
+
+from django.test import TestCase
+
+from machado.loaders.feature import FeatureLoader
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.loaders.feature import FeatureLoader
-from datetime import datetime
-from django.test import TestCase
 
 
 class CoexpressionTest(TestCase):

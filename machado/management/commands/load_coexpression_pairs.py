@@ -6,16 +6,18 @@
 
 """Load coexpression data from LSTRAP output file pcc.mcl.txt."""
 
-from machado.models import Cvterm
-from machado.loaders.common import FileValidator, FieldsValidator
-from machado.loaders.common import get_num_lines
-from machado.loaders.feature import FeatureLoader
-from machado.loaders.exceptions import ImportingError
+import os
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
-import re
-import os
+
+from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.common import get_num_lines
+from machado.loaders.exceptions import ImportingError
+from machado.loaders.feature import FeatureLoader
+from machado.models import Cvterm
 
 
 class Command(BaseCommand):

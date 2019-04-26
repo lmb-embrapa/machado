@@ -5,8 +5,9 @@
 # have been included as part of this package for licensing information.
 
 """Load publication file."""
-from machado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
 import re
+
+from machado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
 
 
 class PublicationLoader(object):

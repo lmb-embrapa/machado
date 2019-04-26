@@ -6,12 +6,14 @@
 
 """Load organism publication file."""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.organism import OrganismLoader
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
 
 
 class Command(BaseCommand):

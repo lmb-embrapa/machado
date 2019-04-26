@@ -6,13 +6,15 @@
 
 """Tests ontology loaders."""
 
+import os
+
+import obonet
+from django.core.management import call_command
+from django.test import TestCase
+
+from machado.loaders.ontology import OntologyLoader
 from machado.models import Cv, Cvterm, Cvtermprop, Db, Dbxref
 from machado.models import CvtermDbxref, Cvtermsynonym, CvtermRelationship
-from machado.loaders.ontology import OntologyLoader
-from django.test import TestCase
-from django.core.management import call_command
-import obonet
-import os
 
 
 class OntologyTest(TestCase):

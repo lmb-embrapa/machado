@@ -6,13 +6,14 @@
 
 """Remove ontology."""
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
+
 from machado.models import Cv, Cvterm
 from machado.models import CvtermDbxref, Cvtermprop
 from machado.models import Cvtermsynonym, CvtermRelationship
 from machado.models import Dbxref
-from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
 
 
 class Command(BaseCommand):

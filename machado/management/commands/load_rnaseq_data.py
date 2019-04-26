@@ -6,15 +6,17 @@
 
 """Load RNA-seq expression data from LSTrAP output file exp_matrix.tpm.txt."""
 
-from machado.loaders.common import FileValidator, FieldsValidator
-from machado.loaders.analysis import AnalysisLoader
-from machado.loaders.exceptions import ImportingError
-from django.db.utils import IntegrityError
-from django.core.management.base import BaseCommand, CommandError
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
-import re
 import os
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
+from tqdm import tqdm
+
+from machado.loaders.analysis import AnalysisLoader
+from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.exceptions import ImportingError
 
 
 class Command(BaseCommand):

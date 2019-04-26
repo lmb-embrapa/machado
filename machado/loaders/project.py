@@ -6,9 +6,10 @@
 
 """Project."""
 
+from django.db.utils import IntegrityError
+
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cvterm, Project, Projectprop
-from django.db.utils import IntegrityError
 
 
 class ProjectLoader(object):

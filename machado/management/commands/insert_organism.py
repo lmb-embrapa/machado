@@ -7,6 +7,7 @@
 """Insert organism."""
 
 from django.core.management.base import BaseCommand, CommandError
+
 from machado.loaders.common import insert_organism
 from machado.loaders.exceptions import ImportingError
 

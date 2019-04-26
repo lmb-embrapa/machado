@@ -6,10 +6,11 @@
 
 """Treatment."""
 
+from django.db.utils import IntegrityError
+
 from machado.loaders.exceptions import ImportingError
 from machado.models import Biomaterial, Db, Dbxref
 from machado.models import Cv, Cvterm, Treatment
-from django.db.utils import IntegrityError
 
 
 class TreatmentLoader(object):

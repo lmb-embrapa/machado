@@ -6,15 +6,17 @@
 
 """Tests analysis data loader."""
 
-from machado.models import Analysis, Analysisfeature, Analysisprop
-from machado.models import Acquisition, Quantification
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism
-from machado.models import Feature
+from datetime import datetime
+
+from django.core.management import call_command
+from django.test import TestCase
+
 from machado.loaders.analysis import AnalysisLoader
 from machado.loaders.assay import AssayLoader
-from datetime import datetime
-from django.test import TestCase
-from django.core.management import call_command
+from machado.models import Acquisition, Quantification
+from machado.models import Analysis, Analysisfeature, Analysisprop
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism
+from machado.models import Feature
 
 
 class AnalysisTest(TestCase):

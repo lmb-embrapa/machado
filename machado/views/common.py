@@ -6,10 +6,11 @@
 
 """common views."""
 
-from django.shortcuts import render
 from django.db.models import Count
+from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
+
 from machado.models import Cv, Organism, Feature, Pub
 
 

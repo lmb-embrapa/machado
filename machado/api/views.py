@@ -6,17 +6,18 @@
 
 """Views."""
 
-from machado.loaders.common import retrieve_organism
-from machado.models import Feature, Featureloc
-from machado.api.serializers import JBrowseFeatureSerializer
-from machado.api.serializers import JBrowseNamesSerializer
-from machado.api.serializers import JBrowseGlobalSerializer
-from machado.api.serializers import JBrowseRefseqSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, mixins
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
+
+from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseGlobalSerializer
+from machado.api.serializers import JBrowseNamesSerializer
+from machado.api.serializers import JBrowseRefseqSerializer
+from machado.loaders.common import retrieve_organism
+from machado.models import Feature, Featureloc
 
 
 class StandardResultSetPagination(PageNumberPagination):

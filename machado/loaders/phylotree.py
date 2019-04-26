@@ -6,12 +6,14 @@
 
 """Phylotree."""
 
+from typing import Dict, Optional, Tuple
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
+
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Phylotree, Phylonode, PhylonodeOrganism
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
-from typing import Dict, Optional, Tuple
 
 
 class PhylotreeLoader(object):

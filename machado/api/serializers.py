@@ -6,9 +6,10 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import serializers
+
 from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship
-from rest_framework import serializers
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):

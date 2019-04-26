@@ -6,13 +6,14 @@
 
 """Tests Assay loader."""
 
+from django.core.management import call_command
+from django.test import TestCase
+
+from machado.loaders.assay import AssayLoader
+from machado.loaders.biomaterial import BiomaterialLoader
 from machado.models import Assay, AssayBiomaterial, AssayProject, Assayprop
 from machado.models import Db, Dbxref, Organism, Cv, Cvterm
 from machado.models import Project
-from machado.loaders.assay import AssayLoader
-from machado.loaders.biomaterial import BiomaterialLoader
-from django.test import TestCase
-from django.core.management import call_command
 
 
 class AssayTest(TestCase):

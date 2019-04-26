@@ -6,14 +6,16 @@
 
 """Load similarity file."""
 
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from Bio import SearchIO
+from django.core.management.base import BaseCommand, CommandError
+from tqdm import tqdm
+
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.similarity import SimilarityLoader
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.core.management.base import BaseCommand, CommandError
-from tqdm import tqdm
-import os
-from Bio import SearchIO
 
 VALID_FORMAT = ["blast-xml", "interproscan-xml"]
 

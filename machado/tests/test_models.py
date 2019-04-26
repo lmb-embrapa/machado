@@ -7,6 +7,7 @@
 """Tests Models."""
 
 from django.test import TestCase
+
 from machado.models import Db, Dbxref, Cvterm, Cv, Pub, PubDbxref
 
 
