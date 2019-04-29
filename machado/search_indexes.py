@@ -37,6 +37,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     ).exists():
         coexpression = indexes.BooleanField(faceted=True)
         coexpression_group = indexes.CharField(faceted=True)
+    biomaterial = indexes.MultiValueField(faceted=True)
+    treatment = indexes.MultiValueField(faceted=True)
 
     def get_model(self):
         """Get model."""
@@ -111,6 +113,15 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             if feature_relationship.subject.name is not None:
                 keywords.append(feature_relationship.subject.name)
 
+        # Expression samples
+        for sample in obj.get_expression_samples():
+            keywords.append(sample.get('assay_name'))
+            keywords.append(sample.get('biomaterial_name'))
+            for i in sample.get('biomaterial_description').split(' '):
+                keywords.append(i)
+            for i in sample.get('treatment_name').split(' '):
+                keywords.append(i)
+
         self.temp = " ".join(keywords)
         return " ".join(keywords)
 
@@ -151,6 +162,22 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             ).value
         except ObjectDoesNotExist:
             return None
+
+    def prepare_biomaterial(self, obj):
+        """Prepare biomaterial."""
+        result = list()
+        for sample in obj.get_expression_samples():
+            if sample.get('biomaterial_description') not in result:
+                result.append(sample.get('biomaterial_description'))
+        return result
+
+    def prepare_treatment(self, obj):
+        """Prepare biomaterial."""
+        result = list()
+        for sample in obj.get_expression_samples():
+            if sample.get('treatment_name') not in result:
+                result.append(sample.get('treatment_name'))
+        return result
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""

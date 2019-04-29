@@ -10,7 +10,7 @@ from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 
-FACET_FIELDS = ["organism", "so_term", "orthology", "coexpression", "analyses"]
+FACET_FIELDS = ["organism", "so_term", "orthology", "coexpression", "analyses", "biomaterial", "treatment"]
 
 
 class FeatureSearchView(FacetedSearchView):
