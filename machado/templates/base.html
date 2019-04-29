@@ -18,7 +18,7 @@
 
   <title>machado</title>
 
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/materia/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="{% static 'machado.css' %}">
 </head>
@@ -31,7 +31,7 @@
 
 
   <header class="bg-light">
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 
       <a class="navbar-brand" href="{% url 'home' %}"><h3>machado</h3></a>
 
@@ -51,8 +51,6 @@
       </div>
     </nav>
   </header>
-
-  <br />
 
   <div class="container-fluid" name="content">
     {% block content %}
