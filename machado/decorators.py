@@ -109,6 +109,9 @@ def get_feature_expression_samples(self):
                 "biomaterial_description",
                 "treatment_name",
             )
+            .exclude(
+                assay_name__isnull=True
+            )
         )
     except ObjectDoesNotExist:
         return None
