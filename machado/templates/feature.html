@@ -199,6 +199,42 @@
   </div>
   {% endif %}
 
+  {% if feature.get_expression_samples %}
+  <div class="card m-1">
+    <div class="card-header">
+      <h3 class="card-title">Expression data</h3>
+    </div>
+    <div class="card-body">
+      <div class="card-text">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Assay Source</th>
+              <th scope="col">Score normalized (TPM)</th>
+              <th scope="col">Assay name</th>
+              <th scope="col">Biomaterial name</th>
+              <th scope="col">Biomaterial description</th>
+              <th scope="col">Treatment</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for value in feature.get_expression_samples %}
+            <tr>
+              <td>{{ value.analysis__sourcename|safe }} </td>
+              <td>{{ value.normscore|safe }} </td>
+              <td>{{ value.assay_name|safe }}</td>
+              <td>{{ value.biomaterial_name|safe }}</td>
+              <td>{{ value.biomaterial_description|safe }}</td>
+              <td>{{ value.treatment_name|safe }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if data.pubs %}
   <div class="card m-1">
     <div class="card-header">
