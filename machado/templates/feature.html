@@ -186,19 +186,6 @@
   </div>
   {% endif %}
 
-  {% if feature.residues %}
-  <div class="card m-1">
-    <div class="card-header">
-        <h3 class="card-title">Sequence</h3>
-    </div>
-    <div class="card-body">
-      <div class="card-text text-monospace">
-          <small>{{ feature.residues}}</small>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
   {% if feature.get_expression_samples %}
   <div class="card m-1">
     <div class="card-header">
@@ -230,6 +217,19 @@
           {% endfor %}
         </tbody>
       </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  {% if feature.residues %}
+  <div class="card m-1">
+    <div class="card-header">
+        <h3 class="card-title">Sequence</h3>
+    </div>
+    <div class="card-body">
+      <div class="card-text text-monospace">
+          <small>{{ feature.residues}}</small>
       </div>
     </div>
   </div>
