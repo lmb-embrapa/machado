@@ -27,7 +27,7 @@ class FeatureSearchView(FacetedSearchView):
         qs = super(FeatureSearchView, self).get_queryset(*args, **kwargs)
 
         for field in self.facet_fields:
-            qs = qs.facet(field, min_doc_count=0)
+            qs = qs.facet(field, min_doc_count=0, size=100)
         return qs
 
     def get_context_data(self, *args, **kwargs):
