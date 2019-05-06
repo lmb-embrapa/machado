@@ -58,7 +58,7 @@ class Command(BaseCommand):
         # retrieve only the file name
         filename = os.path.basename(file)
         try:
-            sequence_file = SequenceLoader(filename=filename, soterm=soterm)
+            sequence_file = SequenceLoader(filename=filename)
         except ImportingError as e:
             raise CommandError(e)
 

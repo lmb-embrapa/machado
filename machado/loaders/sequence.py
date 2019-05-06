@@ -12,7 +12,6 @@ from typing import Optional
 
 from Bio.SeqRecord import SeqRecord
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django.db.utils import IntegrityError
 
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
@@ -129,21 +128,12 @@ class SequenceLoader(object):
         self, seq_obj: SeqRecord, soterm: str, organism: str
     ) -> None:
         """Store Biopython SeqRecord."""
-        soterm_obj = Cvterm.objects.get(name=soterm, cv__name="sequence")
-        organism_obj = retrieve_organism(organism)
         try:
-            description_id = self.retrieve_id_from_description(
-                description=seq_obj.description
-            )
-            feature_obj = Feature.objects.get(
-                Q(dbxref__accession=seq_obj.id) | Q(dbxref__accession=description_id),
-                organism=organism_obj,
-                type=soterm_obj,
-                dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
-            )
+            feature_id = retrieve_feature_id(accession=seq_obj.id, soterm=soterm)
         except ObjectDoesNotExist:
             raise ImportingError("The feature {} does NOT exist.".format(seq_obj.id))
 
+        feature_obj = Feature.objects.get(feature_id=feature_id)
         feature_obj.md5 = md5(str(seq_obj.seq).encode()).hexdigest()
         feature_obj.residues = seq_obj.seq
         feature_obj.save()
