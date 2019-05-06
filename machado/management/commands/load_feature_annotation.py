@@ -32,12 +32,6 @@ class Command(BaseCommand):
             type=str,
         )
         parser.add_argument(
-            "--organism",
-            help="Species name (eg. Homo " "sapiens, Mus musculus)",
-            required=True,
-            type=str,
-        )
-        parser.add_argument(
             "--soterm",
             help="SO Sequence Ontology Term " "(eg. mRNA, polypeptide)",
             required=True,
@@ -57,7 +51,6 @@ class Command(BaseCommand):
         self,
         file: str,
         cvterm: str,
-        organism: str,
         soterm: str,
         verbosity: int = 1,
         cpu: int = 1,
