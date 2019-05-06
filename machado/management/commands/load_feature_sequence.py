@@ -32,19 +32,12 @@ class Command(BaseCommand):
             required=True,
             type=str,
         )
-        parser.add_argument(
-            "--organism",
-            help="Species name (eg. Homo " "sapiens, Mus musculus)",
-            required=True,
-            type=str,
-        )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
         self,
         file: str,
         soterm: str,
-        organism: str,
         verbosity: int = 1,
         cpu: int = 1,
         **options
@@ -71,7 +64,7 @@ class Command(BaseCommand):
         for fasta in fasta_sequences:
             tasks.append(
                 pool.submit(
-                    sequence_file.add_sequence_to_feature, fasta, soterm, organism
+                    sequence_file.add_sequence_to_feature, fasta, soterm
                 )
             )
         if verbosity > 0:

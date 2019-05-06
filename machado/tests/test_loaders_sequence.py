@@ -185,6 +185,6 @@ class SequenceTest(TestCase):
         test_seq_obj = SeqRecord(
             Seq("aaaaaaaaaaaaaaaaaaaa"), id="chr1", description="chromosome 1"
         )
-        test_seq_file.add_sequence_to_feature(test_seq_obj, "assembly", "Mus musculus")
+        test_seq_file.add_sequence_to_feature(test_seq_obj, "assembly")
         test_feature_seq = Feature.objects.get(uniquename="chr1")
         self.assertEqual("aaaaaaaaaaaaaaaaaaaa", test_feature_seq.residues)
