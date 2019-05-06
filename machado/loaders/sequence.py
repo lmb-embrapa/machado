@@ -125,7 +125,7 @@ class SequenceLoader(object):
         return None
 
     def add_sequence_to_feature(
-        self, seq_obj: SeqRecord, soterm: str, organism: str
+        self, seq_obj: SeqRecord, soterm: str
     ) -> None:
         """Store Biopython SeqRecord."""
         try:
