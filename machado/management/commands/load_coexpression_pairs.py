@@ -43,6 +43,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
             "--soterm",
             help="sequence ontology term 'e.g. mRNA'",
             required=False,
+            default='mRNA',
             type=str,
         )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
