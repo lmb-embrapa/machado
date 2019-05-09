@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -171,15 +169,15 @@
   <div class="section" id="loading-taxonomy">
 <h1>2.2. Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this headline">¶</a></h1>
 <p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
-These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.
-This step is optional.
+These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.</p>
+<p><strong>This step is optional.</strong>
 If you decide to skip this step, you should insert the organisms individually using the command <em>insert_organism</em>.</p>
 <div class="section" id="ncbi-taxonomy">
 <h2>2.2.1. NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this headline">¶</a></h2>
 <p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
 <ul class="simple">
-<li><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></li>
-<li><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></li>
+<li><p><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></p></li>
+<li><p><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></p></li>
 </ul>
 <p>After unpacking the file you’ll have the required files.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_organism --file names.dmp --name DB:NCBI_taxonomy
@@ -187,8 +185,8 @@ python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NC
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading these files can be faster if you increase the number of threads (–cpu).</li>
-<li>It will take a long time anyway (hours).</li>
+<li><p>Loading these files can be faster if you increase the number of threads (–cpu).</p></li>
+<li><p>It will take a long time anyway (hours).</p></li>
 </ul>
 </div>
 <div class="section" id="remove-taxonomy">
@@ -199,7 +197,7 @@ python manage.py remove_organisms --help
 </pre></div>
 </div>
 <ul class="simple">
-<li>These commands require the names of the databases (Db.name)</li>
+<li><p>These commands require the names of the databases (Db.name)</p></li>
 </ul>
 </div>
 </div>

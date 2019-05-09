@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -170,46 +168,50 @@
             
   <div class="section" id="loading-fasta-files">
 <h1>2.5. Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this headline">¶</a></h1>
+<p>This command is mostly used to load the reference genome.
+The reference sequences are exclusively used to feed JBrowse.</p>
+<p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks.
+To avoid that, it’s possible to use the parameter (–nosequence) and configure JBrowse to get the reference data from a FASTA file.</p>
 <div class="section" id="load-fasta">
 <h2>2.5.1. Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="13%" />
-<col width="87%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>FASTA File *</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>FASTA File *</p></td>
 </tr>
-<tr class="row-even"><td>–organism</td>
-<td>Species name (eg. Homo sapiens, Mus musculus) *</td>
+<tr class="row-even"><td><p>–organism</p></td>
+<td><p>Species name (eg. Homo sapiens, Mus musculus) *</p></td>
 </tr>
-<tr class="row-odd"><td>–soterm</td>
-<td>SO Sequence Ontology Term (eg. chromosome, assembly) *</td>
+<tr class="row-odd"><td><p>–soterm</p></td>
+<td><p>SO Sequence Ontology Term (eg. chromosome, assembly) *</p></td>
 </tr>
-<tr class="row-even"><td>–description</td>
-<td>Description</td>
+<tr class="row-even"><td><p>–description</p></td>
+<td><p>Description</p></td>
 </tr>
-<tr class="row-odd"><td>–url</td>
-<td>URL</td>
+<tr class="row-odd"><td><p>–url</p></td>
+<td><p>URL</p></td>
 </tr>
-<tr class="row-even"><td>–doi</td>
-<td>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</td>
+<tr class="row-even"><td><p>–doi</p></td>
+<td><p>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</p></td>
 </tr>
-<tr class="row-odd"><td>–nosequence</td>
-<td>Don’t load the sequences</td>
+<tr class="row-odd"><td><p>–nosequence</p></td>
+<td><p>Don’t load the sequences</p></td>
 </tr>
-<tr class="row-even"><td>–cpu</td>
-<td>Number of threads</td>
+<tr class="row-even"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
@@ -222,7 +224,7 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li>This command requires the file name (Dbxrefprop.value)</li>
+<li><p>This command requires the file name (Dbxrefprop.value)</p></li>
 </ul>
 </div>
 </div>
