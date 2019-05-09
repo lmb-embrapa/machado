@@ -27,11 +27,11 @@ class Command(BaseCommand):
     help = """Load RNA-seq .csv information file. The input file should be
     headless and have the following columns:
 
-    Organism,ProjectAcc,BiomaterialAcc,AssayAcc,Condition,Tissue,Date
+    Organism,ProjectAcc,BiomaterialAcc,AssayAcc,AssayDescription,Treatment,Tissue,Date
 
     Example of a line sampled from such a file:
 
-    Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+    Orysa sativa,GSE85653,GSM2280286,SRR4033018,Heat leaf,Heat stress,Leaf,May-30-2018
 
     The information about the database related to the project (e.g.: "GEO"),
     biomaterial (e.g.: "GEO") and assay accessions (e.g: "SRA") need to be
@@ -70,7 +70,7 @@ class Command(BaseCommand):
     ):
         """Execute the main function."""
         filename = os.path.basename(file)
-        nfields = 7
+        nfields = 8
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
         # instantiate project, biomaterial and assay
@@ -93,7 +93,7 @@ class Command(BaseCommand):
             raise CommandError(e)
         # each line is an RNA-seq experiment
         # e.g:
-        # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat,leaf,Jul-20-2018
+        # Oryza sativa,GSE112368,GSM3068810,SRR6902930,heat leaf,Heat stress,Leaf,Jul-20-2018
         for line in rnaseq_data:
             fields = re.split(",", line.strip())
             organism_name = fields[0]
@@ -124,7 +124,7 @@ class Command(BaseCommand):
                     organism=organism,
                     name=fields[2],
                     filename=filename,
-                    description=fields[5],
+                    description=fields[6],
                 )
             except ImportingError as e:
                 raise CommandError(e)
@@ -132,7 +132,7 @@ class Command(BaseCommand):
             try:
                 # e.g. "Heat"
                 treatment_model = treatment_file.store_treatment(
-                    name=fields[4], biomaterial=biomaterial_model
+                    name=fields[5], biomaterial=biomaterial_model
                 )
             except ImportingError as e:
                 raise CommandError(e)
@@ -149,10 +149,10 @@ class Command(BaseCommand):
                 assay_model = assay_file.store_assay(
                     db=assaydb,
                     acc=fields[3],
-                    assaydate=fields[6],
+                    assaydate=fields[7],
                     name=fields[3],
                     filename=filename,
-                    description=fields[3],
+                    description=fields[4],
                 )
                 assay_file.store_assay_project(assay=assay_model, project=project_model)
                 assay_file.store_assay_biomaterial(

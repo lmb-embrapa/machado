@@ -182,11 +182,11 @@ raw data one can be interested to analyse.</p>
 that will be input.</p>
 <p>This file must have the following fields in each line:</p>
 <p>“Organism specific name (e.g.: ‘Oryza sativa’)”, “GEO series identifier (e.g: GSE85653)”,
-“GEO sample identifier (e.g: GSM2280286)”, “SRA identifier (e.g: SRR4033018)”,
-“Experiment description (e.g: ‘Heat’)”, “Sample description (e.g.: ‘leaf’)”,
+“GEO sample identifier (e.g: GSM2280286)”, “SRA identifier (e.g: SRR4033018)”, “Assay description (e.g. Heat stress leaves rep1)”,
+“Treatment description (e.g: ‘Heat stress’)”, “Biomaterial description (e.g.: ‘Leaf’)”,
 “Date (in format ‘%b-%d-%Y’: e.g.: Oct-16-2016)”.</p>
 <p>A sample line for such a file can be seen below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat leaf rep1,Heat stress,Leaf,May-30-2018
 </pre></div>
 </div>
 <p>To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:</p>
@@ -194,28 +194,28 @@ that will be input.</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_info --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 85%" />
+<col width="15%" />
+<col width="85%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>.csv file *</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>.csv file *</td>
 </tr>
-<tr class="row-even"><td><p>–biomaterialdb</p></td>
-<td><p>Biomaterial database info (e.g.: ‘GEO’)</p></td>
+<tr class="row-even"><td>–biomaterialdb</td>
+<td>Biomaterial database info (e.g.: ‘GEO’)</td>
 </tr>
-<tr class="row-odd"><td><p>–assaydb</p></td>
-<td><p>Assay database info (e.g.: ‘SRA’)</p></td>
+<tr class="row-odd"><td>–assaydb</td>
+<td>Assay database info (e.g.: ‘SRA’)</td>
 </tr>
-<tr class="row-even"><td><p>–cpu</p></td>
-<td><p>Number of threads</p></td>
+<tr class="row-even"><td>–cpu</td>
+<td>Number of threads</td>
 </tr>
 </tbody>
 </table>
@@ -228,7 +228,7 @@ that will be input.</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>This command requires the file name ‘file.csv.txt’ used before as input to load RNA-seq information.</p></li>
+<li>This command requires the file name ‘file.csv.txt’ used before as input to load RNA-seq information.</li>
 </ul>
 </div>
 <div class="section" id="load-rna-seq-data">
@@ -252,54 +252,54 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>As default the program name is ‘LSTrAP’ but can be changed with –program</p></li>
-<li><p>The data is by default taken as normalized (TPM, FPKM, etc.) but can be changed with –norm</p></li>
-<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+<li>As default the program name is ‘LSTrAP’ but can be changed with –program</li>
+<li>The data is by default taken as normalized (TPM, FPKM, etc.) but can be changed with –norm</li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_rnaseq_data --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 17%" />
-<col style="width: 83%" />
+<col width="17%" />
+<col width="83%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>tabular text file with gene counts per line.</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>tabular text file with gene counts per line.</td>
 </tr>
-<tr class="row-even"><td><p>–organism</p></td>
-<td><p>Scientific name (e.g.: ‘Oryza sativa’)</p></td>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Oryza sativa’)</td>
 </tr>
-<tr class="row-odd"><td><p>–programversion</p></td>
-<td><p>Version of the software (e.g.: ‘1.3’) (string)</p></td>
+<tr class="row-odd"><td>–programversion</td>
+<td>Version of the software (e.g.: ‘1.3’) (string)</td>
 </tr>
-<tr class="row-even"><td><p>–name</p></td>
-<td><p>Optional name (string)</p></td>
+<tr class="row-even"><td>–name</td>
+<td>Optional name (string)</td>
 </tr>
-<tr class="row-odd"><td><p>–description</p></td>
-<td><p>Optional description (string)</p></td>
+<tr class="row-odd"><td>–description</td>
+<td>Optional description (string)</td>
 </tr>
-<tr class="row-even"><td><p>–algorithm</p></td>
-<td><p>Optional algorithm description (string)</p></td>
+<tr class="row-even"><td>–algorithm</td>
+<td>Optional algorithm description (string)</td>
 </tr>
-<tr class="row-odd"><td><p>–assaydb</p></td>
-<td><p>Optional assay database info (e.g.: ‘SRA’) (string)</p></td>
+<tr class="row-odd"><td>–assaydb</td>
+<td>Optional assay database info (e.g.: ‘SRA’) (string)</td>
 </tr>
-<tr class="row-even"><td><p>–timeexecuted</p></td>
-<td><dl class="simple">
-<dt>Optional Date software was run. Mandatory format: e.g.:</dt><dd><p>‘Oct-16-2016’ (string)</p>
-</dd>
+<tr class="row-even"><td>–timeexecuted</td>
+<td><dl class="first last docutils">
+<dt>Optional Date software was run. Mandatory format: e.g.:</dt>
+<dd>‘Oct-16-2016’ (string)</dd>
 </dl>
 </td>
 </tr>
-<tr class="row-odd"><td><p>–program</p></td>
-<td><p>Optional Name of the software (default: ‘LSTrAP’) (string)</p></td>
+<tr class="row-odd"><td>–program</td>
+<td>Optional Name of the software (default: ‘LSTrAP’) (string)</td>
 </tr>
-<tr class="row-even"><td><p>–norm</p></td>
-<td><dl class="simple">
-<dt>Optional Normalized data: 1-yes (tpm, fpkm, etc.); 0-no (raw</dt><dd><p>counts); default is 1) (integer)</p>
-</dd>
+<tr class="row-even"><td>–norm</td>
+<td><dl class="first last docutils">
+<dt>Optional Normalized data: 1-yes (tpm, fpkm, etc.); 0-no (raw</dt>
+<dd>counts); default is 1) (integer)</dd>
 </dl>
 </td>
 </tr>
@@ -313,7 +313,7 @@ from several RNA-seq experiments, or assays, per column. This file should have t
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>This command requires the file name ‘file.tab’ used before as input to load RNA-seq information.</p></li>
+<li>This command requires the file name ‘file.tab’ used before as input to load RNA-seq information.</li>
 </ul>
 </div>
 </div>

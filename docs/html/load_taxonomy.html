@@ -176,8 +176,8 @@ If you decide to skip this step, you should insert the organisms individually us
 <h2>2.2.1. NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this headline">¶</a></h2>
 <p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
 <ul class="simple">
-<li><p><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></p></li>
-<li><p><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></p></li>
+<li><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></li>
+<li><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></li>
 </ul>
 <p>After unpacking the file you’ll have the required files.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_organism --file names.dmp --name DB:NCBI_taxonomy
@@ -185,8 +185,8 @@ python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NC
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Loading these files can be faster if you increase the number of threads (–cpu).</p></li>
-<li><p>It will take a long time anyway (hours).</p></li>
+<li>Loading these files can be faster if you increase the number of threads (–cpu).</li>
+<li>It will take a long time anyway (hours).</li>
 </ul>
 </div>
 <div class="section" id="remove-taxonomy">
@@ -197,7 +197,7 @@ python manage.py remove_organisms --help
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>These commands require the names of the databases (Db.name)</p></li>
+<li>These commands require the names of the databases (Db.name)</li>
 </ul>
 </div>
 </div>
