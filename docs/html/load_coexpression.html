@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2.14. Loading Coexpression analyzes &mdash; machado 0.1.0 documentation</title>
+  <title>2.12. Loading Coexpression analyzes &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3. Visualization" href="visualization.html" />
-    <link rel="prev" title="2.13. Loading RNA-seq data" href="load_rnaseq.html" /> 
+    <link rel="prev" title="2.11. Loading RNA-seq data" href="load_rnaseq.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -149,7 +147,7 @@
         
           <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>2.14. Loading Coexpression analyzes</li>
+      <li>2.12. Loading Coexpression analyzes</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,9 +167,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-coexpression-analyzes">
-<h1>2.14. Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this headline">¶</a></h1>
+<h1>2.12. Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="load-coexpression-correlated-pairs-of-features">
-<h2>2.14.1. Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this headline">¶</a></h2>
+<h2>2.12.1. Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this headline">¶</a></h2>
 <p>Coexpression analyzes usually generate correlation statistics regarding gene sets in a pairwise manner.
 For example, LSTrAP can generate a table with the Pearson correlation coefficient for every pair of genes in
 a RNA-seq experiment.</p>
@@ -190,53 +188,53 @@ AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>‘pcc.mcl.txt’ File *</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>‘pcc.mcl.txt’ File *</p></td>
 </tr>
-<tr class="row-even"><td>–soterm</td>
-<td>‘mRNA’ sequence ontology term <em>default</em></td>
+<tr class="row-even"><td><p>–soterm</p></td>
+<td><p>‘mRNA’ sequence ontology term <em>default</em></p></td>
 </tr>
-<tr class="row-odd"><td>–cpu</td>
-<td>Number of threads</td>
+<tr class="row-odd"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
 </div>
 <div class="section" id="remove-coexpression-pairs">
-<h2>2.14.2. Remove coexpression pairs<a class="headerlink" href="#remove-coexpression-pairs" title="Permalink to this headline">¶</a></h2>
+<h2>2.12.2. Remove coexpression pairs<a class="headerlink" href="#remove-coexpression-pairs" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove coexpression pair analyzes, all you need to do is pass
 the filename used to load the analyzes to the remove_relationships command: remove_relationship –file &lt;coexpression_file&gt;’
 <strong>Every coexpression relations from coexpression_file (e.g. ‘pcc.mcl.txt’ from LSTrAP) will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>‘mcl.clusters.txt’ file *</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>‘mcl.clusters.txt’ file *</p></td>
 </tr>
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
 </div>
 <div class="section" id="load-coexpression-clusters">
-<h2>2.14.3. Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+<h2>2.12.3. Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
 <p>Other type of coexpression analyzes involve clustering features using its correlation values.
 LSTrAP does that using the ‘mcl’ software. To load data from such analyzes, the input file must be
 headless and fields tab separated, with each line representing one cluster, and each column representing
@@ -256,35 +254,35 @@ ath_3:    AT5G24750.1.TAIR10
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>‘mcl.clusters.txt’ file *</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>‘mcl.clusters.txt’ file *</p></td>
 </tr>
-<tr class="row-even"><td>–organism</td>
-<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
+<tr class="row-even"><td><p>–organism</p></td>
+<td><p>Scientific name (e.g.: ‘Arabidopsis thaliana’)</p></td>
 </tr>
-<tr class="row-odd"><td>–soterm</td>
-<td>‘mRNA’ sequence ontology term <em>default</em></td>
+<tr class="row-odd"><td><p>–soterm</p></td>
+<td><p>‘mRNA’ sequence ontology term <em>default</em></p></td>
 </tr>
-<tr class="row-even"><td>–cpu</td>
-<td>Number of threads</td>
+<tr class="row-even"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
 </div>
 <div class="section" id="remove-coexpression-clusters">
-<h2>2.14.4. Remove coexpression clusters<a class="headerlink" href="#remove-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+<h2>2.12.4. Remove coexpression clusters<a class="headerlink" href="#remove-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove coexpression cluster analyzes, you need to pass
 the controlled vocabulary term ‘coexpression group’ and the organism scientific name to
 the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpression group’ –organism ‘Arabidopsis thaliana’</em> *</p>
@@ -292,17 +290,17 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="33%" />
-<col width="67%" />
+<col style="width: 33%" />
+<col style="width: 67%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–cvterm TERM</td>
-<td>mandatory: ‘coexpression group’</td>
+<tbody>
+<tr class="row-odd"><td><p>–cvterm TERM</p></td>
+<td><p>mandatory: ‘coexpression group’</p></td>
 </tr>
-<tr class="row-even"><td>–organism ORGANISM</td>
-<td>Scientific name (e.g.: ‘Oryza sativa’)</td>
+<tr class="row-even"><td><p>–organism ORGANISM</p></td>
+<td><p>Scientific name (e.g.: ‘Oryza sativa’)</p></td>
 </tr>
 </tbody>
 </table>
@@ -320,7 +318,7 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
         <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_rnaseq.html" class="btn btn-neutral float-left" title="2.13. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_rnaseq.html" class="btn btn-neutral float-left" title="2.11. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

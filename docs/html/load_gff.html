@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2.7. Loading Feature Annotation Files" href="load_feature_annotation.html" />
+    <link rel="next" title="2.7. Loading Feature Additional Info" href="load_feature_annotation.html" />
     <link rel="prev" title="2.5. Loading FASTA files" href="load_fasta.html" /> 
 </head>
 
@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -175,8 +173,8 @@ Usually, in order to load a GFF file, it’s required to have a reference FASTA 
 But some GFF files already have the reference features such as chromosome or scaffold.
 In this case, there are two options:</p>
 <ul class="simple">
-<li>Load the GFF directly, without a reference FASTA file</li>
-<li>Load the FASTA file and then load the GFF using the parameter ‘ignore’ to not load the reference features</li>
+<li><p>Load the GFF directly, without a reference FASTA file</p></li>
+<li><p>Load the FASTA file and then load the GFF using the parameter ‘ignore’ to not load the reference features</p></li>
 </ul>
 <p>The GFF file must be indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a>.</p>
 <div class="section" id="load-gff">
@@ -185,31 +183,31 @@ In this case, there are two options:</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>GFF3 genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>GFF3 genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</p></td>
 </tr>
-<tr class="row-even"><td>–organism</td>
-<td>Species name (eg. Homo sapiens, Mus musculus) *</td>
+<tr class="row-even"><td><p>–organism</p></td>
+<td><p>Species name (eg. Homo sapiens, Mus musculus) *</p></td>
 </tr>
-<tr class="row-odd"><td>–ignore</td>
-<td>List of feature types to ignore (eg. chromosome scaffold)</td>
+<tr class="row-odd"><td><p>–ignore</p></td>
+<td><p>List of feature types to ignore (eg. chromosome scaffold)</p></td>
 </tr>
-<tr class="row-even"><td>–doi</td>
-<td>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</td>
+<tr class="row-even"><td><p>–doi</p></td>
+<td><p>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</p></td>
 </tr>
-<tr class="row-odd"><td>–cpu</td>
-<td>Number of threads</td>
+<tr class="row-odd"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
@@ -222,7 +220,7 @@ In this case, there are two options:</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li>This command requires the file name (Dbxrefprop.value)</li>
+<li><p>This command requires the file name (Dbxrefprop.value)</p></li>
 </ul>
 </div>
 </div>
@@ -235,7 +233,7 @@ In this case, there are two options:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_feature_annotation.html" class="btn btn-neutral float-right" title="2.7. Loading Feature Annotation Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_feature_annotation.html" class="btn btn-neutral float-right" title="2.7. Loading Feature Additional Info" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="load_fasta.html" class="btn btn-neutral float-left" title="2.5. Loading FASTA files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

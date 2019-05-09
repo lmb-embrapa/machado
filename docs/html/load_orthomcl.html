@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2.12. Loading OrthoMCL results &mdash; machado 0.1.0 documentation</title>
+  <title>2.10. Loading OrthoMCL results &mdash; machado 0.1.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2.13. Loading RNA-seq data" href="load_rnaseq.html" />
-    <link rel="prev" title="2.11. Loading InterproScan results" href="load_interproscan.html" /> 
+    <link rel="next" title="2.11. Loading RNA-seq data" href="load_rnaseq.html" />
+    <link rel="prev" title="2.9. Loading InterproScan results" href="load_interproscan.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -149,7 +147,7 @@
         
           <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li>2.12. Loading OrthoMCL results</li>
+      <li>2.10. Loading OrthoMCL results</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,51 +167,51 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-orthomcl-results">
-<h1>2.12. Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
+<h1>2.10. Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="load-orthomcl">
-<h2>2.12.1. Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.1. Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --file groups.txt
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="14%" />
-<col width="86%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–file</td>
-<td>Output result from OrthoMCL software.*</td>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>Output result from OrthoMCL software.*</p></td>
 </tr>
-<tr class="row-even"><td>–cpu</td>
-<td>Number of threads</td>
+<tr class="row-even"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
 <p>* required fields.</p>
 </div>
 <div class="section" id="remove-orthology">
-<h2>2.12.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_feature_annotation</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
-<table border="1" class="docutils">
+<table class="docutils align-center">
 <colgroup>
-<col width="30%" />
-<col width="70%" />
+<col style="width: 30%" />
+<col style="width: 70%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>–cvterm TERM</td>
-<td>‘orthologous group’*</td>
+<tbody>
+<tr class="row-odd"><td><p>–cvterm TERM</p></td>
+<td><p>‘orthologous group’*</p></td>
 </tr>
-<tr class="row-even"><td>–organism ORGANISM</td>
-<td>Species name. (eg. Homo sapiens, Mus musculus)</td>
+<tr class="row-even"><td><p>–organism ORGANISM</p></td>
+<td><p>Species name. (eg. Homo sapiens, Mus musculus)</p></td>
 </tr>
 </tbody>
 </table>
@@ -229,10 +227,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="load_rnaseq.html" class="btn btn-neutral float-right" title="2.13. Loading RNA-seq data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="load_rnaseq.html" class="btn btn-neutral float-right" title="2.11. Loading RNA-seq data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="load_interproscan.html" class="btn btn-neutral float-left" title="2.11. Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="load_interproscan.html" class="btn btn-neutral float-left" title="2.9. Loading InterproScan results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

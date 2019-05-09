@@ -8,7 +8,6 @@
 
 from datetime import datetime, timezone
 from hashlib import md5
-from typing import Optional
 
 from Bio.SeqRecord import SeqRecord
 from django.core.exceptions import ObjectDoesNotExist
@@ -112,17 +111,6 @@ class SequenceLoader(object):
                     )
                 except IntegrityError as e:
                     raise ImportingError(e)
-
-    def retrieve_id_from_description(self, description: str) -> Optional[str]:
-        """Retrieve ID from description."""
-        for item in description.split(" "):
-            try:
-                key, value = item.split("=")
-                if key.lower() == "id":
-                    return value
-            except ValueError:
-                pass
-        return None
 
     def add_sequence_to_feature(
         self, seq_obj: SeqRecord, soterm: str

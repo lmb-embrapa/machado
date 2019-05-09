@@ -89,14 +89,12 @@
 <li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature annotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_sequence.html">2.8. Feature sequence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_feature_publication.html">2.9. Feature publication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.10. Blast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.11. InterproScan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.12. OrthoMCL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.13. RNA-seq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.14. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -175,8 +173,8 @@
 <h2>2.1.1. Relations ontology<a class="headerlink" href="#relations-ontology" title="Permalink to this headline">¶</a></h2>
 <p>RO is an ontology of relations for use with biological ontologies.</p>
 <ul class="simple">
-<li><strong>URL</strong>: <a class="reference external" href="https://github.com/oborel/obo-relations">https://github.com/oborel/obo-relations</a></li>
-<li><strong>File</strong>: ro.obo</li>
+<li><p><strong>URL</strong>: <a class="reference external" href="https://github.com/oborel/obo-relations">https://github.com/oborel/obo-relations</a></p></li>
+<li><p><strong>File</strong>: ro.obo</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_relations_ontology --file ro.obo
 </pre></div>
@@ -186,8 +184,8 @@
 <h2>2.1.2. Sequence ontology<a class="headerlink" href="#sequence-ontology" title="Permalink to this headline">¶</a></h2>
 <p>Collect of SO Ontologies.</p>
 <ul class="simple">
-<li><strong>URL</strong>: <a class="reference external" href="https://github.com/The-Sequence-Ontology/SO-Ontologies">https://github.com/The-Sequence-Ontology/SO-Ontologies</a></li>
-<li><strong>File</strong>: so.obo</li>
+<li><p><strong>URL</strong>: <a class="reference external" href="https://github.com/The-Sequence-Ontology/SO-Ontologies">https://github.com/The-Sequence-Ontology/SO-Ontologies</a></p></li>
+<li><p><strong>File</strong>: so.obo</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_sequence_ontology --file so.obo
 </pre></div>
@@ -197,15 +195,15 @@
 <h2>2.1.3. Gene ontology<a class="headerlink" href="#gene-ontology" title="Permalink to this headline">¶</a></h2>
 <p>Source ontology files for the Gene Ontology.</p>
 <ul class="simple">
-<li><strong>URL</strong>: <a class="reference external" href="http://current.geneontology.org/ontology/">http://current.geneontology.org/ontology/</a></li>
-<li><strong>File</strong>: go.obo</li>
+<li><p><strong>URL</strong>: <a class="reference external" href="http://current.geneontology.org/ontology/">http://current.geneontology.org/ontology/</a></p></li>
+<li><p><strong>File</strong>: go.obo</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gene_ontology --file go.obo
 </pre></div>
 </div>
 <ul class="simple">
-<li>Loading the gene ontology can be faster if you increase the number of threads (–cpu).</li>
-<li>After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.</li>
+<li><p>Loading the gene ontology can be faster if you increase the number of threads (–cpu).</p></li>
+<li><p>After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.</p></li>
 </ul>
 </div>
 <div class="section" id="remove-ontology">
@@ -215,8 +213,8 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li>This command requires the name of the ontology (Cv.name)</li>
-<li>There are dependencies between the Gene ontology records, therefore you need to delete the entry <em>external</em> first.</li>
+<li><p>This command requires the name of the ontology (Cv.name)</p></li>
+<li><p>There are dependencies between the Gene ontology records, therefore you need to delete the entry <em>external</em> first.</p></li>
 </ul>
 </div>
 </div>
