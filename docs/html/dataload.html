@@ -166,7 +166,10 @@
             
   <div class="section" id="data-loading">
 <h1>2. Data loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h1>
-<p>The data files must be loaded in a particular order, taking into account their <a class="reference external" href="http://gmod.org/wiki/Chado_Manual#Module_Dependencies">inter dependencies</a>.</p>
+<p>The Chado schema heavily relies on <strong>Ontologies</strong> to integrate different datasets.
+Therefore it must be the first to load.</p>
+<p>Inside the extras directory, there’s a file named sample.tar.gz that might be helpful.
+It contains a few small FASTA and GFF files, together with a README file with examples of command lines.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>

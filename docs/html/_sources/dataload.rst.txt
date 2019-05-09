@@ -1,7 +1,11 @@
 Data loading
 ============
 
-The data files must be loaded in a particular order, taking into account their `inter dependencies <http://gmod.org/wiki/Chado_Manual#Module_Dependencies>`_.
+The Chado schema heavily relies on **Ontologies** to integrate different datasets.
+Therefore it must be the first to load.
+
+Inside the extras directory, there's a file named sample.tar.gz that might be helpful.
+It contains a few small FASTA and GFF files, together with a README file with examples of command lines.
 
 
 .. toctree::
