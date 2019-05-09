@@ -18,15 +18,15 @@ that will be input.
 This file must have the following fields in each line:
 
 "Organism specific name (e.g.: 'Oryza sativa')", "GEO series identifier (e.g: GSE85653)",
-"GEO sample identifier (e.g: GSM2280286)", "SRA identifier (e.g: SRR4033018)",
-"Experiment description (e.g: 'Heat')", "Sample description (e.g.: 'leaf')",
+"GEO sample identifier (e.g: GSM2280286)", "SRA identifier (e.g: SRR4033018)", "Assay description (e.g. Heat stress leaves rep1)",
+"Treatment description (e.g: 'Heat stress')", "Biomaterial description (e.g.: 'Leaf')",
 "Date (in format '%b-%d-%Y': e.g.: Oct-16-2016)".
 
 A sample line for such a file can be seen below:
 
 .. code-block:: bash
 
-    Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat,leaf,May-30-2018
+    Oryza sativa,GSE85653,GSM2280286,SRR4033018,Heat leaf rep1,Heat stress,Leaf,May-30-2018
 
 To load such a file an example command can be seen below. The databases for the project, biomaterial and assay are required.:
 
