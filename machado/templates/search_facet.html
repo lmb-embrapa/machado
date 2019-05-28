@@ -20,7 +20,8 @@
 
 <div class="card">
     <div class="card-header">
-    <div class="row">
+    {% with facet_fields_desc|get_item:facet as facet_description %}
+    <div class="row" title="{{ facet_description }}">
         <div class="col">
             <b>
             {% if facet == "so_term" %}
@@ -29,11 +30,12 @@
             {{ facet|capfirst }}
             {% endif %}
             </b>
-            </div>
+        </div>
         <div class="col text-right">
             <button class="btn btn-outline-primary btn-sm" type="submit"><small>Apply</small></button>
         </div>
     </div>
+    {% endwith %}
     </div>
     <div class="card-body">
     {% for item in facets.fields|get_item:facet|dictsort:0 %}

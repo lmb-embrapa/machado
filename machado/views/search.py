@@ -11,6 +11,15 @@ from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 
 FACET_FIELDS = ["organism", "so_term", "orthology", "coexpression", "analyses", "biomaterial", "treatment"]
+FACET_FIELDS_DESC = {
+    "organism": "Filter by organism (gene, mRNA, polypeptide)",
+    "so_term": "Filter by sequence ontology term",
+    "orthology": "Filter by orthology (polypeptide)",
+    "coexpression": "Filter by coexpression (mRNA)",
+    "analyses": "Filter by blast and inteproscan (polypeptide)",
+    "biomaterial": "Filter by RNA-seq biomaterial (mRNA)",
+    "treatment": "Filter by RNA-Seq sample (mRNA)",
+}
 
 
 class FeatureSearchView(FacetedSearchView):
@@ -42,6 +51,7 @@ class FeatureSearchView(FacetedSearchView):
                 selected_facets.append(facet)
 
         context["facet_fields_order"] = FACET_FIELDS
+        context["facet_fields_desc"] = FACET_FIELDS_DESC
         context["selected_facets"] = selected_facets
         context["selected_facets_fields"] = selected_facets_fields
 
