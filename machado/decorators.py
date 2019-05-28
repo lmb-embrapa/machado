@@ -87,6 +87,12 @@ def get_feature_expression_samples(self):
                 )
             )
             .annotate(
+                assay_description=F(
+                    "analysis__Quantification_analysis_Analysis__acquisition__assay__description"
+                )
+            )
+
+            .annotate(
                 biomaterial_name=F(
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__name"
                 )
@@ -101,16 +107,20 @@ def get_feature_expression_samples(self):
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__Treatment_biomaterial_Biomaterial__name"
                 )
             )
+            .filter(
+                normscore__gt=0,
+            )
+            .exclude(
+                assay_name__isnull=True,
+            )
             .values(
                 "analysis__sourcename",
                 "normscore",
                 "assay_name",
+                "assay_description",
                 "biomaterial_name",
                 "biomaterial_description",
                 "treatment_name",
-            )
-            .exclude(
-                assay_name__isnull=True
             )
         )
     except ObjectDoesNotExist:

@@ -196,23 +196,25 @@
         <table class="table table-sm table-hover">
           <thead>
             <tr>
-              <th scope="col">Assay Source</th>
-              <th scope="col">Score normalized (TPM)</th>
+              <th scope="col">Assay source</th>
               <th scope="col">Assay name</th>
+              <th scope="col">Assay description</th>
               <th scope="col">Biomaterial name</th>
               <th scope="col">Biomaterial description</th>
               <th scope="col">Treatment</th>
+              <th scope="col">Score normalized (TPM)</th>
             </tr>
           </thead>
           <tbody>
           {% for value in feature.get_expression_samples %}
             <tr>
               <td>{{ value.analysis__sourcename|safe }} </td>
-              <td>{{ value.normscore|safe }} </td>
               <td>{{ value.assay_name|safe }}</td>
+              <td>{{ value.assay_description|safe }}</td>
               <td>{{ value.biomaterial_name|safe }}</td>
               <td>{{ value.biomaterial_description|safe }}</td>
               <td>{{ value.treatment_name|safe }}</td>
+              <td>{{ value.normscore|safe }} </td>
             </tr>
           {% endfor %}
         </tbody>

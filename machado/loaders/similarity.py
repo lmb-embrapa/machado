@@ -250,7 +250,18 @@ class SimilarityLoader(object):
                 subject_end=hsp_item.hit_end,
             )
             if self.input_format == "interproscan-xml":
+                # protein functional annotation
                 self.store_feature_relationship(
                     query_feature_id=query_feature_id,
                     subject_feature_id=subject_feature_id,
                 )
+                # mRNA functional annotation
+                if self.so_query == 'polypeptide':
+                    query_parent_feature_id = FeatureRelationship.objects.get(
+                        type__name="translation_of", type__cv__name="sequence",
+                        object_id=query_feature_id,
+                    ).subject_id
+                    self.store_feature_relationship(
+                        query_feature_id=query_parent_feature_id,
+                        subject_feature_id=subject_feature_id,
+                    )
