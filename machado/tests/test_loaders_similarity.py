@@ -18,6 +18,7 @@ from machado.loaders.similarity import SimilarityLoader
 from machado.models import Analysis, Analysisfeature
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Pub
 from machado.models import Feature, Featureloc, FeatureCvterm
+from machado.models import FeatureRelationship
 
 
 class SimilarityTest(TestCase):
@@ -93,6 +94,23 @@ class SimilarityTest(TestCase):
             is_obsolete=0,
             is_relationshiptype=1,
         )
+        test_dbxref6 = Dbxref.objects.create(accession="22345679", db=test_db2)
+        cvterm_translation = Cvterm.objects.create(
+            name="translation_of",
+            cv=test_cv,
+            dbxref=test_dbxref6,
+            is_obsolete=0,
+            is_relationshiptype=1,
+        )
+        test_dbxref7 = Dbxref.objects.create(accession="223456", db=test_db)
+        test_mrna_term = Cvterm.objects.create(
+            name="mRNA",
+            cv=test_cv,
+            dbxref=test_dbxref7,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
         test_db_pfam = Db.objects.create(name="PFAM")
         test_cv_pfam = Cv.objects.create(name="PFAM")
         test_dbxref_pfam_term = Dbxref.objects.create(accession="123", db=test_db_pfam)
@@ -111,7 +129,12 @@ class SimilarityTest(TestCase):
         feature_dbxref3 = Dbxref.objects.create(db=feature_db, accession="feat3")
         feature_dbxref4 = Dbxref.objects.create(db=feature_db, accession="feat4")
         feature_dbxref5 = Dbxref.objects.create(db=feature_db, accession="feat5")
-        Feature.objects.create(
+        feature_dbxref1m = Dbxref.objects.create(db=feature_db, accession="feat1m")
+        feature_dbxref2m = Dbxref.objects.create(db=feature_db, accession="feat2m")
+        feature_dbxref3m = Dbxref.objects.create(db=feature_db, accession="feat3m")
+        feature_dbxref4m = Dbxref.objects.create(db=feature_db, accession="feat4m")
+        feature_dbxref5m = Dbxref.objects.create(db=feature_db, accession="feat5m")
+        f1 = Feature.objects.create(
             organism=test_organism,
             uniquename="feat1",
             is_analysis=False,
@@ -121,7 +144,7 @@ class SimilarityTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now(),
         )
-        Feature.objects.create(
+        f2 = Feature.objects.create(
             organism=test_organism2,
             uniquename="feat2",
             is_analysis=False,
@@ -131,7 +154,7 @@ class SimilarityTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now(),
         )
-        test_feat = Feature.objects.create(
+        f3 = Feature.objects.create(
             organism=test_organism2,
             uniquename="feat3",
             is_analysis=False,
@@ -141,7 +164,7 @@ class SimilarityTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now(),
         )
-        Feature.objects.create(
+        f4 = Feature.objects.create(
             organism=test_organism,
             uniquename="feat4",
             is_analysis=False,
@@ -151,7 +174,7 @@ class SimilarityTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now(),
         )
-        Feature.objects.create(
+        f5 = Feature.objects.create(
             organism=test_organism2,
             uniquename="feat5",
             is_analysis=False,
@@ -161,8 +184,68 @@ class SimilarityTest(TestCase):
             timeaccessioned=datetime.now(),
             timelastmodified=datetime.now(),
         )
+        f1m = Feature.objects.create(
+            organism=test_organism,
+            uniquename="feat1m",
+            is_analysis=False,
+            type=test_mrna_term,
+            is_obsolete=False,
+            dbxref=feature_dbxref1m,
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now(),
+        )
+        f2m = Feature.objects.create(
+            organism=test_organism2,
+            uniquename="feat2m",
+            is_analysis=False,
+            type=test_mrna_term,
+            is_obsolete=False,
+            dbxref=feature_dbxref2m,
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now(),
+        )
+        f3m = Feature.objects.create(
+            organism=test_organism2,
+            uniquename="feat3m",
+            is_analysis=False,
+            type=test_mrna_term,
+            is_obsolete=False,
+            dbxref=feature_dbxref3m,
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now(),
+        )
+        f4m = Feature.objects.create(
+            organism=test_organism,
+            uniquename="feat4m",
+            is_analysis=False,
+            type=test_mrna_term,
+            is_obsolete=False,
+            dbxref=feature_dbxref4m,
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now(),
+        )
+        f5m = Feature.objects.create(
+            organism=test_organism2,
+            uniquename="feat5m",
+            is_analysis=False,
+            type=test_mrna_term,
+            is_obsolete=False,
+            dbxref=feature_dbxref5m,
+            timeaccessioned=datetime.now(),
+            timelastmodified=datetime.now(),
+        )
+        FeatureRelationship.objects.create(
+            subject=f1m, object=f1, type=cvterm_translation, rank=0)
+        FeatureRelationship.objects.create(
+            subject=f2m, object=f2, type=cvterm_translation, rank=0)
+        FeatureRelationship.objects.create(
+            subject=f3m, object=f3, type=cvterm_translation, rank=0)
+        FeatureRelationship.objects.create(
+            subject=f4m, object=f4, type=cvterm_translation, rank=0)
+        FeatureRelationship.objects.create(
+            subject=f5m, object=f5, type=cvterm_translation, rank=0)
         FeatureCvterm.objects.create(
-            feature=test_feat,
+            feature=f3,
             cvterm=test_cvterm_pfam_term,
             pub=null_pub,
             is_not=False,
@@ -270,7 +353,7 @@ class SimilarityTest(TestCase):
         test_analysis = Analysis.objects.get(sourcename="similarity.file")
         self.assertEqual("interproscan", test_analysis.program)
 
-        test_featureloc = Featureloc.objects.get(srcfeature=test_feat)
+        test_featureloc = Featureloc.objects.get(srcfeature=f3)
 
         test_analysisfeature = Analysisfeature.objects.get(
             analysis=test_analysis, feature_id=test_featureloc.feature_id
