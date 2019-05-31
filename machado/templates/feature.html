@@ -214,7 +214,7 @@
               <td>{{ value.biomaterial_name|safe }}</td>
               <td>{{ value.biomaterial_description|safe }}</td>
               <td>{{ value.treatment_name|safe }}</td>
-              <td>{{ value.normscore|safe }} </td>
+              <td>{{ value.normscore|safe|floatformat:2 }} </td>
             </tr>
           {% endfor %}
         </tbody>
