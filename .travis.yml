@@ -6,14 +6,13 @@ matrix:
     - dist: trusty
       language: python
       python: "3.6"
+      env TEST_SUIT=trusty_python3.6
     - dist: xenial
       python: "3.6"
+      env TEST_SUIT=xenial_python3.6
     - dist: xenial
       python: "3.7"
-    - dist: bionic
-      python: "3.6"
-    - dist: bionic
-      python: "3.7"
+      env TEST_SUIT=xenial_python3.7
 
 services:
   - postgresql
