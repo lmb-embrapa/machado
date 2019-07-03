@@ -1,11 +1,13 @@
-dist: trusty
-language: python
 matrix:
   include:
-  - python: "3.6"
-    cache: pip
-  - python: "3.7"
-    cache: pip
+    - dist: trusty
+      python: "3.6"
+    - dist: xenial
+      python: "3.6"
+    - dist: xenial
+      python: "3.7"
+
+cache: pip
 
 before_install:
   - psql -c "create user username with encrypted password 'password';" -U postgres
