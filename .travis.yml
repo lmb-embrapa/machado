@@ -5,10 +5,13 @@ matrix:
   include:
     - dist: trusty
       python: "3.6"
-      env TEST_SUIT=trusty_python3.6
-    - dist: xenial
+      env: TEST_SUITE=trusty_python3.6
+  - dist: xenial
+      python: "3.6"
+      env: TEST_SUITE=xenial_python3.6
+  - dist: xenial
       python: "3.7"
-      env TEST_SUIT=xenial_python3.7
+      env: TEST_SUITE=xenial_python3.7
 
 services:
   - postgresql
