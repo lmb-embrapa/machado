@@ -1,8 +1,16 @@
-dist: trusty
-language: python
-python:
-  - "3.6"
 cache: pip
+language: python
+matrix:
+  include:
+    - dist: trusty
+      python: "3.6"
+    - dist: xenial
+      python: "3.6"
+    - dist: xenial
+      python: "3.7"
+
+services:
+  - postgresql
 
 before_install:
   - psql -c "create user username with encrypted password 'password';" -U postgres
