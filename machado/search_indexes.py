@@ -39,6 +39,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         coexpression_group = indexes.CharField(faceted=True)
     biomaterial = indexes.MultiValueField(faceted=True)
     treatment = indexes.MultiValueField(faceted=True)
+    orthologs_biomaterial = indexes.MultiValueField(faceted=True)
+    orthologs_coexpression = indexes.MultiValueField(faceted=True)
 
     def get_model(self):
         """Get model."""
@@ -115,11 +117,11 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
         # Expression samples
         for sample in obj.get_expression_samples():
-            keywords.append(sample.get('assay_name'))
-            keywords.append(sample.get('biomaterial_name'))
-            for i in sample.get('biomaterial_description').split(' '):
+            keywords.append(sample.get("assay_name"))
+            keywords.append(sample.get("biomaterial_name"))
+            for i in sample.get("biomaterial_description").split(" "):
                 keywords.append(i)
-            for i in sample.get('treatment_name').split(' '):
+            for i in sample.get("treatment_name").split(" "):
                 keywords.append(i)
 
         self.temp = " ".join(keywords)
@@ -167,17 +169,74 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         """Prepare biomaterial."""
         result = list()
         for sample in obj.get_expression_samples():
-            if sample.get('biomaterial_description') not in result:
-                result.append(sample.get('biomaterial_description'))
+            if sample.get("biomaterial_description") not in result:
+                result.append(sample.get("biomaterial_description"))
         return result
 
     def prepare_treatment(self, obj):
         """Prepare biomaterial."""
         result = list()
         for sample in obj.get_expression_samples():
-            if sample.get('treatment_name') not in result:
-                result.append(sample.get('treatment_name'))
+            if sample.get("treatment_name") not in result:
+                result.append(sample.get("treatment_name"))
         return result
+
+    def prepare_orthologs_biomaterial(self, obj):
+        """Prepare orthologs biomaterial."""
+        result = list()
+        try:
+            ortholog_group = Featureprop.objects.get(
+                type__cv__name="feature_property",
+                type__name="orthologous group",
+                feature=obj,
+            ).value
+        except ObjectDoesNotExist:
+            return result
+
+        protein_ids = Featureprop.objects.filter(
+            type__cv__name="feature_property",
+            type__name="orthologous group",
+            value=ortholog_group,
+        ).values_list("feature_id", flat=True)
+
+        for mrna_protein_obj in FeatureRelationship.objects.filter(
+            type__name="translation_of", object_id__in=protein_ids
+        ):
+            # mrna_protein_obj.subject == mRNA
+            for sample in mrna_protein_obj.subject.get_expression_samples():
+                if sample.get("biomaterial_description") not in result:
+                    result.append(sample.get("biomaterial_description"))
+        return result
+
+    def prepare_orthologs_coexpression(self, obj):
+        """Prepare orthologs coexpression."""
+        try:
+            ortholog_group = Featureprop.objects.get(
+                type__cv__name="feature_property",
+                type__name="orthologous group",
+                feature=obj,
+            ).value
+        except ObjectDoesNotExist:
+            return False
+
+        protein_ids = Featureprop.objects.filter(
+            type__cv__name="feature_property",
+            type__name="orthologous group",
+            value=ortholog_group,
+        ).values_list("feature_id", flat=True)
+
+        for mrna_protein_obj in FeatureRelationship.objects.filter(
+            type__name="translation_of", object_id__in=protein_ids
+        ):
+            # mrna_protein_obj.subject == mRNA
+            have_coexp = Featureprop.objects.filter(
+                type__cv__name="feature_property",
+                type__name="coexpression group",
+                feature=mrna_protein_obj.subject,
+            ).exists()
+            if have_coexp:
+                return True
+        return False
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
