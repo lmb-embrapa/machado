@@ -116,7 +116,7 @@ Load DBxRef
     python manage.py load_feature_dbxrefs --help
 
 =============   ==========================================================================================
---file 		Two-column tab separated file (feature.dbxref\tdb:dbxref). *
+--file 		Two-column tab separated file (feature.accession<TAB>db:dbxref). *
 --soterm        SOTERM SO Sequence Ontology Term (eg. chromosome, assembly, mRNA, polypeptide) *
 --cpu 		Number of threads
 =============   ==========================================================================================
