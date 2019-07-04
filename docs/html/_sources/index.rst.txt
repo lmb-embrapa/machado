@@ -6,7 +6,10 @@
 machado's documentation
 =======================
 
-`machado` is a `Django <https://www.djangoproject.com/>`_ framework for `Chado <http://gmod.org/wiki/Chado_-_Getting_Started>`_.
+machado provides users with a framework to store, search and visualize biological data.
+
+It is a framework powered by `Django <https://www.djangoproject.com/>`_ that contains tools to interact with a `Chado <http://gmod.org/wiki/Chado_-_Getting_Started>`_. 
+
 
 Content
 ========

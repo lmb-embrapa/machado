@@ -9,7 +9,7 @@ Load Annotation
 
 .. code-block:: bash
 
-    python manage.py load_feature_annotation --file feature_annotation.tab --cvterm display
+    python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -18,9 +18,10 @@ Load Annotation
     python manage.py load_feature_annotation --help
 
 =============   ==========================================================================================
---file 			Two-column tab separated file (feature.accession<TAB>annotation text). *
---cvterm 		cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term) *
---cpu 			Number of threads
+--file 		Two-column tab separated file (feature.accession<TAB>annotation text). *
+--soterm        SO Sequence Ontology Term (eg. mRNA, polypeptide)
+--cvterm 	cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term) *
+--cpu 		Number of threads
 =============   ==========================================================================================
 
 \* required fields
