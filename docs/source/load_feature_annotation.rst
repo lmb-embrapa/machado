@@ -19,7 +19,7 @@ Load Annotation
 
 =============   ==========================================================================================
 --file 		Two-column tab separated file (feature.accession<TAB>annotation text). *
---soterm        SO Sequence Ontology Term (eg. mRNA, polypeptide)
+--soterm        SO Sequence Ontology Term (eg. mRNA, polypeptide) *
 --cvterm 	cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term) *
 --cpu 		Number of threads
 =============   ==========================================================================================
@@ -52,7 +52,7 @@ Load Sequence
 
 =============== ==========================================================================================
 --file 		FASTA file. *
---soterm SOTERM SO Sequence Ontology Term (eg. chromosome, assembly, mRNA, polypeptide) *
+--soterm        SO Sequence Ontology Term (eg. chromosome, assembly, mRNA, polypeptide) *
 --cpu 		Number of threads
 =============== ==========================================================================================
 
