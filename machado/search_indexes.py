@@ -25,7 +25,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     organism = indexes.CharField(faceted=True)
     so_term = indexes.CharField(model_attr="type__name", faceted=True)
     uniquename = indexes.CharField(model_attr="uniquename", faceted=True)
-    name = indexes.CharField(model_attr="name", faceted=True)
+    name = indexes.CharField(model_attr="name", faceted=True, null=True)
     analyses = indexes.MultiValueField(faceted=True)
     if Featureprop.objects.filter(
         type__name="orthologous group", type__cv__name="feature_property"
