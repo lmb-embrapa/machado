@@ -59,6 +59,17 @@
             <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:1" in selected_facets %}checked{% endif %}>
             coexpression groups
             {% endif %}
+        {% elif facet == "orthologs_coexpression" %}
+            {% if item.0 == 'false' %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:false" in selected_facets %}checked{% endif %}>
+            no coexpression
+            {% else %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:true" in selected_facets %}checked{% endif %}>
+            coexpression
+            {% endif %}
+        {% elif facet == "orthologs_biomaterial" %}
+            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
+            {{ item.0|capfirst }}
         {% else %}
             <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
             {{ item.0 }}
