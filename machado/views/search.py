@@ -10,9 +10,17 @@ from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 
-FACET_FIELDS = ["organism", "so_term", "orthology", "coexpression",
-                "orthologs_coexpression", "orthologs_biomaterial",
-                "analyses", "biomaterial", "treatment"]
+FACET_FIELDS = [
+    "organism",
+    "so_term",
+    "orthology",
+    "coexpression",
+    "orthologs_coexpression",
+    "orthologs_biomaterial",
+    "analyses",
+    "biomaterial",
+    "treatment",
+]
 FACET_FIELDS_DESC = {
     "organism": "Filter by organism (gene, mRNA, polypeptide)",
     "so_term": "Filter by sequence ontology term",

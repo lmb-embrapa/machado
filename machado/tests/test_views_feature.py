@@ -4,32 +4,33 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-    """Tests feature view."""
+"""Tests feature view."""
 
-    from datetime import datetime, timezone
+from datetime import datetime, timezone
 
-    from django.test import TestCase, RequestFactory
-    from django.urls.exceptions import NoReverseMatch
+from django.test import TestCase, RequestFactory
+from django.urls.exceptions import NoReverseMatch
 
-    from machado.models import Analysis, Analysisfeature
-    from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
-    from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
-    from machado.models import Featureprop, FeatureRelationship
-    from machado.views import feature
+from machado.models import Analysis, Analysisfeature
+from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
+from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
+from machado.models import Featureprop, FeatureRelationship
+from machado.views import feature
 
 
-    class FeatureTest(TestCase):
-        """Tests Feature View."""
+class FeatureTest(TestCase):
+    """Tests Feature View."""
 
-        def setUp(self):
-            """Setup."""
-            self.factory = RequestFactory()
+    def setUp(self):
+        """Setup."""
+        self.factory = RequestFactory()
 
-            null_db, created = Db.objects.get_or_create(name="null")
-            null_cv, created = Cv.objects.get_or_create(name="null")
-            null_dbxref, created = Dbxref.objects.get_or_create(
+        null_db, created = Db.objects.get_or_create(name="null")
+        null_cv, created = Cv.objects.get_or_create(name="null")
+        null_dbxref, created = Dbxref.objects.get_or_create(
             accession="null", db=null_db
         )
+
         null_cvterm, created = Cvterm.objects.get_or_create(
             name="null",
             cv=null_cv,

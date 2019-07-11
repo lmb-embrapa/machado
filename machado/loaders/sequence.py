@@ -112,9 +112,7 @@ class SequenceLoader(object):
                 except IntegrityError as e:
                     raise ImportingError(e)
 
-    def add_sequence_to_feature(
-        self, seq_obj: SeqRecord, soterm: str
-    ) -> None:
+    def add_sequence_to_feature(self, seq_obj: SeqRecord, soterm: str) -> None:
         """Store Biopython SeqRecord."""
         try:
             feature_id = retrieve_feature_id(accession=seq_obj.id, soterm=soterm)

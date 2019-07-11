@@ -35,12 +35,7 @@ class Command(BaseCommand):
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self,
-        file: str,
-        soterm: str,
-        verbosity: int = 1,
-        cpu: int = 1,
-        **options
+        self, file: str, soterm: str, verbosity: int = 1, cpu: int = 1, **options
     ):
         """Execute the main function."""
         try:
@@ -63,9 +58,7 @@ class Command(BaseCommand):
         tasks = list()
         for fasta in fasta_sequences:
             tasks.append(
-                pool.submit(
-                    sequence_file.add_sequence_to_feature, fasta, soterm
-                )
+                pool.submit(sequence_file.add_sequence_to_feature, fasta, soterm)
             )
         if verbosity > 0:
             self.stdout.write("Loading")

@@ -94,7 +94,6 @@ def get_feature_expression_samples(self):
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__description"
                 )
             )
-
             .annotate(
                 biomaterial_name=F(
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__name"
@@ -110,12 +109,8 @@ def get_feature_expression_samples(self):
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__Treatment_biomaterial_Biomaterial__name"
                 )
             )
-            .filter(
-                normscore__gt=0,
-            )
-            .exclude(
-                assay_name__isnull=True,
-            )
+            .filter(normscore__gt=0)
+            .exclude(assay_name__isnull=True)
             .values(
                 "analysis__sourcename",
                 "normscore",
@@ -156,6 +151,7 @@ def get_feature_relationship(self):
 
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
+
     def wrapper(cls):
         setattr(cls, "get_display", get_feature_display)
         setattr(cls, "get_product", get_feature_product)
@@ -188,6 +184,7 @@ def get_pub_doi(self):
 
 def machadoPubMethods():
     """Add methods to machado.models.Pub."""
+
     def wrapper(cls):
         setattr(cls, "get_authors", get_pub_authors)
         setattr(cls, "get_doi", get_pub_doi)
