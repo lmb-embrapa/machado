@@ -30,6 +30,7 @@ class FeatureTest(TestCase):
         null_dbxref, created = Dbxref.objects.get_or_create(
             accession="null", db=null_db
         )
+
         null_cvterm, created = Cvterm.objects.get_or_create(
             name="null",
             cv=null_cv,
@@ -399,16 +400,6 @@ class FeatureTest(TestCase):
         self.assertEqual("PFAM", result[0]["db"])
         self.assertEqual("0001", result[0]["dbxref"])
 
-    def test_retrieve_feature_relationship(self):
-        """Tests - retrieve_feature_relationship."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_relationship(feature_id=f.feature_id)
-        self.assertEqual("mRNA", result[0].type.name)
-        f = Feature.objects.get(uniquename="feat1", type__name="gene")
-        result = fv.retrieve_feature_relationship(feature_id=f.feature_id)
-        self.assertEqual("mRNA", result[0].type.name)
-
     def test_retrieve_feature_similarity(self):
         """Tests - retrieve_feature_similarity."""
         fv = feature.FeatureView()
@@ -452,7 +443,6 @@ class FeatureTest(TestCase):
         f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
         result = fv.retrieve_feature_data(feature_obj=f)
         self.assertEquals("PFAM", result["protein_matches"][0]["db"])
-        self.assertEqual("mRNA", result["relationship"][0].type.name)
         self.assertEqual("blast", result["similarity"][0]["program"])
         self.assertTrue("orthomcl1" in result["orthologs"])
 

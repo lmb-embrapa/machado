@@ -6,8 +6,11 @@
 
 """Decorators."""
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Value, F
+from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
+
+
+VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
 
 def get_feature_product(self):
@@ -91,7 +94,6 @@ def get_feature_expression_samples(self):
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__description"
                 )
             )
-
             .annotate(
                 biomaterial_name=F(
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__name"
@@ -107,12 +109,8 @@ def get_feature_expression_samples(self):
                     "analysis__Quantification_analysis_Analysis__acquisition__assay__AssayBiomaterial_assay_Assay__biomaterial__Treatment_biomaterial_Biomaterial__name"
                 )
             )
-            .filter(
-                normscore__gt=0,
-            )
-            .exclude(
-                assay_name__isnull=True,
-            )
+            .filter(normscore__gt=0)
+            .exclude(assay_name__isnull=True)
             .values(
                 "analysis__sourcename",
                 "normscore",
@@ -127,8 +125,33 @@ def get_feature_expression_samples(self):
         return None
 
 
+def get_feature_relationship(self):
+    """Get the relationships."""
+    result = list()
+    feature_relationships = self.FeatureRelationship_object_Feature.filter(
+        Q(type__name="part_of") | Q(type__name="translation_of"),
+        type__cv__name="sequence",
+    )
+    for feature_relationship in feature_relationships:
+        if feature_relationship.subject.type.name in VALID_TYPES:
+            result.append(feature_relationship.subject)
+    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
+        Q(type__name="part_of") | Q(type__name="translation_of"),
+        type__cv__name="sequence",
+    )
+    for feature_relationship in feature_relationships:
+        if feature_relationship.object.type.name in VALID_TYPES:
+            result.append(feature_relationship.object)
+
+    if len(result) > 0:
+        return result
+    else:
+        return None
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
+
     def wrapper(cls):
         setattr(cls, "get_display", get_feature_display)
         setattr(cls, "get_product", get_feature_product)
@@ -137,6 +160,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_orthologous_group", get_feature_orthologous_group)
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
         setattr(cls, "get_expression_samples", get_feature_expression_samples)
+        setattr(cls, "get_relationship", get_feature_relationship)
         return cls
 
     return wrapper
@@ -160,6 +184,7 @@ def get_pub_doi(self):
 
 def machadoPubMethods():
     """Add methods to machado.models.Pub."""
+
     def wrapper(cls):
         setattr(cls, "get_authors", get_pub_authors)
         setattr(cls, "get_doi", get_pub_doi)

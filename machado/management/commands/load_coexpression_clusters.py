@@ -44,7 +44,7 @@ The features need to be loaded previously or won't be registered."""
             "--soterm",
             help="sequence ontology term 'e.g. mRNA'",
             required=False,
-            default='mRNA',
+            default="mRNA",
             type=str,
         )
         parser.add_argument(

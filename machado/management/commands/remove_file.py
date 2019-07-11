@@ -17,7 +17,6 @@ from machado.models import Project, Projectprop, AssayProject
 import os
 
 
-
 class Command(BaseCommand):
     """Remove file."""
 
@@ -33,7 +32,8 @@ class Command(BaseCommand):
         # Handling Features
         if verbosity > 1:
             self.stdout.write(
-                "Features: deleting {} and every " "child record (CASCADE)".format(filename)
+                "Features: deleting {} and every "
+                "child record (CASCADE)".format(filename)
             )
         try:
             Feature.objects.filter(
@@ -47,7 +47,8 @@ class Command(BaseCommand):
         # Handling Projects
         if verbosity > 1:
             self.stdout.write(
-                "Projects: deleting {} and every " "child record (CASCADE)".format(filename)
+                "Projects: deleting {} and every "
+                "child record (CASCADE)".format(filename)
             )
         try:
             project_ids = list(
@@ -65,16 +66,21 @@ class Command(BaseCommand):
         # Handling Assay
         if verbosity > 1:
             self.stdout.write(
-                "Assay: deleting {} and every " "child record (CASCADE)".format(filename)
+                "Assay: deleting {} and every "
+                "child record (CASCADE)".format(filename)
             )
         try:
             assay_ids = list(
-                Assayprop.objects.filter(value=filename).values_list("assay_id", flat=True)
+                Assayprop.objects.filter(value=filename).values_list(
+                    "assay_id", flat=True
+                )
             )
             AssayProject.objects.filter(assay_id__in=assay_ids).delete()
             Assay.objects.filter(assay_id__in=assay_ids).delete()
         except ObjectDoesNotExist:
-            raise CommandError("Assays: cannot remove {} (not registered)".format(filename))
+            raise CommandError(
+                "Assays: cannot remove {} (not registered)".format(filename)
+            )
         # Handling Biomaterial
         if verbosity > 1:
             self.stdout.write(
@@ -96,7 +102,8 @@ class Command(BaseCommand):
         # Handling Analysis
         if verbosity > 1:
             self.stdout.write(
-                "Analysis: deleting {} and every " "child record (CASCADE)".format(filename)
+                "Analysis: deleting {} and every "
+                "child record (CASCADE)".format(filename)
             )
         try:
             analysis_ids = list(

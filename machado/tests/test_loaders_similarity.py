@@ -235,21 +235,22 @@ class SimilarityTest(TestCase):
             timelastmodified=datetime.now(),
         )
         FeatureRelationship.objects.create(
-            subject=f1m, object=f1, type=cvterm_translation, rank=0)
+            subject=f1m, object=f1, type=cvterm_translation, rank=0
+        )
         FeatureRelationship.objects.create(
-            subject=f2m, object=f2, type=cvterm_translation, rank=0)
+            subject=f2m, object=f2, type=cvterm_translation, rank=0
+        )
         FeatureRelationship.objects.create(
-            subject=f3m, object=f3, type=cvterm_translation, rank=0)
+            subject=f3m, object=f3, type=cvterm_translation, rank=0
+        )
         FeatureRelationship.objects.create(
-            subject=f4m, object=f4, type=cvterm_translation, rank=0)
+            subject=f4m, object=f4, type=cvterm_translation, rank=0
+        )
         FeatureRelationship.objects.create(
-            subject=f5m, object=f5, type=cvterm_translation, rank=0)
+            subject=f5m, object=f5, type=cvterm_translation, rank=0
+        )
         FeatureCvterm.objects.create(
-            feature=f3,
-            cvterm=test_cvterm_pfam_term,
-            pub=null_pub,
-            is_not=False,
-            rank=0,
+            feature=f3, cvterm=test_cvterm_pfam_term, pub=null_pub, is_not=False, rank=0
         )
 
         test_HSPFragment1 = HSPFragment("feat1", "feat2")

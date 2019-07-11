@@ -40,12 +40,7 @@ class Command(BaseCommand):
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self,
-        file: str,
-        soterm: str,
-        verbosity: int = 1,
-        cpu: int = 1,
-        **options
+        self, file: str, soterm: str, verbosity: int = 1, cpu: int = 1, **options
     ):
         """Execute the main function."""
         if verbosity > 0:
