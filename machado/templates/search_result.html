@@ -24,21 +24,29 @@
                 </div>
                 <div class="col text-right">
                     <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=tsv" title="Download TSV" onclick="return confirm('Download results in TSV format')"></a>
-                    <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')"></a>
+                    {% if facets.fields|get_item:'so_term'|length == 1 %}
+                        <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')"></a>
+                    {% endif %}
                 </div>
             </div>
             <table class="table table-hover table-sm">
             <tr>
-                <th>SO term</th>
                 <th>Feature ID</th>
+                <th>Relationship</th>
                 <th>Display</th>
                 {% if orthologs %}<th>Orthologous Group</th>{% endif%}
                 {% if coexp_groups %}<th>Coexpression Group</th>{% endif%}
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
-                <td>{{ result.object.type.name }}</td>
-                <td><a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a></td>
+                <td>
+                    <a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>:{{ result.object.type.name }}
+                </td>
+                <td>
+                    {% for relationship in result.object.get_relationship %}
+                        <a href="{% url 'feature' %}?feature_id={{ relationship.feature_id|safe }}">{{ relationship.uniquename }}</a>:{{ relationship.type.name }} 
+                    {% endfor %}
+                </td>
                 <td>{{ result.object.get_display|default_if_none:'' }}</td>
                 {% if orthologs %}
                     <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.object.get_orthologous_group }}">{{ result.object.get_orthologous_group|default_if_none:'' }}</a></td>

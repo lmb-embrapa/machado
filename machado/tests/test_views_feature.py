@@ -4,30 +4,30 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Tests feature view."""
+    """Tests feature view."""
 
-from datetime import datetime, timezone
+    from datetime import datetime, timezone
 
-from django.test import TestCase, RequestFactory
-from django.urls.exceptions import NoReverseMatch
+    from django.test import TestCase, RequestFactory
+    from django.urls.exceptions import NoReverseMatch
 
-from machado.models import Analysis, Analysisfeature
-from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
-from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
-from machado.models import Featureprop, FeatureRelationship
-from machado.views import feature
+    from machado.models import Analysis, Analysisfeature
+    from machado.models import Db, Dbxref, Cv, Cvterm, Organism, Pub
+    from machado.models import Feature, Featureloc, FeatureDbxref, FeatureCvterm
+    from machado.models import Featureprop, FeatureRelationship
+    from machado.views import feature
 
 
-class FeatureTest(TestCase):
-    """Tests Feature View."""
+    class FeatureTest(TestCase):
+        """Tests Feature View."""
 
-    def setUp(self):
-        """Setup."""
-        self.factory = RequestFactory()
+        def setUp(self):
+            """Setup."""
+            self.factory = RequestFactory()
 
-        null_db, created = Db.objects.get_or_create(name="null")
-        null_cv, created = Cv.objects.get_or_create(name="null")
-        null_dbxref, created = Dbxref.objects.get_or_create(
+            null_db, created = Db.objects.get_or_create(name="null")
+            null_cv, created = Cv.objects.get_or_create(name="null")
+            null_dbxref, created = Dbxref.objects.get_or_create(
             accession="null", db=null_db
         )
         null_cvterm, created = Cvterm.objects.get_or_create(
@@ -399,16 +399,6 @@ class FeatureTest(TestCase):
         self.assertEqual("PFAM", result[0]["db"])
         self.assertEqual("0001", result[0]["dbxref"])
 
-    def test_retrieve_feature_relationship(self):
-        """Tests - retrieve_feature_relationship."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_relationship(feature_id=f.feature_id)
-        self.assertEqual("mRNA", result[0].type.name)
-        f = Feature.objects.get(uniquename="feat1", type__name="gene")
-        result = fv.retrieve_feature_relationship(feature_id=f.feature_id)
-        self.assertEqual("mRNA", result[0].type.name)
-
     def test_retrieve_feature_similarity(self):
         """Tests - retrieve_feature_similarity."""
         fv = feature.FeatureView()
@@ -452,7 +442,6 @@ class FeatureTest(TestCase):
         f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
         result = fv.retrieve_feature_data(feature_obj=f)
         self.assertEquals("PFAM", result["protein_matches"][0]["db"])
-        self.assertEqual("mRNA", result["relationship"][0].type.name)
         self.assertEqual("blast", result["similarity"][0]["program"])
         self.assertTrue("orthomcl1" in result["orthologs"])
 

@@ -6,8 +6,11 @@
 
 """Decorators."""
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Value, F
+from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
+
+
+VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
 
 def get_feature_product(self):
@@ -127,6 +130,30 @@ def get_feature_expression_samples(self):
         return None
 
 
+def get_feature_relationship(self):
+    """Get the relationships."""
+    result = list()
+    feature_relationships = self.FeatureRelationship_object_Feature.filter(
+        Q(type__name="part_of") | Q(type__name="translation_of"),
+        type__cv__name="sequence",
+    )
+    for feature_relationship in feature_relationships:
+        if feature_relationship.subject.type.name in VALID_TYPES:
+            result.append(feature_relationship.subject)
+    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
+        Q(type__name="part_of") | Q(type__name="translation_of"),
+        type__cv__name="sequence",
+    )
+    for feature_relationship in feature_relationships:
+        if feature_relationship.object.type.name in VALID_TYPES:
+            result.append(feature_relationship.object)
+
+    if len(result) > 0:
+        return result
+    else:
+        return None
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
     def wrapper(cls):
@@ -137,6 +164,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_orthologous_group", get_feature_orthologous_group)
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
         setattr(cls, "get_expression_samples", get_feature_expression_samples)
+        setattr(cls, "get_relationship", get_feature_relationship)
         return cls
 
     return wrapper
