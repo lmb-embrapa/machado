@@ -53,7 +53,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Index queryset."""
         return self.get_model().objects.filter(
-            type__name__in=VALID_TYPES, type__cv__name="sequence", is_obsolete=False, organism__genus='Arabidopsis'
+            type__name__in=VALID_TYPES, type__cv__name="sequence", is_obsolete=False
         )
 
     def prepare_organism(self, obj):
