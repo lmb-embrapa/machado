@@ -39,7 +39,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         coexpression_group = indexes.CharField(faceted=True)
     biomaterial = indexes.MultiValueField(faceted=True)
     treatment = indexes.MultiValueField(faceted=True)
-    orthologs_biomaterial = indexes.MultiValueField(faceted=True)
+    # orthologs_biomaterial = indexes.MultiValueField(faceted=True)
     orthologs_coexpression = indexes.MultiValueField(faceted=True)
 
     def get_model(self):
@@ -78,7 +78,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         )
         result = list()
         for i in list(programs):
-            if i in match_part_programs:
+            if i in list(match_part_programs):
                 result.append("{} matches".format(i[0]))
             else:
                 result.append("no {} matches".format(i[0]))
