@@ -155,7 +155,7 @@
       <div class="card-text">
         {% for group_id, group in data.orthologs.items %}
             <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-secondary">Orthologous group: <a href="{% url 'feature_search' %}?q={{ group_id }}">{{ group_id }}</a></li>
+            <li class="list-group-item list-group-item-secondary">Orthologous group: <a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ group_id }}">{{ group_id }}</a></li>
             {% for ortholog in group  %}
             <li class="list-group-item">{{ ortholog.type.name }}: <a href="{% url 'feature'%}?feature_id={{ ortholog.feature_id|safe }}">{{ ortholog.uniquename }}</a> {{ ortholog.get_display|default_if_none:'' }} (<i>{{ ortholog.organism.genus }} {{ ortholog.organism.species }}</i>)</li>
             {% endfor %}
@@ -175,7 +175,7 @@
       <div class="card-text">
         {% if feature.get_coexpression_group %}
         <ul class="list-group list-group-flush">
-        <li class="list-group-item list-group-item-secondary">Coexpression Group: <a href="{% url 'feature_search' %}?q={{ feature.get_coexpression_group }}">{{ feature.get_coexpression_group }}</a></li>
+        <li class="list-group-item list-group-item-secondary">Coexpression Group: <a href="{% url 'feature_search' %}?selected_facets=coexpression_group:{{ feature.get_coexpression_group }}">{{ feature.get_coexpression_group }}</a></li>
         </ul>
         {% endif %}
         <table class="table table-sm table-hover">
