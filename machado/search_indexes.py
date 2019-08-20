@@ -14,7 +14,11 @@ from machado.models import Feature, FeatureCvterm, Featureprop
 from machado.models import Featureloc, FeatureRelationship
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
-VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
+VALID_PROGRAMS = (
+    Analysis.objects.filter(program__in=["interproscan", "diamond", "blast"])
+    .distinct("program")
+    .values_list("program")
+)
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -39,7 +43,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         coexpression_group = indexes.CharField(faceted=True)
     biomaterial = indexes.MultiValueField(faceted=True)
     treatment = indexes.MultiValueField(faceted=True)
-    orthologs_biomaterial = indexes.MultiValueField(faceted=True)
+    # orthologs_biomaterial = indexes.MultiValueField(faceted=True)
     orthologs_coexpression = indexes.MultiValueField(faceted=True)
 
     def get_model(self):
@@ -59,11 +63,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_analyses(self, obj):
         """Prepare analyses."""
         # similarity analyses
-        programs = (
-            Analysis.objects.filter(program__in=VALID_PROGRAMS)
-            .distinct("program")
-            .values_list("program")
-        )
         match_part_ids = (
             Featureloc.objects.filter(srcfeature=obj)
             .filter(feature__organism_id=obj.organism_id)
@@ -77,8 +76,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             .distinct()
         )
         result = list()
-        for i in list(programs):
-            if i in match_part_programs:
+        for i in list(VALID_PROGRAMS):
+            if i in list(match_part_programs):
                 result.append("{} matches".format(i[0]))
             else:
                 result.append("no {} matches".format(i[0]))
@@ -89,12 +88,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         """Prepare text."""
         keywords = list()
 
-        # Featureprop: display, description, note
-        display = Featureprop.objects.filter(
-            ~Q(type__name="parent"), type__cv__name="feature_property", feature=obj
-        )
-        for i in display:
-            keywords.append(i.value)
+        # Featureprop: display or product or description or note (in that order)
+        if obj.get_display():
+            keywords.append(obj.get_display())
 
         # GO terms
         feature_cvterm = FeatureCvterm.objects.filter(feature=obj)
@@ -129,41 +125,19 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_orthology(self, obj):
         """Prepare orthology."""
-        return Featureprop.objects.filter(
-            type__cv__name="feature_property",
-            type__name="orthologous group",
-            feature=obj,
-        ).exists()
+        return bool(obj.get_orthologous_group())
 
     def prepare_orthologous_group(self, obj):
         """Prepare orthology."""
-        try:
-            return Featureprop.objects.get(
-                type__cv__name="feature_property",
-                type__name="orthologous group",
-                feature=obj,
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return obj.get_orthologous_group()
 
     def prepare_coexpression(self, obj):
         """Prepare coexpression."""
-        return Featureprop.objects.filter(
-            type__cv__name="feature_property",
-            type__name="coexpression group",
-            feature=obj,
-        ).exists()
+        return bool(obj.get_coexpression_group())
 
     def prepare_coexpression_group(self, obj):
         """Prepare coepxression group."""
-        try:
-            return Featureprop.objects.get(
-                type__cv__name="feature_property",
-                type__name="coexpression group",
-                feature=obj,
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return obj.get_coexpression_group()
 
     def prepare_biomaterial(self, obj):
         """Prepare biomaterial."""

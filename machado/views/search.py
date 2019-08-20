@@ -10,18 +10,7 @@ from haystack.generic_views import FacetedSearchView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 
-FACET_FIELDS = [
-    "organism",
-    "so_term",
-    "orthology",
-    "coexpression",
-    "orthologs_coexpression",
-    "orthologs_biomaterial",
-    "analyses",
-    "biomaterial",
-    "treatment",
-]
-FACET_FIELDS_DESC = {
+FACET_FIELDS = {
     "organism": "Filter by organism (gene, mRNA, polypeptide)",
     "so_term": "Filter by sequence ontology term",
     "orthology": "Filter by orthology (polypeptide)",
@@ -38,7 +27,7 @@ class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
     form_class = FeatureSearchForm
-    facet_fields = FACET_FIELDS
+    facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.html"
     paginate_by = 50
     context_object_name = "object_list"
@@ -62,8 +51,8 @@ class FeatureSearchView(FacetedSearchView):
                 selected_facets_fields.append(facet_field)
                 selected_facets.append(facet)
 
-        context["facet_fields_order"] = FACET_FIELDS
-        context["facet_fields_desc"] = FACET_FIELDS_DESC
+        context["facet_fields_order"] = list(FACET_FIELDS.keys())
+        context["facet_fields_desc"] = FACET_FIELDS
         context["selected_facets"] = selected_facets
         context["selected_facets_fields"] = selected_facets_fields
 
@@ -82,7 +71,7 @@ class FeatureSearchExportView(FacetedSearchView):
     """Export search results view."""
 
     form_class = FeatureSearchForm
-    facet_fields = FACET_FIELDS
+    facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.out"
     paginate_by = False
     context_object_name = "object_list"
