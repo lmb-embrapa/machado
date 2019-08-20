@@ -423,14 +423,6 @@ class FeatureTest(TestCase):
         self.assertTrue("orthomcl1" in result)
         self.assertEquals("feat2", result["orthomcl1"][1].uniquename)
 
-    def test_retrieve_coexp_groups(self):
-        """Tests - retrieve_feature_coexpgroups."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_coexpression_groups(feature_id=f.feature_id)
-        self.assertTrue("coexpgroup1" in result)
-        self.assertEquals("feat2", result["coexpgroup1"][1].uniquename)
-
     def test_retrieve_feature_data(self):
         """Tests - retrieve_feature_data."""
         fv = feature.FeatureView()
