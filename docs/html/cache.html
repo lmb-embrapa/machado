@@ -177,6 +177,23 @@ You just need to enable Django’s cache framework following the <a class="refer
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py createcachetable
 </pre></div>
 </div>
+<p>Clearing the cache table</p>
+<p>It is a good idea to clear the cache table whenever you made changes to your machado installation.
+For this intent, install the django-clear-cache tool <cite>https://github.com/rdegges/django-clear-cache</cite></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pip install django-clear-cache
+</pre></div>
+</div>
+<p>Then modify your settings.py file to add clear_cache:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">INSTALLED_APPS</span> <span class="o">=</span> <span class="o">(</span>
+<span class="c1"># ...</span>
+<span class="s1">&#39;clear_cache&#39;</span>,
+<span class="o">)</span>
+</pre></div>
+</div>
+<p>Then to clear the cache just run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py clear_cache
+</pre></div>
+</div>
 </div>
 
 
