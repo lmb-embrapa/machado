@@ -173,8 +173,8 @@ Usually, in order to load a GFF file, it’s required to have a reference FASTA 
 But some GFF files already have the reference features such as chromosome or scaffold.
 In this case, there are two options:</p>
 <ul class="simple">
-<li><p>Load the GFF directly, without a reference FASTA file</p></li>
-<li><p>Load the FASTA file and then load the GFF using the parameter ‘ignore’ to not load the reference features</p></li>
+<li>Load the GFF directly, without a reference FASTA file</li>
+<li>Load the FASTA file and then load the GFF using the parameter ‘ignore’ to not load the reference features</li>
 </ul>
 <p>The GFF file must be indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a>.</p>
 <div class="section" id="load-gff">
@@ -183,31 +183,31 @@ In this case, there are two options:</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
+<col width="10%" />
+<col width="90%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>GFF3 genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>GFF3 genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</td>
 </tr>
-<tr class="row-even"><td><p>–organism</p></td>
-<td><p>Species name (eg. Homo sapiens, Mus musculus) *</p></td>
+<tr class="row-even"><td>–organism</td>
+<td>Species name (eg. Homo sapiens, Mus musculus) *</td>
 </tr>
-<tr class="row-odd"><td><p>–ignore</p></td>
-<td><p>List of feature types to ignore (eg. chromosome scaffold)</p></td>
+<tr class="row-odd"><td>–ignore</td>
+<td>List of feature types to ignore (eg. chromosome scaffold)</td>
 </tr>
-<tr class="row-even"><td><p>–doi</p></td>
-<td><p>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</p></td>
+<tr class="row-even"><td>–doi</td>
+<td>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</td>
 </tr>
-<tr class="row-odd"><td><p>–cpu</p></td>
-<td><p>Number of threads</p></td>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
 </tr>
 </tbody>
 </table>
@@ -220,7 +220,7 @@ In this case, there are two options:</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>This command requires the file name (Dbxrefprop.value)</p></li>
+<li>This command requires the file name (Dbxrefprop.value)</li>
 </ul>
 </div>
 </div>
