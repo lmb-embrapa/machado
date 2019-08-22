@@ -24,7 +24,7 @@ Don't forget to configure the PostgreSQL server to allow regular users to connec
 
 **Python 3.6**
 
-Be sure to have the python development libraries installed (in Ubuntu 16.04, install with 'apt-get install python-dev').
+Be sure to have the python development libraries installed (in Ubuntu 18.04, install with 'apt-get install python3-dev').
 
 We strongly recommend creating a new virtualenv for your project
 

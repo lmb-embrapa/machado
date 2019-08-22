@@ -68,3 +68,29 @@ Go to the WEBPROJECT directory and use the manage.py
     python manage.py rebuild_index
 
 * Rebuilding the index can be faster if you increase the number of workers (-k).
+
+
+**Exporting the index to file**
+
+To export your index to a file for backup needs or to upload to another running version of machado, use the elasticdump tool `https://github.com/taskrabbit/elasticsearch-dump`.
+
+Use the following commands in a bash terminal to backup your index to multiple files:
+
+.. code-block:: bash
+
+    elasticdump  --input=http://localhost:9200/haystack  --output=haystack_backup  --fileSize=500mb
+
+* Change the input and output index names according to your needs. Also change the "fileSize" flag according to your index's size
+
+
+**Importing index to other installation of machado**
+
+To import an index from a multiple-file backup from elasticdump, use the following bash terminal one-liner command):
+
+.. code-block:: bash
+
+    for i in $(ls haystack_backup.split-*); do elasticdump --input=$i --output=http://localhost:9200/haystack --limit=1000; done
+
+* Change the input and output according to your needs.
+* You may need to fine tune the "limit" flag according to your machine resources.
+

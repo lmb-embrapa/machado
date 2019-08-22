@@ -188,25 +188,25 @@ AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>‘pcc.mcl.txt’ File *</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>‘pcc.mcl.txt’ File *</td>
 </tr>
-<tr class="row-even"><td><p>–soterm</p></td>
-<td><p>‘mRNA’ sequence ontology term <em>default</em></p></td>
+<tr class="row-even"><td>–soterm</td>
+<td>‘mRNA’ sequence ontology term <em>default</em></td>
 </tr>
-<tr class="row-odd"><td><p>–cpu</p></td>
-<td><p>Number of threads</p></td>
+<tr class="row-odd"><td>–cpu</td>
+<td>Number of threads</td>
 </tr>
 </tbody>
 </table>
@@ -220,14 +220,14 @@ the filename used to load the analyzes to the remove_relationships command: remo
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>‘mcl.clusters.txt’ file *</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>‘mcl.clusters.txt’ file *</td>
 </tr>
 </tbody>
 </table>
@@ -254,28 +254,28 @@ ath_3:    AT5G24750.1.TAIR10
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+<li>Loading this file can be faster if you increase the number of threads (–cpu).</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–file</p></td>
-<td><p>‘mcl.clusters.txt’ file *</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–file</td>
+<td>‘mcl.clusters.txt’ file *</td>
 </tr>
-<tr class="row-even"><td><p>–organism</p></td>
-<td><p>Scientific name (e.g.: ‘Arabidopsis thaliana’)</p></td>
+<tr class="row-even"><td>–organism</td>
+<td>Scientific name (e.g.: ‘Arabidopsis thaliana’)</td>
 </tr>
-<tr class="row-odd"><td><p>–soterm</p></td>
-<td><p>‘mRNA’ sequence ontology term <em>default</em></p></td>
+<tr class="row-odd"><td>–soterm</td>
+<td>‘mRNA’ sequence ontology term <em>default</em></td>
 </tr>
-<tr class="row-even"><td><p>–cpu</p></td>
-<td><p>Number of threads</p></td>
+<tr class="row-even"><td>–cpu</td>
+<td>Number of threads</td>
 </tr>
 </tbody>
 </table>
@@ -290,17 +290,17 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 67%" />
+<col width="33%" />
+<col width="67%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p>–cvterm TERM</p></td>
-<td><p>mandatory: ‘coexpression group’</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td>–cvterm TERM</td>
+<td>mandatory: ‘coexpression group’</td>
 </tr>
-<tr class="row-even"><td><p>–organism ORGANISM</p></td>
-<td><p>Scientific name (e.g.: ‘Oryza sativa’)</p></td>
+<tr class="row-even"><td>–organism ORGANISM</td>
+<td>Scientific name (e.g.: ‘Oryza sativa’)</td>
 </tr>
 </tbody>
 </table>
