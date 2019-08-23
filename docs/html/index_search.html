@@ -211,7 +211,8 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 <ul class="simple">
 <li>Rebuilding the index can be faster if you increase the number of workers (-k).</li>
 </ul>
-<p><strong>Exporting the index to file</strong></p>
+<div class="section" id="exporting-the-index-to-file">
+<h2>3.1.1. Exporting the index to file<a class="headerlink" href="#exporting-the-index-to-file" title="Permalink to this headline">¶</a></h2>
 <p>To export your index to a file for backup needs or to upload to another running version of machado, use the elasticdump tool <cite>https://github.com/taskrabbit/elasticsearch-dump</cite>.</p>
 <p>Use the following commands in a bash terminal to backup your index to multiple files:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>elasticdump  --input<span class="o">=</span>http://localhost:9200/haystack  --output<span class="o">=</span>haystack_backup  --fileSize<span class="o">=</span>500mb
@@ -229,6 +230,7 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 <li>Change the input and output according to your needs.</li>
 <li>You may need to fine tune the “limit” flag according to your machine resources.</li>
 </ul>
+</div>
 </div>
 
 
