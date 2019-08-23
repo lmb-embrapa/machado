@@ -70,7 +70,8 @@ Go to the WEBPROJECT directory and use the manage.py
 * Rebuilding the index can be faster if you increase the number of workers (-k).
 
 
-**Exporting the index to file**
+Exporting the index to file
+---------------------------
 
 To export your index to a file for backup needs or to upload to another running version of machado, use the elasticdump tool `https://github.com/taskrabbit/elasticsearch-dump`.
 

@@ -7,7 +7,7 @@ You just need to enable Django's cache framework following the `official instruc
 
 **Example**
 
-Include the following in the settings.py
+Include the following in the settings.py:
 
 .. code-block:: bash
 
@@ -20,13 +20,13 @@ Include the following in the settings.py
     CACHE_TIMEOUT = 60 * 60  # 3600 seconds == 1 hour
 
 
-Create the cache table
+Create the cache table:
 
 .. code-block:: bash
 
     python manage.py createcachetable
 
-Clearing the cache table
+**Clearing the cache table**
 
 It is a good idea to clear the cache table whenever you made changes to your machado installation.
 For this intent, install the django-clear-cache tool `https://github.com/rdegges/django-clear-cache`
