@@ -33,7 +33,7 @@ For this intent, install the django-clear-cache tool `https://github.com/rdegges
 
 .. code-block:: bash
 
-    pip install pip install django-clear-cache
+    pip install django-clear-cache
 
 Then modify your settings.py file to add clear_cache:
 
