@@ -125,11 +125,12 @@ And then change a whole code chunk, as follows:
      "seqType" : "dna",
      "storeClass" : "JBrowse/Store/SeqFeature/IndexedFasta",
      "type" : "SequenceTrack",
-     "urlTemplate" : "data/seq/Gmax.fa.fai",
+     "urlTemplate" : "data/seq/Gmax.fa",
      "useAsRefSeqStore" : 1
     }
 
 * The code above should replace all code from the "1. Referece sequence" category track code chunk.
+* make sure "urlTemplate" points to the fasta file path, not the .fai indexed one.
 
 Now restart the apache daemon for changes to take effect.
 
