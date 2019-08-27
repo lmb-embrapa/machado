@@ -94,32 +94,33 @@ MACHADO_OFFSET: the number of bp upstream and downstream of the feature.
 Use reference from FASTA file
 -----------------------------
 
-If the reference sequences are really long (>200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, it is possible to use the tool `prepare-refseqs.pl <https://jbrowse.org/docs/prepare-refseqs.pl.html>`, already distributed with jbrowse, to index the genome assembly's fasta file to be used as source for the reference sequences.
+If the reference sequences are really long (>200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences `<https://jbrowse.org/docs/tutorial.html>`_.
 
 Follow the steps below.
 
-Put the genome's assembly fasta file into your jbrowse organism's directory (for example: /var/www/html/jbrowse/data/'Glycine max'), change to this directory, and run the command:
+Put the genome's assembly fasta file into your jbrowse organism's 'data/seq' directory (for example: /var/www/html/jbrowse/data/'Glycine max'/data/seq/Gmax.fa), change to this directory, and run the command:
 
 .. code-block:: bash
 
-    /var/www/html/jbrowse/bin/prepare-refseqs.pl --fasta yourfile.fa
+    samtools faidx Gmax.fa
 
-* yourfile.fa should be replaced with the organisms's genome assembly fasta file.
+* A 'Gmax.fa.fai' indexed fasta file will be created.
 
 
-Now, modify your default trackList.json file. Change only the "1. Reference sequence" track, as follows:
+Now, modify your default trackList.json file. Change only the "1. Reference sequence" code chunk, as follows:
 
 .. code-block:: bash
 
     {
-      "category" : "1. Reference sequence",
-      "chunkSize" : 200000,
-      "key" : "Reference sequence",
-      "label" : "ref_seq",
-      "seqType" : "dna",
-      "storeClass" : "JBrowse/Store/Sequence/StaticChunked",
-      "type" : "SequenceTrack",
-      "urlTemplate" : "data/seq/{refseq_dirpath}/{refseq}-"
+     "category" : "1. Reference sequence",
+     "faiUrlTemplate" : "data/seq/Gmax.fa.fai",
+     "key" : "Reference sequence",
+     "label" : "ref_seq",
+     "seqType" : "dna",
+     "storeClass" : "JBrowse/Store/SeqFeature/IndexedFasta",
+     "type" : "SequenceTrack",
+     "urlTemplate" : "data/seq/Gmax.fa.fai",
+     "useAsRefSeqStore" : 1
     }
 
 * The code above should replace all code from the "1. Referece sequence" track code chunk.
