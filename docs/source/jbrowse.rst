@@ -107,7 +107,13 @@ Put the genome's assembly fasta file into your jbrowse organism's 'data/seq' dir
 * A 'Gmax.fa.fai' indexed fasta file will be created.
 
 
-Now, modify your default trackList.json file. Change only the "1. Reference sequence" code chunk, as follows:
+Now, modify your default trackList.json file. You need to make two modifications, first replace the "refSeqs" entry line (probably the second line of the file) with the following line:
+
+.. code-block:: bash
+
+    "refSeqs" : "data/seq/Gmax.fa.fai",
+
+And then change a whole code chunk, as follows:
 
 .. code-block:: bash
 
@@ -123,7 +129,7 @@ Now, modify your default trackList.json file. Change only the "1. Reference sequ
      "useAsRefSeqStore" : 1
     }
 
-* The code above should replace all code from the "1. Referece sequence" track code chunk.
+* The code above should replace all code from the "1. Referece sequence" category track code chunk.
 
 Now restart the apache daemon for changes to take effect.
 
