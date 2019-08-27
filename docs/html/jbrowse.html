@@ -231,7 +231,11 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 <ul class="simple">
 <li>A ‘Gmax.fa.fai’ indexed fasta file will be created.</li>
 </ul>
-<p>Now, modify your default trackList.json file. Change only the “1. Reference sequence” code chunk, as follows:</p>
+<p>Now, modify your default trackList.json file. You need to make two modifications, first replace the “refSeqs” entry line (probably the second line of the file) with the following line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;refSeqs&quot;</span> : <span class="s2">&quot;data/seq/Gmax.fa.fai&quot;</span>,
+</pre></div>
+</div>
+<p>And then change a whole code chunk, as follows:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
  <span class="s2">&quot;category&quot;</span> : <span class="s2">&quot;1. Reference sequence&quot;</span>,
  <span class="s2">&quot;faiUrlTemplate&quot;</span> : <span class="s2">&quot;data/seq/Gmax.fa.fai&quot;</span>,
@@ -246,7 +250,7 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </pre></div>
 </div>
 <ul class="simple">
-<li>The code above should replace all code from the “1. Referece sequence” track code chunk.</li>
+<li>The code above should replace all code from the “1. Referece sequence” category track code chunk.</li>
 </ul>
 <p>Now restart the apache daemon for changes to take effect.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl restart apache2
