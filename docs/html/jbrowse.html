@@ -244,13 +244,14 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
  <span class="s2">&quot;seqType&quot;</span> : <span class="s2">&quot;dna&quot;</span>,
  <span class="s2">&quot;storeClass&quot;</span> : <span class="s2">&quot;JBrowse/Store/SeqFeature/IndexedFasta&quot;</span>,
  <span class="s2">&quot;type&quot;</span> : <span class="s2">&quot;SequenceTrack&quot;</span>,
- <span class="s2">&quot;urlTemplate&quot;</span> : <span class="s2">&quot;data/seq/Gmax.fa.fai&quot;</span>,
+ <span class="s2">&quot;urlTemplate&quot;</span> : <span class="s2">&quot;data/seq/Gmax.fa&quot;</span>,
  <span class="s2">&quot;useAsRefSeqStore&quot;</span> : <span class="m">1</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li>The code above should replace all code from the “1. Referece sequence” category track code chunk.</li>
+<li>make sure “urlTemplate” points to the fasta file path, not the .fai indexed one.</li>
 </ul>
 <p>Now restart the apache daemon for changes to take effect.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl restart apache2
