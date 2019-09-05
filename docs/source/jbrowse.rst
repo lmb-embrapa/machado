@@ -90,3 +90,50 @@ The settings.py file should contain these variables
 MACHADO_JBROWSE_URL: contains the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)
 
 MACHADO_OFFSET: the number of bp upstream and downstream of the feature.
+
+Use reference from FASTA file
+-----------------------------
+
+If the reference sequences are really long (>200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences `<https://jbrowse.org/docs/tutorial.html>`_.
+
+Follow the steps below.
+
+Put the genome's assembly fasta file into your jbrowse organism's 'data/seq' directory (for example: /var/www/html/jbrowse/data/'Glycine max'/data/seq/Gmax.fa), change to this directory, and run the command:
+
+.. code-block:: bash
+
+    samtools faidx Gmax.fa
+
+* A 'Gmax.fa.fai' indexed fasta file will be created.
+
+
+Now, modify your default trackList.json file. You need to make two modifications, first replace the "refSeqs" entry line (probably the second line of the file) with the following line:
+
+.. code-block:: bash
+
+    "refSeqs" : "data/seq/Gmax.fa.fai",
+
+And then change a whole code chunk, as follows:
+
+.. code-block:: bash
+
+    {
+     "category" : "1. Reference sequence",
+     "faiUrlTemplate" : "data/seq/Gmax.fa.fai",
+     "key" : "Reference sequence",
+     "label" : "ref_seq",
+     "seqType" : "dna",
+     "storeClass" : "JBrowse/Store/SeqFeature/IndexedFasta",
+     "type" : "SequenceTrack",
+     "urlTemplate" : "data/seq/Gmax.fa",
+     "useAsRefSeqStore" : 1
+    }
+
+* The code above should replace all code from the "1. Referece sequence" category track code chunk.
+* make sure "urlTemplate" points to the fasta file path, not the .fai indexed one.
+
+Now restart the apache daemon for changes to take effect.
+
+.. code-block:: bash
+
+    systemctl restart apache2
