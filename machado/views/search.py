@@ -43,13 +43,18 @@ class FeatureSearchView(FacetedSearchView):
     def get_context_data(self, *args, **kwargs):
         """Get context data."""
         context = super(FeatureSearchView, self).get_context_data(*args, **kwargs)
+        so_term_count = 0
         selected_facets = list()
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()["selected_facets"]:
             facet_field, facet_query = facet.split(":")
+            if facet_field == 'so_term':
+                so_term_count += 1
             if facet_field not in ["orthologous_group", "coexpression_group"]:
                 selected_facets_fields.append(facet_field)
                 selected_facets.append(facet)
+
+        context["so_term_count"] = so_term_count
 
         context["facet_fields_order"] = list(FACET_FIELDS.keys())
         context["facet_fields_desc"] = FACET_FIELDS
