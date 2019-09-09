@@ -202,8 +202,8 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </pre></div>
 </div>
 <ul class="simple">
-<li>Now repeat the steps above for as many other organisms as you may have loaded to the database.</li>
-<li>Remember to restart the Apache server after the modifications.</li>
+<li><p>Now repeat the steps above for as many other organisms as you may have loaded to the database.</p></li>
+<li><p>Remember to restart the Apache server after the modifications.</p></li>
 </ul>
 <p><strong>machado API</strong></p>
 <p><strong>In case you don’t have the WSGI module installed under Apache</strong> (and did change the <em>baseUrl</em> variable in trackList.json), start the <em>machado</em> API framework:</p>
@@ -229,7 +229,7 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </pre></div>
 </div>
 <ul class="simple">
-<li>A ‘Gmax.fa.fai’ indexed fasta file will be created.</li>
+<li><p>A ‘Gmax.fa.fai’ indexed fasta file will be created.</p></li>
 </ul>
 <p>Now, modify your default trackList.json file. You need to make two modifications, first replace the “refSeqs” entry line (probably the second line of the file) with the following line:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;refSeqs&quot;</span> : <span class="s2">&quot;data/seq/Gmax.fa.fai&quot;</span>,
@@ -250,8 +250,8 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </pre></div>
 </div>
 <ul class="simple">
-<li>The code above should replace all code from the “1. Referece sequence” category track code chunk.</li>
-<li>make sure “urlTemplate” points to the fasta file path, not the .fai indexed one.</li>
+<li><p>The code above should replace all code from the “1. Referece sequence” category track code chunk.</p></li>
+<li><p>make sure “urlTemplate” points to the fasta file path, not the .fai indexed one.</p></li>
 </ul>
 <p>Now restart the apache daemon for changes to take effect.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl restart apache2

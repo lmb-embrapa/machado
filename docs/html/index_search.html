@@ -209,8 +209,12 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Rebuilding the index can be faster if you increase the number of workers (-k).</li>
+<li><p>Rebuilding the index can be faster if you increase the number of workers (-k).</p></li>
 </ul>
+<p>The Elasticsearch server has a 10,000 results limit by default. In most cases it will not affect the results since they are paginated. The links to export .tsv or .fasta files might truncated the results because of this limit. You can increase it using the following command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -XPUT <span class="s2">&quot;http://localhost:9200/haystack/_settings&quot;</span> -d <span class="s1">&#39;{ &quot;index&quot; : { &quot;max_result_window&quot; : 500000 } }&#39;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span>
+</pre></div>
+</div>
 <div class="section" id="exporting-the-index-to-file">
 <h2>3.1.1. Exporting the index to file<a class="headerlink" href="#exporting-the-index-to-file" title="Permalink to this headline">¶</a></h2>
 <p>To export your index to a file for backup needs or to upload to another running version of machado, use the elasticdump tool <cite>https://github.com/taskrabbit/elasticsearch-dump</cite>.</p>
@@ -219,7 +223,7 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Change the input and output index names according to your needs. Also change the “fileSize” flag according to your index’s size</li>
+<li><p>Change the input and output index names according to your needs. Also change the “fileSize” flag according to your index’s size</p></li>
 </ul>
 <p><strong>Importing index to other installation of machado</strong></p>
 <p>To import an index from a multiple-file backup from elasticdump, use the following bash terminal one-liner command):</p>
@@ -227,8 +231,8 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Change the input and output according to your needs.</li>
-<li>You may need to fine tune the “limit” flag according to your machine resources.</li>
+<li><p>Change the input and output according to your needs.</p></li>
+<li><p>You may need to fine tune the “limit” flag according to your machine resources.</p></li>
 </ul>
 </div>
 </div>
