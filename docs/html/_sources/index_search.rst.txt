@@ -70,6 +70,13 @@ Go to the WEBPROJECT directory and use the manage.py
 * Rebuilding the index can be faster if you increase the number of workers (-k).
 
 
+The Elasticsearch server has a 10,000 results limit by default. In most cases it will not affect the results since they are paginated. The links to export .tsv or .fasta files might truncated the results because of this limit. You can increase it using the following command line:
+
+.. code-block:: bash
+
+   curl -XPUT "http://localhost:9200/haystack/_settings" -d '{ "index" : { "max_result_window" : 500000 } }' -H "Content-Type: application/json"
+
+
 Exporting the index to file
 ---------------------------
 

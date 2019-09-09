@@ -1,5 +1,6 @@
-{% if file_format == 'tsv' %}SO term	Feature ID	Display	Orthologous group
-{% for result in object_list %}{{ result.object.type.name }}	{{ result.uniquename }}	{{ result.object.get_display|default_if_none:'' }}	{{ result.object.get_orthologs_groups|safe|default_if_none:'' }}{% endfor %}
+{% if file_format == 'tsv' %}SO term	Feature ID	Display	Group
+{% for result in object_list %}{{ result.object.type.name }}	{{ result.uniquename }}	{{ result.object.get_display|default_if_none:'' }}	{% if result.object.type.name == 'polypeptide' %}{{ result.object.get_orthologous_group|default_if_none:'' }}{% elif result.object.type.name == 'mRNA' %}{{ result.object.get_coexpression_group|default_if_none:'' }}{% endif %}
+{% endfor %}
 {% elif file_format == 'fasta' %}{% for result in object_list %}{% if result.object.residues %}>{{ result.object.dbxref.accession }} {{ result.object.get_display|default_if_none:'' }}
 {{ result.object.residues }}
 {% endif %}{% endfor %}
