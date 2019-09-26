@@ -45,3 +45,9 @@ def remove_facet(context, *args):
 def get_item(self, key):
     """Return the dictionary value."""
     return self.get(key)
+
+
+@register.filter
+def get_count(self, key):
+    """Return the dictionary value."""
+    return len(self.get(key))

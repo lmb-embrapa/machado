@@ -18,10 +18,10 @@
 {% with facets.fields|get_item:facet as exists %}
 {% if exists %}
 
-<div class="card">
+<div class="card mb-2">
     <div class="card-header">
     {% with facet_fields_desc|get_item:facet as facet_description %}
-    <div class="row" title="{{ facet_description }}">
+    <div class="row">
         <div class="col">
             <b>
             {% if facet == "so_term" %}
@@ -32,58 +32,88 @@
             </b>
         </div>
         <div class="col text-right">
-            <button class="btn btn-outline-primary btn-sm" type="submit"><small>Apply</small></button>
+			<div class="btn-group" role="group">
+				<button class="btn btn-sm btn-light" type="submit" title="{{ facet_description }}"><small>apply</small></button>
+				{% if facet in selected_facets_fields %}
+				<a class="btn btn-sm btn-light" type="link" title="Remove filter" href="?{% remove_facet facet %}"><small>remove</small></a>
+				{%endif%}
+			</div>
         </div>
     </div>
     {% endwith %}
     </div>
-    <div class="card-body">
-    {% for item in facets.fields|get_item:facet|dictsort:0 %}
-        {% with facet_item=facet|add:":"|add:item.0 %}
-        {% if facet == "organism" %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
-            <i>{{ item.0|capfirst }}</i>
-        {% elif facet == "orthology" %}
-            {% if item.0 == 0 %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:0" in selected_facets %}checked{% endif %}>
-            no orthology
-            {% else %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:1" in selected_facets %}checked{% endif %}>
-            orthology
-            {% endif %}
-        {% elif facet == "coexpression" %}
-            {% if item.0 == 0 %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:0" in selected_facets %}checked{% endif %}>
-            no coexpression groups
-            {% else %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:1" in selected_facets %}checked{% endif %}>
-            coexpression groups
-            {% endif %}
-        {% elif facet == "orthologs_coexpression" %}
-            {% if item.0 == 'false' %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:false" in selected_facets %}checked{% endif %}>
-            no coexpression
-            {% else %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:true" in selected_facets %}checked{% endif %}>
-            coexpression
-            {% endif %}
-        {% elif facet == "orthologs_biomaterial" %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
-            {{ item.0|capfirst }}
-        {% else %}
-            <input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
-            {{ item.0 }}
-        {% endif %}
-        {% endwith %}
-        <small>({{ item.1 }})</small><br />
-    {% endfor %}
-    </select>
-    {% if facet in selected_facets_fields %}
-    <small><a href="?{% remove_facet facet %}"><i class="far fa-trash-alt"></i> Remove filter</a><br /></small>
-    {% endif %}
-    </div>
+	<div class="card-body">
+	{% for item in facets.fields|get_item:facet|dictsort:0 %}
+		{% with facet_item=facet|add:":"|add:item.0 %}
+
+		<!-- hide items if there are more than 4 -->
+		{% if forloop.counter <= 4 or facet_item in selected_facets %}
+			<div class="container">
+		{% else %}
+			<div class="container collapse" id="machado-facet-item-{{ facet }}">
+		{% endif %}
+
+		{% if facet == "organism" %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
+			<i>{{ item.0|capfirst }}</i>
+		{% elif facet == "orthology" %}
+			{% if item.0 == 0 %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:0" in selected_facets %}checked{% endif %}>
+			no orthology
+			{% else %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:1" in selected_facets %}checked{% endif %}>
+			orthology
+			{% endif %}
+		{% elif facet == "coexpression" %}
+			{% if item.0 == 0 %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:0" in selected_facets %}checked{% endif %}>
+			no coexpression groups
+			{% else %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:1" in selected_facets %}checked{% endif %}>
+			coexpression groups
+			{% endif %}
+		{% elif facet == "orthologs_coexpression" %}
+			{% if item.0 == 'false' %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:false" in selected_facets %}checked{% endif %}>
+			no coexpression
+			{% else %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:true" in selected_facets %}checked{% endif %}>
+			coexpression
+			{% endif %}
+		{% elif facet == "orthologs_biomaterial" %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
+			{{ item.0|capfirst }}
+		{% else %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
+			{{ item.0 }}
+		{% endif %}
+		{% endwith %}
+		<small>({{ item.1 }})</small><br />
+		</div>
+	{% endfor %}
+	</div>
+	{% if facets.fields|get_count:facet > 4 %}
+		<div class="card-footer text-center py-0">
+			<a role="button" class="collapsed" data-toggle="collapse" href="#machado-facet-item-{{ facet }}" onclick="machadoToggleText(this)"><i class="fas fa-caret-down"></i></a>
+		</div>
+	{% endif %}
 </div>
 {% endif %}
 {% endwith %}
 {% endfor %}
 </form>
+
+<script>
+function machadoToggleText(x) {
+  ec = x.childNodes[0].classList;
+  down = 'fa-caret-down';
+  up = 'fa-caret-up';
+  if (ec.contains(down)) {
+  	ec.remove(down);
+  	ec.add(up);
+  } else {
+  	ec.remove(up);
+  	ec.add(down);
+  }
+}
+</script>
