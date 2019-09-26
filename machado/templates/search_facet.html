@@ -102,18 +102,3 @@
 {% endwith %}
 {% endfor %}
 </form>
-
-<script>
-function machadoToggleText(x) {
-  ec = x.childNodes[0].classList;
-  down = 'fa-caret-down';
-  up = 'fa-caret-up';
-  if (ec.contains(down)) {
-  	ec.remove(down);
-  	ec.add(up);
-  } else {
-  	ec.remove(up);
-  	ec.add(down);
-  }
-}
-</script>
