@@ -162,26 +162,6 @@
   </div>
   {% endif %}
 
-  {% if data.orthologs %}
-  <div class="card m-1">
-    <div class="card-header">
-        <h3 class="card-title">Orthologs</h3>
-    </div>
-    <div class="card-body">
-      <div class="card-text">
-        {% for group_id, group in data.orthologs.items %}
-            <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-secondary">Orthologous group: <a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ group_id }}">{{ group_id }}</a></li>
-            {% for ortholog in group  %}
-            <li class="list-group-item">{{ ortholog.type.name }}: <a href="{% url 'feature'%}?feature_id={{ ortholog.feature_id|safe }}">{{ ortholog.uniquename }}</a> {{ ortholog.get_display|default_if_none:'' }} (<i>{{ ortholog.organism.genus }} {{ ortholog.organism.species }}</i>)</li>
-            {% endfor %}
-            </ul>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
   {% if feature.get_expression_samples %}
   <div class="card m-1">
     <div class="card-header">
@@ -225,12 +205,40 @@
   </div>
   {% endif %}
 
+  {% if data.orthologs %}
+  <div class="card m-1">
+    <div class="card-header">
+        <h3 class="card-title">
+        <a data-toggle="collapse" href="#collapseOrthologs" role="button" aria-expanded="false" aria-controls="collapseOrthologs">
+			Orthologs
+		</a>
+		</h3>
+    </div>
+    <div class="card-body collapse" id="collapseOrthologs">
+      <div class="card-text">
+        {% for group_id, group in data.orthologs.items %}
+            <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-secondary">Orthologous group: <a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ group_id }}">{{ group_id }}</a></li>
+            {% for ortholog in group  %}
+            <li class="list-group-item">{{ ortholog.type.name }}: <a href="{% url 'feature'%}?feature_id={{ ortholog.feature_id|safe }}">{{ ortholog.uniquename }}</a> {{ ortholog.get_display|default_if_none:'' }} (<i>{{ ortholog.organism.genus }} {{ ortholog.organism.species }}</i>)</li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if feature.residues %}
   <div class="card m-1">
     <div class="card-header">
-        <h3 class="card-title">Sequence</h3>
+        <h3 class="card-title">
+        <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq">
+			Sequence
+		</a>
+		</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body collapse" id="collapseSeq">
       <div class="card-text text-monospace">
           <small>{{ feature.residues}}</small>
       </div>
@@ -241,9 +249,13 @@
   {% if data.pubs %}
   <div class="card m-1">
     <div class="card-header">
-        <h3 class="card-title">Publications</h3>
+        <h3 class="card-title">
+        <a data-toggle="collapse" href="#collapsePub" role="button" aria-expanded="false" aria-controls="collapsePub">
+			Publications
+		</a>
+		</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body collapse" id="collapsePub">
       <div class="card-text">
         <ul class="list-group">
         {% for pub in data.pubs %}
@@ -260,6 +272,7 @@
   </div>
   {% endif %}
 
+  <br />
 
 {% else %}
   {{ feature.error }}
