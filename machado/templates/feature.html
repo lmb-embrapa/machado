@@ -107,7 +107,7 @@
         {% endif %}
 
         {% if data.protein_matches %}
-	    <div class="tab-pane fade" id="iprscan" role="tabpanel" aria-labelledby="iprscan-tab">
+		<div class="tab-pane fade {% if not data.cvterm %}show active{% endif %}" id="iprscan" role="tabpanel" aria-labelledby="iprscan-tab">
         <table class="table table-sm table-hover">
           <thead>
             <tr>
