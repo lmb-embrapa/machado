@@ -30,6 +30,9 @@
             {{ facet|capfirst }}
             {% endif %}
             </b>
+			{% if facets.fields|get_count:facet > 4 %}
+			<small>({{ facets.fields|get_count:facet }})</small>
+			{% endif %}
         </div>
         <div class="col text-right">
 			<div class="btn-group" role="group">
