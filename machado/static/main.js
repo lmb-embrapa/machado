@@ -7,7 +7,7 @@
  */
 
 function machadoToggleText(x) {
-  ec = x.childNodes[0].classList;
+  ec = x.getElementsByClassName('fas')[0].classList;
   down = 'fa-caret-down';
   up = 'fa-caret-up';
   if (ec.contains(down)) {
