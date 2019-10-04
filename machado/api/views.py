@@ -7,6 +7,9 @@
 """Views."""
 
 from django.core.exceptions import ObjectDoesNotExist
+
+from haystack.query import SearchQuerySet
+
 from rest_framework import viewsets, mixins
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
@@ -16,6 +19,7 @@ from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
+from machado.api.serializers import autocompleteSerializer
 from machado.loaders.common import retrieve_organism
 from machado.models import Feature, Featureloc
 
@@ -161,3 +165,21 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         response = super(JBrowseFeatureViewSet, self).list(request, *args, **kwargs)
         response.data = {"features": response.data}
         return response
+
+
+class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """API endpoint to provide autocomplete hits."""
+
+    renderer_classes = (JSONRenderer,)
+    serializer_class = autocompleteSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        max_items = 10
+        request = self.request
+        if request.GET.get('q') is not None:
+            query = request.GET.get('q')
+            queryset = SearchQuerySet().filter(content=query)[:max_items]
+            return queryset
+        else:
+         return None

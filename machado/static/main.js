@@ -18,3 +18,18 @@ function machadoToggleText(x) {
   	ec.add(down);
   }
 }
+
+
+$( function() {
+  $( "#q" ).autocomplete({
+    source: function( request, response ) {
+      $.ajax( {
+        url: "{{ request.build_absolute_uri }}/api/autocomplete",
+        data: { q: request.term	},
+        success: function( data ) {	response(data); },
+        minLength: 2,
+      } );
+	}
+  });
+} );
+

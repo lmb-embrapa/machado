@@ -17,7 +17,6 @@ try:
 except AttributeError:
     CACHE_TIMEOUT = 60 * 60
 
-
 urlpatterns = [url(r"api/", include("machado.api.urls"))]
 
 if "haystack" in settings.INSTALLED_APPS:
