@@ -152,7 +152,6 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the display."""
         return obj.get_display()
 
-
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
@@ -177,3 +176,11 @@ class JBrowseRefseqSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         """Get the name."""
         return obj.uniquename
+
+class autocompleteSerializer(serializers.Serializer):
+    """autocomplete search serializer."""
+
+    autocomplete = serializers.CharField()
+
+    def to_representation(self, obj):
+        return obj.autocomplete
