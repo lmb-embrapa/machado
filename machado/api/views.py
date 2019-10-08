@@ -178,14 +178,17 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         """Get queryset."""
         max_items = 10
         request = self.request
-        if request.GET.get('q') is not None:
-            query = request.GET.get('q')
-            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items*100]
+        query = request.GET.get('q')
+        if query is not None:
+            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items*10]
             result = set()
-            for i in queryset:
+            for item in queryset:
                 try:
-                    regex = r"\S*" + escape(query) + "\S*(\s*\S*){2}"
-                    result.add(search(regex, i.autocomplete, IGNORECASE).group())
+                    aux = set()
+                    for i in query.split(" "):
+                        regex = r"\S*" + escape(i) + "\S*\s*\S*"
+                        aux.add(search(regex, item.autocomplete, IGNORECASE).group())
+                    result.add(" ".join(aux))
                 except AttributeError:
                     pass
             return list(result)[:max_items]
