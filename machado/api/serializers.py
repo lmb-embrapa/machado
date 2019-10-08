@@ -183,4 +183,4 @@ class autocompleteSerializer(serializers.Serializer):
     autocomplete = serializers.CharField()
 
     def to_representation(self, obj):
-        return obj.autocomplete
+        return obj
