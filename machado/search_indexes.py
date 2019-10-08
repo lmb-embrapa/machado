@@ -86,19 +86,18 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text(self, obj):
         """Prepare text."""
-        keywords = list()
+        keywords = set()
 
         # Featureprop: display or product or description or note (in that order)
         if obj.get_display():
-            keywords.append(obj.get_display())
+            keywords.add(obj.get_display())
 
         # GO terms
         feature_cvterm = FeatureCvterm.objects.filter(feature=obj)
         for i in feature_cvterm:
-            keywords.append(
-                "{}:{}".format(i.cvterm.dbxref.db.name, i.cvterm.dbxref.accession)
-            )
-            keywords.append(i.cvterm.name)
+            term = "{}:{}".format(i.cvterm.dbxref.db.name, i.cvterm.dbxref.accession)
+            keywords.add(term)
+            keywords.add(i.cvterm.name)
 
         # Protein matches
         feature_relationships = FeatureRelationship.objects.filter(
@@ -107,18 +106,18 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             subject__type__cv__name="sequence",
         )
         for feature_relationship in feature_relationships:
-            keywords.append(feature_relationship.subject.uniquename)
+            keywords.add(feature_relationship.subject.uniquename)
             if feature_relationship.subject.name is not None:
-                keywords.append(feature_relationship.subject.name)
+                keywords.add(feature_relationship.subject.name)
 
         # Expression samples
         for sample in obj.get_expression_samples():
-            keywords.append(sample.get("assay_name"))
-            keywords.append(sample.get("biomaterial_name"))
+            keywords.add(sample.get("assay_name"))
+            keywords.add(sample.get("biomaterial_name"))
             for i in sample.get("biomaterial_description").split(" "):
-                keywords.append(i)
+                keywords.add(i)
             for i in sample.get("treatment_name").split(" "):
-                keywords.append(i)
+                keywords.add(i)
 
         self.temp = " ".join(keywords)
         return " ".join(keywords)
@@ -214,4 +213,4 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
-        return self.temp
+        return '{} {} {} {}'.format(obj.organism.genus, obj.organism.species, obj.uniquename, self.temp)
