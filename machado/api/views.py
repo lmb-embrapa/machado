@@ -178,7 +178,7 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         """Get queryset."""
         max_items = 10
         request = self.request
-        query = request.GET.get('q')
+        query = request.GET.get('q').strip()
         if query is not None:
             queryset = SearchQuerySet().filter(autocomplete=query)[:max_items*10]
             result = set()
