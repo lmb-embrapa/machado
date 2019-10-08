@@ -23,6 +23,7 @@ from machado.api.serializers import autocompleteSerializer
 from machado.loaders.common import retrieve_organism
 from machado.models import Feature, Featureloc
 
+from re import escape, search, IGNORECASE
 
 class StandardResultSetPagination(PageNumberPagination):
     """Set the pagination parameters."""
@@ -179,7 +180,14 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         request = self.request
         if request.GET.get('q') is not None:
             query = request.GET.get('q')
-            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items]
-            return queryset
+            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items*100]
+            result = set()
+            for i in queryset:
+                try:
+                    regex = r"\S*" + escape(query) + "\S*(\s*\S*){2}"
+                    result.add(search(regex, i.autocomplete, IGNORECASE).group())
+                except AttributeError:
+                    pass
+            return list(result)[:max_items]
         else:
          return None

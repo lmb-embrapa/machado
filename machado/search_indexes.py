@@ -22,7 +22,7 @@ VALID_PROGRAMS = (
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
-    """Transcript index."""
+    """Feature index."""
 
     text = indexes.CharField(document=True, null=True)
     autocomplete = indexes.EdgeNgramField(null=True)
@@ -213,4 +213,4 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
-        return '{} {} {} {}'.format(obj.organism.genus, obj.organism.species, obj.uniquename, self.temp)
+        return '{} {} {}'.format(obj.organism.genus, obj.organism.species, self.temp)
