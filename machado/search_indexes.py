@@ -22,7 +22,7 @@ VALID_PROGRAMS = (
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
-    """Transcript index."""
+    """Feature index."""
 
     text = indexes.CharField(document=True, null=True)
     autocomplete = indexes.EdgeNgramField(null=True)
