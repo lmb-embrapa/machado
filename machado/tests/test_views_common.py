@@ -11,13 +11,14 @@ from datetime import datetime, timezone
 from django.test import TestCase, RequestFactory
 from django.urls.exceptions import NoReverseMatch
 
-from machado.models import Db, Dbxref, Cv, Cvterm, Organism
+from machado.models import Db, Dbxref, Cv, Cvterm
+from machado.models import Organism, OrganismPub, Pub, PubDbxref
 from machado.models import Feature
 from machado.views import common
 
 
 class DataSummaryTest(TestCase):
-    """Tests Feature View."""
+    """Tests Data Summary View."""
 
     def test_get(self):
         """Tests - get."""
@@ -217,10 +218,86 @@ class DataSummaryTest(TestCase):
             timeaccessioned=datetime.now(timezone.utc),
             timelastmodified=datetime.now(timezone.utc),
         )
+        test_pub = Pub.objects.create(
+            type=chromosome_cvterm,
+            uniquename="Test2018",
+            title="Test Title",
+            pyear="2018",
+            pages="2000",
+            series_name="Journal of Testing",
+        )
+        doi_db = Db.objects.create(name="DOI")
+        doi_dbxref = Dbxref.objects.create(accession="10.1186/s12864-016-2535-300002", db=doi_db)
+        PubDbxref.objects.create(pub=test_pub, dbxref=doi_dbxref, is_current=True)
+
+        OrganismPub.objects.create(organism=self.organism1, pub=test_pub)
 
         request = self.factory.get("/data/")
         ds = common.DataSummaryView()
         response = ds.get(request)
+
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "assembly: 1 <br />")
         self.assertContains(response, "assembly: 2 <br />")
+        self.assertContains(response, "10.1186/s12864-016-2535-300002")
+
+
+class CongratsTest(TestCase):
+    """Tests Congrats View."""
+
+    def test_get(self):
+        """Tests - get."""
+        self.factory = RequestFactory()
+
+        so_db = Db.objects.create(name="SO")
+        so_cv = Cv.objects.create(name="sequence")
+        chromosome_dbxref = Dbxref.objects.create(accession="chromosome", db=so_db)
+        chromosome_cvterm = Cvterm.objects.create(
+            name="chromosome",
+            cv=so_cv,
+            dbxref=chromosome_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
+        test_organism = Organism.objects.create(genus="Arabidopsis", species="thaliana")
+        Feature.objects.create(
+            organism=test_organism,
+            uniquename="chr1",
+            is_analysis=False,
+            type=chromosome_cvterm,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc),
+        )
+        Pub.objects.create(
+            type=chromosome_cvterm,
+            uniquename="Test2018",
+            title="Test Title",
+            pyear="2018",
+            pages="2000",
+            series_name="Journal of Testing",
+        )
+
+        request = self.factory.get("/home/")
+        ds = common.CongratsView()
+        try:
+            response = ds.get(request)
+        except NoReverseMatch:
+            return
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Controlled Vocabularies <span class="badge badge-primary badge-pill">1</span>',
+        )
+        self.assertContains(
+            response, 'Organisms <span class="badge badge-primary badge-pill">1</span>'
+        )
+        self.assertContains(
+            response, 'Features <span class="badge badge-primary badge-pill">1</span>'
+        )
+        self.assertContains(
+            response,
+            'Publications <span class="badge badge-primary badge-pill">1</span>',
+        )

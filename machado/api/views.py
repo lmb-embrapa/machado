@@ -186,7 +186,7 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 try:
                     aux = set()
                     for i in query.split(" "):
-                        regex = r"\S*" + escape(i) + "\S*\s*\S*"
+                        regex = r"\w*" + escape(i) + "\w*\s*\w*"
                         aux.add(search(regex, item.autocomplete, IGNORECASE).group())
                     result.add(" ".join(aux))
                 except AttributeError:
