@@ -17,12 +17,14 @@ try:
 except AttributeError:
     CACHE_TIMEOUT = 60 * 60
 
-urlpatterns = [url(r"api/", include("machado.api.urls"))]
-
 if "haystack" in settings.INSTALLED_APPS:
     from machado.views import feature, search
 
-    urlpatterns += [
+    urlpatterns = [
+        url(
+            r"api/",
+            include("machado.api.urls")
+        ),
         url(
             r"feature/",
             cache_page(CACHE_TIMEOUT)(feature.FeatureView.as_view()),
@@ -46,7 +48,7 @@ if "haystack" in settings.INSTALLED_APPS:
         url(r"^$", cache_page(CACHE_TIMEOUT)(common.HomeView.as_view()), name="home"),
     ]
 else:
-    urlpatterns += [
+    urlpatterns = [
         url(
             r"^$", cache_page(CACHE_TIMEOUT)(common.CongratsView.as_view()), name="home"
         )
