@@ -37,7 +37,7 @@ setup(
         "tqdm>=4.19.5",
         "typing>=3.6.4",
         "bibtexparser>=1.0.1",
-        "djangorestframework==3.9.2",
+        "djangorestframework==3.9.1",
         "drf-nested-routers>-0.90.2",
         "coreapi>=2.3.3",
         "django-cors-headers>=2.4.0",
