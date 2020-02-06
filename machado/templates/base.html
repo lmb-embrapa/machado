@@ -32,7 +32,7 @@
   <script src="{% static 'main.js' %}"></script>
 
 
-  <header class="bg-light">
+  <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 
       <a class="navbar-brand" href="{% url 'home' %}"><h3>machado</h3></a>
@@ -47,11 +47,21 @@
             <a class="nav-link" href="{% url 'data_numbers' %}">Data summary</a>
           </li>
           <li>
-          {% include "search_form.html" %}
+            <a class="nav-link" href="https://github.com/lmb-embrapa/machado" target="_blank">About</a>
           </li>
+          <li>
+            <a class="nav-link" href="https://github.com/lmb-embrapa/machado" target="_blank">About</a>
+		  </li>
         </ul>
       </div>
     </nav>
+	<div class="container-fluid bg-secondary" name="search-bar">
+      <div class="row justify-content-center">
+		<div class="col col-sm-4 mt-3">
+            {% include "search_form.html" %}
+	    </div>
+      </div>
+	</div>
   </header>
 
   <div class="container-fluid" name="content">
