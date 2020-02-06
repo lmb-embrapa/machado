@@ -28,7 +28,6 @@ addons:
     packages:
     - samtools
     - pandoc
-    - cython3
 
 script:
   - python setup.py install
