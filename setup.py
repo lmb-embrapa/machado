@@ -30,6 +30,7 @@ setup(
     ],
     scripts=["bin/fixChadoModel.py"],
     install_requires=[
+        "Cython>=0.29.7",
         "django>=2.0.1",
         "psycopg2-binary>=2.7.4",
         "biopython>=1.72",
@@ -38,7 +39,7 @@ setup(
         "tqdm>=4.19.5",
         "typing>=3.6.4",
         "bibtexparser>=1.0.1",
-        "djangorestframework==3.9.0",
+        "djangorestframework==3.9.1",
         "drf-nested-routers>-0.90.2",
         "coreapi>=2.3.3",
         "django-cors-headers>=2.4.0",
