@@ -31,6 +31,7 @@
             </div>
             <table class="table table-hover table-sm">
             <tr>
+                <th>Feature Type</th>
                 <th>Feature ID</th>
                 <th>Relationship</th>
                 <th>Display</th>
@@ -39,12 +40,13 @@
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
+                <td>{{ result.object.type.name }}</td>
                 <td>
-                    <a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>:{{ result.object.type.name }}
+                    <a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>
                 </td>
                 <td>
                     {% for relationship in result.object.get_relationship %}
-                        <a href="{% url 'feature' %}?feature_id={{ relationship.feature_id|safe }}">{{ relationship.uniquename }}</a>:{{ relationship.type.name }} 
+                        <a href="{% url 'feature' %}?feature_id={{ relationship.feature_id|safe }}">{{ relationship.type.name }}</a>
                     {% endfor %}
                 </td>
                 <td>{{ result.object.get_display|default_if_none:'' }}</td>
