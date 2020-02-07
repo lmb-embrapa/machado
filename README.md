@@ -3,7 +3,7 @@
 
 # machado
 
-machado is a Django app that contains tools to interact with a Chado database.
+machado is a Django application that contains tools to interact with a Chado database.
 It provides users with a framework to store, search and visualize biological data.
 Detailed documentation can be found in the **docs** directory ([Read the docs](http://machado.readthedocs.io)).
 
