@@ -15,18 +15,18 @@ from machado.api import views
 router = routers.SimpleRouter(trailing_slash=False)
 
 router.register(
-    r"jbrowse/stats/global", views.JBrowseGlobalViewSet, base_name="jbrowse_global"
+    r"jbrowse/stats/global", views.JBrowseGlobalViewSet, basename="jbrowse_global"
 )
 router.register(
     r"jbrowse/features/(?P<refseq>.+)",
     views.JBrowseFeatureViewSet,
-    base_name="jbrowse_features",
+    basename="jbrowse_features",
 )
-router.register(r"jbrowse/names", views.JBrowseNamesViewSet, base_name="jbrowse_names")
+router.register(r"jbrowse/names", views.JBrowseNamesViewSet, basename="jbrowse_names")
 router.register(
-    r"jbrowse/refSeqs.json", views.JBrowseRefSeqsViewSet, base_name="jbrowse_refseqs"
+    r"jbrowse/refSeqs.json", views.JBrowseRefSeqsViewSet, basename="jbrowse_refseqs"
 )
-router.register(r"autocomplete", views.autocompleteViewSet, base_name="autocomplete")
+router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomplete")
 urlpatterns = [
     url(r"", include_docs_urls(title="machado API")),
     url(r"", include(router.urls)),
