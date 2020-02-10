@@ -14,6 +14,20 @@
 
 <h3>Filters</h3>
 
+
+{% if selected_facets %}
+<div class="card mb-2">
+    <div class="card-header">
+      <b>Selected filters</b>
+    </div>
+	<div class="card-body">
+	{% for facet_field in selected_facets %}
+      <a title="Remove filter" href="?{% remove_facet_field facet_field %}">{{ facet_field }} <i class="fa fa-times" aria-hidden="true"></i></a><br />
+	{%endfor%}
+	</div>
+</div>
+{%endif%}
+
 {% for facet in facet_fields_order %}
 {% with facets.fields|get_item:facet as exists %}
 {% if exists %}

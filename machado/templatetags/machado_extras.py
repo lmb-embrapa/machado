@@ -41,6 +41,21 @@ def remove_facet(context, *args):
     return params.urlencode()
 
 
+@register.simple_tag(takes_context=True)
+def remove_facet_field(context, *args):
+    """Return the encoded URL parameters. Remove facet field."""
+    params = context["request"].GET.copy()
+
+    for facet_field in args:
+        params_new = list()
+        for i in params.getlist("selected_facets"):
+            if not i.startswith(facet_field):
+                params_new.append(i)
+        params.setlist("selected_facets", params_new)
+
+    return params.urlencode()
+
+
 @register.filter
 def get_item(self, key):
     """Return the dictionary value."""
