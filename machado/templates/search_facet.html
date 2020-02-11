@@ -21,6 +21,9 @@
       <b>Selected filters</b>
     </div>
 	<div class="card-body">
+	{% if query %}
+	  <a title="Remove query" href="?{% remove_query %}">search:{{ query }} <i class="fa fa-times" aria-hidden="true"></i></a><br />
+	{% endif %}
 	{% for facet_field in selected_facets %}
 	  <a title="Remove filter" href="?{% remove_facet_field facet_field %}">
 	  {% if facet_field == "orthology:0" %}

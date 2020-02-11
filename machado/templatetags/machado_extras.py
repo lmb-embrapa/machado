@@ -26,6 +26,14 @@ def param_replace(context, **kwargs):
 
 
 @register.simple_tag(takes_context=True)
+def remove_query(context, *args):
+    """Return the encoded URL parameters. Remove query."""
+    params = context["request"].GET.copy()
+    params.setlist("q", "")
+    return params.urlencode()
+
+
+@register.simple_tag(takes_context=True)
 def remove_facet(context, *args):
     """Return the encoded URL parameters. Remove facet."""
     params = context["request"].GET.copy()
