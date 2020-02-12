@@ -16,7 +16,7 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     include_package_data=True,
-    license="BSD License",
+    license="GPL License",
     description="machado is a Django app that contains tools to interact "
     "with a Chado database.",
     long_description=README,
@@ -24,9 +24,10 @@ setup(
     author="Adhemar",
     author_email="azneto@gmail.com",
     classifiers=[
-        "Environment :: Command Line",
-        "Framework :: Django",
-        "Programming Language :: Python" "Programming Language :: Python :: 3",
+        "Environment :: Console",
+        "Framework :: Django :: 2.2",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Programming Language :: Python :: 3",
     ],
     scripts=["bin/fixChadoModel.py"],
     install_requires=[
