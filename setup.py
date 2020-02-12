@@ -17,12 +17,11 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     license="GPL License",
-    description="machado is a Django app that contains tools to interact "
-    "with a Chado database.",
+    description="This library provides users with a framework to store, search and visualize biological data.",
     long_description=README,
-    url="https://bitbucket.org/azneto/djangochado",
-    author="Adhemar",
-    author_email="azneto@gmail.com",
+    url="https://github.com/lmb-embrapa/machado",
+    author="LMB",
+    author_email="",
     classifiers=[
         "Environment :: Console",
         "Framework :: Django :: 2.2",
