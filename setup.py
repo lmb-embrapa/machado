@@ -13,16 +13,15 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name="machado",
-    version="0.1.0",
+    version="0.1.1",
     packages=find_packages(),
     include_package_data=True,
     license="GPL License",
-    description="machado is a Django app that contains tools to interact "
-    "with a Chado database.",
+    description="This library provides users with a framework to store, search and visualize biological data.",
     long_description=README,
-    url="https://bitbucket.org/azneto/djangochado",
-    author="Adhemar",
-    author_email="azneto@gmail.com",
+    url="https://github.com/lmb-embrapa/machado",
+    author="LMB",
+    author_email="",
     classifiers=[
         "Environment :: Console",
         "Framework :: Django :: 2.2",
