@@ -39,13 +39,14 @@ class Command(BaseCommand):
                 "Deleting {} and every child" "record (CASCADE)".format(name)
             )
 
-        try:
-            cvterm_contained_in = Cvterm.objects.get(
-                name="contained in", cv__name="relationship"
-            )
-            analysisprop_list = Analysisprop.objects.filter(
-                value=name, type_id=cvterm_contained_in.cvterm_id
-            )
+        cvterm_contained_in = Cvterm.objects.get(
+            name="contained in", cv__name="relationship"
+        )
+        analysisprop_list = Analysisprop.objects.filter(
+            value=name, type_id=cvterm_contained_in.cvterm_id
+        )
+
+        if analysisprop_list.count() > 0:
 
             for analysisprop in tqdm(
                 analysisprop_list,
@@ -98,5 +99,5 @@ class Command(BaseCommand):
                 analysis.delete()
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS("Done"))
-        except ObjectDoesNotExist:
+        else:
             raise CommandError("Cannot remove {} (not registered)".format(name))
