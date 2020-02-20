@@ -158,7 +158,7 @@ class FeatureTest(TestCase):
         )
 
         self.organism1 = Organism.objects.create(genus="Mus", species="musculus")
-        multispecies_organism = Organism.objects.create(
+        multispecies_organism, created = Organism.objects.get_or_create(
             genus="multispecies", species="multispecies"
         )
 

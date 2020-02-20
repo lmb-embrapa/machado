@@ -31,7 +31,7 @@ class CoexpressionTest(TestCase):
     subtracted from 0.7 (PCC - 0.7). To obtain the original PCC value,
     it must be added 0.7 to every value of the third column."""
         # register multispecies organism
-        test_organism = Organism.objects.create(
+        test_organism, created = Organism.objects.get_or_create(
             abbreviation="multispecies",
             genus="multispecies",
             species="multispecies",

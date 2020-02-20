@@ -32,7 +32,7 @@ class AnalysisTest(TestCase):
     def test_store_analysis(self):
         """Run Tests ."""
         # register multispecies organism
-        test_organism = Organism.objects.create(
+        test_organism, created = Organism.objects.get_or_create(
             abbreviation="multispecies",
             genus="multispecies",
             species="multispecies",

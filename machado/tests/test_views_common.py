@@ -292,7 +292,7 @@ class CongratsTest(TestCase):
             'Controlled Vocabularies <span class="badge badge-primary badge-pill">1</span>',
         )
         self.assertContains(
-            response, 'Organisms <span class="badge badge-primary badge-pill">1</span>'
+            response, 'Organisms <span class="badge badge-primary badge-pill">2</span>'
         )
         self.assertContains(
             response, 'Features <span class="badge badge-primary badge-pill">1</span>'

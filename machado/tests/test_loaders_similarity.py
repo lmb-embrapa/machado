@@ -43,7 +43,7 @@ class SimilarityTest(TestCase):
         )
 
         test_organism = Organism.objects.create(genus="Mus", species="musculus")
-        test_organism2 = Organism.objects.create(
+        test_organism2, created = Organism.objects.get_or_create(
             abbreviation="multispecies",
             genus="multispecies",
             species="multispecies",
