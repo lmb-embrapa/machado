@@ -23,8 +23,8 @@ function machadoToggleText(x) {
 $( function() {
   $( "#q" ).autocomplete({
     source: function( request, response ) {
-      $.ajax( {
-        url: "{{ request.build_absolute_uri }}/api/autocomplete",
+	  $.ajax( {
+	    url: "api/autocomplete",
         data: { q: request.term	},
         success: function( data ) {	response(data); },
 		minLength: 2,
