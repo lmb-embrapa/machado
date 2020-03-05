@@ -50,9 +50,8 @@ class FeatureSearchView(FacetedSearchView):
             facet_field, facet_query = facet.split(":")
             if facet_field == 'so_term':
                 so_term_count += 1
-            if facet_field not in ["orthologous_group", "coexpression_group"]:
-                selected_facets_fields.append(facet_field)
-                selected_facets.append(facet)
+            selected_facets_fields.append(facet_field)
+            selected_facets.append(facet)
 
         context["so_term_count"] = so_term_count
 
