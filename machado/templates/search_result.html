@@ -23,7 +23,7 @@
                     <h3>Results</h3>
                 </div>
                 <div class="col text-right">
-                    {% if so_term_count == 1 %}
+                    {% if so_term_count == 1 or 'orthologous_group' in selected_facets_fields or 'coexpression_group' in selected_facets_fields %}
                         <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=tsv" title="Download TSV" onclick="return confirm('Download results in TSV format')"></a>
                         <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')"></a>
                     {% endif %}
