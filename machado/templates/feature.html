@@ -207,9 +207,9 @@
           {% for value in feature.get_expression_samples %}
             <tr>
               <td>{{ value.analysis__sourcename|safe }} </td>
-              <td>{{ value.assay_name|safe }}</td>
+			  <td><a href="https://www.ncbi.nlm.nih.gov/sra/?term={{ value.assay_name|safe }}" target="_blank">{{ value.assay_name|safe }}</a></td>
               <td>{{ value.assay_description|safe }}</td>
-              <td>{{ value.biomaterial_name|safe }}</td>
+			  <td><a href="https://www.ncbi.nlm.nih.gov/sra/?term={{ value.biomaterial_name|safe }}" target="_blank">{{ value.biomaterial_name|safe }}</a></td>
               <td>{{ value.biomaterial_description|safe }}</td>
               <td>{{ value.treatment_name|safe }}</td>
               <td>{{ value.normscore|safe|floatformat:2 }} </td>
