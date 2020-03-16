@@ -26,6 +26,7 @@ FACET_FIELDS = {
 class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
+    load_all=False
     form_class = FeatureSearchForm
     facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.html"

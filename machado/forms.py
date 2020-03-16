@@ -46,7 +46,7 @@ class FeatureSearchForm(FacetedSearchForm):
                     sqs = sqs.filter(query)
 
         if q == "":
-            return sqs.load_all()
+            return sqs
 
         result = sqs.filter(
             SQ(uniquename_exact=Exact(q))
