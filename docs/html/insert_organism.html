@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -145,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
         
-      <li>2.3. Inserting a new organism</li>
+      <li><span class="section-number">2.3. </span>Inserting a new organism</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,9 +167,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="inserting-a-new-organism">
-<h1>2.3. Inserting a new organism<a class="headerlink" href="#inserting-a-new-organism" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2.3. </span>Inserting a new organism<a class="headerlink" href="#inserting-a-new-organism" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="insert-organism">
-<h2>2.3.1. Insert organism<a class="headerlink" href="#insert-organism" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.3.1. </span>Insert organism<a class="headerlink" href="#insert-organism" title="Permalink to this headline">¶</a></h2>
 <p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
 These are instructions to insert a new organism to the database <strong>if you did NOT</strong> load the NCBI taxonomy or if the organism you’re working with is not included.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py insert_organism --genus <span class="s1">&#39;Organismus&#39;</span> --species <span class="s1">&#39;ineditus&#39;</span>
@@ -180,7 +180,7 @@ These are instructions to insert a new organism to the database <strong>if you d
 </ul>
 </div>
 <div class="section" id="remove-organism">
-<h2>2.3.2. Remove organism<a class="headerlink" href="#remove-organism" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.3.2. </span>Remove organism<a class="headerlink" href="#remove-organism" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove an organism you should use the command <em>remove_organism</em>. Most data files you’ll load depend on the organism record (eg. fasta, gff, blast). <strong>If you delete an organism, every data file you loaded that depend on it will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_organism --help
 </pre></div>
