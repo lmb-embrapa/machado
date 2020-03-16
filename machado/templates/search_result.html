@@ -31,30 +31,32 @@
             </div>
             <table class="table table-hover table-sm">
             <tr>
-                <th>Feature Type</th>
+				<th>Feature Type</th>
                 <th>Feature ID</th>
                 <th>Relationship</th>
                 <th>Display</th>
-                {% if orthologs %}<th>Orthologous Group</th>{% endif%}
-                {% if coexp_groups %}<th>Coexpression Group</th>{% endif%}
+                {% if orthologs %}<th>Orthologous Group</th>{% endif %}
+                {% if coexp_groups %}<th>Coexpression Group</th>{% endif %}
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
-                <td>{{ result.object.type.name }}</td>
+                <td>{{ result.so_term }}</td>
                 <td>
-                    <a href="{% url 'feature' %}?feature_id={{ result.object.feature_id|safe }}">{{ result.object.uniquename }}</a>
+                    <a href="{% url 'feature' %}?feature_id={{ result.pk|safe }}">{{ result.uniquename }}</a>
                 </td>
                 <td>
-                    {% for relationship in result.object.get_relationship %}
-                        <a href="{% url 'feature' %}?feature_id={{ relationship.feature_id|safe }}">{{ relationship.type.name }}</a>
-                    {% endfor %}
+					{% for relationship in result.relationship %}
+					  {% with relationship|split:" " as r_list %}
+					    <a href="{% url 'feature' %}?feature_id={{ r_list.0 }}">{{ r_list.1 }}</a>
+					  {% endwith %}
+					{% endfor %}
                 </td>
-                <td>{{ result.object.get_display|default_if_none:'' }}</td>
+                <td>{{ result.display|default_if_none:'' }}</td>
                 {% if orthologs %}
-                    <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.object.get_orthologous_group }}">{{ result.object.get_orthologous_group|default_if_none:'' }}</a></td>
+                    <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.orthologous_group }}">{{ result.orthologous_group|default_if_none:'' }}</a></td>
                 {% endif%}
                 {% if coexp_groups %}
-                    <td><a href="{% url 'feature_search' %}?selected_facets=coexpression_group:{{ result.object.get_coexpression_group }}">{{ result.object.get_coexpression_group|default_if_none:'' }}</a></td>
+                    <td><a href="{% url 'feature_search' %}?selected_facets=coexpression_group:{{ result.coexpression_group }}">{{ result.coexpression_group|default_if_none:'' }}</a></td>
                 {% endif%}
             </tr>
                 {% empty %}

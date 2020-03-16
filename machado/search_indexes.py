@@ -1,4 +1,4 @@
-# Copyright 2018 by Embrapa.  All rights reserved.
+    # Copyright 2018 by Embrapa.  All rights reserved.
 #
 # This code is part of the machado distribution and governed by its
 # license. Please see the LICENSE.txt and README.md files that should
@@ -31,6 +31,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     uniquename = indexes.CharField(model_attr="uniquename", faceted=True)
     name = indexes.CharField(model_attr="name", faceted=True, null=True)
     analyses = indexes.MultiValueField(faceted=True)
+    display = indexes.CharField(indexed=False)
+    relationship = indexes.MultiValueField(indexed=False)
     if Featureprop.objects.filter(
         type__name="orthologous group", type__cv__name="feature_property"
     ).exists():
@@ -210,6 +212,17 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             if have_coexp:
                 return True
         return False
+
+    def prepare_display(self, obj):
+        """Prepare display."""
+        return obj.get_display()
+
+    def prepare_relationship(self, obj):
+        """Prepare relationship."""
+        result = list()
+        for r in obj.get_relationship():
+            result.append('{} {}'.format(r.feature_id, r.type.name))
+        return result
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""

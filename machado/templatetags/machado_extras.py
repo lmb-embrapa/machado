@@ -74,3 +74,8 @@ def get_item(self, key):
 def get_count(self, key):
     """Return the dictionary value."""
     return len(self.get(key))
+
+
+@register.filter
+def split(value, arg):
+    return value.split(arg)
