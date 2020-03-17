@@ -66,9 +66,11 @@
 
                 <br />
 
-                {% if page_obj.has_previous or page_obj.has_next %}
-                <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-left">
+
+
+            {% if page_obj.has_previous or page_obj.has_next %}
+            <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-left">
                 <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
                     <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
                 </li>
@@ -86,7 +88,15 @@
                 </li>
             </ul>
             </nav>
-             {% endif %}
+            {% endif %}
+
+			Number of records:
+			<a href="?{% param_replace records=10 %}">10</a>
+			<a href="?{% param_replace records=50 %}">50</a>
+			<a href="?{% param_replace records=100 %}">100</a>
+			<a href="?{% param_replace records=500 %}">500</a>
+			<a href="?{% param_replace records=1000 %}">1000</a>
+
         </div>
      </div>
     {% else %}
