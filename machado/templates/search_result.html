@@ -31,12 +31,12 @@
             </div>
             <table class="table table-hover table-sm">
             <tr>
-				<th>Feature Type</th>
-                <th>Feature ID</th>
+				<th><a href="?{% param_replace order_by='so_term' %}">Feature Type</a></th>
+				<th><a href="?{% param_replace order_by='uniquename' %}">Feature ID</a></th>
                 <th>Relationship</th>
-                <th>Display</th>
-                {% if orthologs %}<th>Orthologous Group</th>{% endif %}
-                {% if coexp_groups %}<th>Coexpression Group</th>{% endif %}
+				<th><a href="?{% param_replace order_by='display' %}">Display</a></th>
+                {% if orthologs %}<th><a href="?{% param_replace order_by='orthologous_group' %}">Orthologous Group</a></th>{% endif %}
+				{% if coexp_groups %}<th><a href="?{% param_replace order_by='coexpression_group' %}">Coexpression Group</a></th>{% endif %}
             </tr>
             {% for result in page_obj.object_list %}
             <tr>

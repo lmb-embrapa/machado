@@ -37,8 +37,13 @@ class FeatureSearchView(FacetedSearchView):
         """Get queryset."""
         qs = super(FeatureSearchView, self).get_queryset(*args, **kwargs)
 
+        if self.request.GET.get('order_by'):
+            order_by_term = self.request.GET.get('order_by')
+        else:
+            order_by_term = "uniquename"
+
         for field in self.facet_fields:
-            qs = qs.facet(field, min_doc_count=0, size=100)
+            qs = qs.facet(field, min_doc_count=0, size=100).order_by('{}_exact'.format(order_by_term))
         return qs
 
     def get_context_data(self, *args, **kwargs):
@@ -47,6 +52,7 @@ class FeatureSearchView(FacetedSearchView):
         so_term_count = 0
         selected_facets = list()
         selected_facets_fields = list()
+        context["order_by_term"] = self.request.GET.get('order_by')
         for facet in self.get_form_kwargs()["selected_facets"]:
             facet_field, facet_query = facet.split(":")
             if facet_field == 'so_term':
