@@ -30,7 +30,6 @@ class FeatureSearchView(FacetedSearchView):
     form_class = FeatureSearchForm
     facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.html"
-    paginate_by = 50
     context_object_name = "object_list"
 
     def get_queryset(self, *args, **kwargs):
@@ -42,6 +41,11 @@ class FeatureSearchView(FacetedSearchView):
         else:
             order_by_term = "uniquename"
 
+        if self.request.GET.get('records'):
+            self.paginate_by = self.request.GET.get('records')
+        else:
+            self.paginate_by = 50
+
         for field in self.facet_fields:
             qs = qs.facet(field, min_doc_count=0, size=100).order_by('{}_exact'.format(order_by_term))
         return qs
@@ -52,7 +56,6 @@ class FeatureSearchView(FacetedSearchView):
         so_term_count = 0
         selected_facets = list()
         selected_facets_fields = list()
-        context["order_by_term"] = self.request.GET.get('order_by')
         for facet in self.get_form_kwargs()["selected_facets"]:
             facet_field, facet_query = facet.split(":")
             if facet_field == 'so_term':
