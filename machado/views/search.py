@@ -30,7 +30,6 @@ class FeatureSearchView(FacetedSearchView):
     form_class = FeatureSearchForm
     facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.html"
-    paginate_by = 50
     context_object_name = "object_list"
 
     def get_queryset(self, *args, **kwargs):
