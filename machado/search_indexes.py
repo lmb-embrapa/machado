@@ -31,7 +31,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     uniquename = indexes.CharField(model_attr="uniquename", faceted=True)
     name = indexes.CharField(model_attr="name", faceted=True, null=True)
     analyses = indexes.MultiValueField(faceted=True)
-    display = indexes.CharField(indexed=False)
+    display = indexes.CharField(faceted=True, null=True)
     relationship = indexes.MultiValueField(indexed=False)
     if Featureprop.objects.filter(
         type__name="orthologous group", type__cv__name="feature_property"
