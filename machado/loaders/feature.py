@@ -355,7 +355,7 @@ class FeatureLoader(object):
             )
 
     def generate_relationships(self, organism: str) -> None:
-        """Store the relationships."""
+        """Generate the relationship objects."""
         organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
         features = (
