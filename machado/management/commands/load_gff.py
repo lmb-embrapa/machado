@@ -127,7 +127,13 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write("Loading relationships")
 
-        feature_file.store_relationships(organism=organism)
+        relationships_obj = list()
+        for item in tqdm(
+            feature_file.generate_relationships(organism),
+            total=len(feature_file.relationships),
+        ):
+            relationships_obj.append(item)
+        feature_file.store_relationships(relationships_obj)
 
         if feature_file.ignored_attrs is not None:
             self.stdout.write(

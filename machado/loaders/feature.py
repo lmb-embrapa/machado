@@ -24,6 +24,7 @@ from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Featureprop, FeatureSynonym
 from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
+
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = [
@@ -353,33 +354,24 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def store_relationships(self, organism: str) -> None:
+    def generate_relationships(self, organism: str) -> None:
         """Store the relationships."""
         organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
-        relationships = list()
         features = (
             Feature.objects.filter(organism=organism_obj)
             .exclude(type=self.aa_cvterm)
-            .only("feature_id", "uniquename", "organism")
+            .only("feature_id", "uniquename")
         )
-        for i, item in enumerate(self.relationships):
+        for item in self.relationships:
             try:
                 # the aa features should be excluded since they were created
                 # using the same mRNA ID
-                object = features.get(
-                    uniquename=item["object_id"], organism=organism_obj
-                )
-                subject = features.get(
-                    uniquename=item["subject_id"], organism=organism_obj
-                )
-                relationships.append(
-                    FeatureRelationship(
-                        subject_id=subject.feature_id,
-                        object_id=object.feature_id,
-                        type_id=part_of.cvterm_id,
-                        rank=0,
-                    )
+                yield FeatureRelationship(
+                    subject_id=features.get(uniquename=item["subject_id"]).feature_id,
+                    object_id=features.get(uniquename=item["object_id"]).feature_id,
+                    type_id=part_of.cvterm_id,
+                    rank=0,
                 )
             except ObjectDoesNotExist:
                 print(
@@ -387,11 +379,10 @@ class FeatureLoader(object):
                         item["object_id"], item["subject_id"]
                     )
                 )
-            if i % 100000 == 0:
-                FeatureRelationship.objects.bulk_create(relationships)
-                relationships = list()
-        else:
-            FeatureRelationship.objects.bulk_create(relationships)
+
+    def store_relationships(self, relationships_obj: List[FeatureRelationship]) -> None:
+        """Store the relationships."""
+        FeatureRelationship.objects.bulk_create(relationships_obj)
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""
