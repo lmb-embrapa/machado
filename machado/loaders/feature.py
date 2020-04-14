@@ -354,35 +354,24 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def generate_relationships(self, organism: str) -> None:
-        """Generate the relationship objects."""
-        organism_obj = retrieve_organism(organism)
+    def store_relationship(self, subject_id: int, object_id: int) -> FeatureRelationship:
+        """Retrieve the relationship object."""
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
-        features = (
-            Feature.objects.filter(organism=organism_obj)
-            .exclude(type=self.aa_cvterm)
-            .only("feature_id", "uniquename")
-        )
-        for item in self.relationships:
-            try:
-                # the aa features should be excluded since they were created
-                # using the same mRNA ID
-                yield FeatureRelationship(
-                    subject_id=features.get(uniquename=item["subject_id"]).feature_id,
-                    object_id=features.get(uniquename=item["object_id"]).feature_id,
-                    type_id=part_of.cvterm_id,
-                    rank=0,
-                )
-            except ObjectDoesNotExist:
-                print(
-                    "Parent/Feature ({}/{}) not registered.".format(
-                        item["object_id"], item["subject_id"]
-                    )
-                )
 
-    def store_relationships(self, relationships_obj: List[FeatureRelationship]) -> None:
-        """Store the relationships."""
-        FeatureRelationship.objects.bulk_create(relationships_obj)
+        try:
+            fr = FeatureRelationship(
+                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id).feature_id,
+                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id).feature_id,
+                type_id=part_of.cvterm_id,
+                rank=0,
+            )
+            fr.save()
+        except ObjectDoesNotExist:
+            print(
+                "Parent/Feature ({}/{}) not registered.".format(
+                    object_id, subject_id
+                )
+            )
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""

@@ -127,13 +127,17 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write("Loading relationships")
 
-        relationships_obj = list()
-        for item in tqdm(
-            feature_file.generate_relationships(organism),
-            total=len(feature_file.relationships),
-        ):
-            relationships_obj.append(item)
-        feature_file.store_relationships(relationships_obj)
+        pool = ThreadPoolExecutor(max_workers=cpu)
+        tasks = list()
+
+        for item in feature_file.relationships:
+            tasks.append(
+                pool.submit(feature_file.store_relationship, item['subject_id'], item['object_id'])
+            )
+
+        for task in tqdm(as_completed(tasks), total=len(tasks)):
+            task.result()
+        pool.shutdown()
 
         if feature_file.ignored_attrs is not None:
             self.stdout.write(
