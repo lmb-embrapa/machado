@@ -24,6 +24,7 @@ from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Featureprop, FeatureSynonym
 from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
+
 # The following features are handled in a specific manner and should not
 # be included in VALID_ATTRS: id, name, and parent
 VALID_ATTRS = [
@@ -353,45 +354,24 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def store_relationships(self, organism: str) -> None:
-        """Store the relationships."""
-        organism_obj = retrieve_organism(organism)
+    def store_relationship(self, subject_id: int, object_id: int) -> FeatureRelationship:
+        """Retrieve the relationship object."""
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
-        relationships = list()
-        features = (
-            Feature.objects.filter(organism=organism_obj)
-            .exclude(type=self.aa_cvterm)
-            .only("feature_id", "uniquename", "organism")
-        )
-        for i, item in enumerate(self.relationships):
-            try:
-                # the aa features should be excluded since they were created
-                # using the same mRNA ID
-                object = features.get(
-                    uniquename=item["object_id"], organism=organism_obj
+
+        try:
+            fr = FeatureRelationship(
+                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id).feature_id,
+                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id).feature_id,
+                type_id=part_of.cvterm_id,
+                rank=0,
+            )
+            fr.save()
+        except ObjectDoesNotExist:
+            print(
+                "Parent/Feature ({}/{}) not registered.".format(
+                    object_id, subject_id
                 )
-                subject = features.get(
-                    uniquename=item["subject_id"], organism=organism_obj
-                )
-                relationships.append(
-                    FeatureRelationship(
-                        subject_id=subject.feature_id,
-                        object_id=object.feature_id,
-                        type_id=part_of.cvterm_id,
-                        rank=0,
-                    )
-                )
-            except ObjectDoesNotExist:
-                print(
-                    "Parent/Feature ({}/{}) not registered.".format(
-                        item["object_id"], item["subject_id"]
-                    )
-                )
-            if i % 100000 == 0:
-                FeatureRelationship.objects.bulk_create(relationships)
-                relationships = list()
-        else:
-            FeatureRelationship.objects.bulk_create(relationships)
+            )
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""

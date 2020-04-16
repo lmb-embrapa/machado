@@ -88,7 +88,6 @@
                 </li>
             </ul>
             </nav>
-            {% endif %}
 
 			Number of records:
 			<a href="?{% param_replace records=10 %}">10</a>
@@ -96,6 +95,8 @@
 			<a href="?{% param_replace records=100 %}">100</a>
 			<a href="?{% param_replace records=500 %}">500</a>
 			<a href="?{% param_replace records=1000 %}">1000</a>
+
+            {% endif %}
 
         </div>
      </div>
