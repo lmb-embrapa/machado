@@ -41,7 +41,7 @@ setup(
         "drf-nested-routers==0.91",
         "coreapi==2.3.3",
         "django-cors-headers==3.2.1",
-        "pysam==0.15.4"
+        "pysam==0.15.2"
 
     ],
     zip_safe=False,
