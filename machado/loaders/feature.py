@@ -354,14 +354,15 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def store_relationship(self, subject_id: int, object_id: int) -> FeatureRelationship:
+    def store_relationship(self, organism: str, subject_id: int, object_id: int) -> FeatureRelationship:
         """Retrieve the relationship object."""
+        organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
 
         try:
             fr = FeatureRelationship(
-                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id).feature_id,
-                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id).feature_id,
+                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id, organism=organism_obj).feature_id,
+                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id, organism=organism_obj).feature_id,
                 type_id=part_of.cvterm_id,
                 rank=0,
             )

@@ -136,7 +136,10 @@ class Command(BaseCommand):
             )
 
         for task in tqdm(as_completed(tasks), total=len(tasks)):
-            task.result()
+            try:
+                task.result()
+            except ImportingError as e:
+                raise CommandError(e)
         pool.shutdown()
 
         if feature_file.ignored_attrs is not None:
