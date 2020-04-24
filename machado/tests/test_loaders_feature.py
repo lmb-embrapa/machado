@@ -343,7 +343,7 @@ class FeatureTest(TestCase):
 
         # store the relationships
         for item in test_feature_file.relationships:
-            test_feature_file.store_relationship(item['subject_id'], item['object_id'])
+            test_feature_file.store_relationship(organism, item['subject_id'], item['object_id'])
 
         test_feature = Feature.objects.get(uniquename="id2")
         test_featureloc = Featureloc.objects.get(feature=test_feature)
