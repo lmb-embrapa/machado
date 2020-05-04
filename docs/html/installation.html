@@ -214,6 +214,13 @@ python src/machado/setup.py install
 </pre></div>
 </div>
 <p>(Additional information here: <a class="reference external" href="https://docs.djangoproject.com/en/2.1/intro/tutorial02/">https://docs.djangoproject.com/en/2.1/intro/tutorial02/</a>)</p>
+<p><strong>Django rest framework settings</strong></p>
+<p>You’ll need to make sure to update your REST framework settings to include DEFAULT_SCHEMA_CLASS explicitly.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">REST_FRAMEWORK</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;DEFAULT_SCHEMA_CLASS&#39;</span><span class="p">:</span> <span class="s1">&#39;rest_framework.schemas.coreapi.AutoSchema&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 <p><strong>List the machado commands</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py
 </pre></div>
