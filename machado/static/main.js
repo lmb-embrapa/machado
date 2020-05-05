@@ -48,13 +48,14 @@ $(document).ready(function(){
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
     var url = home_url + "api/feature/publication/" + feature_id;
-    if ($("#collapseSeq .card-text .list-group").length == 0) {
+    if ($("#collapsePub .card-text").is(':empty')) {
       $.ajax({
           url : url,
           beforeSend : function(){
-            $("#collapsePub .card-text .list-group").html("<small>LOADING...</small>");
+            $("#collapsePub .card-text").html("<small>LOADING...</small>");
           }, 
           success: function(data) {
+            var text = '<ul class="list-group">';
             for (i=0; i<data.length; i++) {
               var text = '<li class="list-group-item"><small>' ;
               text += data[i].authors + ' ';
@@ -65,8 +66,9 @@ $(document).ready(function(){
                 text += 'DOI:<a target="_blank" href="http://dx.doi.org/' + data[i].doi + '">' + data[i].doi + '</a>';
               }
               text += "</smal></li>" ;
-              $("#collapsePub .card-text .list-group").html(text);
             }
+            text += "</ul>" ;
+            $("#collapsePub .card-text").html(text);
           }
       });    
     }
