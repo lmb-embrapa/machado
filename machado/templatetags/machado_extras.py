@@ -81,4 +81,5 @@ def get_count(self, key):
 
 @register.filter
 def split(value, arg):
+    """Split."""
     return value.split(arg)
