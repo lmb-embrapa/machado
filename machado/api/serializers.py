@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship
+from machado.models import Pub
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):
@@ -152,6 +153,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the display."""
         return obj.get_display()
 
+
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
@@ -177,6 +179,7 @@ class JBrowseRefseqSerializer(serializers.ModelSerializer):
         """Get the name."""
         return obj.uniquename
 
+
 class autocompleteSerializer(serializers.Serializer):
     """autocomplete search serializer."""
 
@@ -185,8 +188,9 @@ class autocompleteSerializer(serializers.Serializer):
     def to_representation(self, obj):
         return obj
 
+
 class FeatureSequenceSerializer(serializers.ModelSerializer):
-    """JBrowse transcript serializer."""
+    """Feature sequence serializer."""
 
     sequence = serializers.SerializerMethodField()
 
@@ -194,10 +198,29 @@ class FeatureSequenceSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Feature
-        fields = (
-            "sequence",
-        )
+        fields = ("sequence", )
 
     def get_sequence(self, obj):
         """Get the sequence."""
         return obj.residues
+
+
+class FeaturePublicationSerializer(serializers.ModelSerializer):
+    """Feature publication serializer."""
+
+    authors = serializers.SerializerMethodField()
+    doi = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Pub
+        fields = ("doi", "authors", "title", "series_name", "pyear", "volume", "pages")
+
+    def get_authors(self, obj):
+        """Get the authors."""
+        return obj.get_authors()
+
+    def get_doi(self, obj):
+        """Get the doi."""
+        return obj.get_doi()

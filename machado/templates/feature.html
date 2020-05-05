@@ -64,7 +64,7 @@
   <div class="card m-1">
     <div class="card-header">
       <h4 class="card-title">
-		  <a data-toggle="collapse" href="#collapseAnnotation" role="button" aria-expanded="false" aria-controls="collapseAnnotation" onclick="machadoToggleText(this)">
+		  <a data-toggle="collapse" href="#collapseAnnotation" role="button" aria-expanded="false" aria-controls="collapseAnnotation" onclick="machadoToggleCaret(this)">
 		    Functional annotation
 			<small><i class="fas fa-caret-up"></i></small>
 		  </a>
@@ -138,7 +138,7 @@
   <div class="card m-1">
     <div class="card-header">
       <h4 class="card-title">
-		  <a data-toggle="collapse" href="#collapseSimilarity" role="button" aria-expanded="false" aria-controls="collapseSimilarity" onclick="machadoToggleText(this)">
+		  <a data-toggle="collapse" href="#collapseSimilarity" role="button" aria-expanded="false" aria-controls="collapseSimilarity" onclick="machadoToggleCaret(this)">
 		  Similarity
 		  <small><i class="fas fa-caret-up"></i></small>
 		  </a>
@@ -179,7 +179,7 @@
   <div class="card m-1">
     <div class="card-header">
       <h4 class="card-title">
-		  <a data-toggle="collapse" href="#collapseExpression" role="button" aria-expanded="false" aria-controls="collapseExpression" onclick="machadoToggleText(this)">
+		  <a data-toggle="collapse" href="#collapseExpression" role="button" aria-expanded="false" aria-controls="collapseExpression" onclick="machadoToggleCaret(this)">
 		  Expression data
 		  <small><i class="fas fa-caret-up"></i></small>
 		  </a>
@@ -227,7 +227,7 @@
   <div class="card m-1">
     <div class="card-header">
         <h4 class="card-title">
-        <a data-toggle="collapse" href="#collapseOrthologs" role="button" aria-expanded="false" aria-controls="collapseOrthologs" onclick="machadoToggleText(this)">
+        <a data-toggle="collapse" href="#collapseOrthologs" role="button" aria-expanded="false" aria-controls="collapseOrthologs" onclick="machadoToggleCaret(this)">
 			Orthologs
 			<small><i class="fas fa-caret-down"></i></small>
 		</a>
@@ -252,7 +252,7 @@
   <div class="card m-1">
     <div class="card-header">
         <h4 class="card-title">
-            <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq" onclick="machadoToggleText(this)">
+            <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq" onclick="machadoToggleCaret(this)">
 			Sequence
 			<small><i class="fas fa-caret-down"></i></small>
 		</a>
@@ -268,7 +268,7 @@
   <div class="card m-1">
     <div class="card-header">
         <h4 class="card-title">
-        <a data-toggle="collapse" href="#collapsePub" role="button" aria-expanded="false" aria-controls="collapsePub" onclick="machadoToggleText(this)">
+        <a data-toggle="collapse" href="#collapsePub" role="button" aria-expanded="false" aria-controls="collapsePub" onclick="machadoToggleCaret(this)">
 			Publications
 			<small><i class="fas fa-caret-down"></i></small>
 		</a>
@@ -276,16 +276,7 @@
     </div>
     <div class="card-body collapse" id="collapsePub">
       <div class="card-text">
-        <ul class="list-group">
-        {% for pub in data.pubs %}
-            <li class="list-group-item"><small>
-                    {{ pub.get_authors }} <b>{{ pub.title }}.</b> <i>{{ pub.series_name }}</i>. {{ pub.pyear }}; {{ pub.volume}} {{ pub.pages }}
-                    {% if pub.get_doi %}
-                    DOI:<a target="_blank" href="http://dx.doi.org/{{ pub.get_doi }}">{{ pub.get_doi }}</a>
-                    {% endif %}
-            </small></li>
-        {% endfor %}
-        </ul>
+        <ul class="list-group"></ul>
       </div>
     </div>
   </div>

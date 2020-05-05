@@ -19,19 +19,16 @@ router.register(
 )
 router.register(
     r"jbrowse/features/(?P<refseq>.+)",
-    views.JBrowseFeatureViewSet,
-    basename="jbrowse_features",
-)
+    views.JBrowseFeatureViewSet, basename="jbrowse_features")
 router.register(r"jbrowse/names", views.JBrowseNamesViewSet, basename="jbrowse_names")
-router.register(
-    r"jbrowse/refSeqs.json", views.JBrowseRefSeqsViewSet, basename="jbrowse_refseqs"
-)
+router.register(r"jbrowse/refSeqs.json", views.JBrowseRefSeqsViewSet,
+                basename="jbrowse_refseqs")
 router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomplete")
-router.register(
-    r"feature/sequence/(?P<feature_id>.+)",
-    views.FeatureSequenceViewSet,
-    basename="feature_sequence",
-)
+
+router.register(r"feature/sequence/(?P<feature_id>.+)",
+                views.FeatureSequenceViewSet, basename="feature_sequence")
+router.register(r"feature/publication/(?P<feature_id>.+)",
+                views.FeaturePublicationViewSet, basename="feature_publication")
 
 urlpatterns = [
     url(r"", include_docs_urls(title="machado API")),

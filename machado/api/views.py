@@ -20,11 +20,13 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.loaders.common import retrieve_organism
-from machado.models import Feature, Featureloc
+from machado.models import Feature, Featureloc, Pub
 
 from re import escape, search, IGNORECASE
+
 
 class StandardResultSetPagination(PageNumberPagination):
     """Set the pagination parameters."""
@@ -182,7 +184,7 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         query = request.GET.get('q')
         if query is not None:
             query = query.strip()
-            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items*10]
+            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items * 10]
             result = set()
             for item in queryset:
                 try:
@@ -195,7 +197,7 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                     pass
             return list(result)[:max_items]
         else:
-         return None
+            return None
 
 
 class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -208,5 +210,19 @@ class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         """Get queryset."""
         try:
             return Feature.objects.filter(feature_id=self.kwargs.get("feature_id"))
+        except ObjectDoesNotExist:
+            return
+
+
+class FeaturePublicationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """API endpoint to view the feature publication."""
+
+    renderer_classes = (JSONRenderer,)
+    serializer_class = FeaturePublicationSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            return Pub.objects.filter(FeaturePub_pub_Pub__feature__feature_id=self.kwargs.get("feature_id"))
         except ObjectDoesNotExist:
             return
