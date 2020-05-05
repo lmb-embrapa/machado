@@ -19,12 +19,34 @@ function machadoToggleText(x) {
   }
 }
 
+$(document).ready(function(){
+  $('#collapseSeq').on('show.bs.collapse', function() {
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/sequence/" + feature_id;
+    if ($("#collapseSeq .card-text small").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#resultado").html("LOADING...");
+          }, 
+          success: function(data) {
+            for (i=0; i<data.length; i++) {
+              $("#collapseSeq .card-text small").text(data[i].sequence);
+            }
+          }
+      });    
+    }
+  });
+} );
 
 $( function() {
   $( "#q" ).autocomplete({
     source: function( request, response ) {
+      var home_url = $("#home_url").val();
+      var url = home_url + "api/autocomplete";
 	  $.ajax( {
-	    url: "api/autocomplete",
+	    url: url,
         data: { q: request.term	},
         success: function( data ) {	response(data); },
 		minLength: 2,
@@ -36,4 +58,3 @@ $( function() {
 	},
   });
 } );
-

@@ -27,6 +27,12 @@ router.register(
     r"jbrowse/refSeqs.json", views.JBrowseRefSeqsViewSet, basename="jbrowse_refseqs"
 )
 router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomplete")
+router.register(
+    r"feature/sequence/(?P<feature_id>.+)",
+    views.FeatureSequenceViewSet,
+    basename="feature_sequence",
+)
+
 urlpatterns = [
     url(r"", include_docs_urls(title="machado API")),
     url(r"", include(router.urls)),

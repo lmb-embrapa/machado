@@ -184,3 +184,20 @@ class autocompleteSerializer(serializers.Serializer):
 
     def to_representation(self, obj):
         return obj
+
+class FeatureSequenceSerializer(serializers.ModelSerializer):
+    """JBrowse transcript serializer."""
+
+    sequence = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = (
+            "sequence",
+        )
+
+    def get_sequence(self, obj):
+        """Get the sequence."""
+        return obj.residues
