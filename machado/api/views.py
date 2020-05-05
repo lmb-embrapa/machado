@@ -20,6 +20,7 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureSequenceSerializer
 from machado.loaders.common import retrieve_organism
 from machado.models import Feature, Featureloc
 
@@ -195,3 +196,17 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return list(result)[:max_items]
         else:
          return None
+
+
+class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """API endpoint to view the feature sequence."""
+
+    renderer_classes = (JSONRenderer,)
+    serializer_class = FeatureSequenceSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            return Feature.objects.filter(feature_id=self.kwargs.get("feature_id"))
+        except ObjectDoesNotExist:
+            return

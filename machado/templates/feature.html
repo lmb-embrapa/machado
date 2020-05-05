@@ -13,6 +13,7 @@
 {% if feature.error == None %}
 
   {% if data %}
+  <input type="hidden" value="{{ feature.feature_id|safe }}" id="feature_id" name="feature_id"></input>
   <div class="card m-1">
     <div class="card-header">
         <small><i>{{ feature.organism.genus }} {{ feature.organism.species }}</i></small>
@@ -251,16 +252,14 @@
   <div class="card m-1">
     <div class="card-header">
         <h4 class="card-title">
-        <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq" onclick="machadoToggleText(this)">
+            <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq" onclick="machadoToggleText(this)">
 			Sequence
 			<small><i class="fas fa-caret-down"></i></small>
 		</a>
 		</h4>
     </div>
     <div class="card-body collapse" id="collapseSeq">
-      <div class="card-text text-monospace">
-          <small>{{ feature.residues}}</small>
-      </div>
+      <div class="card-text text-monospace"><small></small></div>
     </div>
   </div>
   {% endif %}

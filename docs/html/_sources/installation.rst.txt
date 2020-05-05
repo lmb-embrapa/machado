@@ -87,6 +87,15 @@ In the WEBPROJECT/settings.py file, add chado to INSTALLED_APPS section.
 
 (Additional information here: https://docs.djangoproject.com/en/2.1/intro/tutorial02/)
 
+**Django rest framework settings**
+
+You'll need to make sure to update your REST framework settings to include DEFAULT_SCHEMA_CLASS explicitly.
+
+.. code-block:: python
+
+    REST_FRAMEWORK = {
+      'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    }
 
 **List the machado commands**
 
