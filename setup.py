@@ -40,9 +40,7 @@ setup(
         "djangorestframework==3.11.0",
         "drf-nested-routers==0.91",
         "coreapi==2.3.3",
-        "django-cors-headers==3.2.1",
-        "pysam==0.15.2"
-
+        "pysam==0.15.2",
     ],
     zip_safe=False,
 )
