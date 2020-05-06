@@ -56,16 +56,6 @@ class FeatureTest(TestCase):
         )
         fp_db = Db.objects.create(name="feature_property")
         fp_cv = Cv.objects.create(name="feature_property")
-        orthology_dbxref = Dbxref.objects.create(
-            accession="orthologous group", db=fp_db
-        )
-        orthology_cvterm = Cvterm.objects.create(
-            name="orthologous group",
-            cv=fp_cv,
-            dbxref=orthology_dbxref,
-            is_obsolete=0,
-            is_relationshiptype=0,
-        )
         coexpgroup_dbxref = Dbxref.objects.create(
             accession="coexpression group", db=fp_db
         )
@@ -341,12 +331,6 @@ class FeatureTest(TestCase):
         )
 
         Featureprop.objects.create(
-            feature=polypeptide_feat1, type=orthology_cvterm, rank=0, value="orthomcl1"
-        )
-        Featureprop.objects.create(
-            feature=polypeptide_feat2, type=orthology_cvterm, rank=0, value="orthomcl1"
-        )
-        Featureprop.objects.create(
             feature=polypeptide_feat1,
             type=coexpgroup_cvterm,
             rank=0,
@@ -415,14 +399,6 @@ class FeatureTest(TestCase):
         self.assertEqual(0.0001, result[0]["evalue"])
         self.assertEqual(1000, result[0]["score"])
 
-    def test_retrieve_feature_orthologs(self):
-        """Tests - retrieve_feature_orthologs."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_orthologs(feature_id=f.feature_id)
-        self.assertTrue("orthomcl1" in result)
-        self.assertEquals("feat2", result["orthomcl1"][1].uniquename)
-
     def test_retrieve_feature_data(self):
         """Tests - retrieve_feature_data."""
         fv = feature.FeatureView()
@@ -436,7 +412,6 @@ class FeatureTest(TestCase):
         result = fv.retrieve_feature_data(feature_obj=f)
         self.assertEquals("PFAM", result["protein_matches"][0]["db"])
         self.assertEqual("blast", result["similarity"][0]["program"])
-        self.assertTrue("orthomcl1" in result["orthologs"])
 
     def test_get(self):
         """Tests - get."""
