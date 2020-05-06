@@ -7,18 +7,9 @@
  */
 
 // toggles the arrow
-function machadoToggleCaret(x) {
-  ec = x.getElementsByClassName('fas')[0].classList;
-  down = 'fa-caret-down';
-  up = 'fa-caret-up';
-  if (ec.contains(down)) {
-  	ec.remove(down);
-  	ec.add(up);
-  } else {
-  	ec.remove(up);
-  	ec.add(down);
-  }
-}
+$(document).on('click', '.fas', function() {
+   $(this).toggleClass('fa-caret-up fa-caret-down');
+})
 
 // load sequence from API
 $(document).ready(function(){
