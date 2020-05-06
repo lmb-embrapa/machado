@@ -168,24 +168,13 @@ class FeatureView(View):
 
         return result
 
-    def retrieve_feature_orthologs(self, feature_id: int) -> Dict[str, Any]:
+    def retrieve_feature_orthologs(self, feature_id: int) -> bool:
         """Retrieve feature orthologs."""
-        result: Dict[str, List] = dict()
-        try:
-            orthologous_group = Featureprop.objects.get(
-                type__name="orthologous group",
-                type__cv__name="feature_property",
-                feature_id=feature_id,
-            ).value
-            for feature in Feature.objects.filter(
-                Featureprop_feature_Feature__value=orthologous_group
-            ).only("feature_id", "uniquename", "type"):
-                if feature.type.name in VALID_TYPES:
-                    result.setdefault(orthologous_group, []).append(feature)
-        except ObjectDoesNotExist:
-            pass
-
-        return result
+        return Featureprop.objects.filter(
+            type__name="orthologous group",
+            type__cv__name="feature_property",
+            feature_id=feature_id,
+        ).exists()
 
     def retrieve_feature_pub(self, feature_id: int) -> bool:
         """Retrieve feature publications."""

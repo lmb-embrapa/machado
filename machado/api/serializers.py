@@ -189,6 +189,27 @@ class autocompleteSerializer(serializers.Serializer):
         return obj
 
 
+class FeatureOrthologSerializer(serializers.ModelSerializer):
+    """Feature sequence ortholog."""
+
+    display = serializers.SerializerMethodField()
+    organism = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = ("feature_id", "uniquename", "display", "organism")
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.get_display()
+
+    def get_organism(self, obj):
+        """Get the organism."""
+        return "{} {}".format(obj.organism.genus, obj.organism.species)
+
+
 class FeatureSequenceSerializer(serializers.ModelSerializer):
     """Feature sequence serializer."""
 
