@@ -197,7 +197,7 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)</
 &lt;/Files&gt;
 &lt;/Directory&gt;
 
-Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
+Alias /YOURPROJECT/static/ /var/www/YOURPROJECT/WEBPROJECT/static/
 
 &lt;Directory <span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT/static&quot;</span>&gt;
     Require all granted
@@ -221,7 +221,7 @@ WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
 <li><p>In the WEBPROJECT/settings.py file, set the following variables:</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;*&#39;</span><span class="o">]</span>
-<span class="nv">STATIC_URL</span> <span class="o">=</span> <span class="s1">&#39;/static/&#39;</span>
+<span class="nv">STATIC_URL</span> <span class="o">=</span> <span class="s1">&#39;/YOURPROJECT/static/&#39;</span>
 <span class="nv">STATIC_ROOT</span> <span class="o">=</span> <span class="s1">&#39;/var/www/YOURPROJECT/WEBPROJECT/static&#39;</span>
 </pre></div>
 </div>

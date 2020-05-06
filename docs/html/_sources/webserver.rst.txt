@@ -52,7 +52,7 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
     </Files>
     </Directory>
 
-    Alias /static/ /var/www/YOURPROJECT/WEBPROJECT/static/
+    Alias /YOURPROJECT/static/ /var/www/YOURPROJECT/WEBPROJECT/static/
 
     <Directory "/var/www/YOURPROJECT/WEBPROJECT/static">
         Require all granted
@@ -78,7 +78,7 @@ There must be a symlink of your config file in the sites-enabled directory
 .. code-block:: bash
 
     ALLOWED_HOSTS = ['*']
-    STATIC_URL = '/static/'
+    STATIC_URL = '/YOURPROJECT/static/'
     STATIC_ROOT = '/var/www/YOURPROJECT/WEBPROJECT/static'
 
 
