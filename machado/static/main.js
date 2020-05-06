@@ -11,61 +11,6 @@ $(document).on('click', '.fas', function() {
    $(this).toggleClass('fa-caret-up fa-caret-down');
 })
 
-// load sequence from API
-$(document).ready(function(){
-  $('#collapseSeq').on('show.bs.collapse', function() {
-    var feature_id = $("#feature_id").val();
-    var home_url = $("#home_url").val();
-    var url = home_url + "api/feature/sequence/" + feature_id;
-    if ($("#collapseSeq .card-text small").is(':empty')) {
-      $.ajax({
-          url : url,
-          beforeSend : function(){
-            $("#collapseSeq .card-text small").html("<small>LOADING...</small>");
-          }, 
-          success: function(data) {
-            for (i=0; i<data.length; i++) {
-              $("#collapseSeq .card-text small").text(data[i].sequence);
-            }
-          }
-      });    
-    }
-  });
-} );
-
-//load publication from API
-$(document).ready(function(){
-  $('#collapsePub').on('show.bs.collapse', function() {
-    var feature_id = $("#feature_id").val();
-    var home_url = $("#home_url").val();
-    var url = home_url + "api/feature/publication/" + feature_id;
-    if ($("#collapsePub .card-text").is(':empty')) {
-      $.ajax({
-          url : url,
-          beforeSend : function(){
-            $("#collapsePub .card-text").html("<small>LOADING...</small>");
-          }, 
-          success: function(data) {
-            var text = '<ul class="list-group">';
-            for (i=0; i<data.length; i++) {
-              var text = '<li class="list-group-item"><small>' ;
-              text += data[i].authors + ' ';
-              text += '<b>' + data[i].title + '</b> ';
-              text += '<i>' + data[i].series_name + '</i>.  ';
-              text += data[i].pyear + '; ' + data[i].volume + ' ' + data[i].pages + ' ';
-              if (data[i].doi) {
-                text += 'DOI:<a target="_blank" href="http://dx.doi.org/' + data[i].doi + '">' + data[i].doi + '</a>';
-              }
-              text += "</smal></li>" ;
-            }
-            text += "</ul>" ;
-            $("#collapsePub .card-text").html(text);
-          }
-      });    
-    }
-  });
-} );
-
 //load autocomplete from API
 $( function() {
   $( "#q" ).autocomplete({

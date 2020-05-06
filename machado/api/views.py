@@ -20,10 +20,11 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.loaders.common import retrieve_organism
-from machado.models import Feature, Featureloc, Pub
+from machado.models import Feature, Featureloc, Featureprop, Pub
 
 from re import escape, search, IGNORECASE
 
@@ -198,6 +199,41 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return list(result)[:max_items]
         else:
             return None
+
+
+class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """API endpoint to view the feature ortholog."""
+
+    renderer_classes = (JSONRenderer,)
+    serializer_class = FeatureOrthologSerializer
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            ortholog_group = Featureprop.objects.get(
+                type__name="orthologous group",
+                type__cv__name="feature_property",
+                feature_id=self.kwargs.get("feature_id"),
+            )
+            return Feature.objects.filter(
+                type__name='polypeptide',
+                Featureprop_feature_Feature__value=ortholog_group.value)
+        except ObjectDoesNotExist:
+            return
+
+    def list(self, request, *args, **kwargs):
+        """Override return the list inside a dict."""
+        response = super(FeatureOrthologViewSet, self).list(request, *args, **kwargs)
+        try:
+            ortholog_group = Featureprop.objects.get(
+                type__name="orthologous group",
+                type__cv__name="feature_property",
+                feature_id=self.kwargs.get("feature_id"),
+            ).value
+            response.data = {"ortholog_group": ortholog_group, "members": response.data}
+            return response
+        except ObjectDoesNotExist:
+            return response
 
 
 class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
