@@ -84,7 +84,9 @@ def get_num_lines(file_path):
 
     i = 0
     for line in fp:
-        if str(line).startswith("#") or line.startswith(b'#'):
+        if type(line) == str and str(line).startswith("#"):
+            continue
+        if type(line) == bytes and line.startswith(b'#'):
             continue
         i += 1
     return i
