@@ -389,6 +389,9 @@ class FeatureLoader(object):
         # if interproscan-xml parsing, get db name from Hit.attributes.
         if target == "InterPro":
             db_name = searchio_hit.attributes["Target"].upper()
+            # prevents the creation of multiple databases for SIGNALP
+            if db_name.startswith('SIGNALP'):
+                db_name = 'SIGNALP'
             db, created = Db.objects.get_or_create(name=db_name)
         # if blast-xml parsing, db name is self.db ("BLAST_source")
         else:
