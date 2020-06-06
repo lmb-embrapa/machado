@@ -30,7 +30,7 @@ setup(
     ],
     scripts=["bin/fixChadoModel.py"],
     install_requires=[
-        "django==2.2.12",
+        "django==2.2.13",
         "psycopg2-binary==2.8.5",
         "biopython==1.76",
         "obonet==0.2.5",
