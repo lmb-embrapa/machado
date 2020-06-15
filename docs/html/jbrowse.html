@@ -215,11 +215,14 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 <p>The settings.py file should contain these variables</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_JBROWSE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://localhost/jbrowse&#39;</span>
 
+<span class="nv">MACHADO_JBROWSE_TRACKS</span> <span class="o">=</span> <span class="s1">&#39;ref_seq,gene,transcripts,CDS&#39;</span>
+
 <span class="nv">MACHADO_JBROWSE_OFFSET</span> <span class="o">=</span> <span class="m">1200</span>
 </pre></div>
 </div>
-<p>MACHADO_JBROWSE_URL: contains the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)</p>
-<p>MACHADO_OFFSET: the number of bp upstream and downstream of the feature.</p>
+<p>MACHADO_JBROWSE_URL: the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)</p>
+<p>MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed (‘ref_seq,gene,transcripts,CDS’ if not set).</p>
+<p>MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).</p>
 <div class="section" id="use-reference-from-fasta-file">
 <h2><span class="section-number">3.3.1. </span>Use reference from FASTA file<a class="headerlink" href="#use-reference-from-fasta-file" title="Permalink to this headline">¶</a></h2>
 <p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences <a class="reference external" href="https://jbrowse.org/docs/tutorial.html">https://jbrowse.org/docs/tutorial.html</a>.</p>

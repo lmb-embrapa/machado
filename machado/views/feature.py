@@ -29,6 +29,10 @@ class FeatureView(View):
         for location in Featureloc.objects.filter(feature_id=feature_id):
             jbrowse_url = None
             if hasattr(settings, "MACHADO_JBROWSE_URL"):
+                if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
+                    tracks = settings.MACHADO_JBROWSE_TRACKS
+                else:
+                    tracks = "ref_seq,gene,transcripts,CDS"
                 if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
                     offset = settings.MACHADO_JBROWSE_OFFSET
                 else:
@@ -41,8 +45,8 @@ class FeatureView(View):
                 jbrowse_url = (
                     "{}/?data=data/{}&loc={}"
                     "&tracklist=0&nav=0&overview=0"
-                    "&tracks=ref_seq,gene,transcripts,CDS".format(
-                        settings.MACHADO_JBROWSE_URL, organism, loc
+                    "&tracks={}".format(
+                        settings.MACHADO_JBROWSE_URL, organism, loc, tracks
                     )
                 )
             result.append(
