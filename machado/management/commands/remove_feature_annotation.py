@@ -46,7 +46,7 @@ class Command(BaseCommand):
             feature_props = Featureprop.objects.filter(
                 type=cvterm_obj, feature__organism=organism_obj
             )
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, AttributeError):
             feature_props = Featureprop.objects.filter(type=cvterm_obj)
 
         count = feature_props.count()
