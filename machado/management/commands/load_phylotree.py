@@ -84,7 +84,7 @@ class Command(BaseCommand):
         self.nodes: Dict[int, Dict[str, Any]] = dict()
         self.ctr = 0
         for line in file_nodes:
-            columns = re.split("\s\|\s", line)
+            columns = re.split(r"\s\|\s", line)
             tax_id = int(columns[0])
             parent_id = int(columns[1])
             level = columns[2]

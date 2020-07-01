@@ -5,21 +5,26 @@
 # have been included as part of this package for licensing information.
 
 """Create database from chado default_schema.sql."""
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
     """Migration."""
-    dependencies = [('machado','0001_initial')]
+
+    dependencies = [("machado", "0001_initial")]
 
     operations = [
-        migrations.RunSQL('create index on analysis using btree (program);'),
-        migrations.RunSQL('create index on analysis using btree (programversion);'),
-        migrations.RunSQL('create index on analysis using btree (sourcename);'),
-        migrations.RunSQL('create index on analysisfeature using btree (rawscore);'),
-        migrations.RunSQL('create index on analysisfeature using btree (normscore);'),
-        migrations.RunSQL('create index on analysisfeature using btree (significance);'),
-        migrations.RunSQL('create index on analysisfeature using btree (identity);'),
-        migrations.RunSQL('create index on feature using btree (type_id, is_obsolete, feature_id);'),
-        migrations.RunSQL('create index on featureprop using btree (value);'),
+        migrations.RunSQL("create index on analysis using btree (program);"),
+        migrations.RunSQL("create index on analysis using btree (programversion);"),
+        migrations.RunSQL("create index on analysis using btree (sourcename);"),
+        migrations.RunSQL("create index on analysisfeature using btree (rawscore);"),
+        migrations.RunSQL("create index on analysisfeature using btree (normscore);"),
+        migrations.RunSQL(
+            "create index on analysisfeature using btree (significance);"
+        ),
+        migrations.RunSQL("create index on analysisfeature using btree (identity);"),
+        migrations.RunSQL(
+            "create index on feature using btree (type_id, is_obsolete, feature_id);"
+        ),
+        migrations.RunSQL("create index on featureprop using btree (value);"),
     ]

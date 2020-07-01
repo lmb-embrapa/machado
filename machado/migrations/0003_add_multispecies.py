@@ -5,13 +5,16 @@
 # have been included as part of this package for licensing information.
 
 """Create database from chado default_schema.sql."""
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
     """Migration."""
-    dependencies = [('machado','0001_initial'), ('machado', '0002_add_index')]
+
+    dependencies = [("machado", "0001_initial"), ("machado", "0002_add_index")]
 
     operations = [
-        migrations.RunSQL('insert into organism (abbreviation, genus, species, common_name) values (\'multispecies\', \'multispecies\', \'multispecies\', \'multispecies\')'),
+        migrations.RunSQL(
+            "insert into organism (abbreviation, genus, species, common_name) values ('multispecies', 'multispecies', 'multispecies', 'multispecies')"
+        ),
     ]

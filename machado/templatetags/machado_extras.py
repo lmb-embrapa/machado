@@ -19,7 +19,7 @@ def param_replace(context, **kwargs):
             params.appendlist(k, v)
         elif k == "order_by":
             if k in params and params[k] == v:
-                params[k] = '-{}'.format(v)
+                params[k] = "-{}".format(v)
             else:
                 params[k] = v
         else:

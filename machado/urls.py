@@ -21,10 +21,7 @@ if "haystack" in settings.INSTALLED_APPS:
     from machado.views import feature, search
 
     urlpatterns = [
-        url(
-            r"api/",
-            include("machado.api.urls")
-        ),
+        url(r"api/", include("machado.api.urls")),
         url(
             r"feature/",
             cache_page(CACHE_TIMEOUT)(feature.FeatureView.as_view()),

@@ -227,7 +227,9 @@ class DataSummaryTest(TestCase):
             series_name="Journal of Testing",
         )
         doi_db = Db.objects.create(name="DOI")
-        doi_dbxref = Dbxref.objects.create(accession="10.1186/s12864-016-2535-300002", db=doi_db)
+        doi_dbxref = Dbxref.objects.create(
+            accession="10.1186/s12864-016-2535-300002", db=doi_db
+        )
         PubDbxref.objects.create(pub=test_pub, dbxref=doi_dbxref, is_current=True)
 
         OrganismPub.objects.create(organism=self.organism1, pub=test_pub)
