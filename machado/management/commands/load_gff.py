@@ -82,8 +82,8 @@ class Command(BaseCommand):
             try:
                 index_file = "{}.csi".format(file)
                 FileValidator().validate(index_file)
-            except ImportingError as e:
-                raise CommandError("No index found (.tbi/.csi).".format(e))
+            except ImportingError:
+                raise CommandError("No index found (.tbi/.csi)")
 
         try:
             feature_file = FeatureLoader(
