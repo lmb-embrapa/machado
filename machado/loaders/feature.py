@@ -12,7 +12,7 @@ from typing import Dict, List, Set, Union
 from urllib.parse import unquote
 
 from Bio.SearchIO._model import Hit
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy
 
@@ -528,16 +528,14 @@ class FeatureLoader(object):
         else:
             cvterm_id = term
         featureprops = list()
-        feature_id_list = list(
-            Feature.objects.filter(
-                type__cv__name="sequence",
-                type__name=soterm,
-                dbxref__accession__in=group,
-                dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
-            )
-            .distinct("feature_id")
-            .values_list("feature_id", flat=True)
-        )
+        feature_id_list = list()
+        for acc in group:
+            try:
+                # retrieves feature_id from dbxref's accession
+                feature_id_list.append(retrieve_feature_id(accession=acc, soterm=soterm))
+            except (MultipleObjectsReturned, ObjectDoesNotExist):
+                 pass
+        
         # only stores clusters with 2 or more members
         if len(feature_id_list) > 1:
             for feature_id in feature_id_list:
