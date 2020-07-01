@@ -182,7 +182,9 @@ class FeatureView(View):
 
     def retrieve_feature_pub(self, feature_id: int) -> bool:
         """Retrieve feature publications."""
-        return Pub.objects.filter(FeaturePub_pub_Pub__feature__feature_id=feature_id).exists()
+        return Pub.objects.filter(
+            FeaturePub_pub_Pub__feature__feature_id=feature_id
+        ).exists()
 
     def retrieve_feature_data(self, feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""

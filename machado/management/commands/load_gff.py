@@ -78,7 +78,7 @@ class Command(BaseCommand):
         try:
             index_file = "{}.tbi".format(file)
             FileValidator().validate(index_file)
-        except ImportingError as e:
+        except ImportingError:
             try:
                 index_file = "{}.csi".format(file)
                 FileValidator().validate(index_file)
@@ -132,7 +132,12 @@ class Command(BaseCommand):
 
         for item in feature_file.relationships:
             tasks.append(
-                pool.submit(feature_file.store_relationship, organism, item['subject_id'], item['object_id'])
+                pool.submit(
+                    feature_file.store_relationship,
+                    organism,
+                    item["subject_id"],
+                    item["object_id"],
+                )
             )
 
         for task in tqdm(as_completed(tasks), total=len(tasks)):

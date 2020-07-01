@@ -22,7 +22,7 @@ class FeatureTest(TestCase):
     """Tests Feature View."""
 
     def setUp(self):
-        """Setup."""
+        """Se tup."""
         self.factory = RequestFactory()
 
         null_db, created = Db.objects.get_or_create(name="null")

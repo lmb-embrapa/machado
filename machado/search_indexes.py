@@ -1,4 +1,4 @@
-    # Copyright 2018 by Embrapa.  All rights reserved.
+# Copyright 2018 by Embrapa.  All rights reserved.
 #
 # This code is part of the machado distribution and governed by its
 # license. Please see the LICENSE.txt and README.md files that should
@@ -6,7 +6,6 @@
 
 """Search indexes."""
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from haystack import indexes
 
 from machado.models import Analysis, Analysisfeature
@@ -221,9 +220,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         """Prepare relationship."""
         result = list()
         for r in obj.get_relationship():
-            result.append('{} {}'.format(r.feature_id, r.type.name))
+            result.append("{} {}".format(r.feature_id, r.type.name))
         return result
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
-        return '{} {} {}'.format(obj.organism.genus, obj.organism.species, self.temp)
+        return "{} {} {}".format(obj.organism.genus, obj.organism.species, self.temp)

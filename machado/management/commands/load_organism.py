@@ -55,7 +55,7 @@ class Command(BaseCommand):
         taxid, scname = "", ""
         synonyms, common_names = [], []
         for line in file_names:
-            columns = re.split("\s\|\s", line)
+            columns = re.split(r"\s\|\s", line)
             if current_id is not None and current_id != columns[0]:
                 # store if new record
                 tasks.append(

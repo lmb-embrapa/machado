@@ -186,6 +186,7 @@ class autocompleteSerializer(serializers.Serializer):
     autocomplete = serializers.CharField()
 
     def to_representation(self, obj):
+        """To representation."""
         return obj
 
 
@@ -219,7 +220,7 @@ class FeatureSequenceSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Feature
-        fields = ("sequence", )
+        fields = ("sequence",)
 
     def get_sequence(self, obj):
         """Get the sequence."""

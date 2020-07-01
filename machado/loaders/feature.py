@@ -354,24 +354,28 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def store_relationship(self, organism: str, subject_id: int, object_id: int) -> FeatureRelationship:
+    def store_relationship(
+        self, organism: str, subject_id: int, object_id: int
+    ) -> FeatureRelationship:
         """Retrieve the relationship object."""
         organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
 
         try:
             fr = FeatureRelationship(
-                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id, organism=organism_obj).feature_id,
-                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id, organism=organism_obj).feature_id,
+                subject_id=Feature.objects.exclude(type=self.aa_cvterm)
+                .get(uniquename=subject_id, organism=organism_obj)
+                .feature_id,
+                object_id=Feature.objects.exclude(type=self.aa_cvterm)
+                .get(uniquename=object_id, organism=organism_obj)
+                .feature_id,
                 type_id=part_of.cvterm_id,
                 rank=0,
             )
             fr.save()
         except ObjectDoesNotExist:
             print(
-                "Parent/Feature ({}/{}) not registered.".format(
-                    object_id, subject_id
-                )
+                "Parent/Feature ({}/{}) not registered.".format(object_id, subject_id)
             )
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
@@ -390,8 +394,8 @@ class FeatureLoader(object):
         if target == "InterPro":
             db_name = searchio_hit.attributes["Target"].upper()
             # prevents the creation of multiple databases for SIGNALP
-            if db_name.startswith('SIGNALP'):
-                db_name = 'SIGNALP'
+            if db_name.startswith("SIGNALP"):
+                db_name = "SIGNALP"
             db, created = Db.objects.get_or_create(name=db_name)
         # if blast-xml parsing, db name is self.db ("BLAST_source")
         else:
@@ -532,10 +536,12 @@ class FeatureLoader(object):
         for acc in group:
             try:
                 # retrieves feature_id from dbxref's accession
-                feature_id_list.append(retrieve_feature_id(accession=acc, soterm=soterm))
+                feature_id_list.append(
+                    retrieve_feature_id(accession=acc, soterm=soterm)
+                )
             except (MultipleObjectsReturned, ObjectDoesNotExist):
-                 pass
-        
+                pass
+
         # only stores clusters with 2 or more members
         if len(feature_id_list) > 1:
             for feature_id in feature_id_list:

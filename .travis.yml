@@ -34,6 +34,7 @@ script:
   - python setup.py install
   - django-admin startproject WEBPROJECT
   - export PYTHONPATH=`pwd`; coverage run WEBPROJECT/manage.py test machado --settings machado.tests.settings
+  - flake8 machado
 
 after_success:
   - pip install codecov
