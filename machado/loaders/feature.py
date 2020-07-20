@@ -583,7 +583,7 @@ class FeatureLoader(object):
             db_name, dbxref_accession = dbxref.split(":")
         except ValueError:
             raise ImportingError(
-                'Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).'.format(
+                "Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).".format(
                     dbxref
                 )
             )
