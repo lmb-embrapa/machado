@@ -62,19 +62,6 @@ class FeatureView(View):
             )
         return result
 
-    def retrieve_feature_dbxref(self, feature_id: int) -> List[Dict]:
-        """Retrieve feature dbxrefs."""
-        feature_dbxref = FeatureDbxref.objects.filter(feature_id=feature_id)
-        result = list()
-        for feature_dbxref in feature_dbxref:
-            result.append(
-                {
-                    "dbxref": feature_dbxref.dbxref.accession,
-                    "db": feature_dbxref.dbxref.db.name,
-                }
-            )
-        return result
-
     def retrieve_feature_cvterm(self, feature_id: int) -> List[Dict]:
         """Retrieve feature cvterms."""
         feature_cvterm = FeatureCvterm.objects.filter(feature_id=feature_id)
@@ -195,9 +182,6 @@ class FeatureView(View):
             organism="{} {}".format(
                 feature_obj.organism.genus, feature_obj.organism.species
             ),
-        )
-        result["dbxref"] = self.retrieve_feature_dbxref(
-            feature_id=feature_obj.feature_id
         )
         result["cvterm"] = self.retrieve_feature_cvterm(
             feature_id=feature_obj.feature_id
