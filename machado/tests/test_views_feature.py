@@ -355,14 +355,6 @@ class FeatureTest(TestCase):
         self.assertEqual(1, result[0]["strand"])
         self.assertEqual("chr1", result[0]["ref"])
 
-    def test_retrieve_feature_dbxref(self):
-        """Tests - retrieve_feature_dbxref."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
-        result = fv.retrieve_feature_dbxref(feature_id=f.feature_id)
-        self.assertEqual("GI", result[0]["db"])
-        self.assertEqual("12345", result[0]["dbxref"])
-
     def test_retrieve_feature_cvterm(self):
         """Tests - retrieve_feature_cvterm."""
         fv = feature.FeatureView()
@@ -405,7 +397,6 @@ class FeatureTest(TestCase):
         f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
         result = fv.retrieve_feature_data(feature_obj=f)
         self.assertEquals(1, result["location"][0]["start"])
-        self.assertEquals("GI", result["dbxref"][0]["db"])
         self.assertEquals("GO", result["cvterm"][0]["db"])
 
         f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
