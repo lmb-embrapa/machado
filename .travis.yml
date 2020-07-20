@@ -23,7 +23,7 @@ jobs:
 services:
   - postgresql
 
-before_install:
+before_script:
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
@@ -39,8 +39,6 @@ addons:
     packages:
     - samtools
     - pandoc
-    - postgresql
-    - postgresql-client
 
 script:
   - python setup.py install
