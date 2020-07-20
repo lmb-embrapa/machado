@@ -35,11 +35,12 @@ before_install:
   - pip install flake8 flake8-black
 
 addons:
-  postgresql: "10"
   apt:
     packages:
     - samtools
     - pandoc
+    - postgresql
+    - postgresql-client
 
 script:
   - python setup.py install
