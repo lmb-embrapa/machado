@@ -15,7 +15,7 @@ from django.views import View
 
 from machado.models import Analysis, Analysisfeature, Pub
 from machado.models import Feature, Featureloc, Featureprop
-from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
+from machado.models import FeatureCvterm, FeatureRelationship
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
