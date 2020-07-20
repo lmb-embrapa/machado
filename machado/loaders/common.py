@@ -168,8 +168,11 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
         pass
 
     # featuredbxref.dbxref.accession
-    return FeatureDbxref.objects.get(
-        dbxref__accession=accession,
-        feature__type__cv__name="sequence",
-        feature__type__name=soterm,
-    ).feature_id
+    try:
+        return FeatureDbxref.objects.get(
+            dbxref__accession=accession,
+            feature__type__cv__name="sequence",
+            feature__type__name=soterm,
+        ).feature_id
+    except ObjectDoesNotExist:
+        raise ImportingError("Feature {} not found.".format(accession))
