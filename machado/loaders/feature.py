@@ -26,8 +26,8 @@ from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
 
 # The following features are handled in a specific manner and should not
-# be included in VALID_ATTRS: id, name, and parent
-VALID_ATTRS = [
+# be included in VALID_GFF_ATTRS: id, name, and parent
+VALID_GFF_ATTRS = [
     "dbxref",
     "note",
     "display",
@@ -117,15 +117,15 @@ class FeatureLoader(object):
         return result
 
     def process_attributes(self, feature_id: int, attrs: Dict[str, str]) -> None:
-        """Process the VALID_ATTRS attributes."""
+        """Process the VALID_GFF_ATTRS attributes."""
         try:
             cvterm_exact = Cvterm.objects.get(name="exact", cv__name="synonym_type")
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
 
-        # Don't forget to add the attribute to the constant VALID_ATTRS
+        # Don't forget to add the attribute to the constant VALID_GFF_ATTRS
         for key in attrs:
-            if key not in VALID_ATTRS:
+            if key not in VALID_GFF_ATTRS:
                 continue
             elif key in ["ontology_term"]:
                 # store in featurecvterm
@@ -217,7 +217,7 @@ class FeatureLoader(object):
         """Store tabix feature."""
         organism_obj = retrieve_organism(organism)
         for key in self.get_attributes(tabix_feature.attributes):
-            if key not in VALID_ATTRS and key not in ["id", "name", "parent"]:
+            if key not in VALID_GFF_ATTRS and key not in ["id", "name", "parent"]:
                 self.ignored_attrs.add(key)
 
         cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
@@ -451,7 +451,7 @@ class FeatureLoader(object):
         """Store feature annotation."""
         attrs = {cvterm: annotation}
         for key in attrs:
-            if key not in VALID_ATTRS:
+            if key not in VALID_GFF_ATTRS:
                 self.ignored_attrs.add(key)
 
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
