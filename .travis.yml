@@ -39,7 +39,7 @@ addons:
     packages:
     - samtools
     - pandoc
-    - postgresql
+    - postgresql: 12
 
 script:
   - python setup.py install
