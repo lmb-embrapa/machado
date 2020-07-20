@@ -104,7 +104,7 @@ class Command(BaseCommand):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(
-                    pool.submit(feature_file.store_tabix_feature, row, organism)
+                    pool.submit(feature_file.store_tabix_GFF_feature, row, organism)
                 )
 
                 if len(tasks) >= chunk_size:

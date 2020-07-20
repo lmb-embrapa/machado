@@ -213,7 +213,7 @@ class FeatureLoader(object):
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()
 
-    def store_tabix_feature(self, tabix_feature: GTFProxy, organism: str) -> None:
+    def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, organism: str) -> None:
         """Store tabix feature."""
         organism_obj = retrieve_organism(organism)
         for key in self.get_attributes(tabix_feature.attributes):

@@ -174,7 +174,7 @@ class FeatureTest(TestCase):
         # asserting ignored goterms
         self.assertEqual("GO:54321", test_feature_file.ignored_goterms.pop())
 
-    def test_store_tabix_feature(self):
+    def test_store_tabix_GFF_feature(self):
         """Tests - store tabix feature / store relationships."""
         # creating exact term
         test_db_global = Db.objects.create(name="_global")
@@ -338,8 +338,8 @@ class FeatureTest(TestCase):
 
         organism = "Mus musculus"
         # store the tabix feature
-        test_feature_file.store_tabix_feature(test_tabix_feature1, organism)
-        test_feature_file.store_tabix_feature(test_tabix_feature2, organism)
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature1, organism)
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature2, organism)
 
         # store the relationships
         for item in test_feature_file.relationships:
