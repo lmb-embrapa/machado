@@ -14,7 +14,7 @@ from urllib.parse import unquote
 from Bio.SearchIO._model import Hit
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
-from pysam.libctabixproxies import GTFProxy
+from pysam.libctabixproxies import GTFProxy, VCFProxy
 
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
@@ -25,7 +25,7 @@ from machado.models import Featureprop, FeatureSynonym
 from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
 
-# The following features are handled in a specific manner and should not
+# The following attributes are handled in a specific manner and should not
 # be included in VALID_GFF_ATTRS: id, name, and parent
 VALID_GFF_ATTRS = [
     "dbxref",
@@ -40,6 +40,11 @@ VALID_GFF_ATTRS = [
     "description",
     "product",
     "pacid",
+]
+
+VALID_VCF_ATTRS = [
+    "TSA",
+    "VC",
 ]
 
 
@@ -220,7 +225,12 @@ class FeatureLoader(object):
             if key not in VALID_GFF_ATTRS and key not in ["id", "name", "parent"]:
                 self.ignored_attrs.add(key)
 
-        cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
+        try:
+            cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
+        except ObjectDoesNotExist:
+            raise ImportingError(
+                "{} is not a sequence ontology term.", tabix_feature.feature
+            )
 
         attrs_id = self.get_attributes(tabix_feature.attributes).get("id")
         attrs_name = self.get_attributes(tabix_feature.attributes).get("name")
@@ -377,6 +387,114 @@ class FeatureLoader(object):
             print(
                 "Parent/Feature ({}/{}) not registered.".format(object_id, subject_id)
             )
+
+    def store_tabix_VCF_feature(self, tabix_feature: VCFProxy, organism: str) -> None:
+        """Store tabix feature from VCF files."""
+        organism_obj = retrieve_organism(organism)
+        for key in self.get_attributes(tabix_feature.info):
+            if key not in VALID_VCF_ATTRS and key not in ["id", "name", "parent"]:
+                self.ignored_attrs.add(key)
+
+        if self.get_attributes(tabix_feature.info).get("vc"):
+            attrs_class = self.get_attributes(tabix_feature.info).get("vc")
+        elif self.get_attributes(tabix_feature.info).get("tsa"):
+            attrs_class = self.get_attributes(tabix_feature.info).get("tsa")
+        else:
+            raise ImportingError(
+                "{}: Impossible to get the attribute which defines the type of variation (eg. TSA, VC)".format(
+                    tabix_feature.id
+                )
+            )
+
+        try:
+            cvterm = Cvterm.objects.get(name=attrs_class, cv__name="sequence")
+        except ObjectDoesNotExist:
+            raise ImportingError("{} is not a sequence ontology term.", attrs_class)
+
+        try:
+            dbxref, created = Dbxref.objects.get_or_create(
+                db=self.db, accession=tabix_feature.id
+            )
+            Dbxrefprop.objects.get_or_create(
+                dbxref=dbxref,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=self.filename,
+                rank=0,
+            )
+            feature_id = Feature.objects.create(
+                organism=organism_obj,
+                uniquename=tabix_feature.id,
+                type_id=cvterm.cvterm_id,
+                dbxref=dbxref,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc),
+            ).feature_id
+        except IntegrityError as e:
+            raise ImportingError(
+                "ID {} already registered. {}".format(tabix_feature.id, e)
+            )
+
+        # DOI: try to link feature to publication's DOI
+        if feature_id and self.pub_dbxref_doi:
+            try:
+                FeaturePub.objects.get_or_create(
+                    feature_id=feature_id, pub_id=self.pub_dbxref_doi.pub_id
+                )
+            except IntegrityError as e:
+                raise ImportingError(e)
+
+        srcdb = Db.objects.get(name="FASTA_SOURCE")
+        srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig, db=srcdb)
+        srcfeature = Feature.objects.filter(
+            dbxref=srcdbxref, organism=organism_obj
+        ).values_list("feature_id", flat=True)
+        if len(srcfeature) == 1:
+            srcfeature_id = srcfeature.first()
+        else:
+            raise ImportingError(
+                "Parent not found: {}. It's required to load "
+                "a reference FASTA file before loading features.".format(
+                    tabix_feature.contig
+                )
+            )
+
+        # Reference allele
+        try:
+            Featureloc.objects.get_or_create(
+                feature_id=feature_id,
+                srcfeature_id=srcfeature_id,
+                fmin=tabix_feature.pos,
+                is_fmin_partial=False,
+                fmax=tabix_feature.pos + 1,
+                is_fmax_partial=False,
+                residue_info=tabix_feature.ref,
+                locgroup=0,
+                rank=0,
+            )
+        except IntegrityError as e:
+            print(tabix_feature.id, srcdbxref, tabix_feature.pos)
+            raise ImportingError(e)
+
+        # Alternative alleles
+        rank = 1
+        for allele in tabix_feature.alt.split(","):
+            try:
+                Featureloc.objects.get_or_create(
+                    feature_id=feature_id,
+                    fmin=tabix_feature.pos,
+                    is_fmin_partial=False,
+                    fmax=tabix_feature.pos + 1,
+                    is_fmax_partial=False,
+                    residue_info=allele,
+                    locgroup=0,
+                    rank=rank,
+                )
+            except IntegrityError as e:
+                print(tabix_feature.id, srcdbxref, tabix_feature.pos)
+                raise ImportingError(e)
+            rank += 1
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""
