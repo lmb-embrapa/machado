@@ -579,7 +579,14 @@ class FeatureLoader(object):
         """Store feature dbxref."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
 
-        db_name, dbxref_accession = dbxref.split(":")
+        try:
+            db_name, dbxref_accession = dbxref.split(":")
+        except ValueError:
+            raise ImportingError(
+                'Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).'.format(
+                    dbxref
+                )
+            )
         db_obj, created = Db.objects.get_or_create(name=db_name)
         dbxref_obj, created = Dbxref.objects.get_or_create(
             db=db_obj, accession=dbxref_accession
