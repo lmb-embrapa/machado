@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         try:
             feature_file = FeatureLoader(
-                filename=filename, source="GFF_source", doi=doi
+                filename=filename, source="GFF_SOURCE", doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)

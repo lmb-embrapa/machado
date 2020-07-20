@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         try:
             feature_file = FeatureLoader(
-                filename=filename, source="VCF_source", doi=doi
+                filename=filename, source="VCF_SOURCE", doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)

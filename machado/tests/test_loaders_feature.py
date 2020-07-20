@@ -359,6 +359,185 @@ class FeatureTest(TestCase):
         self.assertEqual(10, test_featureloc.fmin)
         self.assertEqual("id1", test_src_feature.uniquename)
 
+    def test_store_tabix_VCF_feature(self):
+        """Tests - store tabix VCF feature / store relationships."""
+        # creating exact term
+        test_db_global = Db.objects.create(name="_global")
+        test_dbxref = Dbxref.objects.create(accession="exact", db=test_db_global)
+        test_cv = Cv.objects.create(name="synonym_type")
+        Cvterm.objects.create(
+            name="exact",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        # creating part_of term
+        test_dbxref = Dbxref.objects.create(accession="part_of", db=test_db_global)
+        test_cv = Cv.objects.create(name="sequence")
+        Cvterm.objects.create(
+            name="part_of",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        # create SO terms: assembly, gene, and exon
+        test_db = Db.objects.create(name="SO")
+        test_dbxref = Dbxref.objects.create(accession="00001", db=test_db)
+        test_cvterm_assembly = Cvterm.objects.create(
+            name="assembly",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
+        Cvterm.objects.create(
+            name="snv",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        test_dbxref = Dbxref.objects.create(accession="00003", db=test_db)
+        Cvterm.objects.create(
+            name="snp",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        test_dbxref = Dbxref.objects.create(accession="00004", db=test_db)
+        Cvterm.objects.create(
+            name="polypeptide",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        test_dbxref = Dbxref.objects.create(accession="00005", db=test_db)
+        Cvterm.objects.create(
+            name="protein_match",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
+        # create RO term: contained in
+        test_db = Db.objects.create(name="RO")
+        test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
+        test_cv = Cv.objects.create(name="relationship")
+        Cvterm.objects.create(
+            name="contained in",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
+        # create an organism
+        test_organism = Organism.objects.create(genus="Mus", species="musculus")
+        # create a srcfeature
+        test_db = Db.objects.create(name="FASTA_SOURCE")
+        test_dbxref = Dbxref.objects.create(accession="contig1", db=test_db)
+        feature = Feature.objects.create(
+            dbxref=test_dbxref,
+            organism=test_organism,
+            name="contig1",
+            type=test_cvterm_assembly,
+            uniquename="contig1",
+            is_analysis=False,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc),
+        )
+
+        # DOI TESTING
+        db2 = BibDatabase()
+        db2.entries = [
+            {
+                "journal": "Nice Journal",
+                "comments": "A comment",
+                "pages": "12--23",
+                "month": "jan",
+                "abstract": "This is an abstract. This line should be "
+                "long enough to test multilines...",
+                "title": "An amazing title",
+                "year": "2013",
+                "doi": "10.1186/s12864-016-2535-300002",
+                "volume": "12",
+                "ID": "Teste2018",
+                "author": "Foo, b. and Foo1, b. and Foo b.",
+                "keyword": "keyword1, keyword2",
+                "ENTRYTYPE": "article",
+            }
+        ]
+        for entry in db2.entries:
+            bibtest3 = PublicationLoader()
+            bibtest3.store_bibtex_entry(entry)
+        test_bibtex3 = Pub.objects.get(uniquename="Teste2018")
+        test_bibtex3_pubdbxref = PubDbxref.objects.get(pub=test_bibtex3)
+        test_bibtex3_dbxref = Dbxref.objects.get(
+            dbxref_id=test_bibtex3_pubdbxref.dbxref_id
+        )
+        self.assertEqual(
+            "10.1186/s12864-016-2535-300002", test_bibtex3_dbxref.accession
+        )
+        # DOI: try to link feature to publication's DOI
+        featurepub_test = None
+        if feature and test_bibtex3_pubdbxref:
+            featurepub_test = FeaturePub.objects.create(
+                feature_id=feature.feature_id, pub_id=test_bibtex3_pubdbxref.pub_id
+            )
+        test_pub = Pub.objects.get(pub_id=featurepub_test.pub_id)
+        self.assertEqual("An amazing title", test_pub.title)
+        test_pubdbxref = PubDbxref.objects.get(pub=test_pub)
+        test_dbxref = Dbxref.objects.get(dbxref_id=test_pubdbxref.dbxref_id)
+        self.assertEqual("10.1186/s12864-016-2535-300002", test_dbxref.accession)
+
+        # create a tabix feature
+        class TabixFeature(object):
+            """mock tabix feature."""
+
+        test_tabix_feature1 = TabixFeature()
+        test_tabix_feature1.contig = "contig1"
+        test_tabix_feature1.feature = "snp"
+        test_tabix_feature1.pos = 10
+        test_tabix_feature1.id = "id1"
+        test_tabix_feature1.ref = "A"
+        test_tabix_feature1.alt = "T,C"
+        test_tabix_feature1.info = "TSA=snv"
+
+        test_tabix_feature2 = TabixFeature()
+        test_tabix_feature2.contig = "contig1"
+        test_tabix_feature2.feature = "snv"
+        test_tabix_feature2.pos = 100
+        test_tabix_feature2.id = "id2"
+        test_tabix_feature2.ref = "G"
+        test_tabix_feature2.alt = "C,A"
+        test_tabix_feature2.info = "VC=snp;SAO=0"
+
+        # instantiate the loader
+        test_feature_file = FeatureLoader(filename="file.name", source="VCF_SOURCE")
+
+        organism = "Mus musculus"
+        # store the tabix feature
+        test_feature_file.store_tabix_VCF_feature(test_tabix_feature1, organism)
+        test_feature_file.store_tabix_VCF_feature(test_tabix_feature2, organism)
+
+        test_feature = Feature.objects.get(uniquename="id2")
+        test_featurelocs = Featureloc.objects.filter(feature=test_feature)
+        self.assertEqual(100, test_featurelocs[0].fmin)
+        self.assertEqual("G", test_featurelocs[0].residue_info)
+        self.assertEqual("C", test_featurelocs[1].residue_info)
+        self.assertEqual("A", test_featurelocs[2].residue_info)
+        self.assertEqual(0, test_featurelocs[0].rank)
+        self.assertEqual(1, test_featurelocs[1].rank)
+        self.assertEqual(2, test_featurelocs[2].rank)
+        self.assertEqual("contig1", test_featurelocs[0].srcfeature.uniquename)
+
     def test_store_bio_searchio_hit(self):
         """Tests - store bio searchio hit."""
         # create RO term: contained in
