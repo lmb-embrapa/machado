@@ -24,3 +24,4 @@ It contains a few small FASTA and GFF files, together with a README file with ex
    OrthoMCL <load_orthomcl>
    RNA-seq <load_rnaseq>
    Coexpression <load_coexpression>
+   VCF <load_vcf>
