@@ -16,6 +16,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseVariantSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
@@ -109,7 +110,21 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
     renderer_classes = (JSONRenderer,)
-    serializer_class = JBrowseFeatureSerializer
+
+    def get_serializer_class(self, *args, **kwargs):
+        """Get the serializer class."""
+        VALID_VARIATION_TYPES = [
+            "snv",
+            "snp",
+            "insertion",
+            "deletion",
+            "indel",
+            "sequence_alteration",
+        ]
+        if self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
+            return JBrowseVariantSerializer
+        else:
+            return JBrowseFeatureSerializer
 
     def get_serializer_context(self):
         """Get the serializer context."""

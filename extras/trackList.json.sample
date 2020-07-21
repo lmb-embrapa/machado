@@ -64,6 +64,66 @@
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/CanvasFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "SNV track",
+         "label" : "SNV",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "SNV"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "SNP track",
+         "label" : "SNP",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "SNP"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "indel track",
+         "label" : "indel",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "indel"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "insertion track",
+         "label" : "insertion",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "insertion"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "deletion track",
+         "label" : "deletion",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "deletion"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
      }
    ]
 }
