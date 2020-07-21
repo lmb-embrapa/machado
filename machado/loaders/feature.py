@@ -421,9 +421,11 @@ class FeatureLoader(object):
                 value=self.filename,
                 rank=0,
             )
+            name = "{}->{}".format(tabix_feature.ref, tabix_feature.alt)
             feature_id = Feature.objects.create(
                 organism=organism_obj,
                 uniquename=tabix_feature.id,
+                name=name,
                 type_id=cvterm.cvterm_id,
                 dbxref=dbxref,
                 is_analysis=False,
@@ -435,6 +437,16 @@ class FeatureLoader(object):
             raise ImportingError(
                 "ID {} already registered. {}".format(tabix_feature.id, e)
             )
+
+        if tabix_feature.qual != ".":
+            cvterm_qual = Cvterm.objects.get(name="quality_value", cv__name="sequence")
+            featureprop_obj = Featureprop(
+                feature_id=feature_id,
+                type=cvterm_qual,
+                value=tabix_feature.qual,
+                rank=0,
+            )
+            featureprop_obj.save()
 
         # DOI: try to link feature to publication's DOI
         if feature_id and self.pub_dbxref_doi:

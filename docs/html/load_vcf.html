@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2.13. Loading VCF files &mdash; machado 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Visualization" href="visualization.html" />
+    <link rel="prev" title="2.12. Loading Coexpression analyzes" href="load_coexpression.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> machado
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="load_ontologies.html">2.1. Ontologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_taxonomy.html">2.2. Taxonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="insert_organism.html">2.3. Organism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_publication.html">2.4. Publication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_fasta.html">2.5. FASTA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_gff.html">2.6. GFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_feature_annotation.html">2.7. Feature additional info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_blast.html">2.8. Blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_interproscan.html">2.9. InterproScan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.13. VCF</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagrams.html">4. Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">machado</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
+        
+      <li><span class="section-number">2.13. </span>Loading VCF files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/load_vcf.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="loading-vcf-files">
+<h1><span class="section-number">2.13. </span>Loading VCF files<a class="headerlink" href="#loading-vcf-files" title="Permalink to this headline">¶</a></h1>
+<p>The first column of a VCF file is the reference sequence ID.
+In order to load a VCF file, it’s required to have a reference FASTA file loaded.</p>
+<p>The VCF file must be indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a>.</p>
+<div class="section" id="load-vcf">
+<h2><span class="section-number">2.13.1. </span>Load VCF<a class="headerlink" href="#load-vcf" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_vcf --file organism_snv_sorted.gff3.gz --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>–file</p></td>
+<td><p>VCF genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</p></td>
+</tr>
+<tr class="row-even"><td><p>–organism</p></td>
+<td><p>Species name (eg. Homo sapiens, Mus musculus) *</p></td>
+</tr>
+<tr class="row-odd"><td><p>–doi</p></td>
+<td><p>DOI of a reference stored using <em>load_publication</em> (eg. 10.1111/s12122-012-1313-4)</p></td>
+</tr>
+<tr class="row-even"><td><p>–cpu</p></td>
+<td><p>Number of threads</p></td>
+</tr>
+</tbody>
+</table>
+<p>* required fields</p>
+</div>
+<div class="section" id="remove-file">
+<h2><span class="section-number">2.13.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<p>If, by any reason, you need to remove a VCF dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>This command requires the file name (Dbxrefprop.value)</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="load_coexpression.html" class="btn btn-neutral float-left" title="2.12. Loading Coexpression analyzes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Embrapa
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
