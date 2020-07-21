@@ -124,6 +124,19 @@
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/HTMLFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "sequence alteration track",
+         "label" : "sequence_alteration",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "sequence_alteration"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
      }
+
    ]
 }

@@ -163,7 +163,7 @@ class JBrowseVariantSerializer(serializers.ModelSerializer):
     alt = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
     qual = serializers.SerializerMethodField()
 
     class Meta:
@@ -177,7 +177,7 @@ class JBrowseVariantSerializer(serializers.ModelSerializer):
             "alt",
             "type",
             "id",
-            "description",
+            "name",
             "qual",
         )
 
@@ -236,8 +236,8 @@ class JBrowseVariantSerializer(serializers.ModelSerializer):
         """Get the id."""
         return obj.uniquename
 
-    def get_description(self, obj):
-        """Get the description."""
+    def get_name(self, obj):
+        """Get the name."""
         return obj.name
 
     def get_qual(self, obj):
