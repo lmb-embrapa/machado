@@ -24,7 +24,7 @@
        {
          "category": "2. Genes",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "Gene track",
+         "key" : "Gene",
          "label" : "gene",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -40,7 +40,7 @@
      {
          "category": "2. Genes",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "Transcript track",
+         "key" : "Transcript",
          "label" : "transcripts",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -56,7 +56,7 @@
       {
          "category": "2. Genes",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "CDS track",
+         "key" : "CDS",
          "label" : "CDS",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -68,7 +68,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "SNV track",
+         "key" : "SNV",
          "label" : "SNV",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -80,7 +80,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "SNP track",
+         "key" : "SNP",
          "label" : "SNP",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -92,7 +92,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "indel track",
+         "key" : "indel",
          "label" : "indel",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -104,7 +104,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "insertion track",
+         "key" : "insertion",
          "label" : "insertion",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -116,7 +116,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "deletion track",
+         "key" : "deletion",
          "label" : "deletion",
          "query" : {
             "organism" : "Arabidopsis thaliana",
@@ -128,7 +128,7 @@
       {
          "category": "3. Variation",
          "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "sequence alteration track",
+         "key" : "sequence alteration",
          "label" : "sequence_alteration",
          "query" : {
             "organism" : "Arabidopsis thaliana",
