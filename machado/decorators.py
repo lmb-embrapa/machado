@@ -19,7 +19,7 @@ def get_feature_dbxrefs(self):
     for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
         result.append(
             "{}:{}".format(
-                feature_dbxref.dbxref.accession, feature_dbxref.dbxref.db.name
+                feature_dbxref.dbxref.db.name, feature_dbxref.dbxref.accession
             )
         )
     return result
