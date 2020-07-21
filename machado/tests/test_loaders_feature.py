@@ -424,6 +424,14 @@ class FeatureTest(TestCase):
             is_obsolete=0,
             is_relationshiptype=0,
         )
+        test_dbxref = Dbxref.objects.create(accession="00006", db=test_db)
+        Cvterm.objects.create(
+            name="quality_value",
+            cv=test_cv,
+            dbxref=test_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
 
         # create RO term: contained in
         test_db = Db.objects.create(name="RO")
@@ -509,6 +517,7 @@ class FeatureTest(TestCase):
         test_tabix_feature1.ref = "A"
         test_tabix_feature1.alt = "T,C"
         test_tabix_feature1.info = "TSA=snv"
+        test_tabix_feature1.qual = 10
 
         test_tabix_feature2 = TabixFeature()
         test_tabix_feature2.contig = "contig1"
@@ -518,6 +527,7 @@ class FeatureTest(TestCase):
         test_tabix_feature2.ref = "G"
         test_tabix_feature2.alt = "C,A"
         test_tabix_feature2.info = "VC=snp;SAO=0"
+        test_tabix_feature2.qual = 20
 
         # instantiate the loader
         test_feature_file = FeatureLoader(filename="file.name", source="VCF_SOURCE")
