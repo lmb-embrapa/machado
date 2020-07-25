@@ -15,7 +15,11 @@ def load_data_from_sql(apps, schema_editor):
     file_path = os.path.join(
         os.path.dirname(__file__), "../schemas/1.31/default_schema.sql"
     )
-    sql_statement = open(file_path).read()
+    sql_statement = ""
+    for line in open(file_path).readlines():
+        line = line.replace("(create_point", "(public.create_point")
+        line = line.replace(", create_point", ", public.create_point")
+        sql_statement += line
     with connection.cursor() as c:
         c.execute(sql_statement)
 
