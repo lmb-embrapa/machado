@@ -85,13 +85,13 @@ The settings.py file should contain these variables
 
    MACHADO_JBROWSE_URL = 'http://localhost/jbrowse'
 
-   MACHADO_JBROWSE_TRACKS = 'ref_seq,gene,transcripts,CDS'
+   MACHADO_JBROWSE_TRACKS = 'ref_seq,gene,transcripts,CDS,SNV'
 
    MACHADO_JBROWSE_OFFSET = 1200
 
 MACHADO_JBROWSE_URL: the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)
 
-MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed ('ref_seq,gene,transcripts,CDS' if not set).
+MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed ('ref_seq,gene,transcripts,CDS,SNV' if not set).
 
 MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).
 

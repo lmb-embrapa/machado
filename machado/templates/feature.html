@@ -25,7 +25,8 @@
     </div>
     <div class="card-body">
       <div class="card-text">
-      <p>ID: {{ feature.uniquename }}</p>
+        <p>ID: {{ feature.uniquename }}</p>
+      {% if feature.get_dbxrefs %}<p>DBxRefs: {{ feature.get_dbxrefs|join:', ' }}</p>{% endif %}
       {% if feature.get_display %}<p>Display: {{ feature.get_display }}</p>{% endif %}
       {% if feature.get_product %}<p>Product: {{ feature.get_product }}</p>{% endif %}
       {% if feature.get_description %}<p>Description: {{ feature.get_description }}</p>{% endif %}

@@ -14,7 +14,7 @@ from urllib.parse import unquote
 from Bio.SearchIO._model import Hit
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
-from pysam.libctabixproxies import GTFProxy
+from pysam.libctabixproxies import GTFProxy, VCFProxy
 
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
@@ -25,9 +25,9 @@ from machado.models import Featureprop, FeatureSynonym
 from machado.models import Pub, PubDbxref, FeaturePub, Synonym
 
 
-# The following features are handled in a specific manner and should not
-# be included in VALID_ATTRS: id, name, and parent
-VALID_ATTRS = [
+# The following attributes are handled in a specific manner and should not
+# be included in VALID_GFF_ATTRS: id, name, and parent
+VALID_GFF_ATTRS = [
     "dbxref",
     "note",
     "display",
@@ -40,6 +40,11 @@ VALID_ATTRS = [
     "description",
     "product",
     "pacid",
+]
+
+VALID_VCF_ATTRS = [
+    "TSA",
+    "VC",
 ]
 
 
@@ -117,15 +122,15 @@ class FeatureLoader(object):
         return result
 
     def process_attributes(self, feature_id: int, attrs: Dict[str, str]) -> None:
-        """Process the VALID_ATTRS attributes."""
+        """Process the VALID_GFF_ATTRS attributes."""
         try:
             cvterm_exact = Cvterm.objects.get(name="exact", cv__name="synonym_type")
         except ObjectDoesNotExist as e:
             raise ImportingError(e)
 
-        # Don't forget to add the attribute to the constant VALID_ATTRS
+        # Don't forget to add the attribute to the constant VALID_GFF_ATTRS
         for key in attrs:
-            if key not in VALID_ATTRS:
+            if key not in VALID_GFF_ATTRS:
                 continue
             elif key in ["ontology_term"]:
                 # store in featurecvterm
@@ -213,14 +218,19 @@ class FeatureLoader(object):
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()
 
-    def store_tabix_feature(self, tabix_feature: GTFProxy, organism: str) -> None:
+    def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, organism: str) -> None:
         """Store tabix feature."""
         organism_obj = retrieve_organism(organism)
         for key in self.get_attributes(tabix_feature.attributes):
-            if key not in VALID_ATTRS and key not in ["id", "name", "parent"]:
+            if key not in VALID_GFF_ATTRS and key not in ["id", "name", "parent"]:
                 self.ignored_attrs.add(key)
 
-        cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
+        try:
+            cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
+        except ObjectDoesNotExist:
+            raise ImportingError(
+                "{} is not a sequence ontology term.", tabix_feature.feature
+            )
 
         attrs_id = self.get_attributes(tabix_feature.attributes).get("id")
         attrs_name = self.get_attributes(tabix_feature.attributes).get("name")
@@ -354,25 +364,149 @@ class FeatureLoader(object):
                 rank=0,
             )
 
-    def store_relationship(self, organism: str, subject_id: int, object_id: int) -> FeatureRelationship:
+    def store_relationship(
+        self, organism: str, subject_id: int, object_id: int
+    ) -> FeatureRelationship:
         """Retrieve the relationship object."""
         organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
 
         try:
             fr = FeatureRelationship(
-                subject_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=subject_id, organism=organism_obj).feature_id,
-                object_id=Feature.objects.exclude(type=self.aa_cvterm).get(uniquename=object_id, organism=organism_obj).feature_id,
+                subject_id=Feature.objects.exclude(type=self.aa_cvterm)
+                .get(uniquename=subject_id, organism=organism_obj)
+                .feature_id,
+                object_id=Feature.objects.exclude(type=self.aa_cvterm)
+                .get(uniquename=object_id, organism=organism_obj)
+                .feature_id,
                 type_id=part_of.cvterm_id,
                 rank=0,
             )
             fr.save()
         except ObjectDoesNotExist:
             print(
-                "Parent/Feature ({}/{}) not registered.".format(
-                    object_id, subject_id
+                "Parent/Feature ({}/{}) not registered.".format(object_id, subject_id)
+            )
+
+    def store_tabix_VCF_feature(self, tabix_feature: VCFProxy, organism: str) -> None:
+        """Store tabix feature from VCF files."""
+        organism_obj = retrieve_organism(organism)
+        for key in self.get_attributes(tabix_feature.info):
+            if key not in VALID_VCF_ATTRS and key not in ["id", "name", "parent"]:
+                self.ignored_attrs.add(key)
+
+        if self.get_attributes(tabix_feature.info).get("vc"):
+            attrs_class = self.get_attributes(tabix_feature.info).get("vc")
+        elif self.get_attributes(tabix_feature.info).get("tsa"):
+            attrs_class = self.get_attributes(tabix_feature.info).get("tsa")
+        else:
+            raise ImportingError(
+                "{}: Impossible to get the attribute which defines the type of variation (eg. TSA, VC)".format(
+                    tabix_feature.id
                 )
             )
+
+        try:
+            cvterm = Cvterm.objects.get(name=attrs_class, cv__name="sequence")
+        except ObjectDoesNotExist:
+            raise ImportingError("{} is not a sequence ontology term.", attrs_class)
+
+        try:
+            dbxref, created = Dbxref.objects.get_or_create(
+                db=self.db, accession=tabix_feature.id
+            )
+            Dbxrefprop.objects.get_or_create(
+                dbxref=dbxref,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=self.filename,
+                rank=0,
+            )
+            name = "{}->{}".format(tabix_feature.ref, tabix_feature.alt)
+            feature_id = Feature.objects.create(
+                organism=organism_obj,
+                uniquename=tabix_feature.id,
+                name=name,
+                type_id=cvterm.cvterm_id,
+                dbxref=dbxref,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned=datetime.now(timezone.utc),
+                timelastmodified=datetime.now(timezone.utc),
+            ).feature_id
+        except IntegrityError as e:
+            raise ImportingError(
+                "ID {} already registered. {}".format(tabix_feature.id, e)
+            )
+
+        if tabix_feature.qual != ".":
+            cvterm_qual = Cvterm.objects.get(name="quality_value", cv__name="sequence")
+            featureprop_obj = Featureprop(
+                feature_id=feature_id,
+                type=cvterm_qual,
+                value=tabix_feature.qual,
+                rank=0,
+            )
+            featureprop_obj.save()
+
+        # DOI: try to link feature to publication's DOI
+        if feature_id and self.pub_dbxref_doi:
+            try:
+                FeaturePub.objects.get_or_create(
+                    feature_id=feature_id, pub_id=self.pub_dbxref_doi.pub_id
+                )
+            except IntegrityError as e:
+                raise ImportingError(e)
+
+        srcdb = Db.objects.get(name="FASTA_SOURCE")
+        srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig, db=srcdb)
+        srcfeature = Feature.objects.filter(
+            dbxref=srcdbxref, organism=organism_obj
+        ).values_list("feature_id", flat=True)
+        if len(srcfeature) == 1:
+            srcfeature_id = srcfeature.first()
+        else:
+            raise ImportingError(
+                "Parent not found: {}. It's required to load "
+                "a reference FASTA file before loading features.".format(
+                    tabix_feature.contig
+                )
+            )
+
+        # Reference allele
+        try:
+            Featureloc.objects.get_or_create(
+                feature_id=feature_id,
+                srcfeature_id=srcfeature_id,
+                fmin=tabix_feature.pos,
+                is_fmin_partial=False,
+                fmax=tabix_feature.pos + 1,
+                is_fmax_partial=False,
+                residue_info=tabix_feature.ref,
+                locgroup=0,
+                rank=0,
+            )
+        except IntegrityError as e:
+            print(tabix_feature.id, srcdbxref, tabix_feature.pos)
+            raise ImportingError(e)
+
+        # Alternative alleles
+        rank = 1
+        for allele in tabix_feature.alt.split(","):
+            try:
+                Featureloc.objects.get_or_create(
+                    feature_id=feature_id,
+                    fmin=tabix_feature.pos,
+                    is_fmin_partial=False,
+                    fmax=tabix_feature.pos + 1,
+                    is_fmax_partial=False,
+                    residue_info=allele,
+                    locgroup=0,
+                    rank=rank,
+                )
+            except IntegrityError as e:
+                print(tabix_feature.id, srcdbxref, tabix_feature.pos)
+                raise ImportingError(e)
+            rank += 1
 
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""
@@ -390,8 +524,8 @@ class FeatureLoader(object):
         if target == "InterPro":
             db_name = searchio_hit.attributes["Target"].upper()
             # prevents the creation of multiple databases for SIGNALP
-            if db_name.startswith('SIGNALP'):
-                db_name = 'SIGNALP'
+            if db_name.startswith("SIGNALP"):
+                db_name = "SIGNALP"
             db, created = Db.objects.get_or_create(name=db_name)
         # if blast-xml parsing, db name is self.db ("BLAST_source")
         else:
@@ -447,7 +581,7 @@ class FeatureLoader(object):
         """Store feature annotation."""
         attrs = {cvterm: annotation}
         for key in attrs:
-            if key not in VALID_ATTRS:
+            if key not in VALID_GFF_ATTRS:
                 self.ignored_attrs.add(key)
 
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
@@ -457,7 +591,14 @@ class FeatureLoader(object):
         """Store feature dbxref."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
 
-        db_name, dbxref_accession = dbxref.split(":")
+        try:
+            db_name, dbxref_accession = dbxref.split(":")
+        except ValueError:
+            raise ImportingError(
+                "Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).".format(
+                    dbxref
+                )
+            )
         db_obj, created = Db.objects.get_or_create(name=db_name)
         dbxref_obj, created = Dbxref.objects.get_or_create(
             db=db_obj, accession=dbxref_accession
@@ -532,10 +673,12 @@ class FeatureLoader(object):
         for acc in group:
             try:
                 # retrieves feature_id from dbxref's accession
-                feature_id_list.append(retrieve_feature_id(accession=acc, soterm=soterm))
+                feature_id_list.append(
+                    retrieve_feature_id(accession=acc, soterm=soterm)
+                )
             except (MultipleObjectsReturned, ObjectDoesNotExist):
-                 pass
-        
+                pass
+
         # only stores clusters with 2 or more members
         if len(feature_id_list) > 1:
             for feature_id in feature_id_list:

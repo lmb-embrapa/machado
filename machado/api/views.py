@@ -16,6 +16,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseVariantSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
@@ -109,7 +110,21 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
     renderer_classes = (JSONRenderer,)
-    serializer_class = JBrowseFeatureSerializer
+
+    def get_serializer_class(self, *args, **kwargs):
+        """Get the serializer class."""
+        VALID_VARIATION_TYPES = [
+            "snv",
+            "snp",
+            "insertion",
+            "deletion",
+            "indel",
+            "sequence_alteration",
+        ]
+        if self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
+            return JBrowseVariantSerializer
+        else:
+            return JBrowseFeatureSerializer
 
     def get_serializer_context(self):
         """Get the serializer context."""
@@ -182,16 +197,16 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         """Get queryset."""
         max_items = 10
         request = self.request
-        query = request.GET.get('q')
+        query = request.GET.get("q")
         if query is not None:
             query = query.strip()
-            queryset = SearchQuerySet().filter(autocomplete=query)[:max_items * 10]
+            queryset = SearchQuerySet().filter(autocomplete=query)[: max_items * 10]
             result = set()
             for item in queryset:
                 try:
                     aux = list()
                     for i in query.split(" "):
-                        regex = r"\w*" + escape(i) + "\w*"
+                        regex = r"\w*" + escape(i) + r"\w*"
                         aux.append(search(regex, item.autocomplete, IGNORECASE).group())
                     result.add(" ".join(aux))
                 except AttributeError:
@@ -216,8 +231,9 @@ class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 feature_id=self.kwargs.get("feature_id"),
             )
             return Feature.objects.filter(
-                type__name='polypeptide',
-                Featureprop_feature_Feature__value=ortholog_group.value)
+                type__name="polypeptide",
+                Featureprop_feature_Feature__value=ortholog_group.value,
+            )
         except ObjectDoesNotExist:
             return
 
@@ -259,6 +275,8 @@ class FeaturePublicationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         """Get queryset."""
         try:
-            return Pub.objects.filter(FeaturePub_pub_Pub__feature__feature_id=self.kwargs.get("feature_id"))
+            return Pub.objects.filter(
+                FeaturePub_pub_Pub__feature__feature_id=self.kwargs.get("feature_id")
+            )
         except ObjectDoesNotExist:
             return

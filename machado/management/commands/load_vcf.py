@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Load GFF file."""
+"""Load VCF file."""
 
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -19,15 +19,15 @@ from machado.loaders.feature import FeatureLoader
 
 
 class Command(BaseCommand):
-    """Load GFF file."""
+    """Load VCF file."""
 
-    help = "Load GFF3 file indexed with tabix."
+    help = "Load VCF file indexed with tabix."
 
     def add_arguments(self, parser):
         """Define the arguments."""
         parser.add_argument(
             "--file",
-            help="GFF3 genome file indexed with tabix"
+            help="VCF file indexed with tabix"
             "(see http://www.htslib.org/doc/tabix.html)",
             required=True,
             type=str,
@@ -36,13 +36,6 @@ class Command(BaseCommand):
             "--organism",
             help="Species name (eg. Homo " "sapiens, Mus musculus)",
             required=True,
-            type=str,
-        )
-        parser.add_argument(
-            "--ignore",
-            help="List of feature " "types to ignore (eg. chromosome,scaffold)",
-            required=False,
-            nargs="+",
             type=str,
         )
         parser.add_argument(
@@ -59,7 +52,6 @@ class Command(BaseCommand):
         file: str,
         organism: str,
         doi: str = None,
-        ignore: str = None,
         cpu: int = 1,
         verbosity: int = 1,
         **options
@@ -87,7 +79,7 @@ class Command(BaseCommand):
 
         try:
             feature_file = FeatureLoader(
-                filename=filename, source="GFF_SOURCE", doi=doi
+                filename=filename, source="VCF_SOURCE", doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -100,11 +92,9 @@ class Command(BaseCommand):
         # Load the GFF3 file
         with open(file) as tbx_file:
             tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
-            for row in tqdm(tbx.fetch(parser=pysam.asGTF()), total=get_num_lines(file)):
-                if ignore is not None and row.feature in ignore:
-                    continue
+            for row in tqdm(tbx.fetch(parser=pysam.asVCF()), total=get_num_lines(file)):
                 tasks.append(
-                    pool.submit(feature_file.store_tabix_GFF_feature, row, organism)
+                    pool.submit(feature_file.store_tabix_VCF_feature, row, organism)
                 )
 
                 if len(tasks) >= chunk_size:
@@ -123,36 +113,6 @@ class Command(BaseCommand):
                 tasks.clear()
 
         pool.shutdown()
-
-        if verbosity > 0:
-            self.stdout.write("Loading relationships")
-
-        pool = ThreadPoolExecutor(max_workers=cpu)
-        tasks = list()
-
-        for item in feature_file.relationships:
-            tasks.append(
-                pool.submit(
-                    feature_file.store_relationship,
-                    organism,
-                    item["subject_id"],
-                    item["object_id"],
-                )
-            )
-
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
-            try:
-                task.result()
-            except ImportingError as e:
-                raise CommandError(e)
-        pool.shutdown()
-
-        if feature_file.ignored_attrs is not None:
-            self.stdout.write(
-                self.style.WARNING(
-                    "Ignored attrs: {}".format(feature_file.ignored_attrs)
-                )
-            )
 
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

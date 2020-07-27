@@ -25,7 +25,7 @@ class SequenceTest(TestCase):
     """Tests Loaders - SequenceLoader."""
 
     def setUp(self):
-        """Setup."""
+        """Set up."""
         test_db = Db.objects.create(name="SO")
         test_dbxref = Dbxref.objects.create(accession="00001", db=test_db)
         test_cv = Cv.objects.create(name="sequence")

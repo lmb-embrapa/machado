@@ -13,6 +13,18 @@ from django.db.models.functions import Concat
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
 
+def get_feature_dbxrefs(self):
+    """Get the display feature dbxrefs."""
+    result = list()
+    for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
+        result.append(
+            "{}:{}".format(
+                feature_dbxref.dbxref.db.name, feature_dbxref.dbxref.accession
+            )
+        )
+    return result
+
+
 def get_feature_product(self):
     """Get the product feature prop."""
     try:
@@ -153,6 +165,7 @@ def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
 
     def wrapper(cls):
+        setattr(cls, "get_dbxrefs", get_feature_dbxrefs)
         setattr(cls, "get_display", get_feature_display)
         setattr(cls, "get_product", get_feature_product)
         setattr(cls, "get_description", get_feature_description)

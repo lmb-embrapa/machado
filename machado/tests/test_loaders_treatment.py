@@ -23,7 +23,7 @@ class TreatmentTest(TestCase):
         test_treatment_file = TreatmentLoader()
         # Treatment name
         treatment_name = "Title"
-        test_treatment = test_treatment_file.store_treatment(
+        test_treatment_file.store_treatment(
             name=treatment_name, biomaterial=test_biomaterial
         )
         self.assertEqual(

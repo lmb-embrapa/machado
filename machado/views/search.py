@@ -26,7 +26,7 @@ FACET_FIELDS = {
 class FeatureSearchView(FacetedSearchView):
     """Search view."""
 
-    load_all=False
+    load_all = False
     form_class = FeatureSearchForm
     facet_fields = list(FACET_FIELDS.keys())
     template_name = "search_result.html"
@@ -36,18 +36,20 @@ class FeatureSearchView(FacetedSearchView):
         """Get queryset."""
         qs = super(FeatureSearchView, self).get_queryset(*args, **kwargs)
 
-        if self.request.GET.get('order_by'):
-            order_by_term = self.request.GET.get('order_by')
+        if self.request.GET.get("order_by"):
+            order_by_term = self.request.GET.get("order_by")
         else:
             order_by_term = "uniquename"
 
-        if self.request.GET.get('records'):
-            self.paginate_by = self.request.GET.get('records')
+        if self.request.GET.get("records"):
+            self.paginate_by = self.request.GET.get("records")
         else:
             self.paginate_by = 50
 
         for field in self.facet_fields:
-            qs = qs.facet(field, min_doc_count=0, size=100).order_by('{}_exact'.format(order_by_term))
+            qs = qs.facet(field, min_doc_count=0, size=100).order_by(
+                "{}_exact".format(order_by_term)
+            )
         return qs
 
     def get_context_data(self, *args, **kwargs):
@@ -58,7 +60,7 @@ class FeatureSearchView(FacetedSearchView):
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()["selected_facets"]:
             facet_field, facet_query = facet.split(":")
-            if facet_field == 'so_term':
+            if facet_field == "so_term":
                 so_term_count += 1
             selected_facets_fields.append(facet_field)
             selected_facets.append(facet)

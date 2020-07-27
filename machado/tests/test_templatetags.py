@@ -15,7 +15,7 @@ class MachadoExtrasTest(TestCase):
     """Tests Feature View."""
 
     def setUp(self):
-        """Setup."""
+        """Set up."""
         self.factory = RequestFactory()
 
     def test_param_replace(self):

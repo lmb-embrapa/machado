@@ -28,7 +28,7 @@ class FeatureSearchForm(FacetedSearchForm):
                 facet_field, facet_query = facet.split(":")
                 selected_facets.setdefault(facet_field, []).append(facet_query)
 
-            and_facets = ['analyses']
+            and_facets = ["analyses"]
 
             # the results of these facets will be united (union/or)
             for key, values in selected_facets.items():

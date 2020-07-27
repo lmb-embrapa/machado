@@ -4,17 +4,30 @@ os: linux
 
 jobs:
   include:
-    - dist: trusty
+    - dist: bionic
       python: "3.6"
+    - dist: bionic
+      python: "3.7"
+    - dist: bionic
+      python: "3.8"
     - dist: xenial
       python: "3.6"
     - dist: xenial
       python: "3.7"
+    - dist: xenial
+      python: "3.8"
+    - dist: 
 
 services:
   - postgresql
 
-before_install:
+addons:
+  apt:
+    packages:
+    - samtools
+    - pandoc
+
+before_script:
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
@@ -23,17 +36,13 @@ before_install:
   - sudo dpkg -i --force-confnew elasticsearch-5.6.14.deb
   - pip install git+https://github.com/django-haystack/django-haystack
   - pip install 'elasticsearch>=5,<6'
-
-addons:
-  apt:
-    packages:
-    - samtools
-    - pandoc
+  - pip install flake8 flake8-black
 
 script:
   - python setup.py install
   - django-admin startproject WEBPROJECT
   - export PYTHONPATH=`pwd`; coverage run WEBPROJECT/manage.py test machado --settings machado.tests.settings
+  - flake8 machado
 
 after_success:
   - pip install codecov

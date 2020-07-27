@@ -15,7 +15,7 @@ from django.views import View
 
 from machado.models import Analysis, Analysisfeature, Pub
 from machado.models import Feature, Featureloc, Featureprop
-from machado.models import FeatureCvterm, FeatureDbxref, FeatureRelationship
+from machado.models import FeatureCvterm, FeatureRelationship
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
@@ -32,7 +32,7 @@ class FeatureView(View):
                 if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
                     tracks = settings.MACHADO_JBROWSE_TRACKS
                 else:
-                    tracks = "ref_seq,gene,transcripts,CDS"
+                    tracks = "ref_seq,gene,transcripts,CDS,SNV"
                 if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
                     offset = settings.MACHADO_JBROWSE_OFFSET
                 else:
@@ -58,19 +58,6 @@ class FeatureView(View):
                         feature_id=location.srcfeature_id
                     ).uniquename,
                     "jbrowse_url": jbrowse_url,
-                }
-            )
-        return result
-
-    def retrieve_feature_dbxref(self, feature_id: int) -> List[Dict]:
-        """Retrieve feature dbxrefs."""
-        feature_dbxref = FeatureDbxref.objects.filter(feature_id=feature_id)
-        result = list()
-        for feature_dbxref in feature_dbxref:
-            result.append(
-                {
-                    "dbxref": feature_dbxref.dbxref.accession,
-                    "db": feature_dbxref.dbxref.db.name,
                 }
             )
         return result
@@ -182,7 +169,9 @@ class FeatureView(View):
 
     def retrieve_feature_pub(self, feature_id: int) -> bool:
         """Retrieve feature publications."""
-        return Pub.objects.filter(FeaturePub_pub_Pub__feature__feature_id=feature_id).exists()
+        return Pub.objects.filter(
+            FeaturePub_pub_Pub__feature__feature_id=feature_id
+        ).exists()
 
     def retrieve_feature_data(self, feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""
@@ -193,9 +182,6 @@ class FeatureView(View):
             organism="{} {}".format(
                 feature_obj.organism.genus, feature_obj.organism.species
             ),
-        )
-        result["dbxref"] = self.retrieve_feature_dbxref(
-            feature_id=feature_obj.feature_id
         )
         result["cvterm"] = self.retrieve_feature_cvterm(
             feature_id=feature_obj.feature_id
