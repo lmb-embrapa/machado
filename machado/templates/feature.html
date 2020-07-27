@@ -163,6 +163,11 @@
           {% for hit in data.similarity %}
             <tr>
               <td>{{ hit.program|safe }} {{ hit.programversion|safe }}</td>
+	      {% if hit.db_name == 'BLAST_SOURCE' and hit.name %}
+                  <td>{{ hit.db_name|default_if_none:'' }} <a href="https://www.ncbi.nlm.nih.gov/protein/{{ hit.name|safe }}" target="_blank">{{ hit.name|safe }}</a> {{ hit.uniquename|safe }} {{ hit.display|default_if_none:'' }}</td>
+              {% else %}
+                  <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
+              {% endif %}
               <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
               <td>{{ hit.query_start|default_if_none:''|safe }}</td>
               <td>{{ hit.query_end|default_if_none:''|safe }}</td>
