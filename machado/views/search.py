@@ -16,10 +16,12 @@ FACET_FIELDS = {
     "orthology": "Filter by orthology (polypeptide)",
     "coexpression": "Filter by coexpression (mRNA)",
     "orthologs_coexpression": "Filter by coexpression in orthologous groups members (polypeptide)",
-    "orthologs_biomaterial": "Filter by biomaterial in orthologous groups members (polypeptide)",
+    # "orthologs_biomaterial": "Filter by biomaterial in orthologous groups members (polypeptide)",
     "analyses": "Filter by blast and inteproscan (polypeptide)",
     "biomaterial": "Filter by RNA-seq biomaterial (mRNA)",
     "treatment": "Filter by RNA-Seq sample (mRNA)",
+    "orthologous_group": "Filter by the orthologous group ID",
+    "coexpression_group": "Filter by the coexpression group ID",
 }
 
 
@@ -47,7 +49,7 @@ class FeatureSearchView(FacetedSearchView):
             self.paginate_by = 50
 
         for field in self.facet_fields:
-            qs = qs.facet(field, min_doc_count=0, size=100).order_by(
+            qs = qs.facet(field, min_doc_count=1, size=100).order_by(
                 "{}_exact".format(order_by_term)
             )
         return qs
