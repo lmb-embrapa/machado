@@ -56,9 +56,15 @@
     {% with facet_fields_desc|get_item:facet as facet_description %}
     <div class="row">
         <div class="col">
-            <b>
+            <b style="cursor: help;" title="{{ facet_description }}">
             {% if facet == "so_term" %}
             Feature type
+            {% elif facet == "orthologs_coexpression" %}
+            Orthologous coexpression
+            {% elif facet == "orthologous_group" %}
+            Orthologous group
+            {% elif facet == "coexpression_group" %}
+            Coexpression group
             {% else %}
             {{ facet|capfirst }}
             {% endif %}
