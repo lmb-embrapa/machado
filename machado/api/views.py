@@ -15,7 +15,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
-from machado.api.serializers import JBrowseVariantSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
@@ -102,20 +101,7 @@ class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
-    def get_serializer_class(self, *args, **kwargs):
-        """Get the serializer class."""
-        VALID_VARIATION_TYPES = [
-            "snv",
-            "snp",
-            "insertion",
-            "deletion",
-            "indel",
-            "sequence_alteration",
-        ]
-        if self.request.query_params.get("soType") and self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
-            return JBrowseVariantSerializer
-        else:
-            return JBrowseFeatureSerializer
+    serializer_class = JBrowseFeatureSerializer
 
     def get_serializer_context(self):
         """Get the serializer context."""
