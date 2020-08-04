@@ -10,14 +10,12 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets, mixins
+from rest_framework import views, viewsets, mixins, status
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
 from machado.api.serializers import JBrowseVariantSerializer
-from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
@@ -38,22 +36,18 @@ class StandardResultSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class JBrowseGlobalViewSet(views.APIView):
     """API endpoint to view JBrowse global settings."""
 
-    renderer_classes = (JSONRenderer,)
-
-    def list(self, request):
+    def get(self, request):
         """List."""
-        data = {"featureDensity": 0.02}
-        serializer = JBrowseGlobalSerializer(data)
-        return Response(serializer.data)
+        result = {"featureDensity": 0.02}
+        response = Response(result, status=status.HTTP_200_OK)
+        return response
 
 
 class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to JBrowse names."""
-
-    renderer_classes = (JSONRenderer,)
 
     serializer_class = JBrowseNamesSerializer
 
@@ -83,7 +77,6 @@ class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to JBrowse refSeqs.json."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = JBrowseRefseqSerializer
 
     def get_queryset(self):
@@ -109,8 +102,6 @@ class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
-    renderer_classes = (JSONRenderer,)
-
     def get_serializer_class(self, *args, **kwargs):
         """Get the serializer class."""
         VALID_VARIATION_TYPES = [
@@ -121,7 +112,7 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             "indel",
             "sequence_alteration",
         ]
-        if self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
+        if self.request.query_params.get("soType") and self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
             return JBrowseVariantSerializer
         else:
             return JBrowseFeatureSerializer
@@ -190,7 +181,6 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to provide autocomplete hits."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = autocompleteSerializer
 
     def get_queryset(self):
@@ -219,7 +209,6 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view the feature ortholog."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeatureOrthologSerializer
 
     def get_queryset(self):
@@ -255,7 +244,6 @@ class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view the feature sequence."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeatureSequenceSerializer
 
     def get_queryset(self):
@@ -269,7 +257,6 @@ class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class FeaturePublicationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """API endpoint to view the feature publication."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeaturePublicationSerializer
 
     def get_queryset(self):

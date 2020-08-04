@@ -6,17 +6,15 @@
 
 """URLs."""
 
+from django.urls import path
 from django.conf.urls import include, url
-from rest_framework.documentation import include_docs_urls
+from rest_framework.schemas import get_schema_view
 from rest_framework_nested import routers
 
 from machado.api import views
 
 router = routers.SimpleRouter(trailing_slash=False)
 
-router.register(
-    r"jbrowse/stats/global", views.JBrowseGlobalViewSet, basename="jbrowse_global"
-)
 router.register(
     r"jbrowse/features/(?P<refseq>.+)",
     views.JBrowseFeatureViewSet,
@@ -45,6 +43,11 @@ router.register(
 )
 
 urlpatterns = [
-    url(r"", include_docs_urls(title="machado API")),
+    path(r"", get_schema_view(title="machado API"), name="openapi-schema"),
+    url(
+        r"jbrowse/stats/global",
+        views.JBrowseGlobalViewSet.as_view(),
+        name="jbrowse_global",
+    ),
     url(r"", include(router.urls)),
 ]

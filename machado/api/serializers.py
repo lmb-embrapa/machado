@@ -13,12 +13,6 @@ from machado.models import FeatureRelationship
 from machado.models import Pub
 
 
-class JBrowseGlobalSerializer(serializers.Serializer):
-    """JBrowse Global settings serializer."""
-
-    featureDensity = serializers.FloatField()
-
-
 class JBrowseNamesSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
