@@ -18,6 +18,9 @@ from machado.api import views
 router = routers.SimpleRouter(trailing_slash=False)
 
 router.register(
+    "jbrowse/stats/global", views.JBrowseGlobalViewSet, basename="jbrowse_global"
+)
+router.register(
     r"jbrowse/features/(?P<refseq>.+)",
     views.JBrowseFeatureViewSet,
     basename="jbrowse_features",
@@ -58,9 +61,5 @@ urlpatterns = [
     url(
         r"^$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"
     ),
-    path(
-        "jbrowse/stats/global",
-        views.JBrowseGlobalViewSet.as_view(),
-        name="jbrowse_global",
-    ),
+    path("jbrowse/stats/global", views.JBrowseGlobalViewSet, name="jbrowse_global"),
 ]

@@ -41,8 +41,9 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
             "ref": ref,
             "start": location.fmin,
             "end": location.fmax,
+            "type": obj.type.name,
             "tracks": [],
-            "objectName": obj.name,
+            "objectName": obj.uniquename,
         }
 
 
