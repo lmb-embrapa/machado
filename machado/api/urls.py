@@ -6,6 +6,7 @@
 
 """URLs."""
 
+from django.conf import settings
 from django.urls import path
 from django.conf.urls import include, url
 from rest_framework import routers
@@ -47,8 +48,12 @@ router.register(
     basename="feature_publication",
 )
 
+baseurl = None
+if hasattr(settings, "MACHADO_URL"):
+    baseurl = "{}/api/".format(settings.MACHADO_URL)
+
 schema_view = get_schema_view(
-    openapi.Info(title="machado API", default_version="v1"), public=True
+    openapi.Info(title="machado API", default_version="v1"), url=baseurl, public=True,
 )
 
 urlpatterns = [
