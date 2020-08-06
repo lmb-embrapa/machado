@@ -31,6 +31,15 @@ def patch_root_urlconf():
         settings.ROOT_URLCONF = "machado.urls"
 
 
+def patch_swagger_settings():
+    """Include swagger settings."""
+    settings.SWAGGER_SETTINGS = {
+        "USE_SESSION_AUTH": False,
+        "DEFAULT_MODEL_DEPTH": 0,
+        "SECURITY_DEFINITIONS": False,
+    }
+
+
 def patch_templates():
     """Include dependencies to TEMPLATE."""
     if len(settings.TEMPLATES) == 0:
@@ -56,6 +65,7 @@ def patch_all():
     patch_root_urlconf()
     patch_middleware()
     patch_templates()
+    patch_swagger_settings()
 
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True
