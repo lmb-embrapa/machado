@@ -8,6 +8,9 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from haystack.query import SearchQuerySet
 
 from rest_framework import views, viewsets, mixins, status
@@ -45,10 +48,41 @@ class JBrowseGlobalViewSet(views.APIView):
         return response
 
 
-class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class JBrowseNamesViewSet(viewsets.GenericViewSet):
     """API endpoint to JBrowse names."""
 
     serializer_class = JBrowseNamesSerializer
+
+    organism_param = openapi.Parameter(
+        "organism",
+        openapi.IN_QUERY,
+        description="species",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+    equals_param = openapi.Parameter(
+        "equals",
+        openapi.IN_QUERY,
+        description="exact matching string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+    startswith_param = openapi.Parameter(
+        "startswith",
+        openapi.IN_QUERY,
+        description="starts with matching string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[organism_param, equals_param, startswith_param]
+    )
+    def list(self, request):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = JBrowseNamesSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
@@ -68,7 +102,7 @@ class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         elif startswith is not None:
             queryset = queryset.filter(uniquename__startswith=startswith)
         else:
-            queryset = None
+            queryset = queryset
 
         return queryset
 
@@ -164,10 +198,25 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return response
 
 
-class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class autocompleteViewSet(viewsets.GenericViewSet):
     """API endpoint to provide autocomplete hits."""
 
     serializer_class = autocompleteSerializer
+
+    q_param = openapi.Parameter(
+        "q",
+        openapi.IN_QUERY,
+        description="search string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(manual_parameters=[q_param])
+    def list(self, request):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = autocompleteSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
