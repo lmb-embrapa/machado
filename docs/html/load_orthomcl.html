@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -95,7 +95,6 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">2.10. OrthoMCL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="load_vcf.html">2.13. VCF</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -146,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li><span class="section-number">2.10. </span>Loading OrthoMCL results</li>
+      <li>2.10. Loading OrthoMCL results</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,9 +167,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-orthomcl-results">
-<h1><span class="section-number">2.10. </span>Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
+<h1>2.10. Loading OrthoMCL results<a class="headerlink" href="#loading-orthomcl-results" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="load-orthomcl">
-<h2><span class="section-number">2.10.1. </span>Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.1. Load OrthoMCL<a class="headerlink" href="#load-orthomcl" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --file groups.txt
 </pre></div>
 </div>
@@ -180,7 +179,7 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_orthomcl --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 86%" />
@@ -197,12 +196,12 @@
 <p>* required fields.</p>
 </div>
 <div class="section" id="remove-orthology">
-<h2><span class="section-number">2.10.2. </span>Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
+<h2>2.10.2. Remove orthology<a class="headerlink" href="#remove-orthology" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove orthology relationships, you should use the command <em>remove_feature_annotation</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 30%" />
 <col style="width: 70%" />
