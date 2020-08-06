@@ -32,7 +32,7 @@ class FeatureView(View):
                 if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
                     tracks = settings.MACHADO_JBROWSE_TRACKS
                 else:
-                    tracks = "ref_seq,gene,transcripts,CDS,SNV"
+                    tracks = "ref_seq,gene,transcripts,CDS"
                 if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
                     offset = settings.MACHADO_JBROWSE_OFFSET
                 else:

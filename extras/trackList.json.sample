@@ -4,9 +4,6 @@
    "names" : {
       "type" : "REST",
       "url" : "http://localhost:8000/machado/api/jbrowse/names",
-      "query": {
-          "organism": "Arabidopsis thaliana"
-      }
    },
    "tracks" : [
        {
@@ -27,7 +24,6 @@
          "key" : "Gene",
          "label" : "gene",
          "query" : {
-            "organism" : "Arabidopsis thaliana",
             "soType" : "gene"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
@@ -43,7 +39,6 @@
          "key" : "Transcript",
          "label" : "transcripts",
          "query" : {
-            "organism" : "Arabidopsis thaliana",
             "soType" : "mRNA"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
@@ -59,83 +54,10 @@
          "key" : "CDS",
          "label" : "CDS",
          "query" : {
-            "organism" : "Arabidopsis thaliana",
             "soType" : "CDS"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/CanvasFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "SNV",
-         "label" : "SNV",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "SNV"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "SNP",
-         "label" : "SNP",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "SNP"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "indel",
-         "label" : "indel",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "indel"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "insertion",
-         "label" : "insertion",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "insertion"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "deletion",
-         "label" : "deletion",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "deletion"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
-     },
-      {
-         "category": "3. Variation",
-         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
-         "key" : "sequence alteration",
-         "label" : "sequence_alteration",
-         "query" : {
-            "organism" : "Arabidopsis thaliana",
-            "soType" : "sequence_alteration"
-         },
-         "storeClass" : "JBrowse/Store/SeqFeature/REST",
-         "type" : "JBrowse/View/Track/HTMLFeatures"
      }
 
    ]

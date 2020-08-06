@@ -8,15 +8,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from machado.models import Feature, Featureloc, Featureprop
+from machado.models import Feature, Featureloc
 from machado.models import FeatureRelationship
 from machado.models import Pub
-
-
-class JBrowseGlobalSerializer(serializers.Serializer):
-    """JBrowse Global settings serializer."""
-
-    featureDensity = serializers.FloatField()
 
 
 class JBrowseNamesSerializer(serializers.ModelSerializer):
@@ -47,8 +41,9 @@ class JBrowseNamesSerializer(serializers.ModelSerializer):
             "ref": ref,
             "start": location.fmin,
             "end": location.fmax,
+            "type": obj.type.name,
             "tracks": [],
-            "objectName": obj.name,
+            "objectName": obj.uniquename,
         }
 
 
@@ -152,105 +147,6 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     def get_display(self, obj):
         """Get the display."""
         return obj.get_display()
-
-
-class JBrowseVariantSerializer(serializers.ModelSerializer):
-    """JBrowse variant serializer."""
-
-    start = serializers.SerializerMethodField()
-    end = serializers.SerializerMethodField()
-    ref = serializers.SerializerMethodField()
-    alt = serializers.SerializerMethodField()
-    type = serializers.SerializerMethodField()
-    id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    qual = serializers.SerializerMethodField()
-
-    class Meta:
-        """Meta."""
-
-        model = Feature
-        fields = (
-            "start",
-            "end",
-            "ref",
-            "alt",
-            "type",
-            "id",
-            "name",
-            "qual",
-        )
-
-    def _get_location(self, obj):
-        """Get the location."""
-        try:
-            feature_loc = Featureloc.objects.get(
-                feature_id=obj.feature_id, srcfeature_id=self.context.get("refseq")
-            )
-            return feature_loc
-        except ObjectDoesNotExist:
-            pass
-
-    def get_start(self, obj):
-        """Get the start location."""
-        if self.context.get("soType"):
-            return self._get_location(obj).fmin
-        else:
-            return 1
-
-    def get_end(self, obj):
-        """Get the end location."""
-        if self.context.get("soType"):
-            return self._get_location(obj).fmax
-        else:
-            return 1
-
-    def get_ref(self, obj):
-        """Get the ref."""
-        try:
-            feature_loc = Featureloc.objects.get(
-                feature_id=obj.feature_id, srcfeature_id=self.context.get("refseq")
-            )
-            ref = feature_loc.residue_info
-            return ref
-        except ObjectDoesNotExist:
-            pass
-
-    def get_alt(self, obj):
-        """Get the alt."""
-        try:
-            feature_locs = Featureloc.objects.filter(
-                feature_id=obj.feature_id, srcfeature_id=None
-            )
-            alt = ", ".join([obj.residue_info for obj in feature_locs])
-            return alt
-        except ObjectDoesNotExist:
-            pass
-
-    def get_type(self, obj):
-        """Get the type."""
-        feat_type = obj.type.name
-        return feat_type
-
-    def get_id(self, obj):
-        """Get the id."""
-        return obj.uniquename
-
-    def get_name(self, obj):
-        """Get the name."""
-        return obj.name
-
-    def get_qual(self, obj):
-        """Get the qual."""
-        try:
-            featureprop = Featureprop.objects.get(
-                feature_id=obj.feature_id,
-                type__name="quality_value",
-                type__cv__name="sequence",
-            )
-            return featureprop.value
-        except ObjectDoesNotExist:
-            return "."
 
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):

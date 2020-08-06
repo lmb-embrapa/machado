@@ -6,16 +6,19 @@
 
 """URLs."""
 
+from django.urls import path
 from django.conf.urls import include, url
-from rest_framework.documentation import include_docs_urls
-from rest_framework_nested import routers
+from rest_framework import routers
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from machado.api import views
+
 
 router = routers.SimpleRouter(trailing_slash=False)
 
 router.register(
-    r"jbrowse/stats/global", views.JBrowseGlobalViewSet, basename="jbrowse_global"
+    "jbrowse/stats/global", views.JBrowseGlobalViewSet, basename="jbrowse_global"
 )
 router.register(
     r"jbrowse/features/(?P<refseq>.+)",
@@ -44,7 +47,19 @@ router.register(
     basename="feature_publication",
 )
 
+schema_view = get_schema_view(
+    openapi.Info(title="machado API", default_version="v1"), public=True
+)
+
 urlpatterns = [
-    url(r"", include_docs_urls(title="machado API")),
-    url(r"", include(router.urls)),
+    path("", include(router.urls)),
+    url(
+        r"^(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=0),
+        name="schema-json",
+    ),
+    url(
+        r"^$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"
+    ),
+    path("jbrowse/stats/global", views.JBrowseGlobalViewSet, name="jbrowse_global"),
 ]

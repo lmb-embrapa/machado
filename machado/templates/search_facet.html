@@ -70,7 +70,7 @@
             {% endif %}
             </b>
 			{% if facets.fields|get_count:facet > 4 %}
-			<small>({{ facets.fields|get_count:facet }})</small>
+			<small>({% if facets.fields|get_count:facet == 100 %}Truncated to {% endif %}{{ facets.fields|get_count:facet }})</small>
 			{% endif %}
         </div>
         <div class="col text-right">
@@ -130,7 +130,7 @@
 			{{ item.0 }}
 		{% endif %}
 		{% endwith %}
-		<small>({{ item.1 }})</small><br />
+        <small>({{ item.1 }})</small><br />
 		</div>
 	{% endfor %}
 	</div>

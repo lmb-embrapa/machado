@@ -8,16 +8,16 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
-from machado.api.serializers import JBrowseVariantSerializer
-from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
@@ -38,166 +38,234 @@ class StandardResultSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class JBrowseGlobalViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     """API endpoint to view JBrowse global settings."""
 
-    renderer_classes = (JSONRenderer,)
-
+    @swagger_auto_schema(
+        operation_summary="Retrieve global settings",
+        operation_description="Retrieve global settings. https://jbrowse.org/docs/data_formats.html",
+    )
     def list(self, request):
         """List."""
-        data = {"featureDensity": 0.02}
-        serializer = JBrowseGlobalSerializer(data)
-        return Response(serializer.data)
-
-
-class JBrowseNamesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to JBrowse names."""
-
-    renderer_classes = (JSONRenderer,)
-
-    serializer_class = JBrowseNamesSerializer
-
-    def get_queryset(self):
-        """Get queryset."""
-        try:
-            organism = retrieve_organism(self.request.query_params.get("organism"))
-        except (ObjectDoesNotExist, AttributeError):
-            return
-
-        queryset = Feature.objects.filter(organism=organism, is_obsolete=0).only(
-            "feature_id"
-        )
-
-        equals = self.request.query_params.get("equals")
-        startswith = self.request.query_params.get("startswith")
-        if equals is not None:
-            queryset = queryset.filter(uniquename=equals)
-        elif startswith is not None:
-            queryset = queryset.filter(uniquename__startswith=startswith)
-        else:
-            queryset = None
-
-        return queryset
-
-
-class JBrowseRefSeqsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to JBrowse refSeqs.json."""
-
-    renderer_classes = (JSONRenderer,)
-    serializer_class = JBrowseRefseqSerializer
-
-    def get_queryset(self):
-        """Get queryset."""
-        try:
-            organism = retrieve_organism(self.request.query_params.get("organism"))
-        except (ObjectDoesNotExist, AttributeError):
-            return
-
-        try:
-            queryset = Feature.objects.filter(
-                organism=organism,
-                is_obsolete=0,
-                type__cv__name="sequence",
-                type__name=self.request.query_params.get("soType"),
-            )
-        except ObjectDoesNotExist:
-            return
-
-        return queryset
-
-
-class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view gene."""
-
-    renderer_classes = (JSONRenderer,)
-
-    def get_serializer_class(self, *args, **kwargs):
-        """Get the serializer class."""
-        VALID_VARIATION_TYPES = [
-            "snv",
-            "snp",
-            "insertion",
-            "deletion",
-            "indel",
-            "sequence_alteration",
-        ]
-        if self.request.query_params.get("soType").lower() in VALID_VARIATION_TYPES:
-            return JBrowseVariantSerializer
-        else:
-            return JBrowseFeatureSerializer
-
-    def get_serializer_context(self):
-        """Get the serializer context."""
-        refseq_feature_obj = (
-            Feature.objects.filter(uniquename=self.kwargs.get("refseq"))
-            .only("feature_id")
-            .first()
-        )
-        soType = self.request.query_params.get("soType")
-        return {"refseq": refseq_feature_obj, "soType": soType}
-
-    def get_queryset(self):
-        """Get queryset."""
-        try:
-            refseq = (
-                Feature.objects.filter(uniquename=self.kwargs.get("refseq"))
-                .only("feature_id")
-                .first()
-            )
-        except ObjectDoesNotExist:
-            return
-
-        soType = self.request.query_params.get("soType")
-        if soType is None:
-            queryset = list()
-            queryset.append(refseq)
-            return queryset
-        else:
-            try:
-                organism = retrieve_organism(self.request.query_params.get("organism"))
-            except (ObjectDoesNotExist, AttributeError):
-                return
-
-            try:
-                soType = self.request.query_params.get("soType")
-                start = self.request.query_params.get("start", 1)
-                end = self.request.query_params.get("end", refseq.seqlen)
-
-                features_locs = Featureloc.objects.filter(srcfeature=refseq)
-                if end is not None:
-                    features_locs = features_locs.filter(fmin__lte=end)
-                features_locs = features_locs.filter(fmax__gte=start)
-                features_ids = features_locs.values_list("feature_id", flat=True)
-
-                return Feature.objects.filter(
-                    type__cv__name="sequence",
-                    type__name=soType,
-                    organism=organism,
-                    is_obsolete=0,
-                    feature_id__in=features_ids,
-                ).only("feature_id")
-
-            except ObjectDoesNotExist:
-                return None
-
-    def list(self, request, *args, **kwargs):
-        """Override return the list inside a dict."""
-        response = super(JBrowseFeatureViewSet, self).list(request, *args, **kwargs)
-        response.data = {"features": response.data}
+        result = {"featureDensity": 0.02}
+        response = Response(result, status=status.HTTP_200_OK)
         return response
 
 
-class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class JBrowseNamesViewSet(viewsets.GenericViewSet):
+    """API endpoint to JBrowse names."""
+
+    serializer_class = JBrowseNamesSerializer
+
+    organism_param = openapi.Parameter(
+        "organism",
+        openapi.IN_QUERY,
+        description="Species name",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+    equals_param = openapi.Parameter(
+        "equals",
+        openapi.IN_QUERY,
+        description="exact matching string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+    startswith_param = openapi.Parameter(
+        "startswith",
+        openapi.IN_QUERY,
+        description="starts with matching string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[organism_param, equals_param, startswith_param],
+        operation_summary="Retrieve feature names by accession",
+        operation_description="Retrieve feature names by accession. https://jbrowse.org/docs/data_formats.html",
+    )
+    def list(self, request):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = JBrowseNamesSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        queryset = (
+            Feature.objects.filter(is_obsolete=0)
+            .exclude(name=None)
+            .exclude(uniquename=None)
+        )
+
+        organism = self.request.query_params.get("organism")
+
+        if organism is not None:
+            queryset = queryset.filter(organism=retrieve_organism(organism))
+
+        equals = self.request.query_params.get("equals")
+        startswith = self.request.query_params.get("startswith")
+        if startswith is not None:
+            return queryset.filter(uniquename__startswith=startswith)
+        elif equals is not None:
+            return queryset.filter(uniquename=equals)
+        else:
+            return queryset
+
+
+class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
+    """API endpoint to JBrowse refSeqs.json."""
+
+    serializer_class = JBrowseRefseqSerializer
+
+    organism_param = openapi.Parameter(
+        "organism",
+        openapi.IN_QUERY,
+        description="Species name",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+    sotype_param = openapi.Parameter(
+        "soType",
+        openapi.IN_QUERY,
+        description="Sequence Ontology term",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[sotype_param, organism_param],
+        operation_summary="Retrieve reference sequences",
+        operation_description="Retrieve reference sequences. https://jbrowse.org/docs/data_formats.html",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = JBrowseRefseqSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        organism = self.request.query_params.get("organism")
+        sotype = self.request.query_params.get("soType")
+
+        queryset = Feature.objects.filter(is_obsolete=0)
+        if organism is not None:
+            queryset = queryset.filter(organism=retrieve_organism(organism))
+        if sotype is not None:
+            queryset = queryset.filter(type__cv__name="sequence", type__name=sotype)
+
+        return queryset
+
+
+class JBrowseFeatureViewSet(viewsets.GenericViewSet):
+    """API endpoint to view gene."""
+
+    serializer_class = JBrowseFeatureSerializer
+
+    start_param = openapi.Parameter(
+        "start",
+        openapi.IN_QUERY,
+        description="start",
+        required=False,
+        type=openapi.TYPE_INTEGER,
+    )
+    end_param = openapi.Parameter(
+        "end",
+        openapi.IN_QUERY,
+        description="start",
+        required=False,
+        type=openapi.TYPE_INTEGER,
+    )
+    sotype_param = openapi.Parameter(
+        "soType",
+        openapi.IN_QUERY,
+        description="Sequence Ontology term",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[sotype_param, start_param, end_param],
+        operation_description="Retrieve features from reference sequence (refseq). https://jbrowse.org/docs/data_formats.html",
+        operation_summary="Retrieve features from reference sequence",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        context = self.get_serializer_context()
+        serializer = JBrowseFeatureSerializer(queryset, context=context, many=True)
+        return Response({"features": serializer.data})
+
+    def get_serializer_context(self):
+        """Get the serializer context."""
+        refseq_feature_obj = Feature.objects.filter(
+            uniquename=self.kwargs.get("refseq")
+        ).first()
+        soType = self.request.query_params.get("soType")
+        return {"refseq": refseq_feature_obj, "soType": soType}
+
+    def get_queryset(self, *args, **kwargs):
+        """Get queryset."""
+        try:
+            refseq = Feature.objects.filter(
+                uniquename=self.kwargs.get("refseq")
+            ).first()
+
+        except ObjectDoesNotExist:
+            return
+
+        try:
+            soType = self.request.query_params.get("soType")
+            start = self.request.query_params.get("start", 1)
+            end = self.request.query_params.get("end")
+
+            features_locs = Featureloc.objects.filter(srcfeature=refseq)
+            if end is not None:
+                features_locs = features_locs.filter(fmin__lte=end)
+            features_locs = features_locs.filter(fmax__gte=start)
+            features_ids = features_locs.values_list("feature_id", flat=True)
+
+            features = Feature.objects.filter(
+                feature_id__in=features_ids, is_obsolete=0
+            )
+            if soType is not None:
+                features = features.filter(type__cv__name="sequence", type__name=soType)
+            return features
+
+        except ObjectDoesNotExist:
+            return None
+
+
+class autocompleteViewSet(viewsets.GenericViewSet):
     """API endpoint to provide autocomplete hits."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = autocompleteSerializer
+
+    q_param = openapi.Parameter(
+        "q",
+        openapi.IN_QUERY,
+        description="search string",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[q_param],
+        operation_summary="Search the ElasticSearch index for matching strings",
+        operation_description="Search the ElasticSearch index for matching strings.",
+    )
+    def list(self, request):
+        """Search the ElasticSearch index for matching strings."""
+        queryset = self.get_queryset()
+        serializer = autocompleteSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
         max_items = 10
         request = self.request
-        query = request.GET.get("q")
+        query = request.query_params.get("q")
         if query is not None:
             query = query.strip()
             queryset = SearchQuerySet().filter(autocomplete=query)[: max_items * 10]
@@ -216,11 +284,30 @@ class autocompleteViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return None
 
 
-class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature ortholog."""
+class FeatureOrthologViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature ortholog."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeatureOrthologSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve ortholog group by feature ID",
+        operation_description="Retrieve ortholog group by feature ID.",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureOrthologSerializer(queryset, many=True)
+        try:
+            ortholog_group = Featureprop.objects.get(
+                type__name="orthologous group",
+                type__cv__name="feature_property",
+                feature_id=self.kwargs.get("feature_id"),
+            ).value
+            return Response(
+                {"ortholog_group": ortholog_group, "members": serializer.data}
+            )
+        except ObjectDoesNotExist:
+            return Response()
 
     def get_queryset(self):
         """Get queryset."""
@@ -237,26 +324,21 @@ class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    def list(self, request, *args, **kwargs):
-        """Override return the list inside a dict."""
-        response = super(FeatureOrthologViewSet, self).list(request, *args, **kwargs)
-        try:
-            ortholog_group = Featureprop.objects.get(
-                type__name="orthologous group",
-                type__cv__name="feature_property",
-                feature_id=self.kwargs.get("feature_id"),
-            ).value
-            response.data = {"ortholog_group": ortholog_group, "members": response.data}
-            return response
-        except ObjectDoesNotExist:
-            return response
 
+class FeatureSequenceViewSet(viewsets.GenericViewSet):
+    """Retrieve sequence by feature ID."""
 
-class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature sequence."""
-
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeatureSequenceSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve sequence by feature ID",
+        operation_description="Retrieve sequence by feature ID.",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeaturePublicationSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
@@ -266,11 +348,20 @@ class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return
 
 
-class FeaturePublicationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature publication."""
+class FeaturePublicationViewSet(viewsets.GenericViewSet):
+    """Retrieve publication by feature ID."""
 
-    renderer_classes = (JSONRenderer,)
     serializer_class = FeaturePublicationSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve publication by feature ID",
+        operation_description="Retrieve publication by feature ID.",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeaturePublicationSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
