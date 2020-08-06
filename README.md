@@ -17,6 +17,10 @@ Detailed documentation can be found in the **docs** directory ([Read the docs](h
 ## Installation
 Please refer to the complete documentation at [Read the docs](http://machado.readthedocs.io/en/latest/installation.html).
 
+## Docker
+
+You can build your Machado instance using Docker: https://github.com/lmb-embrapa/machado-docker
+
 ## Demo
 
 [https://www.machado.cnptia.embrapa.br](https://www.machado.cnptia.embrapa.br "machado demo")
