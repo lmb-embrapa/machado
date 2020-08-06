@@ -172,7 +172,7 @@ class JBrowseFeatureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             try:
                 soType = self.request.query_params.get("soType")
                 start = self.request.query_params.get("start", 1)
-                end = self.request.query_params.get("end", refseq.seqlen)
+                end = self.request.query_params.get("end", len(refseq.seq))
 
                 features_locs = Featureloc.objects.filter(srcfeature=refseq)
                 if end is not None:
