@@ -337,7 +337,7 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
-        serializer = FeaturePublicationSerializer(queryset, many=True)
+        serializer = FeatureSequenceSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def get_queryset(self):
