@@ -213,7 +213,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(manual_parameters=[q_param])
     def list(self, request):
-        """List."""
+        """Search the ElasticSearch index for matching strings."""
         queryset = self.get_queryset()
         serializer = autocompleteSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -241,8 +241,8 @@ class autocompleteViewSet(viewsets.GenericViewSet):
             return None
 
 
-class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature ortholog."""
+class FeatureOrthologViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature ortholog."""
 
     serializer_class = FeatureOrthologSerializer
 
@@ -262,22 +262,24 @@ class FeatureOrthologViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return
 
     def list(self, request, *args, **kwargs):
-        """Override return the list inside a dict."""
-        response = super(FeatureOrthologViewSet, self).list(request, *args, **kwargs)
+        """Retrieve ortholog group by feature ID."""
+        queryset = self.get_queryset()
+        serializer = FeatureOrthologSerializer(queryset, many=True)
         try:
             ortholog_group = Featureprop.objects.get(
                 type__name="orthologous group",
                 type__cv__name="feature_property",
                 feature_id=self.kwargs.get("feature_id"),
             ).value
-            response.data = {"ortholog_group": ortholog_group, "members": response.data}
-            return response
+            return Response(
+                {"ortholog_group": ortholog_group, "members": serializer.data}
+            )
         except ObjectDoesNotExist:
-            return response
+            return Response()
 
 
 class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature sequence."""
+    """Retrieve sequence by feature ID."""
 
     serializer_class = FeatureSequenceSerializer
 
@@ -290,7 +292,7 @@ class FeatureSequenceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class FeaturePublicationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """API endpoint to view the feature publication."""
+    """Retrieve publication by feature ID."""
 
     serializer_class = FeaturePublicationSerializer
 
