@@ -24,7 +24,7 @@ from machado.api.serializers import autocompleteSerializer
 from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
-from machado.loaders.common import retrieve_organism
+from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Feature, Featureloc, Featureprop, Pub
 
 from re import escape, search, IGNORECASE
@@ -282,6 +282,40 @@ class autocompleteViewSet(viewsets.GenericViewSet):
             return list(result)[:max_items]
         else:
             return None
+
+
+class FeatureIDViewSet(viewsets.GenericViewSet):
+    """Retrieve the feature ID by accession."""
+
+    accession_param = openapi.Parameter(
+        "accession",
+        openapi.IN_QUERY,
+        description="Feature name or accession",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+    sotype_param = openapi.Parameter(
+        "soType",
+        openapi.IN_QUERY,
+        description="Sequence Ontology term",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[accession_param, sotype_param],
+        operation_summary="Retrieve feature ID by accession",
+        operation_description="Retrieve feature ID by accession.",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        accession = self.request.query_params.get("accession")
+        soterm = self.request.query_params.get("soType")
+
+        try:
+            return Response(retrieve_feature_id(accession, soterm))
+        except ObjectDoesNotExist:
+            return Response()
 
 
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
