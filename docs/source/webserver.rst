@@ -78,6 +78,7 @@ There must be a symlink of your config file in the sites-enabled directory
 .. code-block:: bash
 
     ALLOWED_HOSTS = ['*']
+    MACHADO_URL = 'http://localhost/YOURPROJECT'
     STATIC_URL = '/YOURPROJECT/static/'
     STATIC_ROOT = '/var/www/YOURPROJECT/WEBPROJECT/static'
 

@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -145,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
         
-      <li>2.6. Loading GFF files</li>
+      <li><span class="section-number">2.6. </span>Loading GFF files</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,7 +167,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-gff-files">
-<h1>2.6. Loading GFF files<a class="headerlink" href="#loading-gff-files" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2.6. </span>Loading GFF files<a class="headerlink" href="#loading-gff-files" title="Permalink to this headline">¶</a></h1>
 <p>The first column of a GFF file is the reference sequence ID.
 Usually, in order to load a GFF file, it’s required to have a reference FASTA file loaded.
 But some GFF files already have the reference features such as chromosome or scaffold.
@@ -178,7 +178,7 @@ In this case, there are two options:</p>
 </ul>
 <p>The GFF file must be indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a>.</p>
 <div class="section" id="load-gff">
-<h2>2.6.1. Load GFF<a class="headerlink" href="#load-gff" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.6.1. </span>Load GFF<a class="headerlink" href="#load-gff" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --file organism_genes_sorted.gff3.gz --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
@@ -188,7 +188,7 @@ In this case, there are two options:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gff --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -214,7 +214,7 @@ In this case, there are two options:</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>2.6.2. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.6.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a GFF dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
 </pre></div>
