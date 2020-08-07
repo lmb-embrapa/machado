@@ -246,14 +246,15 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         "q",
         openapi.IN_QUERY,
         description="search string",
-        required=False,
+        required=True,
         type=openapi.TYPE_STRING,
     )
 
     @swagger_auto_schema(
         manual_parameters=[q_param],
         operation_summary="Search the ElasticSearch index for matching strings",
-        operation_description="Search the ElasticSearch index for matching strings.",
+        operation_description="Search the ElasticSearch index for matching strings.</br></br>\
+        <b>Example:</b></br>q=kinase",
     )
     def list(self, request):
         """Search the ElasticSearch index for matching strings."""
@@ -305,7 +306,10 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         manual_parameters=[accession_param, sotype_param],
         operation_summary="Retrieve feature ID by accession",
-        operation_description="Retrieve feature ID by accession.",
+        operation_description="Retrieve feature ID by accession. </br></br> \
+        <b>Example:</b></br> \
+        accession=Athaliana_ChrM, soType=chromosome</br> \
+        accession=AT1G01010.1, soType=mRNA",
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -325,7 +329,9 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve ortholog group by feature ID",
-        operation_description="Retrieve ortholog group by feature ID.",
+        operation_description="Retrieve ortholog group by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868701",
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -366,7 +372,9 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve sequence by feature ID",
-        operation_description="Retrieve sequence by feature ID.",
+        operation_description="Retrieve sequence by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -389,7 +397,9 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve publication by feature ID",
-        operation_description="Retrieve publication by feature ID.",
+        operation_description="Retrieve publication by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
     )
     def list(self, request, *args, **kwargs):
         """List."""
