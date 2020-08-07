@@ -24,7 +24,7 @@ from machado.api.serializers import autocompleteSerializer
 from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
-from machado.loaders.common import retrieve_organism
+from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Feature, Featureloc, Featureprop, Pub
 
 from re import escape, search, IGNORECASE
@@ -246,14 +246,15 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         "q",
         openapi.IN_QUERY,
         description="search string",
-        required=False,
+        required=True,
         type=openapi.TYPE_STRING,
     )
 
     @swagger_auto_schema(
         manual_parameters=[q_param],
         operation_summary="Search the ElasticSearch index for matching strings",
-        operation_description="Search the ElasticSearch index for matching strings.",
+        operation_description="Search the ElasticSearch index for matching strings.</br></br>\
+        <b>Example:</b></br>q=kinase",
     )
     def list(self, request):
         """Search the ElasticSearch index for matching strings."""
@@ -284,6 +285,43 @@ class autocompleteViewSet(viewsets.GenericViewSet):
             return None
 
 
+class FeatureIDViewSet(viewsets.GenericViewSet):
+    """Retrieve the feature ID by accession."""
+
+    accession_param = openapi.Parameter(
+        "accession",
+        openapi.IN_QUERY,
+        description="Feature name or accession",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+    sotype_param = openapi.Parameter(
+        "soType",
+        openapi.IN_QUERY,
+        description="Sequence Ontology term",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[accession_param, sotype_param],
+        operation_summary="Retrieve feature ID by accession",
+        operation_description="Retrieve feature ID by accession. </br></br> \
+        <b>Example:</b></br> \
+        accession=Athaliana_ChrM, soType=chromosome</br> \
+        accession=AT1G01010.1, soType=mRNA",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        accession = self.request.query_params.get("accession")
+        soterm = self.request.query_params.get("soType")
+
+        try:
+            return Response(retrieve_feature_id(accession, soterm))
+        except ObjectDoesNotExist:
+            return Response()
+
+
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
     """API endpoint for feature ortholog."""
 
@@ -291,7 +329,9 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve ortholog group by feature ID",
-        operation_description="Retrieve ortholog group by feature ID.",
+        operation_description="Retrieve ortholog group by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868701",
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -332,7 +372,9 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve sequence by feature ID",
-        operation_description="Retrieve sequence by feature ID.",
+        operation_description="Retrieve sequence by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -355,7 +397,9 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_summary="Retrieve publication by feature ID",
-        operation_description="Retrieve publication by feature ID.",
+        operation_description="Retrieve publication by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
     )
     def list(self, request, *args, **kwargs):
         """List."""

@@ -159,6 +159,14 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
 
+    # feature.name
+    try:
+        return Feature.objects.get(
+            name=accession, type__cv__name="sequence", type__name=soterm
+        ).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
+
     # feature.dbxref.accession
     try:
         return Feature.objects.get(
