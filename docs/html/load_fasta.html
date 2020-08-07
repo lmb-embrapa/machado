@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -145,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
         
-      <li>2.5. Loading FASTA files</li>
+      <li><span class="section-number">2.5. </span>Loading FASTA files</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,13 +167,13 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-fasta-files">
-<h1>2.5. Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2.5. </span>Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this headline">¶</a></h1>
 <p>This command is mostly used to load the reference genome.
 The reference sequences are exclusively used to feed JBrowse.</p>
 <p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks.
 To avoid that, it’s possible to use the parameter (–nosequence) and configure JBrowse to get the reference data from a FASTA file.</p>
 <div class="section" id="load-fasta">
-<h2>2.5.1. Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.5.1. </span>Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
@@ -183,7 +183,7 @@ To avoid that, it’s possible to use the parameter (–nosequence) and configur
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 86%" />
@@ -218,7 +218,7 @@ To avoid that, it’s possible to use the parameter (–nosequence) and configur
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2>2.5.2. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.5.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a fasta dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
 </pre></div>
