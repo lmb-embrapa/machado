@@ -169,7 +169,6 @@
               {% else %}
                   <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
               {% endif %}
-              <td>{{ hit.db_name|default_if_none:'' }} {{ hit.uniquename|safe }} {{ hit.name|safe }} {{ hit.display|default_if_none:'' }}</td>
               <td>{{ hit.query_start|default_if_none:''|safe }}</td>
               <td>{{ hit.query_end|default_if_none:''|safe }}</td>
               <td>{{ hit.score|default_if_none:''|safe }}</td>
