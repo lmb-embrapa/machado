@@ -32,9 +32,13 @@ router.register(
 )
 router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomplete")
 
+router.register(r"feature/id", views.FeatureIDViewSet, basename="feature_id")
 router.register(
-    r"feature/id", views.FeatureIDViewSet, basename="feature_id",
+    r"feature/ontology/(?P<feature_id>.+)",
+    views.FeatureOntologyViewSet,
+    basename="feature_ontology",
 )
+
 router.register(
     r"feature/ortholog/(?P<feature_id>.+)",
     views.FeatureOrthologViewSet,
@@ -46,6 +50,12 @@ router.register(
     basename="feature_sequence",
 )
 router.register(
+    r"feature/proteinmatches/(?P<feature_id>.+)",
+    views.FeatureProteinMatchesViewSet,
+    basename="feature_proteinmatches",
+)
+
+router.register(
     r"feature/publication/(?P<feature_id>.+)",
     views.FeaturePublicationViewSet,
     basename="feature_publication",
@@ -56,7 +66,7 @@ if hasattr(settings, "MACHADO_URL"):
     baseurl = "{}/api/".format(settings.MACHADO_URL)
 
 schema_view = get_schema_view(
-    openapi.Info(title="machado API", default_version="v1"), url=baseurl, public=True,
+    openapi.Info(title="machado API", default_version="v1"), url=baseurl, public=True
 )
 
 urlpatterns = [

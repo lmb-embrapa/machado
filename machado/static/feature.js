@@ -6,6 +6,76 @@
  have been included as part of this package for licensing information.
  */
 
+$(document).ready(function(){
+  $("#collapseOntology").click(loadOntologyTerms());
+  $("#collapseProteinMatches").click(loadProteinMatches());
+});
+
+
+//load ontology terms from API
+function loadOntologyTerms(){
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/ontology/" + feature_id;
+    if ($("#collapseOntology .table").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#collapseOntology .table").html("<small>LOADING...</small>");
+          }, 
+          success: function(data) {
+            var text = '<thead><tr>';
+            text += '<th scope="col">Ontology</th>';
+            text += '<th scope="col">ID</th>';
+            text += '<th scope="col">Term</th>';
+            text += '</tr></thead>';
+            text += '<tbody>';
+
+            for (i=0; i<data.length; i++) {
+              text += '<tr>'
+              text += '<td>' + data[i]['cv'] + '</td>';
+              text += '<td>' + data[i]['db'] + ':' + data[i]['cvterm'] + '</td>';
+              text += '<td>' + data[i]['cvterm'] + '</td>';
+              text += '</tr>'
+            }
+            text += "</tbody>" ;
+            $("#collapseOntology .table").html(text);
+          }
+      });    
+    }
+} 
+
+//load protein matches from API
+function loadProteinMatches(){
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/proteinmatches/" + feature_id;
+    if ($("#collapseProteinMatches .table").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#collapseProteinMatches .table").html("<small>LOADING...</small>");
+          }, 
+          success: function(data) {
+            var text = '<thead><tr>';
+            text += '<th scope="col">Protein database</th>';
+            text += '<th scope="col">Protein domain</th>';
+            text += '</tr></thead>';
+            text += '<tbody>';
+
+            for (i=0; i<data.length; i++) {
+              text += '<tr>'
+              text += '<td>' + data[i]['db'] + '</td>';
+              text += '<td>' + data[i]['subject_id'] + ' ' + data[i]['subject_desc'] + '</td>';
+              text += '</tr>'
+            }
+            text += "</tbody></table>" ;
+            $("#collapseProteinMatches .table").html(text);
+          }
+      });    
+    }
+}
+
 //load orthologs from API
 $(document).ready(function(){
   $('#collapseOrthologs').on('show.bs.collapse', function() {
@@ -20,7 +90,6 @@ $(document).ready(function(){
           }, 
           success: function(data) {
             var text = '<ul class="list-group list-group-flush">';
-            console.log(data);
             text += '<li class="list-group-item list-group-item-secondary">Orthologous group: <a href="' + home_url + 'find/?selected_facets=orthologous_group:' + data['ortholog_group'] + '">' + data['ortholog_group'] + '</a></li>';
             var members = data['members'];
             for (i=0; i<members.length; i++) {
@@ -92,3 +161,4 @@ $(document).ready(function(){
     }
   });
 } );
+

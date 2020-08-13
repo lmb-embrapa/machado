@@ -42,10 +42,7 @@ VALID_GFF_ATTRS = [
     "pacid",
 ]
 
-VALID_VCF_ATTRS = [
-    "TSA",
-    "VC",
-]
+VALID_VCF_ATTRS = ["TSA", "VC"]
 
 
 class FeatureLoader(object):

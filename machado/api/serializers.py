@@ -8,7 +8,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from machado.models import Feature, Featureloc
+from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureRelationship
 from machado.models import Pub
 
@@ -241,3 +241,70 @@ class FeaturePublicationSerializer(serializers.ModelSerializer):
     def get_doi(self, obj):
         """Get the doi."""
         return obj.get_doi()
+
+
+class FeatureOntologySerializer(serializers.ModelSerializer):
+    """Feature ontology term serializer."""
+
+    cvterm = serializers.SerializerMethodField()
+    cvterm_definition = serializers.SerializerMethodField()
+    cv = serializers.SerializerMethodField()
+    db = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        fields = ("cvterm", "cvterm_definition", "cv", "db", "dbxref")
+        model = Cvterm
+
+    def get_cvterm(self, obj):
+        """Get the cvterm."""
+        return obj.name
+
+    def get_cvterm_definition(self, obj):
+        """Get the cvterm definition."""
+        return obj.definition
+
+    def get_cv(self, obj):
+        """Get the cv."""
+        return obj.cv.name
+
+    def get_db(self, obj):
+        """Get the db."""
+        return obj.dbxref.db.name
+
+    def get_dbxref(self, obj):
+        """Get the dbxref."""
+        return obj.dbxref.accession
+
+
+class FeatureProteinMatchesSerializer(serializers.ModelSerializer):
+    """Feature protein matches serializer."""
+
+    subject_id = serializers.SerializerMethodField()
+    subject_desc = serializers.SerializerMethodField()
+    db = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        fields = ("subject_id", "subject_desc", "db", "dbxref")
+        model = Cvterm
+
+    def get_subject_id(self, obj):
+        """Get the subject id."""
+        return obj.subject.uniquename
+
+    def get_subject_desc(self, obj):
+        """Get the subject name."""
+        return obj.subject.name
+
+    def get_db(self, obj):
+        """Get the db."""
+        return obj.subject.dbxref.db.name
+
+    def get_dbxref(self, obj):
+        """Get the dbxref."""
+        return obj.subject.dbxref.accession
