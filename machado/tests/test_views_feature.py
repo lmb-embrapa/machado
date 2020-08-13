@@ -376,11 +376,9 @@ class FeatureTest(TestCase):
         f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
         result = fv.retrieve_feature_data(feature_obj=f)
         self.assertEquals(1, result["location"][0]["start"])
-        self.assertEquals("GO", result["cvterm"][0]["db"])
 
         f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
         result = fv.retrieve_feature_data(feature_obj=f)
-        self.assertEquals("PFAM", result["protein_matches"][0]["db"])
         self.assertEqual("blast", result["similarity"][0]["program"])
 
     def test_get(self):
