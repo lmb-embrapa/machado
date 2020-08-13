@@ -50,6 +50,12 @@ router.register(
     basename="feature_sequence",
 )
 router.register(
+    r"feature/proteinmatches/(?P<feature_id>.+)",
+    views.FeatureProteinMatchesViewSet,
+    basename="feature_proteinmatches",
+)
+
+router.register(
     r"feature/publication/(?P<feature_id>.+)",
     views.FeaturePublicationViewSet,
     basename="feature_publication",

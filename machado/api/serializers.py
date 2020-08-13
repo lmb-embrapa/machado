@@ -244,7 +244,7 @@ class FeaturePublicationSerializer(serializers.ModelSerializer):
 
 
 class FeatureOntologySerializer(serializers.ModelSerializer):
-    """Feature ontology serializer."""
+    """Feature ontology term serializer."""
 
     cvterm = serializers.SerializerMethodField()
     cvterm_definition = serializers.SerializerMethodField()
@@ -277,3 +277,34 @@ class FeatureOntologySerializer(serializers.ModelSerializer):
     def get_dbxref(self, obj):
         """Get the dbxref."""
         return obj.dbxref.accession
+
+
+class FeatureProteinMatchesSerializer(serializers.ModelSerializer):
+    """Feature protein matches serializer."""
+
+    subject_id = serializers.SerializerMethodField()
+    subject_desc = serializers.SerializerMethodField()
+    db = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        fields = ("subject_id", "subject_desc", "db", "dbxref")
+        model = Cvterm
+
+    def get_subject_id(self, obj):
+        """Get the subject id."""
+        return obj.subject.uniquename
+
+    def get_subject_desc(self, obj):
+        """Get the subject name."""
+        return obj.subject.name
+
+    def get_db(self, obj):
+        """Get the db."""
+        return obj.subject.dbxref.db.name
+
+    def get_dbxref(self, obj):
+        """Get the dbxref."""
+        return obj.subject.dbxref.accession

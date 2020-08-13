@@ -23,10 +23,12 @@ from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
+from machado.api.serializers import FeatureProteinMatchesSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.models import Cvterm, Feature, Featureloc, Featureprop, Pub
+from machado.models import Cvterm, Pub
+from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 
 from re import escape, search, IGNORECASE
 
@@ -440,6 +442,35 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
         try:
             return Cvterm.objects.filter(
                 FeatureCvterm_cvterm_Cvterm__feature_id=self.kwargs.get("feature_id")
+            )
+        except ObjectDoesNotExist:
+            return
+
+
+class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
+    """Retrieve protein matches by feature ID."""
+
+    serializer_class = FeatureProteinMatchesSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve protein matches by feature ID",
+        operation_description="Retrieve protein matches by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868566",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureProteinMatchesSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            return FeatureRelationship.objects.filter(
+                object_id=self.kwargs.get("feature_id"),
+                subject__type__name="protein_match",
+                subject__type__cv__name="sequence",
             )
         except ObjectDoesNotExist:
             return
