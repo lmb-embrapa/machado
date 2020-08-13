@@ -27,6 +27,7 @@ $(document).ready(function(){
             text += '</tr></thead>';
             text += '<tbody>';
 
+            console.log(data);
             for (i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['cv'] + '</td>';
@@ -42,6 +43,40 @@ $(document).ready(function(){
   });
 } );
 
+//load protein matches from API
+$(document).ready(function(){
+  $('#collapseProteinMatches').show(function() {
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/ontology/" + feature_id;
+    if ($("#collapseProteinMatches .card-text").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#collapseProteinMatches .card-text").html("<small>LOADING...</small>");
+          }, 
+          success: function(data) {
+            var text = '<table class="table table-sm table-hover">';
+            text += '<thead><tr>';
+            text += '<th scope="col">Protein database</th>';
+            text += '<th scope="col">Protein domain</th>';
+            text += '</tr></thead>';
+            text += '<tbody>';
+
+            console.log(data);
+            for (i=0; i<data.length; i++) {
+              text += '<tr>'
+              text += '<td>' + data[i]['db'] + '</td>';
+              text += '<td>' + data[i]['subject_id'] + ' ' + data[i]['subject_desc'] + '</td>';
+              text += '</tr>'
+            }
+            text += "</tbody></table>" ;
+            $("#collapseProteinMatches .card-text").html(text);
+          }
+      });    
+    }
+  });
+} );
 
 //load orthologs from API
 $(document).ready(function(){
