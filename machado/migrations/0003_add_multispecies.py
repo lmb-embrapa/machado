@@ -16,5 +16,5 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             "insert into organism (abbreviation, genus, species, common_name) values ('multispecies', 'multispecies', 'multispecies', 'multispecies')"
-        ),
+        )
     ]

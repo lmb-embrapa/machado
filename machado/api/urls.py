@@ -66,7 +66,7 @@ if hasattr(settings, "MACHADO_URL"):
     baseurl = "{}/api/".format(settings.MACHADO_URL)
 
 schema_view = get_schema_view(
-    openapi.Info(title="machado API", default_version="v1"), url=baseurl, public=True,
+    openapi.Info(title="machado API", default_version="v1"), url=baseurl, public=True
 )
 
 urlpatterns = [
