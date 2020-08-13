@@ -188,7 +188,7 @@ class FeatureView(View):
         )
         result["protein_matches"] = self.retrieve_feature_protein_matches(
             feature_id=feature_obj.feature_id
-        )
+        ) 
         result["similarity"] = self.retrieve_feature_similarity(
             feature_id=feature_obj.feature_id, organism_id=feature_obj.organism_id
         )

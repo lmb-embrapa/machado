@@ -6,28 +6,31 @@
  have been included as part of this package for licensing information.
  */
 
-//load ontology terms from API
 $(document).ready(function(){
-  $('#collapseOntology').show(function() {
+  $("#collapseOntology").click(loadOntologyTerms());
+  $("#collapseProteinMatches").click(loadProteinMatches());
+});
+
+
+//load ontology terms from API
+function loadOntologyTerms(){
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
     var url = home_url + "api/feature/ontology/" + feature_id;
-    if ($("#collapseOntology .card-text").is(':empty')) {
+    if ($("#collapseOntology .table").is(':empty')) {
       $.ajax({
           url : url,
           beforeSend : function(){
-            $("#collapseOntology .card-text").html("<small>LOADING...</small>");
+            $("#collapseOntology .table").html("<small>LOADING...</small>");
           }, 
           success: function(data) {
-            var text = '<table class="table table-sm table-hover">';
-            text += '<thead><tr>';
+            var text = '<thead><tr>';
             text += '<th scope="col">Ontology</th>';
             text += '<th scope="col">ID</th>';
             text += '<th scope="col">Term</th>';
             text += '</tr></thead>';
             text += '<tbody>';
 
-            console.log(data);
             for (i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['cv'] + '</td>';
@@ -35,35 +38,31 @@ $(document).ready(function(){
               text += '<td>' + data[i]['cvterm'] + '</td>';
               text += '</tr>'
             }
-            text += "</tbody></table>" ;
-            $("#collapseOntology .card-text").html(text);
+            text += "</tbody>" ;
+            $("#collapseOntology .table").html(text);
           }
       });    
     }
-  });
-} );
+} 
 
 //load protein matches from API
-$(document).ready(function(){
-  $('#collapseProteinMatches').show(function() {
+function loadProteinMatches(){
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
-    var url = home_url + "api/feature/ontology/" + feature_id;
-    if ($("#collapseProteinMatches .card-text").is(':empty')) {
+    var url = home_url + "api/feature/proteinmatches/" + feature_id;
+    if ($("#collapseProteinMatches .table").is(':empty')) {
       $.ajax({
           url : url,
           beforeSend : function(){
-            $("#collapseProteinMatches .card-text").html("<small>LOADING...</small>");
+            $("#collapseProteinMatches .table").html("<small>LOADING...</small>");
           }, 
           success: function(data) {
-            var text = '<table class="table table-sm table-hover">';
-            text += '<thead><tr>';
+            var text = '<thead><tr>';
             text += '<th scope="col">Protein database</th>';
             text += '<th scope="col">Protein domain</th>';
             text += '</tr></thead>';
             text += '<tbody>';
 
-            console.log(data);
             for (i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['db'] + '</td>';
@@ -71,12 +70,11 @@ $(document).ready(function(){
               text += '</tr>'
             }
             text += "</tbody></table>" ;
-            $("#collapseProteinMatches .card-text").html(text);
+            $("#collapseProteinMatches .table").html(text);
           }
       });    
     }
-  });
-} );
+}
 
 //load orthologs from API
 $(document).ready(function(){
@@ -163,3 +161,4 @@ $(document).ready(function(){
     }
   });
 } );
+
