@@ -355,17 +355,6 @@ class FeatureTest(TestCase):
         self.assertEqual(1, result[0]["strand"])
         self.assertEqual("chr1", result[0]["ref"])
 
-    def test_retrieve_feature_cvterm(self):
-        """Tests - retrieve_feature_cvterm."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
-        result = fv.retrieve_feature_cvterm(feature_id=f.feature_id)
-        self.assertEqual("teste", result[0]["cvterm"])
-        self.assertEqual("teste teste", result[0]["cvterm_definition"])
-        self.assertEqual("molecular function", result[0]["cv"])
-        self.assertEqual("GO", result[0]["db"])
-        self.assertEqual("00001", result[0]["dbxref"])
-
     def test_retrieve_feature_similarity(self):
         """Tests - retrieve_feature_similarity."""
         fv = feature.FeatureView()
