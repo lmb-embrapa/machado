@@ -8,7 +8,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from machado.models import Feature, Featureloc
+from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureRelationship
 from machado.models import Pub
 
@@ -241,3 +241,39 @@ class FeaturePublicationSerializer(serializers.ModelSerializer):
     def get_doi(self, obj):
         """Get the doi."""
         return obj.get_doi()
+
+
+class FeatureOntologySerializer(serializers.ModelSerializer):
+    """Feature ontology serializer."""
+
+    cvterm = serializers.SerializerMethodField()
+    cvterm_definition = serializers.SerializerMethodField()
+    cv = serializers.SerializerMethodField()
+    db = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        fields = ("cvterm", "cvterm_definition", "cv", "db", "dbxref")
+        model = Cvterm
+
+    def get_cvterm(self, obj):
+        """Get the cvterm."""
+        return obj.name
+
+    def get_cvterm_definition(self, obj):
+        """Get the cvterm definition."""
+        return obj.definition
+
+    def get_cv(self, obj):
+        """Get the cv."""
+        return obj.cv.name
+
+    def get_db(self, obj):
+        """Get the db."""
+        return obj.dbxref.db.name
+
+    def get_dbxref(self, obj):
+        """Get the dbxref."""
+        return obj.dbxref.accession

@@ -60,12 +60,19 @@ def patch_templates():
         )
 
 
+def patch_proxy_headers():
+    """Include encrypted proxy headers."""
+    settings.USE_X_FORWARDED_HOST = True
+    settings.SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
 def patch_all():
     """Apply patches."""
     patch_root_urlconf()
     patch_middleware()
     patch_templates()
     patch_swagger_settings()
+    patch_proxy_headers()
 
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True
