@@ -366,16 +366,6 @@ class FeatureTest(TestCase):
         self.assertEqual("GO", result[0]["db"])
         self.assertEqual("00001", result[0]["dbxref"])
 
-    def test_retrieve_feature_protein_matches(self):
-        """Tests - retrieve_feature_protein_matches."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_protein_matches(feature_id=f.feature_id)
-        self.assertEqual("PF0001", result[0]["subject_id"])
-        self.assertEqual("PF0001 PF0001", result[0]["subject_desc"])
-        self.assertEqual("PFAM", result[0]["db"])
-        self.assertEqual("0001", result[0]["dbxref"])
-
     def test_retrieve_feature_similarity(self):
         """Tests - retrieve_feature_similarity."""
         fv = feature.FeatureView()

@@ -78,25 +78,6 @@ class FeatureView(View):
             )
         return result
 
-    def retrieve_feature_protein_matches(self, feature_id: int) -> List[Dict]:
-        """Retrieve feature relationships."""
-        feature_relationships = FeatureRelationship.objects.filter(
-            object_id=feature_id,
-            subject__type__name="protein_match",
-            subject__type__cv__name="sequence",
-        )
-        result = list()
-        for feature_relationship in feature_relationships:
-            result.append(
-                {
-                    "subject_id": feature_relationship.subject.uniquename,
-                    "subject_desc": feature_relationship.subject.name,
-                    "db": feature_relationship.subject.dbxref.db.name,
-                    "dbxref": feature_relationship.subject.dbxref.accession,
-                }
-            )
-        return result
-
     def retrieve_feature_similarity(self, feature_id: int, organism_id: int) -> List:
         """Retrieve feature locations."""
         result = list()
@@ -183,12 +164,14 @@ class FeatureView(View):
                 feature_obj.organism.genus, feature_obj.organism.species
             ),
         )
-        result["cvterm"] = self.retrieve_feature_cvterm(
+        result["cvterm"] = FeatureCvterm.objects.filter(
             feature_id=feature_obj.feature_id
-        )
-        result["protein_matches"] = self.retrieve_feature_protein_matches(
-            feature_id=feature_obj.feature_id
-        ) 
+        ).exists()
+        result["protein_matches"] = FeatureRelationship.objects.filter(
+            object_id=feature_obj.feature_id,
+            subject__type__name="protein_match",
+            subject__type__cv__name="sequence",
+        ).exists()
         result["similarity"] = self.retrieve_feature_similarity(
             feature_id=feature_obj.feature_id, organism_id=feature_obj.organism_id
         )
