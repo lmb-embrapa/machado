@@ -77,7 +77,7 @@
 		<ul class="nav nav-tabs" id="annotationTab" role="tablist">
           {% if data.cvterm %}
 		  <li class="nav-item">
-			<a class="nav-link active" id="go-tab" data-toggle="tab" href="#go" role="tab" aria-controls="go" aria-selected="true">Gene Ontology</a>
+			<a class="nav-link active" id="go-tab" data-toggle="tab" href="#collapseOntology" role="tab" aria-controls="go" aria-selected="true">Gene Ontology</a>
 		  </li>
 		  {% endif %}
           {% if data.protein_matches %}
@@ -88,26 +88,8 @@
 		</ul>
       <div class="card-text tab-content">
         {% if data.cvterm %}
-	    <div class="tab-pane fade show active" id="go" role="tabpanel" aria-labelledby="go-tab">
-        <table class="table table-sm table-hover">
-          <thead>
-            <tr>
-              <th scope="col">Ontology</th>
-              <th scope="col">ID</th>
-              <th scope="col">Term</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for cvterm in data.cvterm %}
-            <tr>
-              <td>{{ cvterm.cv|safe }}</td>
-              <td>{{ cvterm.db }}:{{ cvterm.dbxref }}</td>
-              <td>{{ cvterm.cvterm|safe }}
-            </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+	    <div class="tab-pane fade show active" id="collapseOntology" role="tabpanel" aria-labelledby="go-tab">
+           <div class="card-text"></div>
 		</div>
         {% endif %}
 

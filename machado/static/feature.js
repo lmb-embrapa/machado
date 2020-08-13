@@ -6,6 +6,43 @@
  have been included as part of this package for licensing information.
  */
 
+//load ontology terms from API
+$(document).ready(function(){
+  $('#collapseOntology').show(function() {
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/ontology/" + feature_id;
+    if ($("#collapseOntology .card-text").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#collapseOntology .card-text").html("<small>LOADING...</small>");
+          }, 
+          success: function(data) {
+            var text = '<table class="table table-sm table-hover">';
+            text += '<thead><tr>';
+            text += '<th scope="col">Ontology</th>';
+            text += '<th scope="col">ID</th>';
+            text += '<th scope="col">Term</th>';
+            text += '</tr></thead>';
+            text += '<tbody>';
+
+            for (i=0; i<data.length; i++) {
+              text += '<tr>'
+              text += '<td>' + data[i]['cv'] + '</td>';
+              text += '<td>' + data[i]['db'] + ':' + data[i]['cvterm'] + '</td>';
+              text += '<td>' + data[i]['cvterm'] + '</td>';
+              text += '</tr>'
+            }
+            text += "</tbody></table>" ;
+            $("#collapseOntology .card-text").html(text);
+          }
+      });    
+    }
+  });
+} );
+
+
 //load orthologs from API
 $(document).ready(function(){
   $('#collapseOrthologs').on('show.bs.collapse', function() {
@@ -20,7 +57,6 @@ $(document).ready(function(){
           }, 
           success: function(data) {
             var text = '<ul class="list-group list-group-flush">';
-            console.log(data);
             text += '<li class="list-group-item list-group-item-secondary">Orthologous group: <a href="' + home_url + 'find/?selected_facets=orthologous_group:' + data['ortholog_group'] + '">' + data['ortholog_group'] + '</a></li>';
             var members = data['members'];
             for (i=0; i<members.length; i++) {
