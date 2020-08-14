@@ -6,6 +6,7 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from rest_framework import serializers
 
 from machado.models import Cvterm, Feature, Featureloc
@@ -194,7 +195,7 @@ class autocompleteSerializer(serializers.Serializer):
 class FeatureIDSerializer(serializers.Serializer):
     """Feature ID serializer."""
 
-    feature_id = serializers.FloatField()
+    feature_id = serializers.IntegerField()
 
 
 class FeatureOrthologSerializer(serializers.ModelSerializer):
@@ -320,3 +321,18 @@ class FeatureProteinMatchesSerializer(serializers.ModelSerializer):
     def get_dbxref(self, obj):
         """Get the dbxref."""
         return obj.subject.dbxref.accession
+
+
+class FeatureSimilaritySerializer(serializers.Serializer):
+    """Feature similarity matches serializer."""
+
+    program = serializers.CharField()
+    programversion = serializers.CharField()
+    db_name = serializers.CharField()
+    unique = serializers.CharField()
+    name = serializers.CharField()
+    display = serializers.CharField()
+    query_start = serializers.CharField()
+    query_end = serializers.CharField()
+    score = serializers.CharField()
+    evalue = serializers.CharField()

@@ -62,24 +62,8 @@ class FeatureView(View):
             )
         return result
 
-    def retrieve_feature_cvterm(self, feature_id: int) -> List[Dict]:
-        """Retrieve feature cvterms."""
-        feature_cvterm = FeatureCvterm.objects.filter(feature_id=feature_id)
-        result = list()
-        for feature_cvterm in feature_cvterm:
-            result.append(
-                {
-                    "cvterm": feature_cvterm.cvterm.name,
-                    "cvterm_definition": feature_cvterm.cvterm.definition,
-                    "cv": feature_cvterm.cvterm.cv.name,
-                    "db": feature_cvterm.cvterm.dbxref.db.name,
-                    "dbxref": feature_cvterm.cvterm.dbxref.accession,
-                }
-            )
-        return result
-
     def retrieve_feature_similarity(self, feature_id: int, organism_id: int) -> List:
-        """Retrieve feature locations."""
+        """Retrieve feature similarity."""
         result = list()
         try:
             match_parts_ids = (
@@ -114,13 +98,9 @@ class FeatureView(View):
                     else:
                         db_name = match_feat.dbxref.db.name
 
-                    feature_cvterm = self.retrieve_feature_cvterm(
-                        feature_id=match_feat.feature_id
-                    )
+                    feature_cvterm = match_feat.get_cvterm()
 
-            feature_cvterm = self.retrieve_feature_cvterm(
-                feature_id=match_feat.feature_id
-            )
+            feature_cvterm = match_feat.get_cvterm()
 
             result.append(
                 {

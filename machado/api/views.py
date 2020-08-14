@@ -28,8 +28,9 @@ from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeatureProteinMatchesSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
+from machado.api.serializers import FeatureSimilaritySerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.models import Cvterm, Pub
+from machado.models import Analysis, Analysisfeature, Cvterm, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 
 from re import escape, search, IGNORECASE
@@ -490,3 +491,68 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+
+class FeatureSimilarityViewSet(viewsets.GenericViewSet):
+    """Retrieve similarity matches by feature ID."""
+
+    serializer_class = FeatureSimilaritySerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve similarity matches by feature ID",
+        operation_description="Retrieve similarity matches by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868566",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureSimilaritySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        result = list()
+        srcfeature_id = self.kwargs.get("feature_id")
+        try:
+            match_parts_ids = Featureloc.objects.filter(
+                srcfeature_id=srcfeature_id
+            ).values_list("feature_id")
+        except ObjectDoesNotExist:
+            return list()
+
+        for match_part_id in match_parts_ids:
+            analysis_feature = Analysisfeature.objects.get(feature_id=match_part_id)
+            analysis = Analysis.objects.get(analysis_id=analysis_feature.analysis_id)
+            if analysis_feature.normscore is not None:
+                score = analysis_feature.normscore
+            else:
+                score = analysis_feature.rawscore
+
+            # it should have 2 records (query and hit)
+            match_query = Featureloc.objects.filter(
+                feature_id=match_part_id, srcfeature_id=srcfeature_id
+            ).first()
+            match_hit = (
+                Featureloc.objects.filter(feature_id=match_part_id)
+                .exclude(srcfeature_id=srcfeature_id)
+                .first()
+            )
+            match_hit_feat = Feature.objects.get(feature_id=match_hit.srcfeature_id)
+
+            result.append(
+                {
+                    "program": analysis.program,
+                    "programversion": analysis.programversion,
+                    "db_name": match_hit_feat.dbxref.db.name,
+                    "unique": match_hit_feat.uniquename,
+                    "name": match_hit_feat.name,
+                    "display": match_hit_feat.get_display(),
+                    "query_start": match_query.fmin,
+                    "query_end": match_query.fmax,
+                    "score": score,
+                    "evalue": analysis_feature.significance,
+                }
+            )
+
+        return result
