@@ -6,7 +6,6 @@
 
 """Serializers."""
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
 from rest_framework import serializers
 
 from machado.models import Cvterm, Feature, Featureloc
@@ -331,6 +330,7 @@ class FeatureSimilaritySerializer(serializers.Serializer):
     db_name = serializers.CharField()
     unique = serializers.CharField()
     name = serializers.CharField()
+    sotype = serializers.CharField()
     query_start = serializers.CharField()
     query_end = serializers.CharField()
     score = serializers.CharField()

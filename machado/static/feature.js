@@ -102,9 +102,25 @@ function loadSimilarity(){
             text += '<tbody>';
 
             for (i=0; i<data.length; i++) {
+              if (!data[i]['uniquename']) {
+                  uniquename = ""
+              } else {
+                  uniquename = data[i]['uniquename']
+              }
+              if (!data[i]['name']) {
+                  name = ""
+              } else {
+                  name = data[i]['name']
+              }
+
               text += '<tr>'
               text += '<td>' + data[i]['program'] + ' ' + data[i]['programversion'] + '</td>';
-              text += '<td>' + data[i]['db_name'] + ' ' + data[i]['uniquename'] + ' ' + data[i]['name'] + '</td>';
+              if (data[i]['db_name'] == 'BLAST_SOURCE' && data[i]['sotype'] == 'polypeptide') {
+                  text += '<td>' + data[i]['db_name'] + ' ' + uniquename + ' <a href="https://www.ncbi.nlm.nih.gov/protein/' + name + '" target="_blank">' + name + '</a></td>';
+              }
+              else {
+                text += '<td>' + data[i]['db_name'] + ' ' + uniquename + ' ' + name + '</td>';
+              }
               text += '<td>' + data[i]['query_start'] + '</td>';
               text += '<td>' + data[i]['query_end'] + '</td>';
               text += '<td>' + data[i]['score'] + '</td>';

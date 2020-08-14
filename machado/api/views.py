@@ -538,15 +538,15 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
                 .exclude(srcfeature_id=srcfeature_id)
                 .first()
             )
-            match_hit_feat = Feature.objects.get(feature_id=match_hit.srcfeature_id)
 
             result.append(
                 {
                     "program": analysis.program,
                     "programversion": analysis.programversion,
-                    "db_name": match_hit_feat.dbxref.db.name,
-                    "unique": match_hit_feat.uniquename,
-                    "name": match_hit_feat.name,
+                    "db_name": match_hit.srcfeature.dbxref.db.name,
+                    "unique": match_hit.srcfeature.uniquename,
+                    "name": match_hit.srcfeature.name,
+                    "sotype": match_query.srcfeature.type.name,
                     "query_start": match_query.fmin,
                     "query_end": match_query.fmax,
                     "score": score,

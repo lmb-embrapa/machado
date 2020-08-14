@@ -13,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views import View
 
-from machado.models import Analysis, Analysisfeature, Pub
+from machado.models import Pub
 from machado.models import Feature, Featureloc, Featureprop
 from machado.models import FeatureCvterm, FeatureRelationship
 
