@@ -79,5 +79,4 @@ urlpatterns = [
     url(
         r"^$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"
     ),
-    path("jbrowse/stats/global", views.JBrowseGlobalViewSet, name="jbrowse_global"),
 ]

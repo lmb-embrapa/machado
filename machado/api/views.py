@@ -13,11 +13,12 @@ from drf_yasg.utils import swagger_auto_schema
 
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
@@ -41,8 +42,18 @@ class StandardResultSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
+class JBrowseGlobalSettings:
+    """JBrowseGlobalStats."""
+
+    def __init__(self, featureDensity):
+        """Init."""
+        self.featureDensity = featureDensity
+
+
 class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     """API endpoint to view JBrowse global settings."""
+
+    serializer_class = JBrowseGlobalSerializer
 
     @swagger_auto_schema(
         operation_summary="Retrieve global settings",
@@ -50,9 +61,13 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     )
     def list(self, request):
         """List."""
-        result = {"featureDensity": 0.02}
-        response = Response(result, status=status.HTTP_200_OK)
-        return response
+        queryset = self.get_queryset()
+        serializer = JBrowseGlobalSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        return [JBrowseGlobalSettings(featureDensity=0.02)]
 
 
 class JBrowseNamesViewSet(viewsets.GenericViewSet):
