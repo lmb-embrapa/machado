@@ -49,9 +49,9 @@ class FeatureSearchForm(FacetedSearchForm):
             return sqs
 
         result = sqs.filter(
-            SQ(uniquename_exact__iexact=Exact(q))
-            | SQ(name_exact__iexact=Exact(q))
-            | SQ(organism_exact__iexact=Exact(q))
+            SQ(uniquename_exact=Exact(q))
+            | SQ(name_exact=Exact(q))
+            | SQ(organism_exact=Exact(q))
         )
 
         for i in q.split():

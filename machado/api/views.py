@@ -287,7 +287,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         query = request.query_params.get("q")
         if query is not None:
             query = query.strip()
-            queryset = SearchQuerySet().filter(autocomplete__iexact=query)[
+            queryset = SearchQuerySet().filter(autocomplete=query)[
                 : max_items * 10
             ]
             result = set()
