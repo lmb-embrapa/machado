@@ -191,6 +191,12 @@ class autocompleteSerializer(serializers.Serializer):
         return obj
 
 
+class FeatureIDSerializer(serializers.Serializer):
+    """Feature ID serializer."""
+
+    feature_id = serializers.FloatField()
+
+
 class FeatureOrthologSerializer(serializers.ModelSerializer):
     """Feature sequence ortholog."""
 

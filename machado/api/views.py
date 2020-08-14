@@ -22,6 +22,7 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureIDSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeatureProteinMatchesSerializer
@@ -42,14 +43,6 @@ class StandardResultSetPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class JBrowseGlobalSettings:
-    """JBrowseGlobalStats."""
-
-    def __init__(self, featureDensity):
-        """Init."""
-        self.featureDensity = featureDensity
-
-
 class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     """API endpoint to view JBrowse global settings."""
 
@@ -67,7 +60,7 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self):
         """Get queryset."""
-        return [JBrowseGlobalSettings(featureDensity=0.02)]
+        return [{"featureDensity": 0.02}]
 
 
 class JBrowseNamesViewSet(viewsets.GenericViewSet):
@@ -287,9 +280,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         query = request.query_params.get("q")
         if query is not None:
             query = query.strip()
-            queryset = SearchQuerySet().filter(autocomplete=query)[
-                : max_items * 10
-            ]
+            queryset = SearchQuerySet().filter(autocomplete=query)[: max_items * 10]
             result = set()
             for item in queryset:
                 try:
@@ -307,6 +298,8 @@ class autocompleteViewSet(viewsets.GenericViewSet):
 
 class FeatureIDViewSet(viewsets.GenericViewSet):
     """Retrieve the feature ID by accession."""
+
+    serializer_class = FeatureIDSerializer
 
     accession_param = openapi.Parameter(
         "accession",
@@ -331,15 +324,21 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         accession=Athaliana_ChrM, soType=chromosome</br> \
         accession=AT1G01010.1, soType=mRNA",
     )
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureIDSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
         accession = self.request.query_params.get("accession")
         soterm = self.request.query_params.get("soType")
-
         try:
-            return Response(retrieve_feature_id(accession, soterm))
+            feature_id = retrieve_feature_id(accession, soterm)
+            return [{"feature_id": feature_id}]
         except ObjectDoesNotExist:
-            return Response()
+            return None
 
 
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
