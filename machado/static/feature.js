@@ -31,7 +31,7 @@ function loadOntologyTerms(){
             for (i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['cv'] + '</td>';
-              text += '<td>' + data[i]['db'] + ':' + data[i]['cvterm'] + '</td>';
+              text += '<td>' + data[i]['db'] + ':' + data[i]['dbxref'] + '</td>';
               text += '<td>' + data[i]['cvterm'] + '</td>';
               text += '</tr>'
             }
