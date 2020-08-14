@@ -62,64 +62,6 @@ class FeatureView(View):
             )
         return result
 
-    def retrieve_feature_similarity(self, feature_id: int, organism_id: int) -> List:
-        """Retrieve feature similarity."""
-        result = list()
-        try:
-            match_parts_ids = (
-                Featureloc.objects.filter(srcfeature_id=feature_id)
-                .filter(feature__organism_id=organism_id)
-                .values_list("feature_id")
-            )
-        except ObjectDoesNotExist:
-            return list()
-
-        for match_part_id in match_parts_ids:
-            analysis_feature = Analysisfeature.objects.get(feature_id=match_part_id)
-            analysis = Analysis.objects.get(analysis_id=analysis_feature.analysis_id)
-            if analysis_feature.normscore is not None:
-                score = analysis_feature.normscore
-            else:
-                score = analysis_feature.rawscore
-
-            # it should have 2 records (query and hit)
-            matches = Featureloc.objects.filter(feature_id=match_part_id)
-            for match in matches:
-                # query
-                if match.srcfeature_id == feature_id:
-                    query_start = match.fmin
-                    query_end = match.fmax
-                # hit
-                else:
-                    match_feat = Feature.objects.get(feature_id=match.srcfeature_id)
-
-                    if match_feat.dbxref.db.name == "GFF_SOURCE":
-                        db_name = None
-                    else:
-                        db_name = match_feat.dbxref.db.name
-
-                    feature_cvterm = match_feat.get_cvterm()
-
-            feature_cvterm = match_feat.get_cvterm()
-
-            result.append(
-                {
-                    "program": analysis.program,
-                    "programversion": analysis.programversion,
-                    "db_name": db_name,
-                    "unique": match_feat.uniquename,
-                    "name": match_feat.name,
-                    "display": match_feat.get_display,
-                    "query_start": query_start,
-                    "query_end": query_end,
-                    "score": score,
-                    "evalue": analysis_feature.significance,
-                    "feature_cvterm": feature_cvterm,
-                }
-            )
-
-        return result
-
     def retrieve_feature_data(self, feature_obj: Feature) -> Dict[str, Any]:
         """Retrieve feature data."""
         result = dict()  # type: Dict[str, Any]
@@ -138,9 +80,9 @@ class FeatureView(View):
             subject__type__name="protein_match",
             subject__type__cv__name="sequence",
         ).exists()
-        result["similarity"] = self.retrieve_feature_similarity(
-            feature_id=feature_obj.feature_id, organism_id=feature_obj.organism_id
-        )
+        result["similarity"] = Featureloc.objects.filter(
+            srcfeature_id=feature_obj.feature_id
+        ).exists()
         result["orthologs"] = Featureprop.objects.filter(
             type__name="orthologous group",
             type__cv__name="feature_property",

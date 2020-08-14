@@ -331,7 +331,6 @@ class FeatureSimilaritySerializer(serializers.Serializer):
     db_name = serializers.CharField()
     unique = serializers.CharField()
     name = serializers.CharField()
-    display = serializers.CharField()
     query_start = serializers.CharField()
     query_end = serializers.CharField()
     score = serializers.CharField()

@@ -547,7 +547,6 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
                     "db_name": match_hit_feat.dbxref.db.name,
                     "unique": match_hit_feat.uniquename,
                     "name": match_hit_feat.name,
-                    "display": match_hit_feat.get_display(),
                     "query_start": match_query.fmin,
                     "query_end": match_query.fmax,
                     "score": score,
