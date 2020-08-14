@@ -13,6 +13,12 @@ from machado.models import FeatureRelationship
 from machado.models import Pub
 
 
+class JBrowseGlobalSerializer(serializers.Serializer):
+    """JBrowse global settings serializer."""
+
+    featureDensity = serializers.FloatField()
+
+
 class JBrowseNamesSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
@@ -185,6 +191,12 @@ class autocompleteSerializer(serializers.Serializer):
         return obj
 
 
+class FeatureIDSerializer(serializers.Serializer):
+    """Feature ID serializer."""
+
+    feature_id = serializers.IntegerField()
+
+
 class FeatureOrthologSerializer(serializers.ModelSerializer):
     """Feature sequence ortholog."""
 
@@ -308,3 +320,18 @@ class FeatureProteinMatchesSerializer(serializers.ModelSerializer):
     def get_dbxref(self, obj):
         """Get the dbxref."""
         return obj.subject.dbxref.accession
+
+
+class FeatureSimilaritySerializer(serializers.Serializer):
+    """Feature similarity matches serializer."""
+
+    program = serializers.CharField()
+    programversion = serializers.CharField()
+    db_name = serializers.CharField()
+    unique = serializers.CharField()
+    name = serializers.CharField()
+    sotype = serializers.CharField()
+    query_start = serializers.CharField()
+    query_end = serializers.CharField()
+    score = serializers.CharField()
+    evalue = serializers.CharField()

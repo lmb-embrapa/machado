@@ -45,11 +45,6 @@ router.register(
     basename="feature_ortholog",
 )
 router.register(
-    r"feature/sequence/(?P<feature_id>.+)",
-    views.FeatureSequenceViewSet,
-    basename="feature_sequence",
-)
-router.register(
     r"feature/proteinmatches/(?P<feature_id>.+)",
     views.FeatureProteinMatchesViewSet,
     basename="feature_proteinmatches",
@@ -59,6 +54,16 @@ router.register(
     r"feature/publication/(?P<feature_id>.+)",
     views.FeaturePublicationViewSet,
     basename="feature_publication",
+)
+router.register(
+    r"feature/sequence/(?P<feature_id>.+)",
+    views.FeatureSequenceViewSet,
+    basename="feature_sequence",
+)
+router.register(
+    r"feature/similarity/(?P<feature_id>.+)",
+    views.FeatureSimilarityViewSet,
+    basename="feature_similarity",
 )
 
 baseurl = None
@@ -79,5 +84,4 @@ urlpatterns = [
     url(
         r"^$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"
     ),
-    path("jbrowse/stats/global", views.JBrowseGlobalViewSet, name="jbrowse_global"),
 ]

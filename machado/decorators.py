@@ -161,6 +161,17 @@ def get_feature_relationship(self):
         return None
 
 
+def get_feature_cvterm(self):
+    """Get the cvterms."""
+    return self.FeatureCvterm_feature_Feature.all().values(
+        name=F("cvterm__name"),
+        definition=F("cvterm__definition"),
+        cv=F("cvterm__cv__name"),
+        db=F("cvterm__dbxref__db__name"),
+        dbxref=F("cvterm__dbxref__accession"),
+    )
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
 
@@ -174,6 +185,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
         setattr(cls, "get_expression_samples", get_feature_expression_samples)
         setattr(cls, "get_relationship", get_feature_relationship)
+        setattr(cls, "get_cvterm", get_feature_cvterm)
         return cls
 
     return wrapper

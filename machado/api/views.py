@@ -13,21 +13,24 @@ from drf_yasg.utils import swagger_auto_schema
 
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureIDSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeatureProteinMatchesSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
+from machado.api.serializers import FeatureSimilaritySerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.models import Cvterm, Pub
+from machado.models import Analysis, Analysisfeature, Cvterm, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 
 from re import escape, search, IGNORECASE
@@ -44,15 +47,21 @@ class StandardResultSetPagination(PageNumberPagination):
 class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     """API endpoint to view JBrowse global settings."""
 
+    serializer_class = JBrowseGlobalSerializer
+
     @swagger_auto_schema(
         operation_summary="Retrieve global settings",
         operation_description="Retrieve global settings. https://jbrowse.org/docs/data_formats.html",
     )
     def list(self, request):
         """List."""
-        result = {"featureDensity": 0.02}
-        response = Response(result, status=status.HTTP_200_OK)
-        return response
+        queryset = self.get_queryset()
+        serializer = JBrowseGlobalSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        return [{"featureDensity": 0.02}]
 
 
 class JBrowseNamesViewSet(viewsets.GenericViewSet):
@@ -291,6 +300,8 @@ class autocompleteViewSet(viewsets.GenericViewSet):
 class FeatureIDViewSet(viewsets.GenericViewSet):
     """Retrieve the feature ID by accession."""
 
+    serializer_class = FeatureIDSerializer
+
     accession_param = openapi.Parameter(
         "accession",
         openapi.IN_QUERY,
@@ -314,15 +325,21 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         accession=Athaliana_ChrM, soType=chromosome</br> \
         accession=AT1G01010.1, soType=mRNA",
     )
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureIDSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
         accession = self.request.query_params.get("accession")
         soterm = self.request.query_params.get("soType")
-
         try:
-            return Response(retrieve_feature_id(accession, soterm))
+            feature_id = retrieve_feature_id(accession, soterm)
+            return [{"feature_id": feature_id}]
         except ObjectDoesNotExist:
-            return Response()
+            return None
 
 
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
@@ -474,3 +491,67 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+
+class FeatureSimilarityViewSet(viewsets.GenericViewSet):
+    """Retrieve similarity matches by feature ID."""
+
+    serializer_class = FeatureSimilaritySerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve similarity matches by feature ID",
+        operation_description="Retrieve similarity matches by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868566",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureSimilaritySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        result = list()
+        srcfeature_id = self.kwargs.get("feature_id")
+        try:
+            match_parts_ids = Featureloc.objects.filter(
+                srcfeature_id=srcfeature_id
+            ).values_list("feature_id")
+        except ObjectDoesNotExist:
+            return list()
+
+        for match_part_id in match_parts_ids:
+            analysis_feature = Analysisfeature.objects.get(feature_id=match_part_id)
+            analysis = Analysis.objects.get(analysis_id=analysis_feature.analysis_id)
+            if analysis_feature.normscore is not None:
+                score = analysis_feature.normscore
+            else:
+                score = analysis_feature.rawscore
+
+            # it should have 2 records (query and hit)
+            match_query = Featureloc.objects.filter(
+                feature_id=match_part_id, srcfeature_id=srcfeature_id
+            ).first()
+            match_hit = (
+                Featureloc.objects.filter(feature_id=match_part_id)
+                .exclude(srcfeature_id=srcfeature_id)
+                .first()
+            )
+
+            result.append(
+                {
+                    "program": analysis.program,
+                    "programversion": analysis.programversion,
+                    "db_name": match_hit.srcfeature.dbxref.db.name,
+                    "unique": match_hit.srcfeature.uniquename,
+                    "name": match_hit.srcfeature.name,
+                    "sotype": match_query.srcfeature.type.name,
+                    "query_start": match_query.fmin,
+                    "query_end": match_query.fmax,
+                    "score": score,
+                    "evalue": analysis_feature.significance,
+                }
+            )
+
+        return result

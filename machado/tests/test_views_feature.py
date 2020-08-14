@@ -355,21 +355,6 @@ class FeatureTest(TestCase):
         self.assertEqual(1, result[0]["strand"])
         self.assertEqual("chr1", result[0]["ref"])
 
-    def test_retrieve_feature_similarity(self):
-        """Tests - retrieve_feature_similarity."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_similarity(
-            feature_id=f.feature_id, organism_id=self.organism1.organism_id
-        )
-        self.assertEqual("blast", result[0]["program"])
-        self.assertEqual("2.2.31+", result[0]["programversion"])
-        self.assertEqual("feat2", result[0]["unique"])
-        self.assertEqual(20, result[0]["query_start"])
-        self.assertEqual(2000, result[0]["query_end"])
-        self.assertEqual(0.0001, result[0]["evalue"])
-        self.assertEqual(1000, result[0]["score"])
-
     def test_retrieve_feature_data(self):
         """Tests - retrieve_feature_data."""
         fv = feature.FeatureView()
@@ -379,7 +364,6 @@ class FeatureTest(TestCase):
 
         f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
         result = fv.retrieve_feature_data(feature_obj=f)
-        self.assertEqual("blast", result["similarity"][0]["program"])
 
     def test_get(self):
         """Tests - get."""

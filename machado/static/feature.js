@@ -6,13 +6,10 @@
  have been included as part of this package for licensing information.
  */
 
+//load ontology terms from API
 $(document).ready(function(){
   $("#collapseOntology").click(loadOntologyTerms());
-  $("#collapseProteinMatches").click(loadProteinMatches());
 });
-
-
-//load ontology terms from API
 function loadOntologyTerms(){
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
@@ -46,6 +43,9 @@ function loadOntologyTerms(){
 } 
 
 //load protein matches from API
+$(document).ready(function(){
+  $("#collapseProteinMatches").click(loadProteinMatches());
+});
 function loadProteinMatches(){
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
@@ -76,8 +76,69 @@ function loadProteinMatches(){
     }
 }
 
+//load similarity from API
+$(document).ready(function(){
+  $("#collapseSimilarity").click(loadSimilarity());
+});
+function loadSimilarity(){
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/similarity/" + feature_id;
+    if ($("#collapseSimilarity .table").is(':empty')) {
+      $.ajax({
+          url : url,
+          beforeSend : function(){
+            $("#collapseOntology .table").html("<small>LOADING...</small>");
+          }, 
+          success: function(data) {
+            var text = '<thead><tr>';
+            text += '<th scope="col">Program</th>';
+            text += '<th scope="col">Hit</th>';
+            text += '<th scope="col">Query start</th>';
+            text += '<th scope="col">Query end</th>';
+            text += '<th scope="col">Score</th>';
+            text += '<th scope="col">Evalue</th>';
+            text += '</tr></thead>';
+            text += '<tbody>';
+
+            for (i=0; i<data.length; i++) {
+              if (!data[i]['uniquename']) {
+                  uniquename = ""
+              } else {
+                  uniquename = data[i]['uniquename']
+              }
+              if (!data[i]['name']) {
+                  name = ""
+              } else {
+                  name = data[i]['name']
+              }
+
+              text += '<tr>'
+              text += '<td>' + data[i]['program'] + ' ' + data[i]['programversion'] + '</td>';
+              if (data[i]['db_name'] == 'BLAST_SOURCE' && data[i]['sotype'] == 'polypeptide') {
+                  text += '<td>' + data[i]['db_name'] + ' ' + uniquename + ' <a href="https://www.ncbi.nlm.nih.gov/protein/' + name + '" target="_blank">' + name + '</a></td>';
+              }
+              else {
+                text += '<td>' + data[i]['db_name'] + ' ' + uniquename + ' ' + name + '</td>';
+              }
+              text += '<td>' + data[i]['query_start'] + '</td>';
+              text += '<td>' + data[i]['query_end'] + '</td>';
+              text += '<td>' + data[i]['score'] + '</td>';
+              text += '<td>' + data[i]['evalue'] + '</td>';
+              text += '</tr>'
+            }
+            text += "</tbody>" ;
+            $("#collapseSimilarity .table").html(text);
+          }
+      });    
+    }
+} 
+
 //load orthologs from API
 $(document).ready(function(){
+  $("#collapseOrthologs").click(loadOrthologs());
+});
+function loadOrthologs(){
   $('#collapseOrthologs').on('show.bs.collapse', function() {
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
@@ -105,10 +166,13 @@ $(document).ready(function(){
       });    
     }
   });
-} );
+} 
 
 //load publication from API
 $(document).ready(function(){
+  $("#collapsePub").click(loadPublication());
+});
+function loadPublication(){
   $('#collapsePub').on('show.bs.collapse', function() {
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
@@ -138,10 +202,13 @@ $(document).ready(function(){
       });    
     }
   });
-} );
+}
 
 // load sequence from API
 $(document).ready(function(){
+  $("#collapseSeq").click(loadSequence());
+});
+function loadSequence(){
   $('#collapseSeq').on('show.bs.collapse', function() {
     var feature_id = $("#feature_id").val();
     var home_url = $("#home_url").val();
@@ -160,5 +227,5 @@ $(document).ready(function(){
       });    
     }
   });
-} );
+} 
 
