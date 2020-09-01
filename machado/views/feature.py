@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.views import View
 
 from machado.models import Pub
-from machado.models import Feature, Featureloc, Featureprop
+from machado.models import Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureRelationship
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
@@ -82,11 +82,6 @@ class FeatureView(View):
         ).exists()
         result["similarity"] = Featureloc.objects.filter(
             srcfeature_id=feature_obj.feature_id
-        ).exists()
-        result["orthologs"] = Featureprop.objects.filter(
-            type__name="orthologous group",
-            type__cv__name="feature_property",
-            feature_id=feature_obj.feature_id,
         ).exists()
         result["pubs"] = Pub.objects.filter(
             FeaturePub_pub_Pub__feature__feature_id=feature_obj.feature_id
