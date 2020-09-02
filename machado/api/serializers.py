@@ -198,7 +198,7 @@ class FeatureIDSerializer(serializers.Serializer):
 
 
 class FeatureOrthologSerializer(serializers.ModelSerializer):
-    """Feature sequence ortholog."""
+    """Feature ortholog group."""
 
     display = serializers.SerializerMethodField()
     organism = serializers.SerializerMethodField()
@@ -335,6 +335,27 @@ class FeatureSimilaritySerializer(serializers.Serializer):
     query_end = serializers.CharField()
     score = serializers.CharField()
     evalue = serializers.CharField()
+
+
+class FeatureCoexpressionSerializer(serializers.ModelSerializer):
+    """Feature coexpression group."""
+
+    display = serializers.SerializerMethodField()
+    organism = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = ("feature_id", "uniquename", "display", "organism")
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.get_display()
+
+    def get_organism(self, obj):
+        """Get the organism."""
+        return "{} {}".format(obj.organism.genus, obj.organism.species)
 
 
 class FeatureExpressionSerializer(serializers.Serializer):

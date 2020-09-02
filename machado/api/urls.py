@@ -52,7 +52,12 @@ router.register(
 router.register(
     r"feature/expression/(?P<feature_id>\d+)",
     views.FeatureExpressionViewSet,
-    basename="feature_ortholog",
+    basename="feature_expression",
+)
+router.register(
+    r"feature/coexpression/(?P<feature_id>\d+)",
+    views.FeatureCoexpressionViewSet,
+    basename="feature_coexpression",
 )
 
 router.register(
