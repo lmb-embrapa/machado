@@ -34,34 +34,44 @@ router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomple
 
 router.register(r"feature/id", views.FeatureIDViewSet, basename="feature_id")
 router.register(
-    r"feature/ontology/(?P<feature_id>.+)",
+    r"feature/ontology/(?P<feature_id>\d+)",
     views.FeatureOntologyViewSet,
     basename="feature_ontology",
 )
 
 router.register(
-    r"feature/ortholog/(?P<feature_id>.+)",
+    r"feature/ortholog/(?P<feature_id>\d+)",
     views.FeatureOrthologViewSet,
     basename="feature_ortholog",
 )
 router.register(
-    r"feature/proteinmatches/(?P<feature_id>.+)",
+    r"feature/proteinmatches/(?P<feature_id>\d+)",
     views.FeatureProteinMatchesViewSet,
     basename="feature_proteinmatches",
 )
+router.register(
+    r"feature/expression/(?P<feature_id>\d+)",
+    views.FeatureExpressionViewSet,
+    basename="feature_expression",
+)
+router.register(
+    r"feature/coexpression/(?P<feature_id>\d+)",
+    views.FeatureCoexpressionViewSet,
+    basename="feature_coexpression",
+)
 
 router.register(
-    r"feature/publication/(?P<feature_id>.+)",
+    r"feature/publication/(?P<feature_id>\d+)",
     views.FeaturePublicationViewSet,
     basename="feature_publication",
 )
 router.register(
-    r"feature/sequence/(?P<feature_id>.+)",
+    r"feature/sequence/(?P<feature_id>\d+)",
     views.FeatureSequenceViewSet,
     basename="feature_sequence",
 )
 router.register(
-    r"feature/similarity/(?P<feature_id>.+)",
+    r"feature/similarity/(?P<feature_id>\d+)",
     views.FeatureSimilarityViewSet,
     basename="feature_similarity",
 )

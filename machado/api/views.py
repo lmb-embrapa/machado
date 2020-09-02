@@ -22,6 +22,8 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureCoexpressionSerializer
+from machado.api.serializers import FeatureExpressionSerializer
 from machado.api.serializers import FeatureIDSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
@@ -300,6 +302,8 @@ class autocompleteViewSet(viewsets.GenericViewSet):
 class FeatureIDViewSet(viewsets.GenericViewSet):
     """Retrieve the feature ID by accession."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureIDSerializer
 
     accession_param = openapi.Parameter(
@@ -345,6 +349,8 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
     """API endpoint for feature ortholog."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureOrthologSerializer
 
     @swagger_auto_schema(
@@ -358,16 +364,15 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
         queryset = self.get_queryset()
         serializer = FeatureOrthologSerializer(queryset, many=True)
         try:
-            ortholog_group = Featureprop.objects.get(
-                type__name="orthologous group",
-                type__cv__name="feature_property",
-                feature_id=self.kwargs.get("feature_id"),
-            ).value
+            feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
             return Response(
-                {"ortholog_group": ortholog_group, "members": serializer.data}
+                {
+                    "ortholog_group": feature_obj.get_orthologous_group(),
+                    "members": serializer.data,
+                }
             )
         except ObjectDoesNotExist:
-            return Response()
+            return Response({"coexpression_group": None, "members": list()})
 
     def get_queryset(self):
         """Get queryset."""
@@ -385,9 +390,81 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
             return
 
 
+class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature coexpression."""
+
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
+    serializer_class = FeatureOrthologSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve co-expression group by feature ID",
+        operation_description="Retrieve co-expression group by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureCoexpressionSerializer(queryset, many=True)
+        try:
+            feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
+            return Response(
+                {
+                    "coexpression_group": feature_obj.get_coexpression_group(),
+                    "members": serializer.data,
+                }
+            )
+        except ObjectDoesNotExist:
+            return Response({"coexpression_group": None, "members": list()})
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            coexpression_group = Featureprop.objects.get(
+                type__name="coexpression group",
+                type__cv__name="feature_property",
+                feature_id=self.kwargs.get("feature_id"),
+            )
+            return Feature.objects.filter(
+                type__name="mRNA",
+                Featureprop_feature_Feature__value=coexpression_group.value,
+            )
+        except ObjectDoesNotExist:
+            return
+
+
+class FeatureExpressionViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature expression."""
+
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
+    serializer_class = FeatureExpressionSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve expression by feature ID",
+        operation_description="Retrieve expression by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureExpressionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        feature_id = self.kwargs.get("feature_id")
+        feature = Feature.objects.get(feature_id=feature_id)
+        return feature.get_expression_samples()
+
+
 class FeatureSequenceViewSet(viewsets.GenericViewSet):
     """Retrieve sequence by feature ID."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureSequenceSerializer
 
     @swagger_auto_schema(
@@ -413,6 +490,8 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
 class FeaturePublicationViewSet(viewsets.GenericViewSet):
     """Retrieve publication by feature ID."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeaturePublicationSerializer
 
     @swagger_auto_schema(
@@ -440,6 +519,8 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
 class FeatureOntologyViewSet(viewsets.GenericViewSet):
     """Retrieve ontology terms by feature ID."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureOntologySerializer
 
     @swagger_auto_schema(
@@ -467,6 +548,8 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
 class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     """Retrieve protein matches by feature ID."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureProteinMatchesSerializer
 
     @swagger_auto_schema(
@@ -496,6 +579,8 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
 class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     """Retrieve similarity matches by feature ID."""
 
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
     serializer_class = FeatureSimilaritySerializer
 
     @swagger_auto_schema(
