@@ -335,3 +335,15 @@ class FeatureSimilaritySerializer(serializers.Serializer):
     query_end = serializers.CharField()
     score = serializers.CharField()
     evalue = serializers.CharField()
+
+
+class FeatureExpressionSerializer(serializers.Serializer):
+    """Feature similarity matches serializer."""
+
+    analysis__sourcename = serializers.CharField()
+    normscore = serializers.FloatField()
+    assay_name = serializers.CharField()
+    assay_description = serializers.CharField()
+    biomaterial_name = serializers.CharField()
+    biomaterial_description = serializers.CharField()
+    treatment_name = serializers.CharField()

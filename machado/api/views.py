@@ -22,6 +22,7 @@ from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
 from machado.api.serializers import autocompleteSerializer
+from machado.api.serializers import FeatureExpressionSerializer
 from machado.api.serializers import FeatureIDSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
@@ -383,6 +384,30 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+
+class FeatureExpressionViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature expression."""
+
+    serializer_class = FeatureExpressionSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve expression by feature ID",
+        operation_description="Retrieve expression by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureExpressionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        feature_id = self.kwargs.get("feature_id")
+        feature = Feature.objects.get(feature_id=feature_id)
+        return feature.get_expression_samples()
 
 
 class FeatureSequenceViewSet(viewsets.GenericViewSet):

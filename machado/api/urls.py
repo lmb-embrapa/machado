@@ -49,6 +49,11 @@ router.register(
     views.FeatureProteinMatchesViewSet,
     basename="feature_proteinmatches",
 )
+router.register(
+    r"feature/expression/(?P<feature_id>.+)",
+    views.FeatureExpressionViewSet,
+    basename="feature_ortholog",
+)
 
 router.register(
     r"feature/publication/(?P<feature_id>.+)",
