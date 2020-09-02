@@ -363,13 +363,16 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureOrthologSerializer(queryset, many=True)
-        feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
-        return Response(
-            {
-                "ortholog_group": feature_obj.get_orthologous_group(),
-                "members": serializer.data,
-            }
-        )
+        try:
+            feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
+            return Response(
+                {
+                    "ortholog_group": feature_obj.get_orthologous_group(),
+                    "members": serializer.data,
+                }
+            )
+        except ObjectDoesNotExist:
+            return Response({"coexpression_group": None, "members": list()})
 
     def get_queryset(self):
         """Get queryset."""
@@ -404,13 +407,16 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureCoexpressionSerializer(queryset, many=True)
-        feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
-        return Response(
-            {
-                "coexpression_group": feature_obj.get_coexpression_group(),
-                "members": serializer.data,
-            }
-        )
+        try:
+            feature_obj = Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
+            return Response(
+                {
+                    "coexpression_group": feature_obj.get_coexpression_group(),
+                    "members": serializer.data,
+                }
+            )
+        except ObjectDoesNotExist:
+            return Response({"coexpression_group": None, "members": list()})
 
     def get_queryset(self):
         """Get queryset."""
