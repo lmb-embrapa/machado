@@ -368,3 +368,50 @@ class FeatureExpressionSerializer(serializers.Serializer):
     biomaterial_name = serializers.CharField()
     biomaterial_description = serializers.CharField()
     treatment_name = serializers.CharField()
+
+
+class FeatureInfoSerializer(serializers.ModelSerializer):
+    """Feature info."""
+
+    display = serializers.SerializerMethodField()
+    organism = serializers.SerializerMethodField()
+    relationship = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = (
+            "uniquename",
+            "display",
+            "organism",
+            "relationship",
+            "dbxref",
+        )
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.get_display()
+
+    def get_organism(self, obj):
+        """Get the organism."""
+        return "{} {}".format(obj.organism.genus, obj.organism.species)
+
+    def get_relationship(self, obj):
+        """Get the relationship."""
+        result = list()
+        for relative in obj.get_relationship():
+            result.append(
+                {
+                    "relative_feature_id": relative.feature_id,
+                    "relative_type": relative.type.name,
+                    "relative_uniquename": relative.uniquename,
+                    "relative_display": relative.get_display(),
+                }
+            )
+        return result
+
+    def get_dbxref(self, obj):
+        """Get the dbxrefs."""
+        return obj.get_dbxrefs()

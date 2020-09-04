@@ -25,6 +25,7 @@ from machado.api.serializers import autocompleteSerializer
 from machado.api.serializers import FeatureCoexpressionSerializer
 from machado.api.serializers import FeatureExpressionSerializer
 from machado.api.serializers import FeatureIDSerializer
+from machado.api.serializers import FeatureInfoSerializer
 from machado.api.serializers import FeatureOntologySerializer
 from machado.api.serializers import FeatureOrthologSerializer
 from machado.api.serializers import FeatureProteinMatchesSerializer
@@ -460,6 +461,33 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
         return feature.get_expression_samples()
 
 
+class FeatureInfoViewSet(viewsets.GenericViewSet):
+    """API endpoint for feature info."""
+
+    lookup_field = "feature_id"
+    lookup_value_regex = r"^\d+$"
+    serializer_class = FeatureInfoSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Retrieve general information by feature ID",
+        operation_description="Retrieve general information by feature ID. </br></br> \
+        <b>Example:</b></br> \
+        feature_id=1868558",
+    )
+    def list(self, request, *args, **kwargs):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = FeatureInfoSerializer(queryset, many=False)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        try:
+            return Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
+        except ObjectDoesNotExist:
+            return
+
+
 class FeatureSequenceViewSet(viewsets.GenericViewSet):
     """Retrieve sequence by feature ID."""
 
@@ -476,13 +504,13 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
-        serializer = FeatureSequenceSerializer(queryset, many=True)
+        serializer = FeatureSequenceSerializer(queryset, many=False)
         return Response(serializer.data)
 
     def get_queryset(self):
         """Get queryset."""
         try:
-            return Feature.objects.filter(feature_id=self.kwargs.get("feature_id"))
+            return Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
         except ObjectDoesNotExist:
             return
 

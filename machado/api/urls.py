@@ -59,7 +59,11 @@ router.register(
     views.FeatureCoexpressionViewSet,
     basename="feature_coexpression",
 )
-
+router.register(
+    r"feature/info/(?P<feature_id>\d+)",
+    views.FeatureInfoViewSet,
+    basename="feature_info",
+)
 router.register(
     r"feature/publication/(?P<feature_id>\d+)",
     views.FeaturePublicationViewSet,
