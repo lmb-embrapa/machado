@@ -5,16 +5,16 @@
 # have been included as part of this package for licensing information.
 
 """Decorators."""
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
-
 
 VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 
 
 def get_feature_dbxrefs(self):
-    """Get the display feature dbxrefs."""
+    """Get the feature dbxrefs."""
     result = list()
     for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
         result.append(
@@ -172,6 +172,45 @@ def get_feature_cvterm(self):
     )
 
 
+def get_feature_location(self):
+    """Get the feature location."""
+    result = list()
+    for location in self.Featureloc_feature_Feature.all():
+        jbrowse_url = None
+        if hasattr(settings, "MACHADO_JBROWSE_URL"):
+            if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
+                tracks = settings.MACHADO_JBROWSE_TRACKS
+            else:
+                tracks = "ref_seq,gene,transcripts,CDS"
+            if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
+                offset = settings.MACHADO_JBROWSE_OFFSET
+            else:
+                offset = 1000
+            loc = "{}:{}..{}".format(
+                location.srcfeature.uniquename,
+                location.fmin - offset,
+                location.fmax + offset,
+            )
+            organism = "{} {}".format(
+                location.srcfeature.organism.genus, location.srcfeature.organism.species
+            )
+            jbrowse_url = (
+                "{}/?data=data/{}&loc={}"
+                "&tracklist=0&nav=0&overview=0"
+                "&tracks={}".format(settings.MACHADO_JBROWSE_URL, organism, loc, tracks)
+            )
+        result.append(
+            {
+                "start": location.fmin,
+                "end": location.fmax,
+                "strand": location.strand,
+                "ref": location.srcfeature.uniquename,
+                "jbrowse_url": jbrowse_url,
+            }
+        )
+    return result
+
+
 def machadoFeatureMethods():
     """Add methods to machado.models.Feature."""
 
@@ -186,6 +225,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_expression_samples", get_feature_expression_samples)
         setattr(cls, "get_relationship", get_feature_relationship)
         setattr(cls, "get_cvterm", get_feature_cvterm)
+        setattr(cls, "get_location", get_feature_location)
         return cls
 
     return wrapper

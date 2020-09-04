@@ -43,7 +43,7 @@
   </div>
   {% endif %}
 
-  {% if data.location %}
+  {% if feature.get_location %}
   <div class="card m-1">
     <div class="card-header">
         <h4 class="card-title">
@@ -52,7 +52,7 @@
     </div>
     <div class="card-body">
       <div class="card-text">
-        {% for location in data.location %}
+        {% for location in feature.get_location %}
         <p>{{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}</p>
           {% if location.jbrowse_url %}
             <iframe style='border:0' width='100%' height='300' src="{{ location.jbrowse_url }}"></iframe>
