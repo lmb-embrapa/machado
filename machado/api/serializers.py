@@ -430,3 +430,13 @@ class FeatureInfoSerializer(serializers.ModelSerializer):
     def get_note(self, obj):
         """Get the note."""
         return obj.get_note()
+
+
+class FeatureLocationSerializer(serializers.Serializer):
+    """Feature location serializer."""
+
+    start = serializers.IntegerField()
+    end = serializers.IntegerField()
+    strand = serializers.IntegerField()
+    ref = serializers.CharField()
+    jbrowse_url = serializers.CharField()

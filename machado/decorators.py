@@ -186,28 +186,32 @@ def get_feature_location(self):
                 offset = settings.MACHADO_JBROWSE_OFFSET
             else:
                 offset = 1000
-            loc = "{}:{}..{}".format(
-                location.srcfeature.uniquename,
-                location.fmin - offset,
-                location.fmax + offset,
-            )
-            organism = "{} {}".format(
-                location.srcfeature.organism.genus, location.srcfeature.organism.species
-            )
-            jbrowse_url = (
-                "{}/?data=data/{}&loc={}"
-                "&tracklist=0&nav=0&overview=0"
-                "&tracks={}".format(settings.MACHADO_JBROWSE_URL, organism, loc, tracks)
-            )
-        result.append(
-            {
-                "start": location.fmin,
-                "end": location.fmax,
-                "strand": location.strand,
-                "ref": location.srcfeature.uniquename,
-                "jbrowse_url": jbrowse_url,
-            }
-        )
+            if location.srcfeature is not None:
+                loc = "{}:{}..{}".format(
+                    location.srcfeature.uniquename,
+                    location.fmin - offset,
+                    location.fmax + offset,
+                )
+                organism = "{} {}".format(
+                    location.srcfeature.organism.genus,
+                    location.srcfeature.organism.species,
+                )
+                jbrowse_url = (
+                    "{}/?data=data/{}&loc={}"
+                    "&tracklist=0&nav=0&overview=0"
+                    "&tracks={}".format(
+                        settings.MACHADO_JBROWSE_URL, organism, loc, tracks
+                    )
+                )
+                result.append(
+                    {
+                        "start": location.fmin,
+                        "end": location.fmax,
+                        "strand": location.strand,
+                        "ref": location.srcfeature.uniquename,
+                        "jbrowse_url": jbrowse_url,
+                    }
+                )
     return result
 
 

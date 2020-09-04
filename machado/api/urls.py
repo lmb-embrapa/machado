@@ -65,6 +65,11 @@ router.register(
     basename="feature_info",
 )
 router.register(
+    r"feature/location/(?P<feature_id>\d+)",
+    views.FeatureLocationViewSet,
+    basename="feature_location",
+)
+router.register(
     r"feature/publication/(?P<feature_id>\d+)",
     views.FeaturePublicationViewSet,
     basename="feature_publication",
