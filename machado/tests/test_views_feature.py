@@ -343,28 +343,6 @@ class FeatureTest(TestCase):
             value="coexpgroup1",
         )
 
-    def test_retrieve_feature_location(self):
-        """Tests - retrieve_feature_location."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
-        result = fv.retrieve_feature_location(
-            feature_id=f.feature_id, organism="Mus musculus"
-        )
-        self.assertEqual(1, result[0]["start"])
-        self.assertEqual(1000, result[0]["end"])
-        self.assertEqual(1, result[0]["strand"])
-        self.assertEqual("chr1", result[0]["ref"])
-
-    def test_retrieve_feature_data(self):
-        """Tests - retrieve_feature_data."""
-        fv = feature.FeatureView()
-        f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
-        result = fv.retrieve_feature_data(feature_obj=f)
-        self.assertEquals(1, result["location"][0]["start"])
-
-        f = Feature.objects.get(uniquename="feat1", type__name="polypeptide")
-        result = fv.retrieve_feature_data(feature_obj=f)
-
     def test_get(self):
         """Tests - get."""
         f = Feature.objects.get(uniquename="feat1", type__name="mRNA")
