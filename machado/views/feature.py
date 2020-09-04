@@ -6,9 +6,8 @@
 
 """feature views."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.views import View
