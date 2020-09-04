@@ -368,3 +368,75 @@ class FeatureExpressionSerializer(serializers.Serializer):
     biomaterial_name = serializers.CharField()
     biomaterial_description = serializers.CharField()
     treatment_name = serializers.CharField()
+
+
+class FeatureInfoSerializer(serializers.ModelSerializer):
+    """Feature info serializer."""
+
+    display = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    note = serializers.SerializerMethodField()
+    organism = serializers.SerializerMethodField()
+    relationship = serializers.SerializerMethodField()
+    dbxref = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Feature
+        fields = (
+            "uniquename",
+            "display",
+            "product",
+            "note",
+            "organism",
+            "relationship",
+            "dbxref",
+        )
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.get_display()
+
+    def get_organism(self, obj):
+        """Get the organism."""
+        return "{} {}".format(obj.organism.genus, obj.organism.species)
+
+    def get_relationship(self, obj):
+        """Get the relationship."""
+        result = list()
+        try:
+            for relative in obj.get_relationship():
+                result.append(
+                    {
+                        "relative_feature_id": relative.feature_id,
+                        "relative_type": relative.type.name,
+                        "relative_uniquename": relative.uniquename,
+                        "relative_display": relative.get_display(),
+                    }
+                )
+        except TypeError:
+            pass
+        return result
+
+    def get_dbxref(self, obj):
+        """Get the dbxrefs."""
+        return obj.get_dbxrefs()
+
+    def get_product(self, obj):
+        """Get the product."""
+        return obj.get_product()
+
+    def get_note(self, obj):
+        """Get the note."""
+        return obj.get_note()
+
+
+class FeatureLocationSerializer(serializers.Serializer):
+    """Feature location serializer."""
+
+    start = serializers.IntegerField()
+    end = serializers.IntegerField()
+    strand = serializers.IntegerField()
+    ref = serializers.CharField()
+    jbrowse_url = serializers.CharField()

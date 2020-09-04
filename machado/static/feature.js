@@ -220,9 +220,7 @@ function loadSequence(){
             $("#collapseSeq .card-text small").html("<small>LOADING...</small>");
           }, 
           success: function(data) {
-            for (i=0; i<data.length; i++) {
-              $("#collapseSeq .card-text small").text(data[i].sequence);
-            }
+            $("#collapseSeq .card-text small").text(data.sequence);
           }
       });    
     }
