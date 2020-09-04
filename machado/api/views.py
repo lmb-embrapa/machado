@@ -500,8 +500,8 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
     serializer_class = FeatureLocationSerializer
 
     @swagger_auto_schema(
-        operation_summary="Retrieve sequence by feature ID",
-        operation_description="Retrieve sequence by feature ID. </br></br> \
+        operation_summary="Retrieve location by feature ID",
+        operation_description="Retrieve location by feature ID. </br></br> \
         <b>Example:</b></br> \
         feature_id=1868558",
     )
