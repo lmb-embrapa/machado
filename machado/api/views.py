@@ -481,7 +481,7 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
-        serializer = FeatureInfoSerializer(queryset, many=True)
+        serializer = FeatureInfoSerializer(queryset, many=False)
         return Response(serializer.data)
 
     def get_queryset(self):
