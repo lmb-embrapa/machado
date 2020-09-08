@@ -79,9 +79,14 @@ There must be a symlink of your config file in the sites-enabled directory
 
     ALLOWED_HOSTS = ['*']
     MACHADO_URL = 'http://localhost/YOURPROJECT'
+
+    MACHADO_EXAMPLE_TXT = "kinase"
+    MACHADO_EXAMPLE_AA_ACC = "AT1G01030.1"
+    MACHADO_EXAMPLE_AA = 1869098
+    MACHADO_EXAMPLE_NA = 1869093
+
     STATIC_URL = '/YOURPROJECT/static/'
     STATIC_ROOT = '/var/www/YOURPROJECT/WEBPROJECT/static'
-
 
 Now, run collectstatic to gather the static files from all libraries to STATIC_ROOT.
 

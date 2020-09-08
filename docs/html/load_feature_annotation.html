@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -145,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li><span class="section-number">2.7. </span>Loading Feature Additional Info</li>
+      <li>2.7. Loading Feature Additional Info</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,11 +167,11 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-feature-additional-info">
-<h1><span class="section-number">2.7. </span>Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Permalink to this headline">¶</a></h1>
+<h1>2.7. Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Permalink to this headline">¶</a></h1>
 <p>Please notice the features must be loaded in advance.
 If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="section" id="load-annotation">
-<h2><span class="section-number">2.7.1. </span>Load Annotation<a class="headerlink" href="#load-annotation" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.1. Load Annotation<a class="headerlink" href="#load-annotation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display
 </pre></div>
 </div>
@@ -181,7 +181,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_annotation --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
@@ -204,14 +204,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-annotation">
-<h2><span class="section-number">2.7.2. </span>Remove Annotation<a class="headerlink" href="#remove-annotation" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.2. Remove Annotation<a class="headerlink" href="#remove-annotation" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature annotation you should use the command <em>remove_feature_annotation</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
 </div>
 <div class="section" id="load-sequence">
-<h2><span class="section-number">2.7.3. </span>Load Sequence<a class="headerlink" href="#load-sequence" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.3. Load Sequence<a class="headerlink" href="#load-sequence" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_sequence --file Athaliana_transcripts.fasta --soterm mRNA
 </pre></div>
 </div>
@@ -221,7 +221,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_sequence --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 86%" />
@@ -241,7 +241,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-sequence">
-<h2><span class="section-number">2.7.4. </span>Remove Sequence<a class="headerlink" href="#remove-sequence" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.4. Remove Sequence<a class="headerlink" href="#remove-sequence" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature sequence you should use the command <em>load_feature_sequence</em> itself and provide a FASTA file with no sequence. For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;chr1
 
@@ -250,7 +250,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </div>
 </div>
 <div class="section" id="load-publication">
-<h2><span class="section-number">2.7.5. </span>Load Publication<a class="headerlink" href="#load-publication" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.5. Load Publication<a class="headerlink" href="#load-publication" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_publication --file feature_publication.tab
 </pre></div>
 </div>
@@ -260,7 +260,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_publication --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
@@ -277,14 +277,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-publication">
-<h2><span class="section-number">2.7.6. </span>Remove Publication<a class="headerlink" href="#remove-publication" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.6. Remove Publication<a class="headerlink" href="#remove-publication" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature publication attribution, you should use the command <em>remove_publication</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_publication --help
 </pre></div>
 </div>
 </div>
 <div class="section" id="load-dbxref">
-<h2><span class="section-number">2.7.7. </span>Load DBxRef<a class="headerlink" href="#load-dbxref" title="Permalink to this headline">¶</a></h2>
+<h2>2.7.7. Load DBxRef<a class="headerlink" href="#load-dbxref" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_dbxrefs --file feature_dbxrefs.tab --soterm mRNA
 </pre></div>
 </div>
@@ -294,7 +294,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_dbxrefs --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
