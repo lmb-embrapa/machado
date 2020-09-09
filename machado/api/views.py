@@ -333,8 +333,10 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve feature ID by accession"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC"):
-        operation_description += "<b>Example:</b><br />accession={}, soType=polypeptide".format(
-            settings.MACHADO_EXAMPLE_AA_ACC
+        operation_description += (
+            "<b>Example:</b><br />accession={}, soType=polypeptide".format(
+                settings.MACHADO_EXAMPLE_AA_ACC
+            )
         )
 
     @swagger_auto_schema(
