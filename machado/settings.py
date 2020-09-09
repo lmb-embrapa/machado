@@ -36,7 +36,6 @@ def patch_swagger_settings():
     settings.SWAGGER_SETTINGS = {
         "USE_SESSION_AUTH": False,
         "DEFAULT_MODEL_DEPTH": 0,
-        "SECURITY_DEFINITIONS": False,
     }
 
 
