@@ -270,7 +270,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
     operation_summary = "Search the ElasticSearch index for matching strings"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_TXT"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_TXT
         )
 
@@ -371,7 +371,7 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve ortholog group by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_AA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_AA
         )
 
@@ -419,7 +419,7 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve co-expression group by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -467,7 +467,7 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve expression by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -500,7 +500,7 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve general information by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -531,7 +531,7 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve location by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -564,7 +564,7 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve sequence by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -595,7 +595,7 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve publication by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_NA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_NA
         )
 
@@ -628,7 +628,7 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve ontology terms by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_AA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_AA
         )
 
@@ -661,7 +661,7 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve protein matches by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_AA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_AA
         )
 
@@ -696,7 +696,7 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     operation_summary = "Retrieve similarity matches by feature ID"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_AA"):
-        operation_description += "<b>Example:</b><br />q={}".format(
+        operation_description += "<b>Example:</b><br />feature_id={}".format(
             settings.MACHADO_EXAMPLE_AA
         )
 
