@@ -6,6 +6,7 @@
 
 """Views."""
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 from drf_yasg import openapi
@@ -266,11 +267,17 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         type=openapi.TYPE_STRING,
     )
 
+    operation_summary = "Search the ElasticSearch index for matching strings"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_TXT"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_TXT
+        )
+
     @swagger_auto_schema(
         manual_parameters=[q_param],
-        operation_summary="Search the ElasticSearch index for matching strings",
-        operation_description="Search the ElasticSearch index for matching strings.</br></br>\
-        <b>Example:</b></br>q=kinase",
+        operation_summary=operation_summary,
+        operation_description=operation_description,
     )
     def list(self, request):
         """Search the ElasticSearch index for matching strings."""
@@ -323,18 +330,24 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         type=openapi.TYPE_STRING,
     )
 
+    operation_summary = "Retrieve feature ID by accession"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC"):
+        operation_description += (
+            "<b>Example:</b><br />accession={}, soType=polypeptide".format(
+                settings.MACHADO_EXAMPLE_AA_ACC
+            )
+        )
+
     @swagger_auto_schema(
         manual_parameters=[accession_param, sotype_param],
-        operation_summary="Retrieve feature ID by accession",
-        operation_description="Retrieve feature ID by accession. </br></br> \
-        <b>Example:</b></br> \
-        accession=Athaliana_ChrM, soType=chromosome</br> \
-        accession=AT1G01010.1, soType=mRNA",
+        operation_summary=operation_summary,
+        operation_description=operation_description,
     )
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
-        serializer = FeatureIDSerializer(queryset, many=True)
+        serializer = FeatureIDSerializer(queryset, many=False)
         return Response(serializer.data)
 
     def get_queryset(self):
@@ -343,7 +356,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         soterm = self.request.query_params.get("soType")
         try:
             feature_id = retrieve_feature_id(accession, soterm)
-            return [{"feature_id": feature_id}]
+            return {"feature_id": feature_id}
         except ObjectDoesNotExist:
             return None
 
@@ -355,11 +368,15 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureOrthologSerializer
 
+    operation_summary = "Retrieve ortholog group by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_AA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_AA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve ortholog group by feature ID",
-        operation_description="Retrieve ortholog group by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868701",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -399,11 +416,15 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureOrthologSerializer
 
+    operation_summary = "Retrieve co-expression group by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve co-expression group by feature ID",
-        operation_description="Retrieve co-expression group by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -443,11 +464,15 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureExpressionSerializer
 
+    operation_summary = "Retrieve expression by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve expression by feature ID",
-        operation_description="Retrieve expression by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -472,11 +497,15 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureInfoSerializer
 
+    operation_summary = "Retrieve general information by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve general information by feature ID",
-        operation_description="Retrieve general information by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -499,11 +528,15 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureLocationSerializer
 
+    operation_summary = "Retrieve location by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve location by feature ID",
-        operation_description="Retrieve location by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -528,11 +561,15 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureSequenceSerializer
 
+    operation_summary = "Retrieve sequence by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve sequence by feature ID",
-        operation_description="Retrieve sequence by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -555,11 +592,15 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeaturePublicationSerializer
 
+    operation_summary = "Retrieve publication by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_NA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_NA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve publication by feature ID",
-        operation_description="Retrieve publication by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868558",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -584,11 +625,15 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureOntologySerializer
 
+    operation_summary = "Retrieve ontology terms by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_AA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_AA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve ontology terms by feature ID",
-        operation_description="Retrieve ontology terms by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868566",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -613,11 +658,15 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureProteinMatchesSerializer
 
+    operation_summary = "Retrieve protein matches by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_AA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_AA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve protein matches by feature ID",
-        operation_description="Retrieve protein matches by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868566",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""
@@ -644,11 +693,15 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     lookup_value_regex = r"^\d+$"
     serializer_class = FeatureSimilaritySerializer
 
+    operation_summary = "Retrieve similarity matches by feature ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_AA"):
+        operation_description += "<b>Example:</b><br />q={}".format(
+            settings.MACHADO_EXAMPLE_AA
+        )
+
     @swagger_auto_schema(
-        operation_summary="Retrieve similarity matches by feature ID",
-        operation_description="Retrieve similarity matches by feature ID. </br></br> \
-        <b>Example:</b></br> \
-        feature_id=1868566",
+        operation_summary=operation_summary, operation_description=operation_description
     )
     def list(self, request, *args, **kwargs):
         """List."""

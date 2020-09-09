@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -145,9 +145,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
+          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
         
-      <li><span class="section-number">2.9. </span>Loading InterproScan results</li>
+      <li>2.9. Loading InterproScan results</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,11 +167,11 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-interproscan-results">
-<h1><span class="section-number">2.9. </span>Loading InterproScan results<a class="headerlink" href="#loading-interproscan-results" title="Permalink to this headline">¶</a></h1>
+<h1>2.9. Loading InterproScan results<a class="headerlink" href="#loading-interproscan-results" title="Permalink to this headline">¶</a></h1>
 <p>In order to load an InterproScan results file, both the query and the subject records must be previously stored.
 The current version was tested for loading InterproScan analysis on <strong>proteins</strong>.</p>
 <div class="section" id="load-interproscan-subject-records">
-<h2><span class="section-number">2.9.1. </span>Load InterproScan subject records<a class="headerlink" href="#load-interproscan-subject-records" title="Permalink to this headline">¶</a></h2>
+<h2>2.9.1. Load InterproScan subject records<a class="headerlink" href="#load-interproscan-subject-records" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity_matches --file interproscan_result.xml --format interproscan-xml
 </pre></div>
 </div>
@@ -180,7 +180,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 </ul>
 </div>
 <div class="section" id="load-interproscan-similarity">
-<h2><span class="section-number">2.9.2. </span>Load InterproScan similarity<a class="headerlink" href="#load-interproscan-similarity" title="Permalink to this headline">¶</a></h2>
+<h2>2.9.2. Load InterproScan similarity<a class="headerlink" href="#load-interproscan-similarity" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --file interproscan_result.xml --format interproscan-xml --so_query polypeptide --so_subject protein_match --program interproscan --programversion <span class="m">5</span> --organism_query <span class="s1">&#39;Oryza sativa&#39;</span> --organism_subject <span class="s1">&#39;multispecies multispecies&#39;</span>
 </pre></div>
 </div>
@@ -190,7 +190,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_similarity --help
 </pre></div>
 </div>
-<table class="docutils align-default">
+<table class="docutils align-center">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 86%" />
@@ -237,7 +237,7 @@ The current version was tested for loading InterproScan analysis on <strong>prot
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-file">
-<h2><span class="section-number">2.9.3. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.9.3. Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove an InterproScan result set you should use the command <em>remove_analysis</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_analysis --help
 </pre></div>
