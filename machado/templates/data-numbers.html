@@ -11,7 +11,7 @@
 {% for item, data in context.items %}
     <div class="card m-1">
         <div class="card-header">
-            <h4 class="card-title"><a href="{% url 'feature_search' %}?q=&selected_facets=organism:{{ item }}">{{ item }}</a></h4>
+            <h4 class="card-title"><i><a href="{% url 'feature_search' %}?q=&selected_facets=organism:{{ item }}">{{ item }}</a></i></h4>
         </div>
         <div class="card-body">
             <div class="row">
