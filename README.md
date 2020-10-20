@@ -3,15 +3,16 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4035/badge)](https://bestpractices.coreinfrastructure.org/projects/4035)
 
-# machado
+# Machado
 
-machado is a Django application that contains tools to interact with a Chado database.
+Machado is a Django application that contains tools to interact with a Chado database.
 It provides users with a framework to store, search and visualize biological data.
 Detailed documentation can be found in the **docs** directory ([Read the docs](http://machado.readthedocs.io)).
 
+
 ## Features
 - There are data loaders for the major bioinformatics formats: fasta, gff, obo, bibtex, blast, interproscan, orthomcl
-- The machado API delivers data directly to the JBrowse genome browser
+- The Machado API delivers data directly to the JBrowse genome browser
 - The Haystack framework provides a very fast query interface using the Elasticsearch engine
 
 ## Installation
@@ -27,16 +28,16 @@ You can build your Machado instance using Docker: https://github.com/lmb-embrapa
 
 ## Contributing
 
-machado is run by volunteers and we are always looking for people interested in helping with code development, documentation writing, and bug report.
+Machado is run by volunteers and we are always looking for people interested in helping with code development, documentation writing, and bug report.
 
 If you wish to contribute, please create an issue.
 
-## LICENSE
+## License
 
-machado - A Django implementation of Chado's schema.
+Machado - A Django implementation of Chado's schema.
 Copyright (C) 2018 Embrapa
 
-machado is free software: you can redistribute it and/or modify
+Machado is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
@@ -64,4 +65,12 @@ See LICENSE.txt for complete gpl-3.0 license.
 [travis]: https://travis-ci.org/lmb-embrapa/machado
 [cov-status-image]: https://img.shields.io/codecov/c/github/lmb-embrapa/machado/master.svg
 [codecov]: https://codecov.io/gh/lmb-embrapa/machado
+
+## Please cite
+
+**Machado: Open source genomics data integration framework.**<br/>
+Mauricio de Alvarenga Mudadu, Adhemar Zerlotini <br/>
+[GigaScience, Volume 9, Issue 9, September 2020, giaa097](https://academic.oup.com/gigascience/article-abstract/doi/10.1093/gigascience/giaa097/5905760) <br/>
+[![doi](http://img.shields.io/badge/doi-10.1093%2Fgigascience%2Fgiaa097-blue.svg?style=flat)](https://doi.org/10.1093/gigascience/giaa097) 
+[![pubmed](http://img.shields.io/badge/pubmed-32930331-blue.svg?style=flat)](https://pubmed.ncbi.nlm.nih.gov/32930331)
 
