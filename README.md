@@ -69,7 +69,6 @@ See LICENSE.txt for complete gpl-3.0 license.
 ## Please cite
 
 **Machado: Open source genomics data integration framework.**<br/>
-Mauricio de Alvarenga Mudadu, Adhemar Zerlotini <br/>
 [GigaScience, Volume 9, Issue 9, September 2020, giaa097](https://academic.oup.com/gigascience/article-abstract/doi/10.1093/gigascience/giaa097/5905760) <br/>
 [![doi](http://img.shields.io/badge/doi-10.1093%2Fgigascience%2Fgiaa097-blue.svg?style=flat)](https://doi.org/10.1093/gigascience/giaa097) 
 [![pubmed](http://img.shields.io/badge/pubmed-32930331-blue.svg?style=flat)](https://pubmed.ncbi.nlm.nih.gov/32930331)
