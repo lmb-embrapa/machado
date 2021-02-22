@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>3.3. JBrowse (optional) &mdash; machado 0.1.0 documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3.4. Cache (optional)" href="cache.html" />
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,6 +101,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -131,20 +136,22 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="visualization.html">3. Visualization</a> &raquo;</li>
+          <li><a href="visualization.html"><span class="section-number">3. </span>Visualization</a> &raquo;</li>
         
-      <li>3.3. JBrowse (optional)</li>
+      <li><span class="section-number">3.3. </span>JBrowse (optional)</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/jbrowse.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -159,15 +166,15 @@
            <div itemprop="articleBody">
             
   <div class="section" id="jbrowse-optional">
-<h1>3.3. JBrowse (optional)<a class="headerlink" href="#jbrowse-optional" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">3.3. </span>JBrowse (optional)<a class="headerlink" href="#jbrowse-optional" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference external" href="https://jbrowse.org">JBrowse</a> software renders genomic tracks from Chado using the <em>machado</em> API.</p>
 <p><strong>JBrowse</strong></p>
-<p>Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 18.04):</p>
+<p>Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 20.04):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install bioperl
 </pre></div>
 </div>
 <p>Then install JBrowse following the <a class="reference external" href="https://jbrowse.org/docs/installation.html">official instructions</a>:</p>
-<p>In Ubuntu 18.04:</p>
+<p>In Ubuntu 20.04:</p>
 <p>Install some prerequisites:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install build-essential zlib1g-dev curl
@@ -175,14 +182,14 @@
 </div>
 </div></blockquote>
 <p>Also <em>Node.js</em> is needed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -sL https://deb.nodesource.com/setup_11.x <span class="p">|</span> sudo -E bash -
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -sL https://deb.nodesource.com/setup_12.x <span class="p">|</span> sudo -E bash -
 sudo apt-get install -y nodejs
 </pre></div>
 </div>
 <p>Finally, proceed with JBrowse installation</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
-unzip JBrowse-1.16.2.zip
-sudo mv JBrowse-1.16.2 /var/www/html/jbrowse
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/GMOD/jbrowse/releases/download/1.16.9-release/JBrowse-1.16.9.zip
+unzip JBrowse-1.16.9.zip
+sudo mv JBrowse-1.16.9 /var/www/html/jbrowse
 <span class="nb">cd</span> /var/www/html
 sudo chown <span class="sb">`</span>whoami<span class="sb">`</span> jbrowse
 <span class="nb">cd</span> jbrowse
@@ -212,7 +219,7 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </div>
 <p>Once the server is running, just go to your browser and open your JBrowse instance (e.g.: <a class="reference external" href="http://localhost/jbrowse/?data=data/Arabidopsis thaliana">http://localhost/jbrowse/?data=data/Arabidopsis thaliana</a> ).</p>
 <p><strong>machado</strong></p>
-<p>The settings.py file should contain these variables</p>
+<p>The settings.py file should contain these variables in order to have the jbrowse visualization embedded to the feature page. Don’t forget to restart apache to make the settings changes up to date.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_JBROWSE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://localhost/jbrowse&#39;</span>
 
 <span class="nv">MACHADO_JBROWSE_TRACKS</span> <span class="o">=</span> <span class="s1">&#39;ref_seq,gene,transcripts,CDS,SNV&#39;</span>
@@ -223,8 +230,8 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 <p>MACHADO_JBROWSE_URL: the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)</p>
 <p>MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed (‘ref_seq,gene,transcripts,CDS,SNV’ if not set).</p>
 <p>MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).</p>
-<div class="section" id="use-reference-from-fasta-file">
-<h2>3.3.1. Use reference from FASTA file<a class="headerlink" href="#use-reference-from-fasta-file" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-reference-from-fasta-file-optional">
+<h2><span class="section-number">3.3.1. </span>Use reference from FASTA file (optional)<a class="headerlink" href="#use-reference-from-fasta-file-optional" title="Permalink to this headline">¶</a></h2>
 <p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences <a class="reference external" href="https://jbrowse.org/docs/tutorial.html">https://jbrowse.org/docs/tutorial.html</a>.</p>
 <p>Follow the steps below.</p>
 <p>Put the genome’s assembly fasta file into your jbrowse organism’s ‘data/seq’ directory (for example: /var/www/html/jbrowse/data/’Glycine max’/data/seq/Gmax.fa), change to this directory, and run the command:</p>
@@ -268,29 +275,29 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="cache.html" class="btn btn-neutral float-right" title="3.4. Cache (optional)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="webserver.html" class="btn btn-neutral float-left" title="3.2. Web server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="cache.html" class="btn btn-neutral float-right" title="3.4. Cache (optional)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="webserver.html" class="btn btn-neutral float-left" title="3.2. Web server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa
+        &#169; Copyright 2018, Embrapa.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -298,7 +305,6 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

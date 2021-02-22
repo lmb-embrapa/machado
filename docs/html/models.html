@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>5. Models &mdash; machado 0.1.0 documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="4. Diagrams" href="diagrams.html" /> 
@@ -72,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -90,6 +94,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -124,18 +129,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>5. Models</li>
+      <li><span class="section-number">5. </span>Models</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/models.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -150,10 +157,10 @@
            <div itemprop="articleBody">
             
   <div class="section" id="models">
-<h1>5. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">5. </span>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
 <p>This document describes how the <a class="reference external" href="https://www.djangoproject.com">Django</a> models.py file for the <a class="reference external" href="http://gmod.org/wiki/Chado_-_Getting_Started">Chado</a> schema was created. You <strong>don’t need</strong> to create it again since <em>machado</em> already contains a copy of this file.</p>
 <div class="section" id="prerequisite">
-<h2>5.1. Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">5.1. </span>Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
 <p>The list bellow contains the softwares and versions required by <em>machado</em>.</p>
 <p><strong>PostgreSQL 9.5</strong></p>
 <p>Install PostgreSQL and create a database and user for loading the Chado schema.
@@ -183,7 +190,7 @@ python src/machado/setup.py install
 </div>
 </div>
 <div class="section" id="the-django-project">
-<h2>5.2. The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">5.2. </span>The Django project<a class="headerlink" href="#the-django-project" title="Permalink to this headline">¶</a></h2>
 <p>Inside YOURPROJECT directory create a Django project with the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin startproject WEBPROJECT
 <span class="nb">cd</span> WEBPROJECT
@@ -204,7 +211,7 @@ python src/machado/setup.py install
 </div>
 </div>
 <div class="section" id="the-model">
-<h2>5.3. The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">5.3. </span>The model<a class="headerlink" href="#the-model" title="Permalink to this headline">¶</a></h2>
 <p>Django has a command to generate a Models file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">inspectdb</span> <span class="o">&gt;</span> <span class="n">unsortedmodels</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
@@ -216,7 +223,7 @@ python src/machado/setup.py install
 <p>The resulting files, models.py and admin.py, are ready.</p>
 </div>
 <div class="section" id="references">
-<h2>5.4. References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">5.4. </span>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://gmod.org/wiki/Chado_Django_HOWTO">http://gmod.org/wiki/Chado_Django_HOWTO</a></p></li>
 </ul>
@@ -228,27 +235,28 @@ python src/machado/setup.py install
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="diagrams.html" class="btn btn-neutral float-left" title="4. Diagrams" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="diagrams.html" class="btn btn-neutral float-left" title="4. Diagrams" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa
+        &#169; Copyright 2018, Embrapa.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -256,7 +264,6 @@ python src/machado/setup.py install
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

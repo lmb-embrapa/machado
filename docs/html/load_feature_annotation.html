@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>2.7. Loading Feature Additional Info &mdash; machado 0.1.0 documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2.8. Loading Blast results" href="load_blast.html" />
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -105,6 +109,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -139,20 +144,22 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="dataload.html">2. Data loading</a> &raquo;</li>
+          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
         
-      <li>2.7. Loading Feature Additional Info</li>
+      <li><span class="section-number">2.7. </span>Loading Feature Additional Info</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/load_feature_annotation.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -167,11 +174,11 @@
            <div itemprop="articleBody">
             
   <div class="section" id="loading-feature-additional-info">
-<h1>2.7. Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2.7. </span>Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Permalink to this headline">¶</a></h1>
 <p>Please notice the features must be loaded in advance.
 If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="section" id="load-annotation">
-<h2>2.7.1. Load Annotation<a class="headerlink" href="#load-annotation" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.1. </span>Load Annotation<a class="headerlink" href="#load-annotation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display
 </pre></div>
 </div>
@@ -181,7 +188,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_annotation --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
@@ -204,14 +211,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-annotation">
-<h2>2.7.2. Remove Annotation<a class="headerlink" href="#remove-annotation" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.2. </span>Remove Annotation<a class="headerlink" href="#remove-annotation" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature annotation you should use the command <em>remove_feature_annotation</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
 </pre></div>
 </div>
 </div>
 <div class="section" id="load-sequence">
-<h2>2.7.3. Load Sequence<a class="headerlink" href="#load-sequence" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.3. </span>Load Sequence<a class="headerlink" href="#load-sequence" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_sequence --file Athaliana_transcripts.fasta --soterm mRNA
 </pre></div>
 </div>
@@ -221,7 +228,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_sequence --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 86%" />
@@ -241,7 +248,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-sequence">
-<h2>2.7.4. Remove Sequence<a class="headerlink" href="#remove-sequence" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.4. </span>Remove Sequence<a class="headerlink" href="#remove-sequence" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature sequence you should use the command <em>load_feature_sequence</em> itself and provide a FASTA file with no sequence. For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;chr1
 
@@ -250,7 +257,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </div>
 </div>
 <div class="section" id="load-publication">
-<h2>2.7.5. Load Publication<a class="headerlink" href="#load-publication" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.5. </span>Load Publication<a class="headerlink" href="#load-publication" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_publication --file feature_publication.tab
 </pre></div>
 </div>
@@ -260,7 +267,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_publication --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
@@ -277,14 +284,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </div>
 <div class="section" id="remove-publication">
-<h2>2.7.6. Remove Publication<a class="headerlink" href="#remove-publication" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.6. </span>Remove Publication<a class="headerlink" href="#remove-publication" title="Permalink to this headline">¶</a></h2>
 <p>If, by any reason, you need to remove a feature publication attribution, you should use the command <em>remove_publication</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_publication --help
 </pre></div>
 </div>
 </div>
 <div class="section" id="load-dbxref">
-<h2>2.7.7. Load DBxRef<a class="headerlink" href="#load-dbxref" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.7.7. </span>Load DBxRef<a class="headerlink" href="#load-dbxref" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_dbxrefs --file feature_dbxrefs.tab --soterm mRNA
 </pre></div>
 </div>
@@ -294,7 +301,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_feature_dbxrefs --help
 </pre></div>
 </div>
-<table class="docutils align-center">
+<table class="docutils align-default">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 87%" />
@@ -320,29 +327,29 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="load_blast.html" class="btn btn-neutral float-right" title="2.8. Loading Blast results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="load_gff.html" class="btn btn-neutral float-left" title="2.6. Loading GFF files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="load_blast.html" class="btn btn-neutral float-right" title="2.8. Loading Blast results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="load_gff.html" class="btn btn-neutral float-left" title="2.6. Loading GFF files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Embrapa
+        &#169; Copyright 2018, Embrapa.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -350,7 +357,6 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

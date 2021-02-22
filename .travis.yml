@@ -16,7 +16,6 @@ jobs:
       python: "3.7"
     - dist: xenial
       python: "3.8"
-    - dist: 
 
 services:
   - postgresql

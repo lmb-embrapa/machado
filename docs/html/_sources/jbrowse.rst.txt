@@ -7,7 +7,7 @@ The `JBrowse <https://jbrowse.org>`_ software renders genomic tracks from Chado 
 
 **JBrowse**
 
-Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 18.04):
+Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 20.04):
 
 .. code-block:: bash
 
@@ -15,7 +15,7 @@ Before installing Jbrowse you should probably have Bioperl installed in your sys
 
 Then install JBrowse following the `official instructions <https://jbrowse.org/docs/installation.html>`_:
 
-In Ubuntu 18.04:
+In Ubuntu 20.04:
 
 Install some prerequisites:
 
@@ -27,16 +27,16 @@ Also *Node.js* is needed:
 
 .. code-block:: bash
 
-    curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
     sudo apt-get install -y nodejs
 
 Finally, proceed with JBrowse installation
 
 .. code-block:: bash
 
-   wget https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
-   unzip JBrowse-1.16.2.zip
-   sudo mv JBrowse-1.16.2 /var/www/html/jbrowse
+   wget https://github.com/GMOD/jbrowse/releases/download/1.16.9-release/JBrowse-1.16.9.zip
+   unzip JBrowse-1.16.9.zip
+   sudo mv JBrowse-1.16.9 /var/www/html/jbrowse
    cd /var/www/html
    sudo chown `whoami` jbrowse
    cd jbrowse
@@ -79,7 +79,7 @@ Once the server is running, just go to your browser and open your JBrowse instan
 
 **machado**
 
-The settings.py file should contain these variables
+The settings.py file should contain these variables in order to have the jbrowse visualization embedded to the feature page. Don't forget to restart apache to make the settings changes up to date.
 
 .. code-block:: bash
 
@@ -95,8 +95,8 @@ MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed ('ref_seq,gene,tr
 
 MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).
 
-Use reference from FASTA file
------------------------------
+Use reference from FASTA file (optional)
+----------------------------------------
 
 If the reference sequences are really long (>200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences `<https://jbrowse.org/docs/tutorial.html>`_.
 
