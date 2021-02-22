@@ -8,7 +8,6 @@
 
 from datetime import datetime
 
-from Bio.Alphabet import generic_protein
 from Bio.SearchIO._model import QueryResult, Hit, HSP, HSPFragment
 from django.core.management import call_command
 from django.test import TestCase
@@ -254,7 +253,6 @@ class SimilarityTest(TestCase):
         )
 
         test_HSPFragment1 = HSPFragment("feat1", "feat2")
-        setattr(test_HSPFragment1, "alphabet", generic_protein)
         setattr(test_HSPFragment1, "query_start", 110)
         setattr(test_HSPFragment1, "query_end", 1100)
         setattr(test_HSPFragment1, "aln_span", 990)
@@ -274,7 +272,6 @@ class SimilarityTest(TestCase):
         setattr(test_HIT1, "seq_len", 2000)
 
         test_HSPFragment2 = HSPFragment("feat1", "feat3")
-        setattr(test_HSPFragment2, "alphabet", generic_protein)
         setattr(test_HSPFragment2, "query_start", 210)
         setattr(test_HSPFragment2, "query_end", 2100)
         setattr(test_HSPFragment2, "aln_span", 1890)
@@ -300,7 +297,6 @@ class SimilarityTest(TestCase):
         # test retrieve_query_from_hsp and retrieve_subject_from_hsp
         # test hsp with no bitscore, bitscore_raw, evalue, and ident_num
         test_HSPFragment3 = HSPFragment("feat4_desc", "feat5_desc")
-        setattr(test_HSPFragment3, "alphabet", generic_protein)
         setattr(test_HSPFragment3, "query_start", 210)
         setattr(test_HSPFragment3, "query_end", 2100)
         setattr(test_HSPFragment3, "aln_span", 1890)
