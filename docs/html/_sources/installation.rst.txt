@@ -69,12 +69,12 @@ Then, configure the WEBPROJECT/settings.py file to connect to your Chado databas
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',    # Set the DB driver
-            'NAME': 'yourdatabase',                                # Set the DB name
-            'USER': 'username',                                    # Set the DB user
-            'PASSWORD': 'password',                                # Set the DB password
-            'HOST': 'localhost',                                   # Set the DB host
-            'PORT': '',                                            # Set the DB port
+            'ENGINE': 'django.db.backends.postgresql',    # Set the DB driver
+            'NAME': 'yourdatabase',                       # Set the DB name
+            'USER': 'username',                           # Set the DB user
+            'PASSWORD': 'password',                       # Set the DB password
+            'HOST': 'localhost',                          # Set the DB host
+            'PORT': '',                                   # Set the DB port
         },
     }
 

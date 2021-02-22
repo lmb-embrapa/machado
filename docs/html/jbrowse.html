@@ -230,8 +230,8 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 <p>MACHADO_JBROWSE_URL: the base URL to the JBrowse instalation. The URL must contain the protocol (i.e. http or https)</p>
 <p>MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed (‘ref_seq,gene,transcripts,CDS,SNV’ if not set).</p>
 <p>MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).</p>
-<div class="section" id="use-reference-from-fasta-file">
-<h2><span class="section-number">3.3.1. </span>Use reference from FASTA file<a class="headerlink" href="#use-reference-from-fasta-file" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-reference-from-fasta-file-optional">
+<h2><span class="section-number">3.3.1. </span>Use reference from FASTA file (optional)<a class="headerlink" href="#use-reference-from-fasta-file-optional" title="Permalink to this headline">¶</a></h2>
 <p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences <a class="reference external" href="https://jbrowse.org/docs/tutorial.html">https://jbrowse.org/docs/tutorial.html</a>.</p>
 <p>Follow the steps below.</p>
 <p>Put the genome’s assembly fasta file into your jbrowse organism’s ‘data/seq’ directory (for example: /var/www/html/jbrowse/data/’Glycine max’/data/seq/Gmax.fa), change to this directory, and run the command:</p>
