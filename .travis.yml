@@ -1,3 +1,5 @@
+env:
+    - PGVERSION=12
 cache: pip
 language: python
 os: linux
