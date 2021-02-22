@@ -8,7 +8,7 @@ Prerequisite
 
 The list bellow contains the softwares and versions required by *machado*.
 
-**PostgreSQL 9.5**
+**PostgreSQL 12**
 
 Install PostgreSQL and create a database and user for loading the Chado schema.
 As postgres user run:
@@ -22,9 +22,15 @@ As postgres user run:
 
 Don't forget to configure the PostgreSQL server to allow regular users to connect (pg_hba.conf).
 
-**Python 3.6**
+**Linux dependencies**
 
-Be sure to have the python development libraries installed (in Ubuntu 18.04, install with 'apt-get install python3-dev').
+Be sure to have the following dependencies installed
+
+.. code-block:: bash
+
+    sudo apt install zlib1g-dev libbz2-dev liblzma-dev python3-dev
+
+**Python 3.8**
 
 We strongly recommend creating a new virtualenv for your project
 
