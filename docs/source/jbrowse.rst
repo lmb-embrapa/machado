@@ -95,8 +95,8 @@ MACHADO_JBROWSE_TRACKS: the name of the tracks to be displayed ('ref_seq,gene,tr
 
 MACHADO_OFFSET: the number of bp upstream and downstream of the feature (1000 if not set).
 
-Use reference from FASTA file
------------------------------
+Use reference from FASTA file (optional)
+----------------------------------------
 
 If the reference sequences are really long (>200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks. To avoid this, follow instructions to create and use and indexed fasta file as source the reference sequences `<https://jbrowse.org/docs/tutorial.html>`_.
 
