@@ -7,7 +7,7 @@ The `JBrowse <https://jbrowse.org>`_ software renders genomic tracks from Chado 
 
 **JBrowse**
 
-Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 18.04):
+Before installing Jbrowse you should probably have Bioperl installed in your system (tested in Ubuntu 20.04):
 
 .. code-block:: bash
 
@@ -15,7 +15,7 @@ Before installing Jbrowse you should probably have Bioperl installed in your sys
 
 Then install JBrowse following the `official instructions <https://jbrowse.org/docs/installation.html>`_:
 
-In Ubuntu 18.04:
+In Ubuntu 20.04:
 
 Install some prerequisites:
 

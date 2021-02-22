@@ -18,7 +18,7 @@ Use CTRL+C to stop the webserver.
 
 Django Apache WSGI
 ------------------
-Before starting, make sure you have Apache installed in your system. In Ubuntu 18.04,
+Before starting, make sure you have Apache installed in your system. In Ubuntu 20.04,
 do:
 
 .. code-block:: bash
@@ -33,7 +33,7 @@ take care of this process. It will be necessary to install the following package
 
     sudo apt install libapache2-mod-wsgi-py3
 
-Now symlink the directory of YOURPROJECT to '/var/www/' (tested in Ubuntu 18.04):
+Now symlink the directory of YOURPROJECT to '/var/www/' (tested in Ubuntu 20.04):
 
 .. code-block:: bash
 
