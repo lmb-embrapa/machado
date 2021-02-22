@@ -25,7 +25,6 @@ addons:
     packages:
     - samtools
     - pandoc
-  postgres: "12.2"
 
 before_script:
   - psql -c "create user username with encrypted password 'password';" -U postgres
