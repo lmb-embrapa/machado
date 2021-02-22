@@ -27,7 +27,7 @@ Also *Node.js* is needed:
 
 .. code-block:: bash
 
-    curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
     sudo apt-get install -y nodejs
 
 Finally, proceed with JBrowse installation
