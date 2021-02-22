@@ -79,7 +79,7 @@ Once the server is running, just go to your browser and open your JBrowse instan
 
 **machado**
 
-The settings.py file should contain these variables
+The settings.py file should contain these variables in order to have the jbrowse visualization embedded to the feature page. Don't forget to restart apache to make the settings changes up to date.
 
 .. code-block:: bash
 

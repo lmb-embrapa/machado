@@ -219,7 +219,7 @@ cp extras/trackList.json.sample <span class="s2">&quot;/var/www/html/jbrowse/dat
 </div>
 <p>Once the server is running, just go to your browser and open your JBrowse instance (e.g.: <a class="reference external" href="http://localhost/jbrowse/?data=data/Arabidopsis thaliana">http://localhost/jbrowse/?data=data/Arabidopsis thaliana</a> ).</p>
 <p><strong>machado</strong></p>
-<p>The settings.py file should contain these variables</p>
+<p>The settings.py file should contain these variables in order to have the jbrowse visualization embedded to the feature page. Don’t forget to restart apache to make the settings changes up to date.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_JBROWSE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://localhost/jbrowse&#39;</span>
 
 <span class="nv">MACHADO_JBROWSE_TRACKS</span> <span class="o">=</span> <span class="s1">&#39;ref_seq,gene,transcripts,CDS,SNV&#39;</span>
