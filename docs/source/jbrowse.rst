@@ -34,9 +34,9 @@ Finally, proceed with JBrowse installation
 
 .. code-block:: bash
 
-   wget https://github.com/GMOD/jbrowse/releases/download/1.16.2-release/JBrowse-1.16.2.zip
-   unzip JBrowse-1.16.2.zip
-   sudo mv JBrowse-1.16.2 /var/www/html/jbrowse
+   wget https://github.com/GMOD/jbrowse/releases/download/1.16.9-release/JBrowse-1.16.9.zip
+   unzip JBrowse-1.16.9.zip
+   sudo mv JBrowse-1.16.9 /var/www/html/jbrowse
    cd /var/www/html
    sudo chown `whoami` jbrowse
    cd jbrowse
