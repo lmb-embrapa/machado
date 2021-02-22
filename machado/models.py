@@ -3379,7 +3379,7 @@ class Pub(models.Model):
     type = models.ForeignKey(
         Cvterm, on_delete=models.DO_NOTHING, related_name="Pub_type_Cvterm"
     )
-    is_obsolete = models.NullBooleanField()
+    is_obsolete = models.BooleanField(null=True)
     publisher = models.CharField(max_length=255, blank=True, null=True)
     pubplace = models.CharField(max_length=255, blank=True, null=True)
 
@@ -3425,7 +3425,7 @@ class Pubauthor(models.Model):
         Pub, on_delete=models.DO_NOTHING, related_name="Pubauthor_pub_Pub"
     )
     rank = models.IntegerField()
-    editor = models.NullBooleanField()
+    editor = models.BooleanField(null=True)
     surname = models.CharField(max_length=100)
     givennames = models.CharField(max_length=100, blank=True, null=True)
     suffix = models.CharField(max_length=100, blank=True, null=True)
