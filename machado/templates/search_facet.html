@@ -73,14 +73,6 @@
 			<small>({% if facets.fields|get_count:facet == 100 %}Truncated to {% endif %}{{ facets.fields|get_count:facet }})</small>
 			{% endif %}
         </div>
-        <div class="col text-right">
-			<div class="btn-group" role="group">
-				<button class="btn btn-sm btn-light" type="submit" title="{{ facet_description }}"><small>apply</small></button>
-				{% if facet in selected_facets_fields %}
-				<a class="btn btn-sm btn-light" type="link" title="Remove filter" href="?{% remove_facet facet %}"><small>remove</small></a>
-				{%endif%}
-			</div>
-        </div>
     </div>
     {% endwith %}
     </div>
@@ -143,4 +135,10 @@
 {% endif %}
 {% endwith %}
 {% endfor %}
+
+
+
+<div class="col col-3 text-right my-2 fixed-bottom">
+    <button class="btn btn-primary" type="submit">Submit</button>
+</div>
 </form>
