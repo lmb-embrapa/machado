@@ -59,9 +59,16 @@ The settings.py file should contain the `search engine configuration <http://doc
         },
     }
 
+* In the settings.py file, set the variable MACHADO_VALID_TYPES to restrict the types of features that will be indexed. Otherwise, every feature will be indexed.
+
+.. code-block:: bash
+
+    MACHADO_VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+
+
 **Indexing the data**
 
-Go to the WEBPROJECT directory and use the manage.py
+Go to the WEBPROJECT directory and use the manage.py. Please notice that it's necessary to run rebuild_index if additional data is loaded to the database or if changes are made to the settings files.
 
 .. code-block:: bash
 

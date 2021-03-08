@@ -12,13 +12,13 @@ Load VCF
 
 .. code-block:: bash
 
-    python manage.py load_vcf --file organism_snv_sorted.gff3.gz --organism 'Arabidopsis thaliana'
+    python manage.py load_vcf --file organism_snv_sorted.vcf.gz --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
 .. code-block:: bash
 
-    python manage.py load_gff --help
+    python manage.py load_vcf --help
 
 
 ==========    ==================================================================================
