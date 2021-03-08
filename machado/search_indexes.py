@@ -56,13 +56,13 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         if hasattr(settings, "MACHADO_VALID_TYPES"):
             return self.get_model().objects.filter(
                 type__name__in=settings.MACHADO_VALID_TYPES,
-                type__cv__name="sequence", is_obsolete=False
+                type__cv__name="sequence",
+                is_obsolete=False,
             )
         else:
             return self.get_model().objects.filter(
                 type__cv__name="sequence", is_obsolete=False
             )
-
 
     def prepare_organism(self, obj):
         """Prepare organism."""

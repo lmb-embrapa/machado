@@ -143,7 +143,10 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if hasattr(settings, "MACHADO_VALID_TYPES") and feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES:
+        if (
+            hasattr(settings, "MACHADO_VALID_TYPES")
+            and feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES
+        ):
             result.append(feature_relationship.subject)
         else:
             result.append(feature_relationship.subject)
@@ -153,7 +156,10 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if hasattr(settings, "MACHADO_VALID_TYPES") and feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES:
+        if (
+            hasattr(settings, "MACHADO_VALID_TYPES")
+            and feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES
+        ):
             result.append(feature_relationship.object)
         else:
             result.append(feature_relationship.object)

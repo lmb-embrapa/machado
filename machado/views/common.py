@@ -46,7 +46,8 @@ class DataSummaryView(View):
         if hasattr(settings, "MACHADO_VALID_TYPES"):
             counts = (
                 Feature.objects.filter(
-                    type__name__in=settings.MACHADO_VALID_TYPES, type__cv__name="sequence"
+                    type__name__in=settings.MACHADO_VALID_TYPES,
+                    type__cv__name="sequence",
                 )
                 .values("organism__genus", "organism__species", "type__name")
                 .annotate(count=Count("type__name"))
@@ -59,7 +60,6 @@ class DataSummaryView(View):
                 .annotate(count=Count("type__name"))
                 .order_by("organism__genus", "organism__species")
             )
-
 
         for item in counts:
             organism_name = "{} {}".format(
