@@ -5,6 +5,7 @@
 # have been included as part of this package for licensing information.
 
 """Search indexes."""
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from haystack import indexes
 
@@ -12,7 +13,6 @@ from machado.models import Analysis, Analysisfeature
 from machado.models import Feature, FeatureCvterm, Featureprop
 from machado.models import Featureloc, FeatureRelationship
 
-VALID_TYPES = ["gene", "mRNA", "polypeptide"]
 VALID_PROGRAMS = (
     Analysis.objects.filter(program__in=["interproscan", "diamond", "blast"])
     .distinct("program")
@@ -53,9 +53,16 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Index queryset."""
-        return self.get_model().objects.filter(
-            type__name__in=VALID_TYPES, type__cv__name="sequence", is_obsolete=False
-        )
+        if hasattr(settings, "MACHADO_VALID_TYPES"):
+            return self.get_model().objects.filter(
+                type__name__in=settings.MACHADO_VALID_TYPES,
+                type__cv__name="sequence", is_obsolete=False
+            )
+        else:
+            return self.get_model().objects.filter(
+                type__cv__name="sequence", is_obsolete=False
+            )
+
 
     def prepare_organism(self, obj):
         """Prepare organism."""
