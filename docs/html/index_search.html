@@ -210,8 +210,14 @@ pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
 <span class="o">}</span>
 </pre></div>
 </div>
+<ul class="simple">
+<li><p>In the settings.py file, set the variable MACHADO_VALID_TYPES to restrict the types of features that will be indexed. Otherwise, every feature will be indexed.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MACHADO_VALID_TYPES</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;gene&#39;</span>, <span class="s1">&#39;mRNA&#39;</span>, <span class="s1">&#39;polypeptide&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
 <p><strong>Indexing the data</strong></p>
-<p>Go to the WEBPROJECT directory and use the manage.py</p>
+<p>Go to the WEBPROJECT directory and use the manage.py. Please notice that it’s necessary to run rebuild_index if additional data is loaded to the database or if changes are made to the settings files.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py rebuild_index
 </pre></div>
 </div>

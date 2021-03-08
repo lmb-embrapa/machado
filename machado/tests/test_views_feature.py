@@ -365,8 +365,6 @@ class FeatureTest(TestCase):
         except NoReverseMatch:
             return
 
-        self.assertContains(response, "Invalid feature type.")
-
         request = self.factory.get("/feature/?feature_id=123456789")
         fv = feature.FeatureView()
         response = fv.get(request)

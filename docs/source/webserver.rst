@@ -85,6 +85,8 @@ There must be a symlink of your config file in the sites-enabled directory
     MACHADO_EXAMPLE_AA = 1869098
     MACHADO_EXAMPLE_NA = 1869093
 
+    MACHADO_VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+
     STATIC_URL = '/YOURPROJECT/static/'
     STATIC_ROOT = '/var/www/YOURPROJECT/WEBPROJECT/static'
 

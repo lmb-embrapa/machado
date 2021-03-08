@@ -10,8 +10,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 
-VALID_TYPES = ["gene", "mRNA", "polypeptide"]
-
 
 def get_feature_dbxrefs(self):
     """Get the feature dbxrefs."""
@@ -145,20 +143,28 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if feature_relationship.subject.type.name in VALID_TYPES:
+        if (
+            hasattr(settings, "MACHADO_VALID_TYPES")
+            and feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES
+        ):
             result.append(feature_relationship.subject)
+        else:
+            result.append(feature_relationship.subject)
+
     feature_relationships = self.FeatureRelationship_subject_Feature.filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if feature_relationship.object.type.name in VALID_TYPES:
+        if (
+            hasattr(settings, "MACHADO_VALID_TYPES")
+            and feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES
+        ):
+            result.append(feature_relationship.object)
+        else:
             result.append(feature_relationship.object)
 
-    if len(result) > 0:
-        return result
-    else:
-        return None
+    return result
 
 
 def get_feature_cvterm(self):

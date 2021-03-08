@@ -6,6 +6,7 @@
 
 """common views."""
 
+from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import render
 from django.views import View
@@ -42,16 +43,23 @@ class DataSummaryView(View):
         """General data numbers."""
         data = dict()
 
-        VALID_TYPES = ["chromosome", "assembly", "gene", "mRNA", "polypeptide"]
-
-        counts = (
-            Feature.objects.filter(
-                type__name__in=VALID_TYPES, type__cv__name="sequence"
+        if hasattr(settings, "MACHADO_VALID_TYPES"):
+            counts = (
+                Feature.objects.filter(
+                    type__name__in=settings.MACHADO_VALID_TYPES,
+                    type__cv__name="sequence",
+                )
+                .values("organism__genus", "organism__species", "type__name")
+                .annotate(count=Count("type__name"))
+                .order_by("organism__genus", "organism__species")
             )
-            .values("organism__genus", "organism__species", "type__name")
-            .annotate(count=Count("type__name"))
-            .order_by("organism__genus", "organism__species")
-        )
+        else:
+            counts = (
+                Feature.objects.filter(type__cv__name="sequence")
+                .values("organism__genus", "organism__species", "type__name")
+                .annotate(count=Count("type__name"))
+                .order_by("organism__genus", "organism__species")
+            )
 
         for item in counts:
             organism_name = "{} {}".format(
