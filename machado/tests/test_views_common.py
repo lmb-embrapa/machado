@@ -239,8 +239,8 @@ class DataSummaryTest(TestCase):
         response = ds.get(request)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "assembly: 1 <br />")
-        self.assertContains(response, "assembly: 2 <br />")
+        self.assertContains(response, "gene: 1 <br />")
+        self.assertContains(response, "mRNA: 2 <br />")
         self.assertContains(response, "10.1186/s12864-016-2535-300002")
 
 
