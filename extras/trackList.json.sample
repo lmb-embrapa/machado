@@ -24,6 +24,7 @@
          "key" : "Gene",
          "label" : "gene",
          "query" : {
+            "organism": "Arabidopsis thaliana",
             "soType" : "gene"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
@@ -39,6 +40,7 @@
          "key" : "Transcript",
          "label" : "transcripts",
          "query" : {
+            "organism": "Arabidopsis thaliana",
             "soType" : "mRNA"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
@@ -54,11 +56,23 @@
          "key" : "CDS",
          "label" : "CDS",
          "query" : {
+            "organism": "Arabidopsis thaliana",
             "soType" : "CDS"
          },
          "storeClass" : "JBrowse/Store/SeqFeature/REST",
          "type" : "JBrowse/View/Track/CanvasFeatures"
+     },
+      {
+         "category": "3. Variation",
+         "baseUrl" : "http://localhost:8000/machado/api/jbrowse",
+         "key" : "SNV",
+         "label" : "SNV",
+         "query" : {
+            "organism" : "Arabidopsis thaliana",
+            "soType" : "SNV"
+         },
+         "storeClass" : "JBrowse/Store/SeqFeature/REST",
+         "type" : "JBrowse/View/Track/HTMLFeatures"
      }
-
    ]
 }
