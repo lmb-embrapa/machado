@@ -60,6 +60,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
     end = serializers.SerializerMethodField()
     strand = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField()
+    accession = serializers.SerializerMethodField()
     uniqueID = serializers.SerializerMethodField()
     subfeatures = serializers.SerializerMethodField()
     seq = serializers.SerializerMethodField()
@@ -71,6 +72,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         model = Feature
         fields = (
             "uniqueID",
+            "accession",
             "name",
             "type",
             "start",
@@ -131,6 +133,10 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the type."""
         feat_type = obj.type.name
         return feat_type
+
+    def get_accession(self, obj):
+        """Get the uniquename."""
+        return obj.uniquename
 
     def get_uniqueID(self, obj):
         """Get the uniquename."""
