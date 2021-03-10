@@ -127,6 +127,20 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             for i in sample.get("treatment_name").split(" "):
                 keywords.add(i)
 
+        # IDs of overlapping features
+        for location in obj.Featureloc_feature_Feature.all():
+            for overlapping_feature in Featureloc.objects.filter(
+                srcfeature=location.srcfeature,
+                feature__type__name="SNV",
+                fmin__lte=location.fmax,
+                fmax__gte=location.fmin,
+            ):
+                keywords.add(overlapping_feature.feature.uniquename)
+
+        if obj.name is not None:
+            keywords.add(obj.name)
+        keywords.add(obj.uniquename)
+
         self.temp = " ".join(keywords)
         return " ".join(keywords)
 

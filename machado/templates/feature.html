@@ -20,7 +20,7 @@
     <div class="card-header">
         <small><i>{{ feature.organism.genus }} {{ feature.organism.species }}</i></small>
         <h3 class="card-title">
-			{{ feature.type.name }}: {{ feature.name }}
+			{{ feature.type.name }}: {{ feature.name|default_if_none:feature.uniquename }}
 		</h3>
     </div>
     <div class="card-body">
