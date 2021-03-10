@@ -131,7 +131,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         for location in obj.Featureloc_feature_Feature.all():
             for overlapping_feature in Featureloc.objects.filter(
                 srcfeature=location.srcfeature,
-                feature__type__name='SNV',
+                feature__type__name="SNV",
                 fmin__lte=location.fmax,
                 fmax__gte=location.fmin,
             ):
