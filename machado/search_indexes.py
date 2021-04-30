@@ -19,6 +19,8 @@ VALID_PROGRAMS = (
     .values_list("program")
 )
 
+OVERLAPPING_SNV = Feature.objects.filter(type__name="SNV").exists()
+
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     """Feature index."""
@@ -53,16 +55,14 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Index queryset."""
-        if hasattr(settings, "MACHADO_VALID_TYPES"):
+        try:
             return self.get_model().objects.filter(
                 type__name__in=settings.MACHADO_VALID_TYPES,
                 type__cv__name="sequence",
                 is_obsolete=False,
             )
-        else:
-            return self.get_model().objects.filter(
-                type__cv__name="sequence", is_obsolete=False
-            )
+        except AttributeError:
+            raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
     def prepare_organism(self, obj):
         """Prepare organism."""
@@ -128,14 +128,15 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 keywords.add(i)
 
         # IDs of overlapping features
-        for location in obj.Featureloc_feature_Feature.all():
-            for overlapping_feature in Featureloc.objects.filter(
-                srcfeature=location.srcfeature,
-                feature__type__name="SNV",
-                fmin__lte=location.fmax,
-                fmax__gte=location.fmin,
-            ):
-                keywords.add(overlapping_feature.feature.uniquename)
+        if OVERLAPPING_SNV:
+            for location in obj.Featureloc_feature_Feature.all():
+                for overlapping_feature in Featureloc.objects.filter(
+                    srcfeature=location.srcfeature,
+                    feature__type__name="SNV",
+                    fmin__lte=location.fmax,
+                    fmax__gte=location.fmin,
+                ):
+                    keywords.add(overlapping_feature.feature.uniquename)
 
         if obj.name is not None:
             keywords.add(obj.name)
