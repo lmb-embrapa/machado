@@ -55,16 +55,14 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Index queryset."""
-        if hasattr(settings, "MACHADO_VALID_TYPES"):
+        try:
             return self.get_model().objects.filter(
                 type__name__in=settings.MACHADO_VALID_TYPES,
                 type__cv__name="sequence",
                 is_obsolete=False,
             )
-        else:
-            return self.get_model().objects.filter(
-                type__cv__name="sequence", is_obsolete=False
-            )
+        except AttributeError:
+            raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
     def prepare_organism(self, obj):
         """Prepare organism."""
