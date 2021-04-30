@@ -186,7 +186,7 @@ function loadPublication(){
           success: function(data) {
             var text = '<ul class="list-group">';
             for (i=0; i<data.length; i++) {
-              var text = '<li class="list-group-item"><small>' ;
+              text += '<li class="list-group-item"><small>' ;
               text += data[i].authors + ' ';
               text += '<b>' + data[i].title + '</b> ';
               text += '<i>' + data[i].series_name + '</i>.  ';
@@ -194,7 +194,7 @@ function loadPublication(){
               if (data[i].doi) {
                 text += 'DOI:<a target="_blank" href="http://dx.doi.org/' + data[i].doi + '">' + data[i].doi + '</a>';
               }
-              text += "</smal></li>" ;
+              text += "</small></li>" ;
             }
             text += "</ul>" ;
             $("#collapsePub .card-text").html(text);
