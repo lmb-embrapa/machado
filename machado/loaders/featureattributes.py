@@ -69,14 +69,16 @@ class FeatureAttributesLoader(object):
             is_obsolete=False,
         )
 
-        if(filecontent == "genome"):
+        if filecontent == "genome":
             self.filter = VALID_GENOME_ATTRS
-        elif(filecontent == "polymorphism"):
+        elif filecontent == "polymorphism":
             self.filter = VALID_POLYMORPHISM_ATTRS
-        elif(filecontent == "qtl"):
+        elif filecontent == "qtl":
             self.filter = VALID_QTL_ATTRS
         else:
-            raise ImportingError("Attributes type required: (eg. genome, polymorphism, qtl)")
+            raise ImportingError(
+                "Attributes type required: (eg. genome, polymorphism, qtl)"
+            )
 
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
@@ -89,7 +91,11 @@ class FeatureAttributesLoader(object):
             try:
                 key, value = field.split("=")
 
-                if key.lower() not in self.filter and key.lower() not in ["id", "name", "parent"]:
+                if key.lower() not in self.filter and key.lower() not in [
+                    "id",
+                    "name",
+                    "parent",
+                ]:
                     self.ignored_attrs.add(key)
                 else:
                     result[key.lower()] = unquote(value)

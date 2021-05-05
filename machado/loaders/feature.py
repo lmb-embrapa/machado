@@ -9,7 +9,6 @@
 from datetime import datetime, timezone
 from time import time
 from typing import Dict, List, Set, Union
-from urllib.parse import unquote
 
 from Bio.SearchIO._model import Hit
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -18,31 +17,11 @@ from pysam.libctabixproxies import GTFProxy, VCFProxy
 
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
+from machado.loaders.featureattributes import FeatureAttributesLoader
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
 from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureloc
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.models import Featureprop, FeatureSynonym
-from machado.models import Pub, PubDbxref, FeaturePub, Synonym
-
-
-# The following attributes are handled in a specific manner and should not
-# be included in VALID_GFF_ATTRS: id, name, and parent
-VALID_GFF_ATTRS = [
-    "dbxref",
-    "note",
-    "display",
-    "alias",
-    "ontology_term",
-    "orf_classification",
-    "synonym",
-    "is_circular",
-    "gene_synonym",
-    "description",
-    "product",
-    "pacid",
-]
-
-VALID_VCF_ATTRS = ["TSA", "VC"]
+from machado.models import Featureprop, FeaturePub, Pub, PubDbxref
 
 
 class FeatureLoader(object):
@@ -56,8 +35,6 @@ class FeatureLoader(object):
         # ignored goterms, and relationships
         self.cache: Dict[str, str] = dict()
         self.usedcache = 0
-        self.ignored_attrs: Set[str] = set()
-        self.ignored_goterms: Set[str] = set()
         self.relationships: List[Dict[str, str]] = list()
 
         try:
@@ -106,121 +83,9 @@ class FeatureLoader(object):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
-    def get_attributes(self, attributes: str) -> Dict[str, str]:
-        """Get attributes."""
-        result = dict()
-        fields = attributes.split(";")
-        for field in fields:
-            try:
-                key, value = field.split("=")
-                result[key.lower()] = unquote(value)
-            except ValueError:
-                pass
-        return result
-
-    def process_attributes(self, feature_id: int, attrs: Dict[str, str]) -> None:
-        """Process the VALID_GFF_ATTRS attributes."""
-        try:
-            cvterm_exact = Cvterm.objects.get(name="exact", cv__name="synonym_type")
-        except ObjectDoesNotExist as e:
-            raise ImportingError(e)
-
-        # Don't forget to add the attribute to the constant VALID_GFF_ATTRS
-        for key in attrs:
-            if key not in VALID_GFF_ATTRS:
-                continue
-            elif key in ["ontology_term"]:
-                # store in featurecvterm
-                terms = attrs[key].split(",")
-                for term in terms:
-                    try:
-                        aux_db, aux_term = term.split(":")
-                        term_db = Db.objects.get(name=aux_db.upper())
-                        dbxref = Dbxref.objects.get(db=term_db, accession=aux_term)
-                        cvterm = Cvterm.objects.get(dbxref=dbxref)
-                        FeatureCvterm.objects.create(
-                            feature_id=feature_id,
-                            cvterm=cvterm,
-                            pub=self.pub,
-                            is_not=False,
-                            rank=0,
-                        )
-                    except ObjectDoesNotExist:
-                        self.ignored_goterms.add(term)
-            elif key in ["dbxref"]:
-                try:
-                    dbxrefs = attrs[key].split(",")
-                except ValueError as e:
-                    raise ImportingError("{}: {}".format(attrs[key], e))
-                for dbxref in dbxrefs:
-                    # It expects just one dbxref formated as XX:012345
-                    try:
-                        aux_db, aux_dbxref = dbxref.split(":")
-                    except ValueError as e:
-                        raise ImportingError("{}: {}".format(dbxref, e))
-                    db, created = Db.objects.get_or_create(name=aux_db.upper())
-                    dbxref, created = Dbxref.objects.get_or_create(
-                        db=db, accession=aux_dbxref
-                    )
-                    FeatureDbxref.objects.create(
-                        feature_id=feature_id, dbxref=dbxref, is_current=1
-                    )
-            elif key in ["pacid"]:
-                db, created = Db.objects.get_or_create(name="PACID")
-                dbxref, created = Dbxref.objects.get_or_create(
-                    db=db, accession=attrs[key]
-                )
-                FeatureDbxref.objects.create(
-                    feature_id=feature_id, dbxref=dbxref, is_current=1
-                )
-            elif key in ["alias", "gene_synonym", "synonym"]:
-                synonym, created = Synonym.objects.get_or_create(
-                    name=attrs.get(key),
-                    defaults={
-                        "type_id": cvterm_exact.cvterm_id,
-                        "synonym_sgml": attrs.get(key),
-                    },
-                )
-                FeatureSynonym.objects.create(
-                    synonym=synonym,
-                    feature_id=feature_id,
-                    pub=self.pub,
-                    is_current=True,
-                    is_internal=False,
-                )
-            else:
-                note_dbxref, created = Dbxref.objects.get_or_create(
-                    db=self.db_null, accession=key
-                )
-                cv_feature_property, created = Cv.objects.get_or_create(
-                    name="feature_property"
-                )
-                note_cvterm, created = Cvterm.objects.get_or_create(
-                    cv=cv_feature_property,
-                    name=key,
-                    dbxref=note_dbxref,
-                    defaults={
-                        "definition": "",
-                        "is_relationshiptype": 0,
-                        "is_obsolete": 0,
-                    },
-                )
-                featureprop_obj, created = Featureprop.objects.get_or_create(
-                    feature_id=feature_id,
-                    type_id=note_cvterm.cvterm_id,
-                    rank=0,
-                    defaults={"value": attrs.get(key)},
-                )
-                if not created:
-                    featureprop_obj.value = attrs.get(key)
-                    featureprop_obj.save()
-
     def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, organism: str) -> None:
         """Store tabix feature."""
         organism_obj = retrieve_organism(organism)
-        for key in self.get_attributes(tabix_feature.attributes):
-            if key not in VALID_GFF_ATTRS and key not in ["id", "name", "parent"]:
-                self.ignored_attrs.add(key)
 
         try:
             cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
@@ -229,12 +94,15 @@ class FeatureLoader(object):
                 "{} is not a sequence ontology term.", tabix_feature.feature
             )
 
-        attrs_id = self.get_attributes(tabix_feature.attributes).get("id")
-        attrs_name = self.get_attributes(tabix_feature.attributes).get("name")
+        attrs_loader = FeatureAttributesLoader(filecontent="genome")
+        attrs_dict = attrs_loader.get_attributes(tabix_feature.attributes)
+        self.ignored_attrs = attrs_loader.ignored_attrs
+        self.ignored_goterms = attrs_loader.ignored_goterms
+
+        attrs_id = attrs_dict.get("id")
+        attrs_name = attrs_dict.get("name")
         try:
-            attrs_parent = (
-                self.get_attributes(tabix_feature.attributes).get("parent").split(",")
-            )
+            attrs_parent = attrs_dict.get("parent").split(",")
         except AttributeError:
             attrs_parent = list()
 
@@ -331,9 +199,8 @@ class FeatureLoader(object):
             )
             raise ImportingError(e)
 
-        self.process_attributes(
-            feature_id=feature_id, attrs=self.get_attributes(tabix_feature.attributes)
-        )
+        # Process attrs_dict after the creation of the feature
+        attrs_loader.process_attributes(feature_id, attrs_dict)
 
         for parent in attrs_parent:
             self.relationships.append({"object_id": attrs_id, "subject_id": parent})
@@ -388,14 +255,16 @@ class FeatureLoader(object):
     def store_tabix_VCF_feature(self, tabix_feature: VCFProxy, organism: str) -> None:
         """Store tabix feature from VCF files."""
         organism_obj = retrieve_organism(organism)
-        for key in self.get_attributes(tabix_feature.info):
-            if key not in VALID_VCF_ATTRS and key not in ["id", "name", "parent"]:
-                self.ignored_attrs.add(key)
 
-        if self.get_attributes(tabix_feature.info).get("vc"):
-            attrs_class = self.get_attributes(tabix_feature.info).get("vc")
-        elif self.get_attributes(tabix_feature.info).get("tsa"):
-            attrs_class = self.get_attributes(tabix_feature.info).get("tsa")
+        attrs_loader = FeatureAttributesLoader(filecontent="polymorphism")
+        attrs_dict = attrs_loader.get_attributes(tabix_feature.info)
+        self.ignored_attrs = attrs_loader.ignored_attrs
+        self.ignored_goterms = attrs_loader.ignored_goterms
+
+        if attrs_dict.get("vc"):
+            attrs_class = attrs_dict.get("vc")
+        elif attrs_dict.get("tsa"):
+            attrs_class = attrs_dict.get("tsa")
         else:
             raise ImportingError(
                 "{}: Impossible to get the attribute which defines the type of variation (eg. TSA, VC)".format(
@@ -576,13 +445,14 @@ class FeatureLoader(object):
         self, feature: str, soterm: str, cvterm: str, annotation: str
     ) -> None:
         """Store feature annotation."""
-        attrs = {cvterm: annotation}
-        for key in attrs:
-            if key not in VALID_GFF_ATTRS:
-                self.ignored_attrs.add(key)
-
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
-        self.process_attributes(feature_id, attrs)
+        attrs_str = "{}={};".format(cvterm, annotation)
+
+        attrs_loader = FeatureAttributesLoader(filecontent="genome")
+        attrs_dict = attrs_loader.get_attributes(attrs_str)
+        attrs_loader.process_attributes(feature_id, attrs_dict)
+        self.ignored_attrs = attrs_loader.ignored_attrs
+        self.ignored_goterms = attrs_loader.ignored_goterms
 
     def store_feature_dbxref(self, feature: str, soterm: str, dbxref: str) -> None:
         """Store feature dbxref."""
