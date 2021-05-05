@@ -8,7 +8,7 @@
 
 from datetime import datetime, timezone
 from time import time
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Union
 
 from Bio.SearchIO._model import Hit
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
