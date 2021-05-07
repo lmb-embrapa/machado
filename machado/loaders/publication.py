@@ -37,11 +37,13 @@ class PublicationLoader(object):
         pub, created = Pub.objects.get_or_create(
             type=cvterm_type,
             uniquename=entry.get("ID"),
-            title=title,
-            pyear=entry.get("year"),
-            pages=entry.get("pages"),
-            volume=entry.get("volume"),
-            series_name=entry.get("journal"),
+            defaults={
+                "title": title,
+                "pyear": entry.get("year"),
+                "pages": entry.get("pages"),
+                "volume": entry.get("volume"),
+                "series_name": entry.get("journal"),
+            },
         )
         # try to store DOI information
         if pub and (("doi" in entry) or ("DOI" in entry)):
@@ -51,7 +53,7 @@ class PublicationLoader(object):
             except KeyError:
                 doi = entry["doi"]
             dbxref_doi, created = Dbxref.objects.get_or_create(accession=doi, db=db_doi)
-            PubDbxref.objects.create(pub=pub, dbxref=dbxref_doi, is_current=True)
+            PubDbxref.objects.get_or_create(pub=pub, dbxref=dbxref_doi, is_current=True)
         # try to store author information
         if pub and (("author" in entry) or ("AUTHOR" in entry)):
             author_line = ""
@@ -73,5 +75,7 @@ class PublicationLoader(object):
                 if len(names) > 1:
                     givennames = names[1].strip()
                 pubauthor, created = Pubauthor.objects.get_or_create(
-                    pub=pub, rank=rank, surname=surname, givennames=givennames
+                    pub=pub,
+                    rank=rank,
+                    defaults={"surname": surname, "givennames": givennames},
                 )
