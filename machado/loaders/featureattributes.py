@@ -37,7 +37,20 @@ VALID_GENOME_ATTRS = [
 
 VALID_POLYMORPHISM_ATTRS = ["tsa", "vc"]
 
-VALID_QTL_ATTRS = ["tsa", "vc"]
+VALID_QTL_ATTRS = [
+    "qtl_id",
+    "qtl_type",
+    "abbrev",
+    "trait",
+    "breed",
+    "flankmarker",
+    "map_type",
+    "model",
+    "peak_cm",
+    "test_base",
+    "significance",
+    "p-value",
+]
 
 
 class FeatureAttributesLoader(object):
@@ -98,7 +111,8 @@ class FeatureAttributesLoader(object):
                 ]:
                     self.ignored_attrs.add(key)
                 else:
-                    result[key.lower()] = unquote(value)
+                    key = key.lower().replace("qtl_id", "id")
+                    result[key] = unquote(value)
             except ValueError:
                 pass
 
@@ -159,7 +173,7 @@ class FeatureAttributesLoader(object):
                 FeatureDbxref.objects.create(
                     feature_id=feature_id, dbxref=dbxref, is_current=1
                 )
-            elif key in ["alias", "gene_synonym", "synonym"]:
+            elif key in ["alias", "gene_synonym", "synonym", "abbrev"]:
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
                     defaults={

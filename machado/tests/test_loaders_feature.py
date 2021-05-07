@@ -188,8 +188,9 @@ class FeatureTest(TestCase):
 
         organism = "Mus musculus"
         # store the tabix feature
-        test_feature_file.store_tabix_GFF_feature(test_tabix_feature1, organism)
-        test_feature_file.store_tabix_GFF_feature(test_tabix_feature2, organism)
+        qtl = False
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature1, organism, qtl)
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature2, organism, qtl)
 
         # store the relationships
         for item in test_feature_file.relationships:
