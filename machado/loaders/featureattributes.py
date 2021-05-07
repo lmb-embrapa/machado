@@ -50,6 +50,8 @@ VALID_QTL_ATTRS = [
     "test_base",
     "significance",
     "p-value",
+    "trait_id",
+    "pubmed_id",
 ]
 
 

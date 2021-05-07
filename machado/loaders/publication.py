@@ -34,7 +34,7 @@ class PublicationLoader(object):
         title = re.sub("^{", "", title)
         title = re.sub("}$", "", title)
 
-        pub = Pub.objects.create(
+        pub, created = Pub.objects.get_or_create(
             type=cvterm_type,
             uniquename=entry.get("ID"),
             title=title,
