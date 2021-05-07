@@ -488,7 +488,7 @@ class FeatureLoader(object):
         """Store feature publication."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
         try:
-            doi_obj = Dbxref.objects.get(accession=doi, db__name="DOI")
+            doi_obj = Dbxref.objects.get(accession=doi.lower(), db__name="DOI")
             pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
         except ObjectDoesNotExist:
             raise ImportingError("{} not registered.", doi)
