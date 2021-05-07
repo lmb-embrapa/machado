@@ -47,7 +47,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--qtl",
-            help="Set this flag to handl GFF files from QTLDB",
+            help="Set this flag to handle GFF files from QTLDB",
             action="store_true",
         )
         parser.add_argument(
