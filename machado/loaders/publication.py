@@ -52,7 +52,9 @@ class PublicationLoader(object):
                 doi = entry["DOI"]
             except KeyError:
                 doi = entry["doi"]
-            dbxref_doi, created = Dbxref.objects.get_or_create(accession=doi.lower(), db=db_doi)
+            dbxref_doi, created = Dbxref.objects.get_or_create(
+                accession=doi.lower(), db=db_doi
+            )
             PubDbxref.objects.get_or_create(pub=pub, dbxref=dbxref_doi, is_current=True)
         # try to store author information
         if pub and (("author" in entry) or ("AUTHOR" in entry)):
