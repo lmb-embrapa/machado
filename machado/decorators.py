@@ -74,9 +74,11 @@ def get_feature_properties(self):
     """Get all the feature properties."""
     attrs_bl = ["coexpression group", "coexpression group"]
     try:
-        return self.Featureprop_feature_Feature.filter(
-            type__cv__name="feature_property"
-        ).exclude(type__name__in=attrs_bl).values_list("type__name", "value")
+        return (
+            self.Featureprop_feature_Feature.filter(type__cv__name="feature_property")
+            .exclude(type__name__in=attrs_bl)
+            .values_list("type__name", "value")
+        )
     except ObjectDoesNotExist:
         return list()
 
@@ -157,7 +159,7 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if (feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES):
+        if feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.subject)
 
     feature_relationships = self.FeatureRelationship_subject_Feature.filter(
@@ -165,7 +167,7 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if (feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES):
+        if feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.object)
 
     return result

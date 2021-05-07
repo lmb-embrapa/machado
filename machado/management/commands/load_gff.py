@@ -48,7 +48,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--qtl",
             help="Set this flag to handl GFF files from QTLDB",
-            action='store_true',
+            action="store_true",
         )
         parser.add_argument(
             "--doi",
@@ -110,7 +110,9 @@ class Command(BaseCommand):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(
-                    pool.submit(feature_file.store_tabix_GFF_feature, row, organism, qtl)
+                    pool.submit(
+                        feature_file.store_tabix_GFF_feature, row, organism, qtl
+                    )
                 )
 
                 if len(tasks) >= chunk_size:

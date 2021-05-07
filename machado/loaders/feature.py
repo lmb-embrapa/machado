@@ -83,7 +83,9 @@ class FeatureLoader(object):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
-    def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, organism: str, qtl: bool) -> None:
+    def store_tabix_GFF_feature(
+        self, tabix_feature: GTFProxy, organism: str, qtl: bool
+    ) -> None:
         """Store tabix feature."""
         organism_obj = retrieve_organism(organism)
 
@@ -96,10 +98,12 @@ class FeatureLoader(object):
 
         if qtl:
             cvterm = Cvterm.objects.get(name="QTL", cv__name="sequence")
-            attrs_dict['qtl_type'] = tabix_feature.feature
+            attrs_dict["qtl_type"] = tabix_feature.feature
         else:
             try:
-                cvterm = Cvterm.objects.get(name=tabix_feature.feature, cv__name="sequence")
+                cvterm = Cvterm.objects.get(
+                    name=tabix_feature.feature, cv__name="sequence"
+                )
             except ObjectDoesNotExist:
                 raise ImportingError(
                     "{} is not a sequence ontology term.", tabix_feature.feature

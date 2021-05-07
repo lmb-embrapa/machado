@@ -48,4 +48,4 @@ HAYSTACK_CONNECTIONS = {
     }
 }
 
-MACHADO_VALID_TYPES = ['gene', 'mRNA', 'polypeptide']
+MACHADO_VALID_TYPES = ["gene", "mRNA", "polypeptide"]
