@@ -46,7 +46,7 @@ class PublicationLoader(object):
             },
         )
         # try to store DOI information
-        if pub and "doi" in entry.lower():
+        if pub and (("doi" in entry) or ("DOI" in entry)):
             db_doi, created = Db.objects.get_or_create(name="DOI")
             try:
                 doi = entry["DOI"]
