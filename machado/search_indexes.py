@@ -19,7 +19,7 @@ VALID_PROGRAMS = (
     .values_list("program")
 )
 
-OVERLAPPING_SNV = Feature.objects.filter(type__name="SNV").exists()
+OVERLAPPING_FEATURES = Feature.objects.filter(type__name__in=["SNV", "QTL"]).exists()
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -128,15 +128,16 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 keywords.add(i)
 
         # IDs of overlapping features
-        if OVERLAPPING_SNV:
+        if OVERLAPPING_FEATURES:
             for location in obj.Featureloc_feature_Feature.all():
                 for overlapping_feature in Featureloc.objects.filter(
                     srcfeature=location.srcfeature,
-                    feature__type__name="SNV",
+                    feature__type__name__in=["SNV", "QTL"],
                     fmin__lte=location.fmax,
                     fmax__gte=location.fmin,
                 ):
                     keywords.add(overlapping_feature.feature.uniquename)
+                    keywords.add(overlapping_feature.feature.name)
 
         if obj.name is not None:
             keywords.add(obj.name)

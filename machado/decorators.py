@@ -77,10 +77,19 @@ def get_feature_properties(self):
         return (
             self.Featureprop_feature_Feature.filter(type__cv__name="feature_property")
             .exclude(type__name__in=attrs_bl)
+            .order_by("type__name")
             .values_list("type__name", "value")
         )
     except ObjectDoesNotExist:
         return list()
+
+
+def get_feature_synonyms(self):
+    """Get all the feature synonyms."""
+    result = list()
+    for feature_synonym in self.FeatureSynonym_feature_Feature.all():
+        result.append("{}".format(feature_synonym.synonym.name))
+    return result
 
 
 def get_feature_orthologous_group(self):
@@ -243,6 +252,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_cvterm", get_feature_cvterm)
         setattr(cls, "get_location", get_feature_location)
         setattr(cls, "get_properties", get_feature_properties)
+        setattr(cls, "get_synonyms", get_feature_synonyms)
         return cls
 
     return wrapper
