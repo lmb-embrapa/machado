@@ -70,6 +70,28 @@ def get_feature_display(self):
             return None
 
 
+def get_feature_properties(self):
+    """Get all the feature properties."""
+    attrs_bl = ["coexpression group", "coexpression group"]
+    try:
+        return (
+            self.Featureprop_feature_Feature.filter(type__cv__name="feature_property")
+            .exclude(type__name__in=attrs_bl)
+            .order_by("type__name")
+            .values_list("type__name", "value")
+        )
+    except ObjectDoesNotExist:
+        return list()
+
+
+def get_feature_synonyms(self):
+    """Get all the feature synonyms."""
+    result = list()
+    for feature_synonym in self.FeatureSynonym_feature_Feature.all():
+        result.append("{}".format(feature_synonym.synonym.name))
+    return result
+
+
 def get_feature_orthologous_group(self):
     """Get the orthologous group id."""
     try:
@@ -137,18 +159,16 @@ def get_feature_expression_samples(self):
 
 def get_feature_relationship(self):
     """Get the relationships."""
+    if not hasattr(settings, "MACHADO_VALID_TYPES"):
+        raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
+
     result = list()
     feature_relationships = self.FeatureRelationship_object_Feature.filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if (
-            hasattr(settings, "MACHADO_VALID_TYPES")
-            and feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES
-        ):
-            result.append(feature_relationship.subject)
-        else:
+        if feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.subject)
 
     feature_relationships = self.FeatureRelationship_subject_Feature.filter(
@@ -156,12 +176,7 @@ def get_feature_relationship(self):
         type__cv__name="sequence",
     )
     for feature_relationship in feature_relationships:
-        if (
-            hasattr(settings, "MACHADO_VALID_TYPES")
-            and feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES
-        ):
-            result.append(feature_relationship.object)
-        else:
+        if feature_relationship.object.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.object)
 
     return result
@@ -236,6 +251,8 @@ def machadoFeatureMethods():
         setattr(cls, "get_relationship", get_feature_relationship)
         setattr(cls, "get_cvterm", get_feature_cvterm)
         setattr(cls, "get_location", get_feature_location)
+        setattr(cls, "get_properties", get_feature_properties)
+        setattr(cls, "get_synonyms", get_feature_synonyms)
         return cls
 
     return wrapper

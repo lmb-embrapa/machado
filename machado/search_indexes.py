@@ -19,7 +19,7 @@ VALID_PROGRAMS = (
     .values_list("program")
 )
 
-OVERLAPPING_SNV = Feature.objects.filter(type__name="SNV").exists()
+OVERLAPPING_FEATURES = ["SNV", "QTL"]
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -128,15 +128,22 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 keywords.add(i)
 
         # IDs of overlapping features
-        if OVERLAPPING_SNV:
-            for location in obj.Featureloc_feature_Feature.all():
-                for overlapping_feature in Featureloc.objects.filter(
-                    srcfeature=location.srcfeature,
-                    feature__type__name="SNV",
-                    fmin__lte=location.fmax,
-                    fmax__gte=location.fmin,
+        if Feature.objects.filter(type__name__in=OVERLAPPING_FEATURES).exists():
+
+            try:
+                for location in obj.Featureloc_feature_Feature.filter(
+                    feature__type__name__in=settings.MACHADO_VALID_TYPES
                 ):
-                    keywords.add(overlapping_feature.feature.uniquename)
+                    for overlapping_feature in Featureloc.objects.filter(
+                        srcfeature=location.srcfeature,
+                        feature__type__name__in=OVERLAPPING_FEATURES,
+                        fmin__lte=location.fmax,
+                        fmax__gte=location.fmin,
+                    ):
+                        keywords.add(overlapping_feature.feature.uniquename)
+                        keywords.add(overlapping_feature.feature.name)
+            except AttributeError:
+                raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
         if obj.name is not None:
             keywords.add(obj.name)

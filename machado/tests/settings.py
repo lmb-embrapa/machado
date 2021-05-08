@@ -47,3 +47,5 @@ HAYSTACK_CONNECTIONS = {
         "INDEX_NAME": "haystack",
     }
 }
+
+MACHADO_VALID_TYPES = ["gene", "mRNA", "polypeptide"]

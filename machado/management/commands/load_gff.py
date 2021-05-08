@@ -46,6 +46,11 @@ class Command(BaseCommand):
             type=str,
         )
         parser.add_argument(
+            "--qtl",
+            help="Set this flag to handle GFF files from QTLDB",
+            action="store_true",
+        )
+        parser.add_argument(
             "--doi",
             help="DOI of the article reference to "
             "this sequence. E.g.: 10.1111/s12122-012-1313-4",
@@ -60,6 +65,7 @@ class Command(BaseCommand):
         organism: str,
         doi: str = None,
         ignore: str = None,
+        qtl: bool = False,
         cpu: int = 1,
         verbosity: int = 1,
         **options
@@ -104,7 +110,9 @@ class Command(BaseCommand):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(
-                    pool.submit(feature_file.store_tabix_GFF_feature, row, organism)
+                    pool.submit(
+                        feature_file.store_tabix_GFF_feature, row, organism, qtl
+                    )
                 )
 
                 if len(tasks) >= chunk_size:

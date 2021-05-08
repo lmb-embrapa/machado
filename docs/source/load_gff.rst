@@ -30,6 +30,7 @@ Load GFF
 --organism 	  Species name (eg. Homo sapiens, Mus musculus) *
 --ignore 	  List of feature types to ignore (eg. chromosome scaffold)
 --doi 		  DOI of a reference stored using *load_publication* (eg. 10.1111/s12122-012-1313-4)
+--qtl 		  Set this flag to handle GFF files from QTLDB
 --cpu 		  Number of threads
 ==========    ==================================================================================
 
