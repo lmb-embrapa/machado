@@ -127,7 +127,7 @@ class AssayLoader(object):
     ) -> None:
         """Store analysisprop."""
         try:
-            Assayprop.objects.create(
+            Assayprop.objects.get_or_create(
                 assay=assay, type_id=type_id, value=value, rank=rank
             )
         except IntegrityError as e:
