@@ -7,6 +7,7 @@
 """Search indexes."""
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from haystack import indexes
 
 from machado.models import Analysis, Analysisfeature
@@ -135,6 +136,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                     feature__type__name__in=settings.MACHADO_VALID_TYPES
                 ):
                     for overlapping_feature in Featureloc.objects.filter(
+                        ~Q(feature__type__name=location.feature.type.name),
                         srcfeature=location.srcfeature,
                         feature__type__name__in=OVERLAPPING_FEATURES,
                         fmin__lte=location.fmax,
