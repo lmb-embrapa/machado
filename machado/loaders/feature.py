@@ -423,8 +423,6 @@ class FeatureLoader(object):
                 "timelastmodified": datetime.now(timezone.utc),
             },
         )
-        if not created:
-            return None
 
         for aux_dbxref in searchio_hit.dbxrefs:
             aux_db, aux_term = aux_dbxref.split(":")
