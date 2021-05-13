@@ -8,7 +8,7 @@
 
 from datetime import datetime, timezone
 from time import time
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Set
 
 from Bio.SearchIO._model import Hit
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -36,6 +36,8 @@ class FeatureLoader(object):
         self.cache: Dict[str, str] = dict()
         self.usedcache = 0
         self.relationships: List[Dict[str, str]] = list()
+        self.ignored_attrs: Set[str] = set()
+        self.ignored_goterms: Set[str] = set()
 
         try:
             self.db, created = Db.objects.get_or_create(name=source.upper())
