@@ -34,7 +34,8 @@
 				<th><a href="?{% param_replace order_by='organism' %}">Organism</a></th>
 				<th><a href="?{% param_replace order_by='so_term' %}">Feature Type</a></th>
 				<th><a href="?{% param_replace order_by='uniquename' %}">Feature ID</a></th>
-                <th>Relationship</th>
+		                <th><a href="?{% param_replace order_by='name' %}">Info</a></th>
+                                <th>Relationship</th>
 				<th><a href="?{% param_replace order_by='display' %}">Display</a></th>
                 {% if orthologs %}<th><a href="?{% param_replace order_by='orthologous_group' %}">Orthologous Group</a></th>{% endif %}
 				{% if coexp_groups %}<th><a href="?{% param_replace order_by='coexpression_group' %}">Coexpression Group</a></th>{% endif %}
@@ -46,6 +47,7 @@
                 <td>
                     <a href="{% url 'feature' %}?feature_id={{ result.pk|safe }}">{{ result.uniquename }}</a>
                 </td>
+		<td>{{ result.name|default_if_none:'' }}</td>
                 <td>
 					{% for relationship in result.relationship %}
 					  {% with relationship|split:" " as r_list %}
