@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Db, Cvterm, Dbxref
 from machado.models import FeatureCvterm, FeatureDbxref
-from machado.models import Featureprop, FeatureSynonym
+from machado.models import Featureprop, FeaturePub, FeatureSynonym
 from machado.models import Pub, Synonym
 
 
@@ -33,6 +33,7 @@ VALID_GENOME_ATTRS = [
     "description",
     "product",
     "pacid",
+    "doi",
 ]
 
 VALID_POLYMORPHISM_ATTRS = ["tsa", "vc"]
@@ -52,6 +53,7 @@ VALID_QTL_ATTRS = [
     "p-value",
     "trait_id",
     "pubmed_id",
+    "doi",
 ]
 
 
@@ -175,6 +177,17 @@ class FeatureAttributesLoader(object):
                 FeatureDbxref.objects.create(
                     feature_id=feature_id, dbxref=dbxref, is_current=1
                 )
+            elif key in ["doi"]:
+                try:
+                    doi_obj = Dbxref.objects.get(
+                        accession=attrs[key].lower(), db__name="DOI"
+                    )
+                    pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
+                except ObjectDoesNotExist:
+                    raise ImportingError("{} not registered.", attrs[key])
+
+                FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
+
             elif key in ["alias", "gene_synonym", "synonym", "abbrev"]:
                 synonym, created = Synonym.objects.get_or_create(
                     name=attrs.get(key),
