@@ -143,7 +143,8 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                         fmax__gte=location.fmin,
                     ):
                         keywords.add(overlapping_feature.feature.uniquename)
-                        keywords.add(overlapping_feature.feature.name)
+                        if overlapping_feature.feature.name:
+                            keywords.add(overlapping_feature.feature.name)
             except AttributeError:
                 raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
