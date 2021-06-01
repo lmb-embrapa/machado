@@ -184,3 +184,5 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
         ).feature_id
     except ObjectDoesNotExist:
         raise ImportingError("{} {} does not exist".format(soterm, accession))
+    except MultipleObjectsReturned:
+        raise ImportingError("{} {} matches multiple features".format(soterm, accession))
