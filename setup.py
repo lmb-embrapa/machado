@@ -32,8 +32,8 @@ setup(
     install_requires=[
         "django==3.1.8",
         "psycopg2-binary==2.8.6",
+        "obonet==0.3.0",
         "biopython==1.78",
-        "obonet==0.2.6",
         "tqdm==4.47.0",
         "typing==3.7.4.3",
         "bibtexparser==1.2.0",
