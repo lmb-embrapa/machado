@@ -170,7 +170,9 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
     # feature.dbxref.accession
     try:
         return Feature.objects.get(
-            dbxref__accession__iexact=accession, type__cv__name="sequence", type__name=soterm
+            dbxref__accession__iexact=accession,
+            type__cv__name="sequence",
+            type__name=soterm,
         ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
@@ -185,4 +187,6 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist("{} {} does not exist".format(soterm, accession))
     except MultipleObjectsReturned:
-        raise MultipleObjectsReturned("{} {} matches multiple features".format(soterm, accession))
+        raise MultipleObjectsReturned(
+            "{} {} matches multiple features".format(soterm, accession)
+        )
