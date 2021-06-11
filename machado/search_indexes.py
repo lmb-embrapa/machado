@@ -11,7 +11,7 @@ from django.db.models import Q
 from haystack import indexes
 
 from machado.models import Analysis, Analysisfeature
-from machado.models import Feature, FeatureCvterm, Featureprop
+from machado.models import Feature, FeatureCvterm, FeatureDbxref, Featureprop
 from machado.models import Featureloc, FeatureRelationship
 
 VALID_PROGRAMS = (
@@ -100,6 +100,12 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         # Featureprop: display or product or description or note (in that order)
         if obj.get_display():
             keywords.add(obj.get_display())
+
+        # DBxRef
+        feature_dbxref = FeatureDbxref.objects.filter(feature=obj)
+        for i in feature_dbxref:
+            term = "{}:{}".format(i.dbxref.db.name, i.dbxref.accession)
+            keywords.add(term)
 
         # GO terms
         feature_cvterm = FeatureCvterm.objects.filter(feature=obj)
