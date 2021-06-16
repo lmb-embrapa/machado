@@ -105,6 +105,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         feature_dbxref = FeatureDbxref.objects.filter(feature=obj)
         for i in feature_dbxref:
             term = "{}:{}".format(i.dbxref.db.name, i.dbxref.accession)
+            keywords.add(i.dbxref.accession)
             keywords.add(term)
 
         # GO terms
