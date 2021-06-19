@@ -55,6 +55,6 @@ class FeatureSearchForm(FacetedSearchForm):
         )
 
         for i in q.split():
-            result |= sqs.filter(text__contains=i)
+            result |= sqs.filter(text__icontains=i)
 
         return result
