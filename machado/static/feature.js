@@ -227,3 +227,32 @@ function loadSequence(){
   });
 } 
 
+
+// load expression from API
+$(document).ready(function(){
+  $("#collapseExpression").click(loadExpression());
+});
+function loadExpression(){
+  $('#collapseExpression').on('show.bs.collapse', function() {
+    var feature_id = $("#feature_id").val();
+    var home_url = $("#home_url").val();
+    var url = home_url + "api/feature/expression/" + feature_id;
+    $('#collapseExpression .table').DataTable( {
+        retrieve: true,
+        ajax: {
+            url: url,
+            dataSrc: ''
+        },
+        columns: [
+            { data: 'analysis__sourcename', title: 'Source' }, 
+            { data: 'assay_name', title: 'Assay name' }, 
+            { data: 'assay_description', title: 'Assay description' }, 
+            { data: 'biomaterial_name', title: 'Biomaterial name' }, 
+            { data: 'biomaterial_description', title: 'Biomaterial description' }, 
+            { data: 'treatment_name', title: 'Phenotype condition' }, 
+            { data: 'normscore', title: 'Normalized score (TPM)' }
+        ]
+    } );
+  });
+} 
+
