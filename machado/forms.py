@@ -6,7 +6,7 @@
 """Search forms."""
 
 from haystack.forms import FacetedSearchForm
-from haystack.inputs import Exact
+from haystack.inputs import Exact, Raw
 from haystack.query import SQ
 
 
@@ -45,16 +45,10 @@ class FeatureSearchForm(FacetedSearchForm):
                         query &= item
                     sqs = sqs.filter(query)
 
+        # escape : because of GO terms
+        q = q.replace(":", "\\:")
+
         if q == "":
             return sqs
-
-        result = sqs.filter(
-            SQ(uniquename_exact=Exact(q))
-            | SQ(name_exact=Exact(q))
-            | SQ(organism_exact=Exact(q))
-        )
-
-        for i in q.split():
-            result |= sqs.filter(text__icontains=i)
-
-        return result
+        else:
+            return sqs.filter(text=Raw(q))
