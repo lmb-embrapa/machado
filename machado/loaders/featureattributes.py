@@ -34,6 +34,8 @@ VALID_GENOME_ATTRS = [
     "product",
     "pacid",
     "doi",
+    "freq",
+    "cnv_type",
 ]
 
 VALID_POLYMORPHISM_ATTRS = ["tsa", "vc"]
