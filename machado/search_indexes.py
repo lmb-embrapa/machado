@@ -20,7 +20,7 @@ VALID_PROGRAMS = (
     .values_list("program")
 )
 
-OVERLAPPING_FEATURES = ["SNV", "QTL"]
+OVERLAPPING_FEATURES = ["SNV", "QTL", "copy_number_variation"]
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -63,7 +63,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 is_obsolete=False,
             )
         except AttributeError:
-            raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
+            raise AttributeError("It is required to set MACHADO_VALID_TYPES in the settings file.")
 
     def prepare_organism(self, obj):
         """Prepare organism."""
