@@ -52,7 +52,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def __init__(self):
         """Check for overlapping features."""
-        self.has_overlapping_features = Feature.objects.filter(type__name__in=OVERLAPPING_FEATURES).exists()
+        self.has_overlapping_features = Feature.objects.filter(
+            type__name__in=OVERLAPPING_FEATURES
+        ).exists()
         super()
 
     def get_model(self):
