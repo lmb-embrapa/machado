@@ -51,6 +51,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     orthologs_coexpression = indexes.MultiValueField(faceted=True)
 
     def __init__(self):
+        """Check for overlapping features."""
         self.has_overlapping_features = Feature.objects.filter(type__name__in=OVERLAPPING_FEATURES).exists()
         super()
 
