@@ -55,7 +55,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         self.has_overlapping_features = Feature.objects.filter(
             type__name__in=OVERLAPPING_FEATURES
         ).exists()
-        super()
 
     def get_model(self):
         """Get model."""
@@ -68,7 +67,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 type__name__in=settings.MACHADO_VALID_TYPES,
                 type__cv__name="sequence",
                 is_obsolete=False,
-            )
+            ).order_by('feature_id')
         except AttributeError:
             raise AttributeError("It is required to set MACHADO_VALID_TYPES in the settings file.")
 
