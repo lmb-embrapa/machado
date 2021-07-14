@@ -50,6 +50,13 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     # orthologs_biomaterial = indexes.MultiValueField(faceted=True)
     orthologs_coexpression = indexes.MultiValueField(faceted=True)
 
+    def __init__(self):
+        """Check for overlapping features."""
+        self.has_overlapping_features = Feature.objects.filter(
+            type__name__in=OVERLAPPING_FEATURES
+        ).exists()
+        super()
+
     def get_model(self):
         """Get model."""
         return Feature
@@ -134,7 +141,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
                 keywords.add(i)
 
         # IDs of overlapping features
-        if Feature.objects.filter(type__name__in=OVERLAPPING_FEATURES).exists():
+        if self.has_overlapping_features:
 
             try:
                 for location in obj.Featureloc_feature_Feature.filter(
