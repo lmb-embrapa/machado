@@ -20,7 +20,7 @@ VALID_PROGRAMS = (
     .values_list("program")
 )
 
-OVERLAPPING_FEATURES = ["SNV", "QTL"]
+OVERLAPPING_FEATURES = ["SNV", "QTL", "copy_number_variation"]
 
 
 class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
@@ -55,7 +55,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
         self.has_overlapping_features = Feature.objects.filter(
             type__name__in=OVERLAPPING_FEATURES
         ).exists()
-        super()
 
     def get_model(self):
         """Get model."""
@@ -64,13 +63,19 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Index queryset."""
         try:
-            return self.get_model().objects.filter(
-                type__name__in=settings.MACHADO_VALID_TYPES,
-                type__cv__name="sequence",
-                is_obsolete=False,
+            return (
+                self.get_model()
+                .objects.filter(
+                    type__name__in=settings.MACHADO_VALID_TYPES,
+                    type__cv__name="sequence",
+                    is_obsolete=False,
+                )
+                .order_by("feature_id")
             )
         except AttributeError:
-            raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
+            raise AttributeError(
+                "It is required to set MACHADO_VALID_TYPES in the settings file."
+            )
 
     def prepare_organism(self, obj):
         """Prepare organism."""
