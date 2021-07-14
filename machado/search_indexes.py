@@ -63,13 +63,19 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Index queryset."""
         try:
-            return self.get_model().objects.filter(
-                type__name__in=settings.MACHADO_VALID_TYPES,
-                type__cv__name="sequence",
-                is_obsolete=False,
-            ).order_by('feature_id')
+            return (
+                self.get_model()
+                .objects.filter(
+                    type__name__in=settings.MACHADO_VALID_TYPES,
+                    type__cv__name="sequence",
+                    is_obsolete=False,
+                )
+                .order_by("feature_id")
+            )
         except AttributeError:
-            raise AttributeError("It is required to set MACHADO_VALID_TYPES in the settings file.")
+            raise AttributeError(
+                "It is required to set MACHADO_VALID_TYPES in the settings file."
+            )
 
     def prepare_organism(self, obj):
         """Prepare organism."""
