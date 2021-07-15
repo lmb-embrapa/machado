@@ -49,29 +49,50 @@ class DataSummaryView(View):
                     type__name__in=settings.MACHADO_VALID_TYPES,
                     type__cv__name="sequence",
                 )
-                .values("organism__genus", "organism__species", "type__name")
+                .values(
+                    "organism__genus",
+                    "organism__species",
+                    "organism__infraspecific_name",
+                    "type__name",
+                )
                 .annotate(count=Count("type__name"))
-                .order_by("organism__genus", "organism__species")
+                .order_by(
+                    "organism__genus",
+                    "organism__species",
+                    "organism__infraspecific_name",
+                )
             )
         else:
             counts = (
                 Feature.objects.filter(type__cv__name="sequence")
-                .values("organism__genus", "organism__species", "type__name")
+                .values(
+                    "organism__genus",
+                    "organism__species",
+                    "organism__infraspecific_name",
+                    "type__name",
+                )
                 .annotate(count=Count("type__name"))
-                .order_by("organism__genus", "organism__species")
+                .order_by(
+                    "organism__genus",
+                    "organism__species",
+                    "organism__infraspecific_name",
+                )
             )
 
         for item in counts:
-            organism_name = "{} {}".format(
-                item["organism__genus"], item["organism__species"]
+            organism_name = "{} {} {}".format(
+                item["organism__genus"],
+                item["organism__species"],
+                item["organism__infraspecific_name"],
             )
             data.setdefault(organism_name, {}).setdefault("counts", []).append(item)
 
         for key, value in data.items():
-            genus, species = key.split()
+            genus, species, infraspecific_name = key.split()
             pubs = Pub.objects.filter(
                 OrganismPub_pub_Pub__organism__genus=genus,
                 OrganismPub_pub_Pub__organism__species=species,
+                OrganismPub_pub_Pub__organism__infraspecific_name=infraspecific_name,
             )
             if pubs:
                 data[key].update({"pubs": pubs})

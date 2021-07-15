@@ -213,9 +213,10 @@ def get_feature_location(self):
                     location.fmin - offset,
                     location.fmax + offset,
                 )
-                organism = "{} {}".format(
+                organism = "{} {} {}".format(
                     location.srcfeature.organism.genus,
                     location.srcfeature.organism.species,
+                    location.srcfeature.organism.infraspecific_name,
                 )
                 jbrowse_url = (
                     "{}/?data=data/{}&loc={}"
