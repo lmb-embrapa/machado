@@ -83,12 +83,21 @@ class DataSummaryView(View):
             organism_name = "{} {} {}".format(
                 item["organism__genus"],
                 item["organism__species"],
-                item["organism__infraspecific_name"],
+                item["organism__infraspecific_name"]
+                if item["organism__infraspecific_name"] is not None
+                else "",
             )
             data.setdefault(organism_name, {}).setdefault("counts", []).append(item)
 
         for key, value in data.items():
-            genus, species, infraspecific_name = key.split()
+            organism = key.split()
+            genus = organism[0]
+            species = organism[1]
+            try:
+                infraspecific_name = organism[2]
+            except IndexError:
+                infraspecific_name = ""
+
             pubs = Pub.objects.filter(
                 OrganismPub_pub_Pub__organism__genus=genus,
                 OrganismPub_pub_Pub__organism__species=species,

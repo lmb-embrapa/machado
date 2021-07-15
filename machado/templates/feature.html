@@ -18,7 +18,7 @@
   <input type="hidden" value="{{ feature.feature_id|safe }}" id="feature_id" name="feature_id"></input>
   <div class="card m-1">
     <div class="card-header">
-        <small><i>{{ feature.organism.genus }} {{ feature.organism.species }} {{ feature.organism.infraspecific_name }}</i></small>
+        <small><i>{{ feature.organism.genus }} {{ feature.organism.species }} {{ feature.organism.infraspecific_name|default_if_none:'' }}</i></small>
         <h3 class="card-title">
 			{{ feature.type.name }}: {{ feature.name|default_if_none:feature.uniquename }}
 		</h3>
