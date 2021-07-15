@@ -80,7 +80,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_organism(self, obj):
         """Prepare organism."""
-        return " ".join([obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name])
+        return " ".join(
+            [obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name]
+        )
 
     def prepare_analyses(self, obj):
         """Prepare analyses."""
@@ -275,4 +277,9 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
-        return "{} {} {}".format(obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name, self.temp)
+        return "{} {} {}".format(
+            obj.organism.genus,
+            obj.organism.species,
+            obj.organism.infraspecific_name,
+            self.temp,
+        )
