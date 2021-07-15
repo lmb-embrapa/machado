@@ -213,11 +213,14 @@ def get_feature_location(self):
                     location.fmin - offset,
                     location.fmax + offset,
                 )
-                organism = "{} {} {}".format(
+                organism = "{} {}".format(
                     location.srcfeature.organism.genus,
                     location.srcfeature.organism.species,
-                    location.srcfeature.organism.infraspecific_name,
                 )
+                if location.srcfeature.organism.infraspecific_name is not None:
+                    organism += " {}".format(
+                        location.srcfeature.organism.infraspecific_name
+                    )
                 jbrowse_url = (
                     "{}/?data=data/{}&loc={}"
                     "&tracklist=0&nav=0&overview=0"

@@ -221,9 +221,10 @@ class FeatureOrthologSerializer(serializers.ModelSerializer):
 
     def get_organism(self, obj):
         """Get the organism."""
-        return "{} {} {}".format(
-            obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name
-        )
+        organism = "{} {}".format(obj.organism.genus, obj.organism.species)
+        if obj.organism.infraspecific_name:
+            organism += " {}".format(obj.organism.infraspecific_name)
+        return organism
 
 
 class FeatureSequenceSerializer(serializers.ModelSerializer):
@@ -363,9 +364,10 @@ class FeatureCoexpressionSerializer(serializers.ModelSerializer):
 
     def get_organism(self, obj):
         """Get the organism."""
-        return "{} {} {}".format(
-            obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name
-        )
+        organism = "{} {}".format(obj.organism.genus, obj.organism.species)
+        if obj.organism.infraspecific_name:
+            organism += " {}".format(obj.organism.infraspecific_name)
+        return organism
 
 
 class FeatureExpressionSerializer(serializers.Serializer):
@@ -410,9 +412,10 @@ class FeatureInfoSerializer(serializers.ModelSerializer):
 
     def get_organism(self, obj):
         """Get the organism."""
-        return "{} {} {}".format(
-            obj.organism.genus, obj.organism.species, obj.organism.infraspecific_name
-        )
+        organism = "{} {}".format(obj.organism.genus, obj.organism.species)
+        if obj.organism.infraspecific_name:
+            organism += " {}".format(obj.organism.infraspecific_name)
+        return organism
 
     def get_relationship(self, obj):
         """Get the relationship."""
