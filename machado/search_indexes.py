@@ -277,7 +277,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_autocomplete(self, obj):
         """Prepare autocomplete."""
-        return "{} {} {}".format(
+        return "{} {} {} {}".format(
             obj.organism.genus,
             obj.organism.species,
             obj.organism.infraspecific_name,
