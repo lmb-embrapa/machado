@@ -231,8 +231,11 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
             feature__FeatureRelationship_subject_Feature__type__name="part_of",
             feature__FeatureRelationship_subject_Feature__type__cv__name="sequence"
         )
-        serializer = JBrowseFeatureLocSerializer(related_featurelocs, context=self.context, many=True)
-        return serializer.data
+        if len(related_featurelocs) > 0:
+            serializer = JBrowseFeatureLocSerializer(related_featurelocs, context=self.context, many=True)
+            return serializer.data
+        else:
+            return []
 
     def get_seq(self, obj):
         """Get the sequence."""
