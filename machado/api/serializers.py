@@ -184,7 +184,6 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
             'type',
             'accession',
             'uniqueID',
-            'subfeatures',
             'seq',
             'display',
             'name'
