@@ -211,7 +211,9 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         context = self.get_serializer_context()
-        serializer = JBrowseFeatureLocWithSubSerializer(queryset, context=context, many=True)
+        serializer = JBrowseFeatureLocWithSubSerializer(
+            queryset, context=context, many=True
+        )
         return Response({"features": serializer.data})
 
     def get_serializer_context(self):
@@ -244,7 +246,9 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
             features_locs = features_locs.filter(feature__is_obsolete=0)
 
             if soType is not None:
-                features_locs = features_locs.filter(feature__type__cv__name="sequence", feature__type__name=soType)
+                features_locs = features_locs.filter(
+                    feature__type__cv__name="sequence", feature__type__name=soType
+                )
             return features_locs
 
         except ObjectDoesNotExist:

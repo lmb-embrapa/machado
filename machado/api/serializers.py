@@ -160,6 +160,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the display."""
         return obj.get_display()
 
+
 class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
 
@@ -178,15 +179,15 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
 
         model = Featureloc
         fields = (
-            'start',
-            'end',
-            'strand',
-            'type',
-            'accession',
-            'uniqueID',
-            'seq',
-            'display',
-            'name'
+            "start",
+            "end",
+            "strand",
+            "type",
+            "accession",
+            "uniqueID",
+            "seq",
+            "display",
+            "name",
         )
 
     def get_start(self, obj):
@@ -234,6 +235,7 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
         """Get the name."""
         return obj.feature.name
 
+
 class JBrowseFeatureLocWithSubSerializer(JBrowseFeatureLocSerializer):
 
     subfeatures = serializers.SerializerMethodField()
@@ -243,16 +245,16 @@ class JBrowseFeatureLocWithSubSerializer(JBrowseFeatureLocSerializer):
 
         model = Featureloc
         fields = (
-            'start',
-            'end',
-            'strand',
-            'type',
-            'accession',
-            'uniqueID',
-            'subfeatures',
-            'seq',
-            'display',
-            'name'
+            "start",
+            "end",
+            "strand",
+            "type",
+            "accession",
+            "uniqueID",
+            "subfeatures",
+            "seq",
+            "display",
+            "name",
         )
 
     def get_subfeatures(self, obj):
@@ -260,13 +262,16 @@ class JBrowseFeatureLocWithSubSerializer(JBrowseFeatureLocSerializer):
         related_featurelocs = Featureloc.objects.filter(
             feature__FeatureRelationship_subject_Feature__subject_id=obj.feature.feature_id,
             feature__FeatureRelationship_subject_Feature__type__name="part_of",
-            feature__FeatureRelationship_subject_Feature__type__cv__name="sequence"
+            feature__FeatureRelationship_subject_Feature__type__cv__name="sequence",
         )
         if len(related_featurelocs) > 0:
-            serializer = JBrowseFeatureLocSerializer(related_featurelocs, context=self.context, many=True)
+            serializer = JBrowseFeatureLocSerializer(
+                related_featurelocs, context=self.context, many=True
+            )
             return serializer.data
         else:
             return []
+
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""
