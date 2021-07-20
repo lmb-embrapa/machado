@@ -160,6 +160,80 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         """Get the display."""
         return obj.get_display()
 
+class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
+    """JBrowse transcript serializer."""
+
+    start = serializers.SerializerMethodField()
+    end = serializers.SerializerMethodField()
+    strand = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    accession = serializers.SerializerMethodField()
+    uniqueID = serializers.SerializerMethodField()
+    subfeatures = serializers.SerializerMethodField()
+    seq = serializers.SerializerMethodField()
+    display = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Featureloc
+        fields = ()
+
+    def get_start(self, obj):
+        """Get the start location."""
+        if self.context.get("soType"):
+            return obj.fmin
+        else:
+            return 1
+
+    def get_end(self, obj):
+        """Get the end location."""
+        if self.context.get("soType"):
+            return obj.fmax
+        else:
+            return obj.feature.seqlen
+
+    def get_strand(self, obj):
+        """Get the strand."""
+        try:
+            return obj.strand
+        except AttributeError:
+            return None
+
+    def get_type(self, obj):
+        """Get the type."""
+        return obj.feature.type.name
+
+    def get_accession(self, obj):
+        """Get the uniquename."""
+        return obj.feature.uniquename
+
+    def get_uniqueID(self, obj):
+        """Get the uniquename."""
+        return obj.feature.uniquename
+
+    def get_subfeatures(self, obj):
+        """Get the subfeatures."""
+        related_featurelocs = Featureloc.objects.filter(
+            feature__FeatureRelationship_subject_Feature__subject_id=obj.feature.feature_id,
+            feature__FeatureRelationship_subject_Feature__type__name="part_of",
+            feature__FeatureRelationship_subject_Feature__type__cv__name="sequence"
+        )
+        serializer = JBrowseFeatureLocSerializer(related_featurelocs, context=self.context, many=True)
+        return serializer.data
+
+    def get_seq(self, obj):
+        """Get the sequence."""
+        return obj.feature.residues
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.feature.get_display()
+
+    def get_name(self, obj):
+        """Get the name."""
+        return obj.feature.name
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""

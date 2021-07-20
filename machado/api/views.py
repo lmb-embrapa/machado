@@ -18,7 +18,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from machado.api.serializers import JBrowseFeatureSerializer
+from machado.api.serializers import JBrowseFeatureLocSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
@@ -178,7 +178,7 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
 class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
-    serializer_class = JBrowseFeatureSerializer
+    serializer_class = JBrowseFeatureLocSerializer
 
     start_param = openapi.Parameter(
         "start",
@@ -211,7 +211,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         context = self.get_serializer_context()
-        serializer = JBrowseFeatureSerializer(queryset, context=context, many=True)
+        serializer = JBrowseFeatureLocSerializer(queryset, context=context, many=True)
         return Response({"features": serializer.data})
 
     def get_serializer_context(self):
@@ -241,14 +241,11 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
             if end is not None:
                 features_locs = features_locs.filter(fmin__lte=end)
             features_locs = features_locs.filter(fmax__gte=start)
-            features_ids = features_locs.values_list("feature_id", flat=True)
+            features_locs = features_locs.filter(feature__is_obsolete=0)
 
-            features = Feature.objects.filter(
-                feature_id__in=features_ids, is_obsolete=0
-            )
             if soType is not None:
-                features = features.filter(type__cv__name="sequence", type__name=soType)
-            return features
+                features_locs = features_locs.filter(feature__type__cv__name="sequence", feature__type__name=soType)
+            return features_locs
 
         except ObjectDoesNotExist:
             return None
