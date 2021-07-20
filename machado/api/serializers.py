@@ -178,7 +178,18 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
         """Meta."""
 
         model = Featureloc
-        fields = ()
+        fields = (
+            'start',
+            'end',
+            'strand',
+            'type',
+            'accession',
+            'uniqueID',
+            'subfeatures',
+            'seq',
+            'display',
+            'name'
+        )
 
     def get_start(self, obj):
         """Get the start location."""
