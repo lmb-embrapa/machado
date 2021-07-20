@@ -169,7 +169,6 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     accession = serializers.SerializerMethodField()
     uniqueID = serializers.SerializerMethodField()
-    subfeatures = serializers.SerializerMethodField()
     seq = serializers.SerializerMethodField()
     display = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
@@ -224,6 +223,39 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
         """Get the uniquename."""
         return obj.feature.uniquename
 
+    def get_seq(self, obj):
+        """Get the sequence."""
+        return obj.feature.residues
+
+    def get_display(self, obj):
+        """Get the display."""
+        return obj.feature.get_display()
+
+    def get_name(self, obj):
+        """Get the name."""
+        return obj.feature.name
+
+class JBrowseFeatureLocWithSubSerializer(JBrowseFeatureLocSerializer):
+
+    subfeatures = serializers.SerializerMethodField()
+
+    class Meta:
+        """Meta."""
+
+        model = Featureloc
+        fields = (
+            'start',
+            'end',
+            'strand',
+            'type',
+            'accession',
+            'uniqueID',
+            'subfeatures',
+            'seq',
+            'display',
+            'name'
+        )
+
     def get_subfeatures(self, obj):
         """Get the subfeatures."""
         related_featurelocs = Featureloc.objects.filter(
@@ -236,18 +268,6 @@ class JBrowseFeatureLocSerializer(serializers.ModelSerializer):
             return serializer.data
         else:
             return []
-
-    def get_seq(self, obj):
-        """Get the sequence."""
-        return obj.feature.residues
-
-    def get_display(self, obj):
-        """Get the display."""
-        return obj.feature.get_display()
-
-    def get_name(self, obj):
-        """Get the name."""
-        return obj.feature.name
 
 class JBrowseRefseqSerializer(serializers.ModelSerializer):
     """JBrowse transcript serializer."""

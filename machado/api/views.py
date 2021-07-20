@@ -18,7 +18,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from machado.api.serializers import JBrowseFeatureLocSerializer
+from machado.api.serializers import JBrowseFeatureLocWithSubSerializer
 from machado.api.serializers import JBrowseGlobalSerializer
 from machado.api.serializers import JBrowseNamesSerializer
 from machado.api.serializers import JBrowseRefseqSerializer
@@ -178,7 +178,7 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
 class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     """API endpoint to view gene."""
 
-    serializer_class = JBrowseFeatureLocSerializer
+    serializer_class = JBrowseFeatureLocWithSubSerializer
 
     start_param = openapi.Parameter(
         "start",
@@ -211,7 +211,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         context = self.get_serializer_context()
-        serializer = JBrowseFeatureLocSerializer(queryset, context=context, many=True)
+        serializer = JBrowseFeatureLocWithSubSerializer(queryset, context=context, many=True)
         return Response({"features": serializer.data})
 
     def get_serializer_context(self):
