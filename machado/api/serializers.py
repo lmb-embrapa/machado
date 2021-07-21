@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from machado.models import Cvterm, Feature, Featureloc
-from machado.models import FeatureRelationship
 from machado.models import Pub
 
 
