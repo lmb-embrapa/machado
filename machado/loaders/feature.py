@@ -425,7 +425,7 @@ class FeatureLoader(object):
         )
 
         for aux_dbxref in searchio_hit.dbxrefs:
-            aux_db, aux_term = aux_dbxref.split(":")
+            aux_db, aux_term = aux_dbxref.split(":", 1)
             if aux_db == "GO":
                 try:
                     term_db = Db.objects.get(name=aux_db.upper())
@@ -469,7 +469,7 @@ class FeatureLoader(object):
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
 
         try:
-            db_name, dbxref_accession = dbxref.split(":")
+            db_name, dbxref_accession = dbxref.split(":", 1)
         except ValueError:
             raise ImportingError(
                 "Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).".format(

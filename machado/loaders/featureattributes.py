@@ -140,7 +140,7 @@ class FeatureAttributesLoader(object):
                 terms = attrs[key].split(",")
                 for term in terms:
                     try:
-                        aux_db, aux_term = term.split(":")
+                        aux_db, aux_term = term.split(":", 1)
                         term_db = Db.objects.get(name=aux_db.upper())
                         dbxref = Dbxref.objects.get(db=term_db, accession=aux_term)
                         cvterm = Cvterm.objects.get(dbxref=dbxref)
@@ -161,7 +161,7 @@ class FeatureAttributesLoader(object):
                 for dbxref in dbxrefs:
                     # It expects just one dbxref formated as XX:012345
                     try:
-                        aux_db, aux_dbxref = dbxref.split(":")
+                        aux_db, aux_dbxref = dbxref.split(":", 1)
                     except ValueError as e:
                         raise ImportingError("{}: {}".format(dbxref, e))
                     db, created = Db.objects.get_or_create(name=aux_db.upper())
