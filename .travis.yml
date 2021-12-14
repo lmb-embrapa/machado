@@ -23,6 +23,7 @@ services:
 addons:
   apt:
     packages:
+    - postgresql-server-dev-13
     - samtools
     - pandoc
 
