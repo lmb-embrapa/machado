@@ -41,7 +41,7 @@ setup(
         "djangorestframework~=3.12.4",
         "drf-yasg~=1.20.0",
         "drf-nested-routers~=0.90.0",
-        "pysam~=0.18.",
+        "pysam~=0.18.0",
     ],
     zip_safe=False,
 )
