@@ -8,6 +8,8 @@
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -58,6 +60,7 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve global settings",
         operation_description="Retrieve global settings. https://jbrowse.org/docs/data_formats.html",
     )
+    @method_decorator(cache_page(60 * 60 * 2))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -67,6 +70,11 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         """Get queryset."""
         return [{"featureDensity": 0.02}]
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(JBrowseGlobalViewSet, self).dispatch(*args, **kwargs)
 
 
 class JBrowseNamesViewSet(viewsets.GenericViewSet):
@@ -101,6 +109,7 @@ class JBrowseNamesViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve feature names by accession",
         operation_description="Retrieve feature names by accession. https://jbrowse.org/docs/data_formats.html",
     )
+    @method_decorator(cache_page(60 * 60 * 2))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -129,6 +138,11 @@ class JBrowseNamesViewSet(viewsets.GenericViewSet):
         else:
             return queryset
 
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(JBrowseNamesViewSet, self).dispatch(*args, **kwargs)
+
 
 class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
     """API endpoint to JBrowse refSeqs.json."""
@@ -155,7 +169,8 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve reference sequences",
         operation_description="Retrieve reference sequences. https://jbrowse.org/docs/data_formats.html",
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = JBrowseRefseqSerializer(queryset, many=True)
@@ -173,6 +188,11 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
             queryset = queryset.filter(type__cv__name="sequence", type__name=sotype)
 
         return queryset
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(JBrowseRefSeqsViewSet, self).dispatch(*args, **kwargs)
 
 
 class JBrowseFeatureViewSet(viewsets.GenericViewSet):
@@ -207,7 +227,8 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         operation_description="Retrieve features from reference sequence (refseq). https://jbrowse.org/docs/data_formats.html",
         operation_summary="Retrieve features from reference sequence",
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         context = self.get_serializer_context()
@@ -253,6 +274,11 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return None
 
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(JBrowseFeatureViewSet, self).dispatch(*args, **kwargs)
+
 
 class autocompleteViewSet(viewsets.GenericViewSet):
     """API endpoint to provide autocomplete hits."""
@@ -279,6 +305,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
+    @method_decorator(cache_page(60 * 60 * 2))
     def list(self, request):
         """Search the ElasticSearch index for matching strings."""
         queryset = self.get_queryset()
@@ -306,6 +333,11 @@ class autocompleteViewSet(viewsets.GenericViewSet):
             return list(result)[:max_items]
         else:
             return None
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(autocompleteViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureIDViewSet(viewsets.GenericViewSet):
@@ -344,6 +376,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
+    @method_decorator(cache_page(60 * 60 * 2))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -359,6 +392,11 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
             return {"feature_id": feature_id}
         except ObjectDoesNotExist:
             return None
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureIDViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureOrthologViewSet(viewsets.GenericViewSet):
@@ -378,7 +416,8 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureOrthologSerializer(queryset, many=True)
@@ -408,6 +447,11 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureOrthologViewSet, self).dispatch(*args, **kwargs)
+
 
 class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
     """API endpoint for feature coexpression."""
@@ -426,7 +470,8 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureCoexpressionSerializer(queryset, many=True)
@@ -456,6 +501,11 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureCoexpressionViewSet, self).dispatch(*args, **kwargs)
+
 
 class FeatureExpressionViewSet(viewsets.GenericViewSet):
     """API endpoint for feature expression."""
@@ -474,7 +524,8 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureExpressionSerializer(queryset, many=True)
@@ -488,6 +539,11 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
             return feature_obj.get_expression_samples()
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureExpressionViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureInfoViewSet(viewsets.GenericViewSet):
@@ -507,7 +563,8 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureInfoSerializer(queryset, many=False)
@@ -519,6 +576,11 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
             return Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureInfoViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureLocationViewSet(viewsets.GenericViewSet):
@@ -538,7 +600,8 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureLocationSerializer(queryset, many=True)
@@ -552,6 +615,11 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
             return feature_obj.get_location()
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureLocationViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureSequenceViewSet(viewsets.GenericViewSet):
@@ -571,7 +639,8 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureSequenceSerializer(queryset, many=False)
@@ -583,6 +652,11 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
             return Feature.objects.get(feature_id=self.kwargs.get("feature_id"))
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureSequenceViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeaturePublicationViewSet(viewsets.GenericViewSet):
@@ -602,7 +676,8 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeaturePublicationSerializer(queryset, many=True)
@@ -616,6 +691,11 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeaturePublicationViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureOntologyViewSet(viewsets.GenericViewSet):
@@ -635,7 +715,8 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureOntologySerializer(queryset, many=True)
@@ -649,6 +730,11 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureOntologyViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
@@ -668,7 +754,8 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureProteinMatchesSerializer(queryset, many=True)
@@ -684,6 +771,11 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
             )
         except ObjectDoesNotExist:
             return
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureProteinMatchesViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureSimilarityViewSet(viewsets.GenericViewSet):
@@ -703,7 +795,8 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    def list(self, request, *args, **kwargs):
+    @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
         serializer = FeatureSimilaritySerializer(queryset, many=True)
@@ -754,3 +847,8 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
             )
 
         return result
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(FeatureSimilarityViewSet, self).dispatch(*args, **kwargs)
