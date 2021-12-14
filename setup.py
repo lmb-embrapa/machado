@@ -36,7 +36,7 @@ setup(
         "obonet~=0.3.0",
         "biopython~=1.79",
         "tqdm~=4.62.3",
-        "typing~=4.0.1",
+        "typing~=3.7.4.3",
         "bibtexparser~=1.2.0",
         "djangorestframework~=3.12.4",
         "drf-yasg~=1.20.0",
