@@ -5,17 +5,17 @@ os: linux
 jobs:
   include:
     - dist: bionic
+      python: "3.7"
+    - dist: bionic
       python: "3.8"
     - dist: bionic
       python: "3.9"
-    - dist: bionic
-      python: "3.10"
+    - dist: focal
+      python: "3.7"
     - dist: focal
       python: "3.8"
     - dist: focal
       python: "3.9"
-    - dist: focal
-      python: "3.10"
 
 services:
   - postgresql
