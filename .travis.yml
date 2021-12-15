@@ -18,6 +18,7 @@ jobs:
       python: "3.9"
 
 addons:
+  postgresql: "13"
   apt:
     packages:
     - postgresql-13
