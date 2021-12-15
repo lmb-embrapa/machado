@@ -21,10 +21,10 @@ services:
   - postgresql
 
 addons:
-  postgresql: '12'
   apt:
     packages:
     - postgresql-12
+    - postgresql-client-12
     - samtools
     - pandoc
 
