@@ -27,7 +27,7 @@ addons:
 
 before_script:
   - sudo service postgresql restart
-  - postgres --version
+  - sudo -u postgres psql -V
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
