@@ -27,6 +27,7 @@ addons:
     - pandoc
 
 before_script:
+  - sudo pg_ctlcluster 13 main start
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres
