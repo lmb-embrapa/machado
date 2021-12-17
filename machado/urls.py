@@ -15,7 +15,7 @@ from machado.views import common
 try:
     CACHE_TIMEOUT = settings.CACHE_TIMEOUT
 except AttributeError:
-    CACHE_TIMEOUT = 60 * 60 * 24 * 60
+    CACHE_TIMEOUT = 60 * 60
 
 if "haystack" in settings.INSTALLED_APPS:
     from machado.views import feature, search

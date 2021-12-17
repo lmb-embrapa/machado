@@ -46,7 +46,7 @@ from re import escape, search, IGNORECASE
 try:
     CACHE_TIMEOUT = settings.CACHE_TIMEOUT
 except AttributeError:
-    CACHE_TIMEOUT = 60 * 60 * 24 * 60
+    CACHE_TIMEOUT = 60 * 60
 
 
 class StandardResultSetPagination(PageNumberPagination):
