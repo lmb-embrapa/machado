@@ -4,29 +4,24 @@ os: linux
 
 jobs:
   include:
-    - dist: bionic
+    - dist: focal
       python: "3.7"
-    - dist: bionic
+    - dist: focal
       python: "3.8"
-    - dist: bionic
+    - dist: focal
       python: "3.9"
-    - dist: xenial
-      python: "3.7"
-    - dist: xenial
-      python: "3.8"
-    - dist: xenial
-      python: "3.9"
-
-services:
-  - postgresql
 
 addons:
   apt:
     packages:
+    - postgresql-13
+    - postgresql-client-13
     - samtools
     - pandoc
 
 before_script:
+  - sudo service postgresql@13-main start
+  - sudo -u postgres psql -V
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
   - psql -c "alter user username createdb;" -U postgres

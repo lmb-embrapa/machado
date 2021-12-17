@@ -167,17 +167,17 @@
             
   <div class="section" id="cache-optional">
 <h1><span class="section-number">3.4. </span>Cache (optional)<a class="headerlink" href="#cache-optional" title="Permalink to this headline">¶</a></h1>
-<p>The machado.urls are pre-configured to enable caching.
-You just need to enable Django’s cache framework following the <a class="reference external" href="https://docs.djangoproject.com/en/2.1/topics/cache/">official instructions</a>.</p>
+<p>The machado views are pre-configured to enable local-memory caching for 1 hour.
+In order to move the cache to another location, you’ll to set Django’s cache framework following the <a class="reference external" href="https://docs.djangoproject.com/en/2.1/topics/cache/">official instructions</a>.</p>
 <p><strong>Example</strong></p>
-<p>Include the following in the settings.py:</p>
+<p>Include the following in the settings.py to store the cache in the database:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">CACHES</span> <span class="o">=</span> <span class="o">{</span>
     <span class="s1">&#39;default&#39;</span>: <span class="o">{</span>
         <span class="s1">&#39;BACKEND&#39;</span>: <span class="s1">&#39;django.core.cache.backends.db.DatabaseCache&#39;</span>,
         <span class="s1">&#39;LOCATION&#39;</span>: <span class="s1">&#39;machado_cache_table&#39;</span>,
     <span class="o">}</span>
 <span class="o">}</span>
-<span class="nv">CACHE_TIMEOUT</span> <span class="o">=</span> <span class="m">60</span> * <span class="m">60</span>  <span class="c1"># 3600 seconds == 1 hour</span>
+<span class="nv">CACHE_TIMEOUT</span> <span class="o">=</span> <span class="m">60</span> * <span class="m">60</span> * <span class="m">24</span>  <span class="c1"># 86400 seconds == 1 day</span>
 </pre></div>
 </div>
 <p>Create the cache table:</p>
