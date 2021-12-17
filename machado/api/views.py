@@ -43,6 +43,12 @@ from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 from re import escape, search, IGNORECASE
 
 
+try:
+    CACHE_TIMEOUT = settings.CACHE_TIMEOUT
+except AttributeError:
+    CACHE_TIMEOUT = 60 * 60 * 24 * 60
+
+
 class StandardResultSetPagination(PageNumberPagination):
     """Set the pagination parameters."""
 
@@ -60,7 +66,7 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve global settings",
         operation_description="Retrieve global settings. https://jbrowse.org/docs/data_formats.html",
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -71,7 +77,7 @@ class JBrowseGlobalViewSet(viewsets.GenericViewSet):
         """Get queryset."""
         return [{"featureDensity": 0.02}]
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(JBrowseGlobalViewSet, self).dispatch(*args, **kwargs)
@@ -109,7 +115,7 @@ class JBrowseNamesViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve feature names by accession",
         operation_description="Retrieve feature names by accession. https://jbrowse.org/docs/data_formats.html",
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -138,7 +144,7 @@ class JBrowseNamesViewSet(viewsets.GenericViewSet):
         else:
             return queryset
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(JBrowseNamesViewSet, self).dispatch(*args, **kwargs)
@@ -169,7 +175,7 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
         operation_summary="Retrieve reference sequences",
         operation_description="Retrieve reference sequences. https://jbrowse.org/docs/data_formats.html",
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -189,7 +195,7 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
 
         return queryset
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(JBrowseRefSeqsViewSet, self).dispatch(*args, **kwargs)
@@ -227,7 +233,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         operation_description="Retrieve features from reference sequence (refseq). https://jbrowse.org/docs/data_formats.html",
         operation_summary="Retrieve features from reference sequence",
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -274,7 +280,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return None
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(JBrowseFeatureViewSet, self).dispatch(*args, **kwargs)
@@ -305,7 +311,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, request):
         """Search the ElasticSearch index for matching strings."""
         queryset = self.get_queryset()
@@ -334,7 +340,7 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         else:
             return None
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(autocompleteViewSet, self).dispatch(*args, **kwargs)
@@ -376,7 +382,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, request):
         """List."""
         queryset = self.get_queryset()
@@ -393,7 +399,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return None
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureIDViewSet, self).dispatch(*args, **kwargs)
@@ -416,7 +422,7 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -447,7 +453,7 @@ class FeatureOrthologViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureOrthologViewSet, self).dispatch(*args, **kwargs)
@@ -470,7 +476,7 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -501,7 +507,7 @@ class FeatureCoexpressionViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureCoexpressionViewSet, self).dispatch(*args, **kwargs)
@@ -524,7 +530,7 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -540,7 +546,7 @@ class FeatureExpressionViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureExpressionViewSet, self).dispatch(*args, **kwargs)
@@ -563,7 +569,7 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -577,7 +583,7 @@ class FeatureInfoViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureInfoViewSet, self).dispatch(*args, **kwargs)
@@ -600,7 +606,7 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -616,7 +622,7 @@ class FeatureLocationViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureLocationViewSet, self).dispatch(*args, **kwargs)
@@ -639,7 +645,7 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -653,7 +659,7 @@ class FeatureSequenceViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureSequenceViewSet, self).dispatch(*args, **kwargs)
@@ -676,7 +682,7 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -692,7 +698,7 @@ class FeaturePublicationViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeaturePublicationViewSet, self).dispatch(*args, **kwargs)
@@ -715,7 +721,7 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -731,7 +737,7 @@ class FeatureOntologyViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureOntologyViewSet, self).dispatch(*args, **kwargs)
@@ -754,7 +760,7 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -772,7 +778,7 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
         except ObjectDoesNotExist:
             return
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureProteinMatchesViewSet, self).dispatch(*args, **kwargs)
@@ -795,7 +801,7 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         operation_summary=operation_summary, operation_description=operation_description
     )
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
@@ -848,7 +854,7 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
 
         return result
 
-    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(cache_page(CACHE_TIMEOUT))
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureSimilarityViewSet, self).dispatch(*args, **kwargs)
