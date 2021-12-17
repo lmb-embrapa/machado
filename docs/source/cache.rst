@@ -2,12 +2,12 @@ Cache (optional)
 ==================
 
 
-The machado.urls are pre-configured to enable caching.
-You just need to enable Django's cache framework following the `official instructions <https://docs.djangoproject.com/en/2.1/topics/cache/>`_.
+The machado views are pre-configured to enable local-memory caching for 1 hour.
+In order to move the cache to another location, you'll to set Django's cache framework following the `official instructions <https://docs.djangoproject.com/en/2.1/topics/cache/>`_.
 
 **Example**
 
-Include the following in the settings.py:
+Include the following in the settings.py to store the cache in the database:
 
 .. code-block:: bash
 
@@ -17,7 +17,7 @@ Include the following in the settings.py:
             'LOCATION': 'machado_cache_table',
         }
     }
-    CACHE_TIMEOUT = 60 * 60  # 3600 seconds == 1 hour
+    CACHE_TIMEOUT = 60 * 60 * 24  # 86400 seconds == 1 day
 
 
 Create the cache table:
