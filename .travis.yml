@@ -26,7 +26,7 @@ addons:
     - pandoc
 
 before_script:
-  - sudo service postgresql restart
+  - sudo service postgresql@13-main start
   - sudo -u postgres psql -V
   - psql -c "create user username with encrypted password 'password';" -U postgres
   - psql -c "create database yourdatabase with owner username;" -U postgres
