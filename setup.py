@@ -38,7 +38,7 @@ setup(
         "tqdm==4.63.0",
         "typing==3.7.4.3",
         "bibtexparser==1.2.0",
-        "djangorestframework==3.13.3",
+        "djangorestframework==3.13.1",
         "drf-yasg==1.20.0",
         "drf-nested-routers==0.93.4",
         "pysam==0.18.0",
