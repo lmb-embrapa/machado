@@ -87,6 +87,8 @@ class Command(BaseCommand):
         # Load the annotation file
         with open(file) as tab_file:
             for line in tab_file:
+                if line.startswith("#"):
+                    continue
                 feature, annotation = line.strip().split("\t")
                 tasks.append(
                     pool.submit(
