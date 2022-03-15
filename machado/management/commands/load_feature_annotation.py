@@ -41,7 +41,7 @@ class Command(BaseCommand):
             "--cvterm",
             help="cvterm.name from cv "
             "feature_property. (eg. display, note, product, "
-            "alias, ontology_term)",
+            "alias, ontology_term, annotation)",
             required=True,
             type=str,
         )
