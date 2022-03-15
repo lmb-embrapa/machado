@@ -452,13 +452,13 @@ class FeatureLoader(object):
         return None
 
     def store_feature_annotation(
-        self, feature: str, soterm: str, cvterm: str, annotation: str
+        self, feature: str, soterm: str, cvterm: str, annotation: str, doi: str
     ) -> None:
         """Store feature annotation."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
         attrs_str = "{}={};".format(cvterm, annotation)
 
-        attrs_loader = FeatureAttributesLoader(filecontent="genome")
+        attrs_loader = FeatureAttributesLoader(filecontent="genome", doi=doi)
         attrs_dict = attrs_loader.get_attributes(attrs_str)
         attrs_loader.process_attributes(feature_id, attrs_dict)
         self.ignored_attrs = attrs_loader.ignored_attrs

@@ -13,9 +13,9 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Db, Cvterm, Dbxref
-from machado.models import FeatureCvterm, FeatureDbxref
-from machado.models import Featureprop, FeaturePub, FeatureSynonym
-from machado.models import Pub, Synonym
+from machado.models import FeatureCvterm, FeatureDbxref, FeaturePub
+from machado.models import Featureprop, FeaturepropPub, FeatureSynonym
+from machado.models import Pub, PubDbxref, Synonym
 
 
 # The following attributes are handled in a specific manner and should not
@@ -36,6 +36,7 @@ VALID_GENOME_ATTRS = [
     "doi",
     "freq",
     "cnv_type",
+    "annotation",
 ]
 
 VALID_POLYMORPHISM_ATTRS = ["tsa", "vc"]
@@ -64,7 +65,7 @@ class FeatureAttributesLoader(object):
 
     help = "Load feature attributes."
 
-    def __init__(self, filecontent: str) -> None:
+    def __init__(self, filecontent: str, doi: str = None) -> None:
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes, and
         # ignored goterms
@@ -81,12 +82,6 @@ class FeatureAttributesLoader(object):
             is_obsolete=0,
             is_relationshiptype=0,
         )
-        self.pub, created = Pub.objects.get_or_create(
-            miniref="null",
-            uniquename="null",
-            type_id=null_cvterm.cvterm_id,
-            is_obsolete=False,
-        )
 
         if filecontent == "genome":
             self.filter = VALID_GENOME_ATTRS
@@ -97,6 +92,30 @@ class FeatureAttributesLoader(object):
         else:
             raise ImportingError(
                 "Attributes type required: (eg. genome, polymorphism, qtl)"
+            )
+
+        # Retrieve DOI's Dbxref
+        dbxref_doi = None
+        pub_dbxref_doi = None
+        if doi:
+            try:
+                dbxref_doi = Dbxref.objects.get(accession=doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
+            try:
+                pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
+            try:
+                self.pub = Pub.objects.get(pub_id=pub_dbxref_doi.pub_id)
+            except ObjectDoesNotExist as e:
+                raise ImportingError(e)
+        else:
+            self.pub, created = Pub.objects.get_or_create(
+                miniref="null",
+                uniquename="null",
+                type_id=null_cvterm.cvterm_id,
+                is_obsolete=False,
             )
 
         self.ignored_attrs: Set[str] = set()
@@ -228,6 +247,10 @@ class FeatureAttributesLoader(object):
                     rank=0,
                     defaults={"value": attrs.get(key)},
                 )
+                if self.pub.uniquename != "null":
+                    FeaturepropPub.objects.get_or_create(
+                        featureprop=featureprop_obj, pub=self.pub
+                    )
                 if not created:
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()

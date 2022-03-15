@@ -45,6 +45,13 @@ class Command(BaseCommand):
             required=True,
             type=str,
         )
+        parser.add_argument(
+            "--doi",
+            help="DOI of the article reference to "
+            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
+            required=False,
+            type=str,
+        )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
@@ -52,6 +59,7 @@ class Command(BaseCommand):
         file: str,
         cvterm: str,
         soterm: str,
+        doi: str = None,
         verbosity: int = 1,
         cpu: int = 1,
         **options
@@ -87,6 +95,7 @@ class Command(BaseCommand):
                         soterm,
                         cvterm,
                         annotation,
+                        doi,
                     )
                 )
 
