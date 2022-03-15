@@ -452,7 +452,12 @@ class FeatureLoader(object):
         return None
 
     def store_feature_annotation(
-        self, feature: str, soterm: str, cvterm: str, annotation: str, doi: str
+        self,
+        feature: str,
+        soterm: str,
+        cvterm: str,
+        annotation: str,
+        doi: Union[str, None],
     ) -> None:
         """Store feature annotation."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)

@@ -290,7 +290,7 @@ class CongratsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(
             response,
-            'Controlled Vocabularies <span class="badge badge-primary badge-pill">2</span>',
+            'Controlled Vocabularies <span class="badge badge-primary badge-pill">1</span>',
         )
         self.assertContains(
             response, 'Organisms <span class="badge badge-primary badge-pill">2</span>'
