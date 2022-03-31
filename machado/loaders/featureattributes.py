@@ -10,6 +10,7 @@ from typing import Dict, Set
 from urllib.parse import unquote
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Max
 
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Db, Cvterm, Dbxref
@@ -224,6 +225,51 @@ class FeatureAttributesLoader(object):
                     is_current=True,
                     is_internal=False,
                 )
+            elif key in ["annotation"]:
+                annotation_dbxref, created = Dbxref.objects.get_or_create(
+                    db=self.db_null, accession=key
+                )
+                cv_feature_property, created = Cv.objects.get_or_create(
+                    name="feature_property"
+                )
+                annotation_cvterm, created = Cvterm.objects.get_or_create(
+                    cv=cv_feature_property,
+                    name=key,
+                    dbxref=annotation_dbxref,
+                    defaults={
+                        "definition": "",
+                        "is_relationshiptype": 0,
+                        "is_obsolete": 0,
+                    },
+                )
+                try:
+                    featureprop_obj = Featureprop.objects.get(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                        value=attrs.get(key),
+                    )
+                    featureprop_obj.value = attrs.get(key)
+                    featureprop_obj.save()
+                except ObjectDoesNotExist:
+                    feature_props = Featureprop.objects.filter(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                    )
+                    max_rank = feature_props.aggregate(Max("rank")).get("rank__max")
+                    if max_rank is None:
+                        max_rank = 0
+                    else:
+                        max_rank += 1
+                    featureprop_obj, created = Featureprop.objects.get_or_create(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                        value=attrs.get(key),
+                        rank=max_rank,
+                    )
+                if self.pub.uniquename != "null":
+                    FeaturepropPub.objects.get_or_create(
+                        featureprop=featureprop_obj, pub=self.pub
+                    )
             else:
                 note_dbxref, created = Dbxref.objects.get_or_create(
                     db=self.db_null, accession=key
