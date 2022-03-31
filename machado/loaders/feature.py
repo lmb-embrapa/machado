@@ -78,12 +78,12 @@ class FeatureLoader(object):
         if doi:
             try:
                 dbxref_doi = Dbxref.objects.get(accession=doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.", doi)
             try:
                 self.pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.", doi)
 
     def store_tabix_GFF_feature(
         self, tabix_feature: GTFProxy, organism: str, qtl: bool

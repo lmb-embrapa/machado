@@ -100,16 +100,16 @@ class FeatureAttributesLoader(object):
         if doi:
             try:
                 dbxref_doi = Dbxref.objects.get(accession=doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.", doi)
             try:
                 pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.", doi)
             try:
                 self.pub = Pub.objects.get(pub_id=pub_dbxref_doi.pub_id)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.", doi)
         else:
             self.pub, created = Pub.objects.get_or_create(
                 miniref="null",
