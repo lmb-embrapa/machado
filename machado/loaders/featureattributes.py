@@ -270,6 +270,9 @@ class FeatureAttributesLoader(object):
                     FeaturepropPub.objects.get_or_create(
                         featureprop=featureprop_obj, pub=self.pub
                     )
+                    FeaturePub.objects.get_or_create(
+                        feature_id=feature_id, pub=self.pub
+                    )
             else:
                 note_dbxref, created = Dbxref.objects.get_or_create(
                     db=self.db_null, accession=key
