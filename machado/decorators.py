@@ -53,6 +53,24 @@ def get_feature_note(self):
         return None
 
 
+def get_feature_annotation(self):
+    """Get the annotation feature prop."""
+    try:
+        fps = self.Featureprop_feature_Feature.filter(
+            type__name="annotation", type__cv__name="feature_property"
+        )
+        annotations = list()
+        for fp in fps:
+            try:
+                doi = fp.FeaturepropPub_featureprop_Featureprop.get().pub.get_doi()
+                annotations.append("{} (DOI:{})".format(fp.value, doi))
+            except ObjectDoesNotExist:
+                annotations.append(fp.value)
+        return annotations
+    except ObjectDoesNotExist:
+        return None
+
+
 def get_feature_display(self):
     """Get the display feature prop."""
     try:
@@ -72,7 +90,7 @@ def get_feature_display(self):
 
 def get_feature_properties(self):
     """Get all the feature properties."""
-    attrs_bl = ["coexpression group", "coexpression group"]
+    attrs_bl = ["coexpression group", "coexpression group", "annotation"]
     try:
         return (
             self.Featureprop_feature_Feature.filter(type__cv__name="feature_property")
@@ -249,6 +267,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_product", get_feature_product)
         setattr(cls, "get_description", get_feature_description)
         setattr(cls, "get_note", get_feature_note)
+        setattr(cls, "get_annotation", get_feature_annotation)
         setattr(cls, "get_orthologous_group", get_feature_orthologous_group)
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
         setattr(cls, "get_expression_samples", get_feature_expression_samples)

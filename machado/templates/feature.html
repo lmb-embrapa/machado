@@ -55,6 +55,27 @@
   </div>
   {% endif %}
 
+  {% if feature.get_annotation %}
+  <div class="card m-1">
+    <div class="card-header">
+        <h4 class="card-title">
+        <a data-toggle="collapse" href="#collapseAnnotation" role="button" aria-expanded="false" aria-controls="collapseAnnotation">
+			Annotation
+			<small><i class="fas fa-caret-down"></i></small>
+		</a>
+		</h4>
+    </div>
+    <div class="card-body collapse show" id="collapseAnnotation">
+      <div class="card-text">
+         {% for prop in feature.get_annotation %}
+         {{ prop }}<br />
+         {% endfor %}
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if feature.get_location %}
   <div class="card m-1">
     <div class="card-header">
