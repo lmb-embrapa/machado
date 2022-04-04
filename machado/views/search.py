@@ -17,12 +17,12 @@ FACET_FIELDS = {
     "coexpression": "Filter by coexpression (mRNA)",
     "orthologs_coexpression": "Filter by coexpression in orthologous groups members (polypeptide)",
     # "orthologs_biomaterial": "Filter by biomaterial in orthologous groups members (polypeptide)",
-    "doi": "Filter by related publications (gene, mRNA, polypeptide)",
     "analyses": "Filter by blast and inteproscan (polypeptide)",
     "biomaterial": "Filter by RNA-seq biomaterial (mRNA)",
     "treatment": "Filter by RNA-Seq sample (mRNA)",
     "orthologous_group": "Filter by the orthologous group ID",
     "coexpression_group": "Filter by the coexpression group ID",
+    "doi": "Filter by related publications (gene, mRNA, polypeptide)",
 }
 
 
