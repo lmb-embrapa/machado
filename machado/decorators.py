@@ -71,6 +71,27 @@ def get_feature_annotation(self):
         return None
 
 
+def get_feature_doi(self):
+    """Get the DOI feature."""
+    dois = set()
+    pubs = self.FeaturePub_feature_Feature.filter()
+    for featurepub in pubs:
+        dois.add("DOI:{}".format(featurepub.pub.get_doi()))
+    try:
+        fps = self.Featureprop_feature_Feature.filter(
+            type__name="annotation", type__cv__name="feature_property"
+        )
+        for fp in fps:
+            try:
+                doi = fp.FeaturepropPub_featureprop_Featureprop.get().pub.get_doi()
+                dois.add("DOI:{}".format(doi))
+            except ObjectDoesNotExist:
+                pass
+        return dois
+    except ObjectDoesNotExist:
+        return None
+
+
 def get_feature_display(self):
     """Get the display feature prop."""
     try:
@@ -268,6 +289,7 @@ def machadoFeatureMethods():
         setattr(cls, "get_description", get_feature_description)
         setattr(cls, "get_note", get_feature_note)
         setattr(cls, "get_annotation", get_feature_annotation)
+        setattr(cls, "get_doi", get_feature_doi)
         setattr(cls, "get_orthologous_group", get_feature_orthologous_group)
         setattr(cls, "get_coexpression_group", get_feature_coexpression_group)
         setattr(cls, "get_expression_samples", get_feature_expression_samples)
