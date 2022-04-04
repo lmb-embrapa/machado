@@ -6,7 +6,7 @@
 """Search forms."""
 
 from haystack.forms import FacetedSearchForm
-from haystack.inputs import Exact, AutoQuery
+from haystack.inputs import Exact, Raw
 from haystack.query import SQ
 
 
@@ -54,4 +54,4 @@ class FeatureSearchForm(FacetedSearchForm):
         if q == "":
             return sqs
         else:
-            return sqs.filter(text=AutoQuery(q))
+            return sqs.filter(text=Raw(q))

@@ -76,7 +76,7 @@ def get_feature_doi(self):
     dois = set()
     pubs = self.FeaturePub_feature_Feature.filter()
     for featurepub in pubs:
-        dois.add("DOI:{}".format(featurepub.pub.get_doi()))
+        dois.add(featurepub.pub.get_doi())
     try:
         fps = self.Featureprop_feature_Feature.filter(
             type__name="annotation", type__cv__name="feature_property"
@@ -84,7 +84,7 @@ def get_feature_doi(self):
         for fp in fps:
             try:
                 doi = fp.FeaturepropPub_featureprop_Featureprop.get().pub.get_doi()
-                dois.add("DOI:{}".format(doi))
+                dois.add(doi)
             except ObjectDoesNotExist:
                 pass
         return dois
