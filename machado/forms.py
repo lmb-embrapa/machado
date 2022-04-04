@@ -6,7 +6,7 @@
 """Search forms."""
 
 from haystack.forms import FacetedSearchForm
-from haystack.inputs import Exact, Raw
+from haystack.inputs import Exact, AutoQuery
 from haystack.query import SQ
 
 
@@ -25,7 +25,7 @@ class FeatureSearchForm(FacetedSearchForm):
         selected_facets = dict()
         if "selected_facets" in self.data:
             for facet in self.data.getlist("selected_facets"):
-                facet_field, facet_query = facet.split(":")
+                facet_field, facet_query = facet.split(":", 1)
                 selected_facets.setdefault(facet_field, []).append(facet_query)
 
             and_facets = ["analyses"]
@@ -47,8 +47,11 @@ class FeatureSearchForm(FacetedSearchForm):
 
         # escape : because of GO terms
         q = q.replace(":", "\\:")
+        q = q.replace("/", "\\/")
+        q = q.replace(".", "\\.")
+        q = q.replace('"', '\\"')
 
         if q == "":
             return sqs
         else:
-            return sqs.filter(text=Raw(q))
+            return sqs.filter(text=AutoQuery(q))

@@ -67,9 +67,11 @@
     </div>
     <div class="card-body collapse show" id="collapseAnnotation">
       <div class="card-text">
+         <ul>
          {% for prop in feature.get_annotation %}
-         {{ prop }}<br />
+            <li>{{ prop }}</li>
          {% endfor %}
+         </ul>
 
       </div>
     </div>
