@@ -17,6 +17,7 @@ FACET_FIELDS = {
     "coexpression": "Filter by coexpression (mRNA)",
     "orthologs_coexpression": "Filter by coexpression in orthologous groups members (polypeptide)",
     # "orthologs_biomaterial": "Filter by biomaterial in orthologous groups members (polypeptide)",
+    "doi": "Filter by related publications (gene, mRNA, polypeptide)",
     "analyses": "Filter by blast and inteproscan (polypeptide)",
     "biomaterial": "Filter by RNA-seq biomaterial (mRNA)",
     "treatment": "Filter by RNA-Seq sample (mRNA)",
@@ -61,7 +62,7 @@ class FeatureSearchView(FacetedSearchView):
         selected_facets = list()
         selected_facets_fields = list()
         for facet in self.get_form_kwargs()["selected_facets"]:
-            facet_field, facet_query = facet.split(":")
+            facet_field, facet_query = facet.split(":", 1)
             if facet_field == "so_term":
                 so_term_count += 1
             selected_facets_fields.append(facet_field)
