@@ -159,6 +159,16 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
 
+    # soterm-feature.uniquename
+    try:
+        return Feature.objects.get(
+            uniquename="{}-{}".format(soterm, accession),
+            type__cv__name="sequence",
+            type__name=soterm,
+        ).feature_id
+    except (MultipleObjectsReturned, ObjectDoesNotExist):
+        pass
+
     # feature.name
     try:
         return Feature.objects.get(

@@ -10,12 +10,13 @@ from typing import Dict, Set
 from urllib.parse import unquote
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Max
 
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cv, Db, Cvterm, Dbxref
-from machado.models import FeatureCvterm, FeatureDbxref
-from machado.models import Featureprop, FeaturePub, FeatureSynonym
-from machado.models import Pub, Synonym
+from machado.models import FeatureCvterm, FeatureDbxref, FeaturePub
+from machado.models import Featureprop, FeaturepropPub, FeatureSynonym
+from machado.models import Pub, PubDbxref, Synonym
 
 
 # The following attributes are handled in a specific manner and should not
@@ -36,6 +37,7 @@ VALID_GENOME_ATTRS = [
     "doi",
     "freq",
     "cnv_type",
+    "annotation",
 ]
 
 VALID_POLYMORPHISM_ATTRS = ["tsa", "vc"]
@@ -64,7 +66,7 @@ class FeatureAttributesLoader(object):
 
     help = "Load feature attributes."
 
-    def __init__(self, filecontent: str) -> None:
+    def __init__(self, filecontent: str, doi: str = None) -> None:
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes, and
         # ignored goterms
@@ -81,12 +83,6 @@ class FeatureAttributesLoader(object):
             is_obsolete=0,
             is_relationshiptype=0,
         )
-        self.pub, created = Pub.objects.get_or_create(
-            miniref="null",
-            uniquename="null",
-            type_id=null_cvterm.cvterm_id,
-            is_obsolete=False,
-        )
 
         if filecontent == "genome":
             self.filter = VALID_GENOME_ATTRS
@@ -97,6 +93,30 @@ class FeatureAttributesLoader(object):
         else:
             raise ImportingError(
                 "Attributes type required: (eg. genome, polymorphism, qtl)"
+            )
+
+        # Retrieve DOI's Dbxref
+        dbxref_doi = None
+        pub_dbxref_doi = None
+        if doi:
+            try:
+                dbxref_doi = Dbxref.objects.get(accession=doi)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.".format(doi))
+            try:
+                pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.".format(doi))
+            try:
+                self.pub = Pub.objects.get(pub_id=pub_dbxref_doi.pub_id)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.".format(doi))
+        else:
+            self.pub, created = Pub.objects.get_or_create(
+                miniref="null",
+                uniquename="null",
+                type_id=null_cvterm.cvterm_id,
+                is_obsolete=False,
             )
 
         self.ignored_attrs: Set[str] = set()
@@ -186,7 +206,7 @@ class FeatureAttributesLoader(object):
                     )
                     pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
                 except ObjectDoesNotExist:
-                    raise ImportingError("{} not registered.", attrs[key])
+                    raise ImportingError("{} not registered.".format(attrs[key]))
 
                 FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
 
@@ -205,6 +225,54 @@ class FeatureAttributesLoader(object):
                     is_current=True,
                     is_internal=False,
                 )
+            elif key in ["annotation"]:
+                annotation_dbxref, created = Dbxref.objects.get_or_create(
+                    db=self.db_null, accession=key
+                )
+                cv_feature_property, created = Cv.objects.get_or_create(
+                    name="feature_property"
+                )
+                annotation_cvterm, created = Cvterm.objects.get_or_create(
+                    cv=cv_feature_property,
+                    name=key,
+                    dbxref=annotation_dbxref,
+                    defaults={
+                        "definition": "",
+                        "is_relationshiptype": 0,
+                        "is_obsolete": 0,
+                    },
+                )
+                try:
+                    featureprop_obj = Featureprop.objects.get(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                        value=attrs.get(key),
+                    )
+                    featureprop_obj.value = attrs.get(key)
+                    featureprop_obj.save()
+                except ObjectDoesNotExist:
+                    feature_props = Featureprop.objects.filter(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                    )
+                    max_rank = feature_props.aggregate(Max("rank")).get("rank__max")
+                    if max_rank is None:
+                        max_rank = 0
+                    else:
+                        max_rank += 1
+                    featureprop_obj, created = Featureprop.objects.get_or_create(
+                        feature_id=feature_id,
+                        type_id=annotation_cvterm.cvterm_id,
+                        value=attrs.get(key),
+                        rank=max_rank,
+                    )
+                if self.pub.uniquename != "null":
+                    FeaturepropPub.objects.get_or_create(
+                        featureprop=featureprop_obj, pub=self.pub
+                    )
+                    FeaturePub.objects.get_or_create(
+                        feature_id=feature_id, pub=self.pub
+                    )
             else:
                 note_dbxref, created = Dbxref.objects.get_or_create(
                     db=self.db_null, accession=key
@@ -228,6 +296,10 @@ class FeatureAttributesLoader(object):
                     rank=0,
                     defaults={"value": attrs.get(key)},
                 )
+                if self.pub.uniquename != "null":
+                    FeaturepropPub.objects.get_or_create(
+                        featureprop=featureprop_obj, pub=self.pub
+                    )
                 if not created:
                     featureprop_obj.value = attrs.get(key)
                     featureprop_obj.save()

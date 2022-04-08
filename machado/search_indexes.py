@@ -34,6 +34,7 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr="name", faceted=True, null=True)
     analyses = indexes.MultiValueField(faceted=True)
     display = indexes.CharField(faceted=True, null=True)
+    doi = indexes.MultiValueField(faceted=True)
     relationship = indexes.MultiValueField(indexed=False)
     if Featureprop.objects.filter(
         type__name="orthologous group", type__cv__name="feature_property"
@@ -140,6 +141,14 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
             if feature_relationship.subject.name is not None:
                 keywords.add(feature_relationship.subject.name)
 
+        # Annotation
+        for annotation in obj.get_annotation():
+            keywords.add(annotation)
+
+        # DOI
+        for doi in obj.get_doi():
+            keywords.add(doi)
+
         # Expression samples
         for sample in obj.get_expression_samples():
             keywords.add(sample.get("assay_name"))
@@ -175,6 +184,13 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
         self.temp = " ".join(keywords)
         return " ".join(keywords)
+
+    def prepare_doi(self, obj):
+        """Prepare DOI."""
+        result = list()
+        for doi in obj.get_doi():
+            result.append(doi)
+        return result
 
     def prepare_orthology(self, obj):
         """Prepare orthology."""

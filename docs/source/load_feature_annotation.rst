@@ -18,10 +18,11 @@ Load Annotation
     python manage.py load_feature_annotation --help
 
 =============   ==========================================================================================
---file 		Two-column tab separated file (feature.accession<TAB>annotation text). *
+--file 		    Two-column tab separated file (feature.accession<TAB>annotation text). *
 --soterm        SO Sequence Ontology Term (eg. mRNA, polypeptide) *
---cvterm 	cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term) *
---cpu 		Number of threads
+--cvterm 	    cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term, annotation) *
+--doi 		    DOI of a reference stored using *load_publication* (eg. 10.1111/s12122-012-1313-4)
+--cpu 		    Number of threads
 =============   ==========================================================================================
 
 \* required fields

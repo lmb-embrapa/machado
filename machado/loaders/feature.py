@@ -78,12 +78,12 @@ class FeatureLoader(object):
         if doi:
             try:
                 dbxref_doi = Dbxref.objects.get(accession=doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.".format(doi))
             try:
                 self.pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
-            except ObjectDoesNotExist as e:
-                raise ImportingError(e)
+            except ObjectDoesNotExist:
+                raise ImportingError("{} not registered.".format(doi))
 
     def store_tabix_GFF_feature(
         self, tabix_feature: GTFProxy, organism: str, qtl: bool
@@ -108,7 +108,7 @@ class FeatureLoader(object):
                 )
             except ObjectDoesNotExist:
                 raise ImportingError(
-                    "{} is not a sequence ontology term.", tabix_feature.feature
+                    "{} is not a sequence ontology term.".format(tabix_feature.feature)
                 )
 
         attrs_id = attrs_dict.get("id")
@@ -287,7 +287,9 @@ class FeatureLoader(object):
         try:
             cvterm = Cvterm.objects.get(name=attrs_class, cv__name="sequence")
         except ObjectDoesNotExist:
-            raise ImportingError("{} is not a sequence ontology term.", attrs_class)
+            raise ImportingError(
+                "{} is not a sequence ontology term.".format(attrs_class)
+            )
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
@@ -452,13 +454,18 @@ class FeatureLoader(object):
         return None
 
     def store_feature_annotation(
-        self, feature: str, soterm: str, cvterm: str, annotation: str
+        self,
+        feature: str,
+        soterm: str,
+        cvterm: str,
+        annotation: str,
+        doi: Union[str, None],
     ) -> None:
         """Store feature annotation."""
         feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
         attrs_str = "{}={};".format(cvterm, annotation)
 
-        attrs_loader = FeatureAttributesLoader(filecontent="genome")
+        attrs_loader = FeatureAttributesLoader(filecontent="genome", doi=doi)
         attrs_dict = attrs_loader.get_attributes(attrs_str)
         attrs_loader.process_attributes(feature_id, attrs_dict)
         self.ignored_attrs = attrs_loader.ignored_attrs
@@ -491,7 +498,7 @@ class FeatureLoader(object):
             doi_obj = Dbxref.objects.get(accession=doi.lower(), db__name="DOI")
             pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
         except ObjectDoesNotExist:
-            raise ImportingError("{} not registered.", doi)
+            raise ImportingError("{} not registered.".format(doi))
 
         FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
 

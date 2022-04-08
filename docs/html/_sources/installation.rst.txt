@@ -36,7 +36,7 @@ We strongly recommend creating a new virtualenv for your project
 
 .. code-block:: bash
 
-    virtualenv -p /usr/bin/python3.6 YOURPROJECT
+    virtualenv -p /usr/bin/python3.8 YOURPROJECT
     cd YOURPROJECT
     source bin/activate
 

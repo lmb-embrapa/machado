@@ -41,8 +41,15 @@ class Command(BaseCommand):
             "--cvterm",
             help="cvterm.name from cv "
             "feature_property. (eg. display, note, product, "
-            "alias, ontology_term)",
+            "alias, ontology_term, annotation)",
             required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--doi",
+            help="DOI of the article reference to "
+            "this sequence. E.g.: 10.1111/s12122-012-1313-4",
+            required=False,
             type=str,
         )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
@@ -52,6 +59,7 @@ class Command(BaseCommand):
         file: str,
         cvterm: str,
         soterm: str,
+        doi: str = None,
         verbosity: int = 1,
         cpu: int = 1,
         **options
@@ -79,6 +87,8 @@ class Command(BaseCommand):
         # Load the annotation file
         with open(file) as tab_file:
             for line in tab_file:
+                if line.startswith("#"):
+                    continue
                 feature, annotation = line.strip().split("\t")
                 tasks.append(
                     pool.submit(
@@ -87,6 +97,7 @@ class Command(BaseCommand):
                         soterm,
                         cvterm,
                         annotation,
+                        doi,
                     )
                 )
 

@@ -554,6 +554,7 @@ class FeatureTest(TestCase):
             soterm="polypeptide",
             cvterm="display",
             annotation="feature one",
+            doi=None,
         )
         test_featureprop = Featureprop.objects.get(feature=test_feature)
         self.assertEqual("feature one", test_featureprop.value)
@@ -564,6 +565,7 @@ class FeatureTest(TestCase):
             soterm="polypeptide",
             cvterm="display",
             annotation="feature new",
+            doi=None,
         )
         test_featureprop = Featureprop.objects.get(feature=test_feature)
         self.assertEqual("feature new", test_featureprop.value)
@@ -574,6 +576,7 @@ class FeatureTest(TestCase):
             soterm="polypeptide",
             cvterm="ontology_term",
             annotation="GO:12345",
+            doi=None,
         )
         test_cvterm = Cvterm.objects.get(name="go test term")
         test_feature_cvterm = FeatureCvterm.objects.get(
@@ -587,6 +590,7 @@ class FeatureTest(TestCase):
             soterm="polypeptide",
             cvterm="dbxref",
             annotation="GEO:123456",
+            doi=None,
         )
         test_db = Db.objects.get(name="GEO")
         test_dbxref = Dbxref.objects.get(db=test_db, accession="123456")

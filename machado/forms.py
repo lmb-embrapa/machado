@@ -25,7 +25,7 @@ class FeatureSearchForm(FacetedSearchForm):
         selected_facets = dict()
         if "selected_facets" in self.data:
             for facet in self.data.getlist("selected_facets"):
-                facet_field, facet_query = facet.split(":")
+                facet_field, facet_query = facet.split(":", 1)
                 selected_facets.setdefault(facet_field, []).append(facet_query)
 
             and_facets = ["analyses"]
@@ -47,6 +47,9 @@ class FeatureSearchForm(FacetedSearchForm):
 
         # escape : because of GO terms
         q = q.replace(":", "\\:")
+        q = q.replace("/", "\\/")
+        q = q.replace(".", "\\.")
+        q = q.replace('"', '\\"')
 
         if q == "":
             return sqs
