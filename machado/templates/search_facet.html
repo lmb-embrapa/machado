@@ -18,28 +18,28 @@
 {% if selected_facets or query %}
 <div class="card mb-2">
     <div class="card-header">
-      <b>Selected filters</b>
+      <strong>Selected filters</strong>
     </div>
 	<div class="card-body">
 	{% if query %}
-	  <a title="Remove query" href="?{% remove_query %}">search:{{ query }} <i class="fa fa-times" aria-hidden="true"></i></a><br />
+	  <a title="Remove query" href="?{% remove_query %}">search:{{ query }} <em class="fa fa-times" aria-hidden="true"></em></a><br />
 	{% endif %}
 	{% for facet_field in selected_facets %}
 	  <a title="Remove filter" href="?{% remove_facet_field facet_field %}">
 	  {% if facet_field == "orthology:0" %}
-	  	no orthology <i class="fa fa-times" aria-hidden="true"></i>
+	  	no orthology <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "orthology:1" %}
-	  	orthology <i class="fa fa-times" aria-hidden="true"></i>
+	  	orthology <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "coexpression:0" %}
-	  	no coexpression groups <i class="fa fa-times" aria-hidden="true"></i>
+	  	no coexpression groups <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "coexpression:1" %}
-	  	coexpression groups <i class="fa fa-times" aria-hidden="true"></i>
+	  	coexpression groups <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "orthologs_coexpression:false" %}
-	  	no coexpression in orthologs <i class="fa fa-times" aria-hidden="true"></i>
+	  	no coexpression in orthologs <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "orthologs_coexpression:true" %}
-	  	coexpression in orthologs <i class="fa fa-times" aria-hidden="true"></i>
+	  	coexpression in orthologs <em class="fa fa-times" aria-hidden="true"></em>
 	  {% else %}
-        {{ facet_field }} <i class="fa fa-times" aria-hidden="true"></i>
+        {{ facet_field }} <em class="fa fa-times" aria-hidden="true"></em>
 	  {% endif %}
 	  </a><br />
 	{%endfor%}
@@ -70,7 +70,7 @@
             {% else %}
             {{ facet|capfirst }}
             {% endif %}
-            </b>
+            </strong>
 			{% if facets.fields|get_count:facet > 4 %}
 			<small>({% if facets.fields|get_count:facet == 100 %}Truncated to {% endif %}{{ facets.fields|get_count:facet }})</small>
 			{% endif %}
@@ -91,7 +91,7 @@
 
 		{% if facet == "organism" %}
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
-			<i>{{ item.0|capfirst }}</i>
+			<em>{{ item.0|capfirst }}</em>
 		{% elif facet == "orthology" %}
 			{% if item.0 == 0 %}
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:0" in selected_facets %}checked{% endif %}>
@@ -130,7 +130,7 @@
 	</div>
 	{% if facets.fields|get_count:facet > 4 %}
 		<div class="card-footer text-center py-0">
-			<a role="button" class="collapsed" data-toggle="collapse" href="#machado-facet-item-{{ facet }}"><i class="fas fa-caret-down"></i></a>
+			<a role="button" class="collapsed" data-toggle="collapse" href="#machado-facet-item-{{ facet }}"><em class="fas fa-caret-down"></em></a>
 		</div>
 	{% endif %}
 </div>

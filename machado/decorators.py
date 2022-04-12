@@ -279,7 +279,7 @@ def get_feature_location(self):
     return result
 
 
-def machadoFeatureMethods():
+def machado_feature_methods():
     """Add methods to machado.models.Feature."""
 
     def wrapper(cls):
@@ -319,7 +319,7 @@ def get_pub_doi(self):
     )
 
 
-def machadoPubMethods():
+def machado_pub_methods():
     """Add methods to machado.models.Pub."""
 
     def wrapper(cls):

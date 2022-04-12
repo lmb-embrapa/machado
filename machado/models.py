@@ -5,7 +5,7 @@
 # have been included as part of this package for licensing information.
 from django.db import models
 
-from machado.decorators import machadoFeatureMethods, machadoPubMethods
+from machado.decorators import machado_feature_methods, machado_pub_methods
 
 
 class Acquisition(models.Model):
@@ -1266,7 +1266,7 @@ class Expressionprop(models.Model):
         unique_together = (("expression", "type", "rank"),)
 
 
-@machadoFeatureMethods()
+@machado_feature_methods()
 class Feature(models.Model):
     feature_id = models.BigAutoField(primary_key=True)
     dbxref = models.ForeignKey(
@@ -3364,7 +3364,7 @@ class Protocolparam(models.Model):
         db_table = "protocolparam"
 
 
-@machadoPubMethods()
+@machado_pub_methods()
 class Pub(models.Model):
     pub_id = models.BigAutoField(primary_key=True)
     title = models.TextField(blank=True, null=True)

@@ -483,7 +483,7 @@ class FeatureTest(TestCase):
         test_db_global = Db.objects.create(name="_global")
         test_dbxref = Dbxref.objects.create(accession="exact", db=test_db_global)
         test_cv = Cv.objects.create(name="synonym_type")
-        test_so_term = Cvterm.objects.create(
+        Cvterm.objects.create(
             name="exact",
             cv=test_cv,
             dbxref=test_dbxref,
@@ -689,7 +689,7 @@ class FeatureTest(TestCase):
         """Tests - store feature dbxref."""
         # creating exact term
         test_db_global = Db.objects.create(name="_global")
-        test_dbxref = Dbxref.objects.create(accession="exact", db=test_db_global)
+        Dbxref.objects.create(accession="exact", db=test_db_global)
         test_db = Db.objects.create(name="RO")
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")

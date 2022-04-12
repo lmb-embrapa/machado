@@ -30,7 +30,6 @@ class OrthologyTest(TestCase):
         fo_db = Db.objects.create(name="ORTHOMCL_SOURCE")
         fo_cv = Cv.objects.create(name="feature_property")
 
-        # test_dbxref = Dbxref.objects.create(accession='123456', db=test_db)
         so_dbxref = Dbxref.objects.create(accession="357", db=so_db)
         so_dbxref2 = Dbxref.objects.create(accession="358", db=so_db)
         ro_dbxref = Dbxref.objects.create(accession="658", db=ro_db)

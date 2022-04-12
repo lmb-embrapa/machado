@@ -42,7 +42,7 @@
             </tr>
             {% for result in page_obj.object_list %}
             <tr>
-		<td><i>{{ result.organism }}</i></td>
+		<td><em>{{ result.organism }}</em></td>
                 <td>{{ result.so_term }}</td>
                 <td>
                     <a href="{% url 'feature' %}?feature_id={{ result.pk|safe }}">{{ result.uniquename }}</a>

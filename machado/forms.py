@@ -15,7 +15,6 @@ class FeatureSearchForm(FacetedSearchForm):
 
     def search(self):
         """Search."""
-        # sqs = super(FeatureSearchForm, self).search()
         q = self.cleaned_data.get("q")
         sqs = self.searchqueryset
 

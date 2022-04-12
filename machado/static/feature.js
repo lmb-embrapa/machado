@@ -28,7 +28,7 @@ function loadOntologyTerms(){
             text += '</tr></thead>';
             text += '<tbody>';
 
-            for (i=0; i<data.length; i++) {
+            for (let i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['cv'] + '</td>';
               text += '<td>' + data[i]['db'] + ':' + data[i]['dbxref'] + '</td>';
@@ -63,7 +63,7 @@ function loadProteinMatches(){
             text += '</tr></thead>';
             text += '<tbody>';
 
-            for (i=0; i<data.length; i++) {
+            for (let i=0; i<data.length; i++) {
               text += '<tr>'
               text += '<td>' + data[i]['db'] + '</td>';
               text += '<td>' + data[i]['subject_id'] + ' ' + data[i]['subject_desc'] + '</td>';
@@ -101,7 +101,7 @@ function loadSimilarity(){
             text += '</tr></thead>';
             text += '<tbody>';
 
-            for (i=0; i<data.length; i++) {
+            for (let i=0; i<data.length; i++) {
               if (!data[i]['uniquename']) {
                   uniquename = ""
               } else {
@@ -153,7 +153,7 @@ function loadOrthologs(){
             var text = '<ul class="list-group list-group-flush">';
             text += '<li class="list-group-item list-group-item-secondary">Orthologous group: <a href="' + home_url + 'find/?selected_facets=orthologous_group:' + data['ortholog_group'] + '">' + data['ortholog_group'] + '</a></li>';
             var members = data['members'];
-            for (i=0; i<members.length; i++) {
+            for (let i=0; i<members.length; i++) {
               text += '<li class="list-group-item">' ;
               text += '<a href="' + home_url + 'feature/?feature_id=' + members[i].feature_id + '">' + members[i].uniquename + '</a> ';
               text += members[i].display + ' ';
@@ -185,7 +185,7 @@ function loadPublication(){
           }, 
           success: function(data) {
             var text = '<ul class="list-group">';
-            for (i=0; i<data.length; i++) {
+            for (let i=0; i<data.length; i++) {
               text += '<li class="list-group-item"><small>' ;
               text += data[i].authors + ' ';
               text += '<b>' + data[i].title + '</b> ';

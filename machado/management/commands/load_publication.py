@@ -11,7 +11,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import bibtexparser
 from django.core.management.base import BaseCommand, CommandError
 
-# import os
 from tqdm import tqdm
 
 from machado.loaders.common import FileValidator

@@ -45,7 +45,7 @@ class FeatureTest(TestCase):
         test_db = Db.objects.create(name="SO")
         test_dbxref = Dbxref.objects.create(accession="12345", db=test_db)
         test_cv = Cv.objects.create(name="sequence")
-        test_so_term = Cvterm.objects.create(
+        Cvterm.objects.create(
             name="gene",
             cv=test_cv,
             dbxref=test_dbxref,
@@ -83,7 +83,7 @@ class FeatureTest(TestCase):
         test_db_global = Db.objects.create(name="_global")
         test_dbxref = Dbxref.objects.create(accession="exact", db=test_db_global)
         test_cv = Cv.objects.create(name="synonym_type")
-        test_so_term = Cvterm.objects.create(
+        Cvterm.objects.create(
             name="exact",
             cv=test_cv,
             dbxref=test_dbxref,

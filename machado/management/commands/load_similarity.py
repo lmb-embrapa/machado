@@ -99,7 +99,7 @@ class Command(BaseCommand):
 
         if format not in VALID_FORMAT:
             raise CommandError(
-                "The format is not valid. Please choose: " "{}".format(VALID_FORMAT)
+                "The format is not valid. Please choose: {}".format(VALID_FORMAT)
             )
         try:
             FileValidator().validate(file)

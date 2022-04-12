@@ -27,13 +27,13 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument(
             "--file",
-            help="Two-column tab separated file. " "(feature.dbxref\\tdb:dbxref)",
+            help="Two-column tab separated file. (feature.dbxref\\tdb:dbxref)",
             required=True,
             type=str,
         )
         parser.add_argument(
             "--soterm",
-            help="SO Sequence Ontology Term " "(eg. mRNA, polypeptide)",
+            help="SO Sequence Ontology Term (eg. mRNA, polypeptide)",
             required=True,
             type=str,
         )

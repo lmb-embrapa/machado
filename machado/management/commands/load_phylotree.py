@@ -32,13 +32,13 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--name",
-            help="Set a phylotree name " "<e.g.: NCBI taxonomy tree>",
+            help="Set a phylotree name <e.g.: NCBI taxonomy tree>",
             required=True,
             type=str,
         )
         parser.add_argument(
             "--organismdb",
-            help="inform the Organism DB name " "<e.g.: DB:NCBI_taxonomy>",
+            help="inform the Organism DB name <e.g.: DB:NCBI_taxonomy>",
             required=True,
             type=str,
         )
