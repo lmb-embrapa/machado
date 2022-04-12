@@ -80,7 +80,6 @@ The feature members need to be loaded previously."""
                 for field in fields:
                     if re.search(r"^(\w+)\|(\S+)", field):
                         member_field = re.match(r"^(\w+)\|(\S+)", field)
-                        # species = member_field.group(1)
                         ident = member_field.group(2)
                         members.append(ident)
             else:

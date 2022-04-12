@@ -21,7 +21,7 @@ class Command(BaseCommand):
         """Define the arguments."""
         parser.add_argument(
             "--organism",
-            help="Species name (eg. Homo " "sapiens, Mus musculus)",
+            help="Species name (eg. Homo sapiens, Mus musculus)",
             required=False,
             type=str,
         )

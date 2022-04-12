@@ -28,7 +28,7 @@ class Command(BaseCommand):
         parser.add_argument("--file", help="FASTA File", required=True, type=str)
         parser.add_argument(
             "--soterm",
-            help="SO Sequence Ontology Term (eg. " "chromosome, assembly)",
+            help="SO Sequence Ontology Term (eg. chromosome, assembly)",
             required=True,
             type=str,
         )

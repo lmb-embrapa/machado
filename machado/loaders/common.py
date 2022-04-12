@@ -135,7 +135,7 @@ def retrieve_organism(organism: str) -> Organism:
             infraspecific_name = " ".join(aux[2:])
     except ValueError:
         raise ValueError(
-            "The organism genus and species should be " "separated by a single space"
+            "The organism genus and species should be separated by a single space"
         )
     except AttributeError as e:
         raise AttributeError(e)

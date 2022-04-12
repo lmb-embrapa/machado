@@ -34,13 +34,13 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--organism",
-            help="Species name (eg. Homo " "sapiens, Mus musculus)",
+            help="Species name (eg. Homo sapiens, Mus musculus)",
             required=True,
             type=str,
         )
         parser.add_argument(
             "--ignore",
-            help="List of feature " "types to ignore (eg. chromosome,scaffold)",
+            help="List of feature types to ignore (eg. chromosome,scaffold)",
             required=False,
             nargs="+",
             type=str,

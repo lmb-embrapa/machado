@@ -73,7 +73,7 @@ class SequenceLoader(object):
             )
             retrieve_feature_id(accession=seq_obj.id, soterm=soterm)
             raise ImportingError(
-                "The sequence {} is already " "registered.".format(seq_obj.id)
+                "The sequence {} is already registered.".format(seq_obj.id)
             )
         except ObjectDoesNotExist:
             residues = seq_obj.seq

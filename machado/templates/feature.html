@@ -18,7 +18,7 @@
   <input type="hidden" value="{{ feature.feature_id|safe }}" id="feature_id" name="feature_id"></input>
   <div class="card m-1">
     <div class="card-header">
-        <small><i>{{ feature.organism.genus }} {{ feature.organism.species }} {{ feature.organism.infraspecific_name|default_if_none:'' }}</i></small>
+        <small><em>{{ feature.organism.genus }} {{ feature.organism.species }} {{ feature.organism.infraspecific_name|default_if_none:'' }}</em></small>
         <h3 class="card-title">
 			{{ feature.type.name }}: {{ feature.name|default_if_none:feature.uniquename }}
 		</h3>
@@ -29,21 +29,21 @@
           <div class="row justify-content-start">
             <div class="col">
                 <p>
-                <b>ID:</b> {{ feature.uniquename }}<br />
-                {% if feature.get_synonyms %}<b>Symbols:</b> {{ feature.get_synonyms|join:', ' }}<br />{% endif %}
+                <strong>ID:</strong> {{ feature.uniquename }}<br />
+                {% if feature.get_synonyms %}<strong>Symbols:</strong> {{ feature.get_synonyms|join:', ' }}<br />{% endif %}
                  {% if feature.get_properties %}
                  {% for prop in feature.get_properties %}
-                 <b>{{ prop.0|title }}</b>: {{ prop.1 }}<br />
+                 <strong>{{ prop.0|title }}</strong>: {{ prop.1 }}<br />
                  {% endfor %}
                 {% endif %}
                 </p>
             </div>
             <div class="col">
-              {% if feature.get_dbxrefs %}<p><b>DBxRefs:</b> {{ feature.get_dbxrefs|join:', ' }}</p>{% endif %}
+              {% if feature.get_dbxrefs %}<p><strong>DBxRefs:</strong> {{ feature.get_dbxrefs|join:', ' }}</p>{% endif %}
               {% if feature.get_relationship %}
                 <p>
                 {% for relative in feature.get_relationship %}
-                <b>{{ relative.type.name|title }}</b>: <a href="{% url 'feature'%}?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display|default_if_none:'' }}<br />
+                <strong>{{ relative.type.name|title }}</strong>: <a href="{% url 'feature'%}?feature_id={{ relative.feature_id|safe }}">{{ relative.uniquename }}</a> {{ relative.get_display|default_if_none:'' }}<br />
                 {% endfor %}
                 </p>
                 {% endif %}
@@ -61,7 +61,7 @@
         <h4 class="card-title">
         <a data-toggle="collapse" href="#collapseAnnotation" role="button" aria-expanded="false" aria-controls="collapseAnnotation">
 			Annotation
-			<small><i class="fas fa-caret-down"></i></small>
+			<small><em class="fas fa-caret-down"></em></small>
 		</a>
 		</h4>
     </div>
@@ -90,7 +90,7 @@
         {% for location in feature.get_location %}
         <p>{{ location.ref|safe }}:{{ location.start|safe }}..{{ location.end|safe }} {{ location.strand|safe }}</p>
           {% if location.jbrowse_url %}
-            <iframe style='border:0' width='100%' height='300' src="{{ location.jbrowse_url }}"></iframe>
+            <iframe title='jbrowse' style='border:0' width='100%' height='300' src="{{ location.jbrowse_url }}"></iframe>
           {% endif %}
         {% endfor %}
       </div>
@@ -104,7 +104,7 @@
       <h4 class="card-title">
 		  <a data-toggle="collapse" href="#collapseAnnotation" role="button" aria-expanded="false" aria-controls="collapseAnnotation">
 		    Functional annotation
-			<small><i class="fas fa-caret-up"></i></small>
+			<small><em class="fas fa-caret-up"></em></small>
 		  </a>
 	  </h4>
     </div>
@@ -144,7 +144,7 @@
       <h4 class="card-title">
 		  <a data-toggle="collapse" href="#collapseSimilarity" role="button" aria-expanded="false" aria-controls="collapseSimilarity">
 		  Similarity
-		  <small><i class="fas fa-caret-up"></i></small>
+		  <small><em class="fas fa-caret-up"></em></small>
 		  </a>
 	  </h4>
     </div>
@@ -162,7 +162,7 @@
       <h4 class="card-title">
 		  <a data-toggle="collapse" href="#collapseExpression" role="button" aria-expanded="false" aria-controls="collapseExpression">
 		  Expression data
-		  <small><i class="fas fa-caret-down"></i></small>
+		  <small><em class="fas fa-caret-down"></em></small>
 		  </a>
 	  </h4>
     </div>
@@ -180,7 +180,7 @@
         <h4 class="card-title">
           <a data-toggle="collapse" href="#collapseOrthologs" role="button" aria-expanded="false" aria-controls="collapseOrthologs">
 			Orthologs
-			<small><i class="fas fa-caret-down"></i></small>
+			<small><em class="fas fa-caret-down"></em></small>
 		  </a>
 		</h4>
     </div>
@@ -196,7 +196,7 @@
         <h4 class="card-title">
             <a data-toggle="collapse" href="#collapseSeq" role="button" aria-expanded="false" aria-controls="collapseSeq">
 			Sequence
-			<small><i class="fas fa-caret-down"></i></small>
+			<small><em class="fas fa-caret-down"></em></small>
 		</a>
 		</h4>
     </div>
@@ -212,7 +212,7 @@
         <h4 class="card-title">
         <a data-toggle="collapse" href="#collapsePub" role="button" aria-expanded="false" aria-controls="collapsePub">
 			Publications
-			<small><i class="fas fa-caret-down"></i></small>
+			<small><em class="fas fa-caret-down"></em></small>
 		</a>
 		</h4>
     </div>

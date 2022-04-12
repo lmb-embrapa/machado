@@ -64,7 +64,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--timeexecuted",
-            help="Time software was run. " "Mandatory format: e.g.: 'Oct-16-2016'",
+            help="Time software was run. Mandatory format: e.g.: 'Oct-16-2016'",
             required=False,
             type=str,
         )

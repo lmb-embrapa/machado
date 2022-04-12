@@ -36,7 +36,7 @@ class Command(BaseCommand):
         """Execute the main function."""
         if verbosity > 0:
             self.stdout.write(
-                "Deleting {} and every child" "record (CASCADE)".format(name)
+                "Deleting {} and every child record (CASCADE)".format(name)
             )
 
         cvterm_contained_in = Cvterm.objects.get(
