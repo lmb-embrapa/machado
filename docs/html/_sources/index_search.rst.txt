@@ -34,7 +34,6 @@ Install django-haystack following the `official instructions <http://docs.haysta
 
 .. code-block:: bash
 
-    pip install git+https://github.com/django-haystack/django-haystack
     pip install 'elasticsearch>=5,<6'
 
 In the WEBPROJECT/settings.py file, add haystack to INSTALLED_APPS section.
