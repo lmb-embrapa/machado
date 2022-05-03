@@ -179,8 +179,8 @@ Install Elasticsearch following the <a class="reference external" href="https://
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> YOURPROJECT
 <span class="nb">source</span> bin/activate
 <span class="nb">cd</span> src
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.16.deb
-sudo dpkg -i elasticsearch-5.6.16.deb
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.3-amd64.deb
+sudo dpkg -i elasticsearch-7.17.3-amd64.deb
 sudo systemctl daemon-reload
 sudo systemctl <span class="nb">enable</span> elasticsearch.service
 sudo systemctl start elasticsearch.service
@@ -188,7 +188,7 @@ sudo systemctl start elasticsearch.service
 </div>
 <p><strong>Django Haystack</strong></p>
 <p>Install django-haystack following the <a class="reference external" href="http://docs.haystacksearch.org/en/master/tutorial.html#installation">official instructions</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;elasticsearch&gt;=5,&lt;6&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;elasticsearch&gt;=7,&lt;8&#39;</span>
 </pre></div>
 </div>
 <p>In the WEBPROJECT/settings.py file, add haystack to INSTALLED_APPS section.</p>
@@ -202,7 +202,7 @@ sudo systemctl start elasticsearch.service
 <p>The settings.py file should contain the <a class="reference external" href="http://docs.haystacksearch.org/en/master/tutorial.html#xapian">search engine configuration</a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">HAYSTACK_CONNECTIONS</span> <span class="o">=</span> <span class="o">{</span>
     <span class="s1">&#39;default&#39;</span>: <span class="o">{</span>
-        <span class="s1">&#39;ENGINE&#39;</span>: <span class="s1">&#39;haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine&#39;</span>,
+        <span class="s1">&#39;ENGINE&#39;</span>: <span class="s1">&#39;haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine&#39;</span>,
         <span class="s1">&#39;URL&#39;</span>: <span class="s1">&#39;http://127.0.0.1:9200/&#39;</span>,
         <span class="s1">&#39;INDEX_NAME&#39;</span>: <span class="s1">&#39;haystack&#39;</span>,
     <span class="o">}</span>,

@@ -21,8 +21,8 @@ Now, proceding with elasticsearch instalation, run the following commands:
     cd YOURPROJECT
     source bin/activate
     cd src
-    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.16.deb
-    sudo dpkg -i elasticsearch-5.6.16.deb
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.3-amd64.deb
+    sudo dpkg -i elasticsearch-7.17.3-amd64.deb
     sudo systemctl daemon-reload
     sudo systemctl enable elasticsearch.service
     sudo systemctl start elasticsearch.service
@@ -34,7 +34,7 @@ Install django-haystack following the `official instructions <http://docs.haysta
 
 .. code-block:: bash
 
-    pip install 'elasticsearch>=5,<6'
+    pip install 'elasticsearch>=7,<8'
 
 In the WEBPROJECT/settings.py file, add haystack to INSTALLED_APPS section.
 
@@ -52,7 +52,7 @@ The settings.py file should contain the `search engine configuration <http://doc
 
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+            'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
             'URL': 'http://127.0.0.1:9200/',
             'INDEX_NAME': 'haystack',
         },
