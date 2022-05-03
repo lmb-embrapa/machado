@@ -42,6 +42,7 @@ setup(
         "drf-yasg==1.20.0",
         "drf-nested-routers==0.93.4",
         "pysam==0.18.0",
+        "django-haystack==3.1.1",
     ],
     zip_safe=False,
 )
