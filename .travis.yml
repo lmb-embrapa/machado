@@ -5,11 +5,11 @@ os: linux
 jobs:
   include:
     - dist: focal
-      python: "3.7"
-    - dist: focal
       python: "3.8"
     - dist: focal
       python: "3.9"
+    - dist: focal
+      python: "3.10"
 
 addons:
   apt:
