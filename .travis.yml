@@ -10,8 +10,6 @@ jobs:
       python: "3.9"
     - dist: focal
       python: "3.10"
-    - dist: focal
-      python: "3.10"
 
 addons:
   apt:
