@@ -344,7 +344,6 @@ class FeatureTest(TestCase):
             "10.1186/s12864-016-2535-300002", test_bibtex3_dbxref.accession
         )
         # DOI: try to link feature to publication's DOI
-        featurepub_test = None
         if feature and test_bibtex3_pubdbxref:
             featurepub_test = FeaturePub.objects.create(
                 feature_id=feature.feature_id, pub_id=test_bibtex3_pubdbxref.pub_id
