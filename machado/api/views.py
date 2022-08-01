@@ -193,6 +193,8 @@ class JBrowseRefSeqsViewSet(viewsets.GenericViewSet):
         if sotype is not None:
             queryset = queryset.filter(type__cv__name="sequence", type__name=sotype)
 
+        queryset = queryset.only('seqlen', 'uniquename')
+
         return queryset
 
     @method_decorator(cache_page(CACHE_TIMEOUT))

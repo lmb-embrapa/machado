@@ -161,7 +161,7 @@ class JBrowseFeatureSerializer(serializers.ModelSerializer):
         return obj.get_display()
 
 
-class JBrowseRefseqSerializer(serializers.ModelSerializer):
+class JBrowseRefseqSerializer(serializers.Serializer):
     """JBrowse transcript serializer."""
 
     start = serializers.SerializerMethodField()
