@@ -93,19 +93,19 @@
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
 			<em>{{ item.0|capfirst }}</em>
 		{% elif facet == "orthology" %}
-			{% if item.0 == 0 %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:0" in selected_facets %}checked{% endif %}>
+			{% if item.0 == 'false' %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:false" {% if "orthology:false" in selected_facets %}checked{% endif %}>
 			no orthology
 			{% else %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthology:1" in selected_facets %}checked{% endif %}>
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:true" {% if "orthology:true" in selected_facets %}checked{% endif %}>
 			orthology
 			{% endif %}
 		{% elif facet == "coexpression" %}
-			{% if item.0 == 0 %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:0" in selected_facets %}checked{% endif %}>
+			{% if item.0 == 'false' %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:false" {% if "coexpression:false" in selected_facets %}checked{% endif %}>
 			no coexpression groups
 			{% else %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "coexpression:1" in selected_facets %}checked{% endif %}>
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:true" {% if "coexpression:true" in selected_facets %}checked{% endif %}>
 			coexpression groups
 			{% endif %}
 		{% elif facet == "orthologs_coexpression" %}
