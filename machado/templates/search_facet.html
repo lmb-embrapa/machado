@@ -26,13 +26,13 @@
 	{% endif %}
 	{% for facet_field in selected_facets %}
 	  <a title="Remove filter" href="?{% remove_facet_field facet_field %}">
-	  {% if facet_field == "orthology:0" %}
+	  {% if facet_field == "orthology:false" %}
 	  	no orthology <em class="fa fa-times" aria-hidden="true"></em>
-	  {% elif facet_field == "orthology:1" %}
+	  {% elif facet_field == "orthology:true" %}
 	  	orthology <em class="fa fa-times" aria-hidden="true"></em>
-	  {% elif facet_field == "coexpression:0" %}
+	  {% elif facet_field == "coexpression:false" %}
 	  	no coexpression groups <em class="fa fa-times" aria-hidden="true"></em>
-	  {% elif facet_field == "coexpression:1" %}
+	  {% elif facet_field == "coexpression:true" %}
 	  	coexpression groups <em class="fa fa-times" aria-hidden="true"></em>
 	  {% elif facet_field == "orthologs_coexpression:false" %}
 	  	no coexpression in orthologs <em class="fa fa-times" aria-hidden="true"></em>
