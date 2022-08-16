@@ -58,6 +58,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
     def handle(
         self,
         file: str,
+        organism: str,
         cpu: int = 1,
         soterm: str = "mRNA",
         verbosity: int = 0,
