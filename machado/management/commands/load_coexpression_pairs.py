@@ -9,11 +9,12 @@
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.db.utils import IntegrityError
 
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator, FieldsValidator
+from machado.loaders.common import FileValidator, FieldsValidator, retrieve_organism
 from machado.loaders.common import get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
@@ -38,6 +39,12 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         """Define the arguments."""
         parser.add_argument(
             "--file", help="'pcc.mcl.txt' File", required=True, type=str
+        )
+        parser.add_argument(
+            "--organism",
+            help="Scientific name (e.g.: 'Oryza sativa')",
+            required=True,
+            type=str,
         )
         parser.add_argument(
             "--soterm",
@@ -65,6 +72,12 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
+
+        try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
         try:
             pairs = open(file, "r")
             # retrieve only the file name
@@ -76,7 +89,9 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         ).cvterm_id
         # feature source is not needed here
         source = "null"
-        featureloader = FeatureLoader(source=source, filename=filename)
+        featureloader = FeatureLoader(
+            source=source, filename=filename, organism=organism
+        )
         size = get_num_lines(file)
         # every cpu should be able to handle 5 tasks
         chunk = cpu * 5

@@ -9,11 +9,12 @@
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.db.utils import IntegrityError
 
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 from machado.models import Cv, Cvterm, Dbxref, Db
@@ -32,14 +33,28 @@ The feature members need to be loaded previously."""
     def add_arguments(self, parser):
         """Define the arguments."""
         parser.add_argument("--file", help="'groups.txt' File", required=True, type=str)
+        parser.add_argument(
+            "--organism",
+            help="Scientific name (e.g.: 'Oryza sativa')",
+            required=True,
+            type=str,
+        )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
+    def handle(
+        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
+    ):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
+
+        try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
@@ -67,7 +82,9 @@ The feature members need to be loaded previously."""
         soterm = "polypeptide"
 
         source = "null"
-        featureloader = FeatureLoader(source=source, filename=filename)
+        featureloader = FeatureLoader(
+            source=source, filename=filename, organism=organism
+        )
         # each line is an orthologous group
         for line in groups:
             members = []

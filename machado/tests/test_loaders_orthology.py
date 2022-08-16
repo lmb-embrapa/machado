@@ -472,7 +472,9 @@ class OrthologyTest(TestCase):
         )
         source = "null"
         soterm = "polypeptide"
-        test_orthology_loader = FeatureLoader(source=source, filename=filename)
+        test_orthology_loader = FeatureLoader(
+            source=source, filename=filename, organism=organism
+        )
         # ####################
         # test store groups
         group1_name = "machado0001"

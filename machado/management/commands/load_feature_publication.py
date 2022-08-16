@@ -10,9 +10,10 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 
@@ -40,7 +41,13 @@ class Command(BaseCommand):
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self, file: str, soterm: str, verbosity: int = 1, cpu: int = 1, **options
+        self,
+        file: str,
+        organism: str,
+        soterm: str,
+        verbosity: int = 1,
+        cpu: int = 1,
+        **options
     ):
         """Execute the main function."""
         if verbosity > 0:
@@ -51,11 +58,18 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
+        try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
         # retrieve only the file name
         filename = os.path.basename(file)
 
         try:
-            feature_file = FeatureLoader(filename=filename, source="PUBLICATION")
+            feature_file = FeatureLoader(
+                filename=filename, source="PUBLICATION", organism=organism
+            )
         except ImportingError as e:
             raise CommandError(e)
 

@@ -183,19 +183,18 @@ class FeatureTest(TestCase):
         test_tabix_feature2.attributes = "id=id2;name=name2;parent=id1"
 
         # instantiate the loader
-        test_feature_file = FeatureLoader(filename="file.name", source="GFF_source")
+        test_feature_file = FeatureLoader(
+            filename="file.name", source="GFF_source", organism=test_organism
+        )
 
-        organism = "Mus musculus"
         # store the tabix feature
         qtl = False
-        test_feature_file.store_tabix_GFF_feature(test_tabix_feature1, organism, qtl)
-        test_feature_file.store_tabix_GFF_feature(test_tabix_feature2, organism, qtl)
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature1, qtl)
+        test_feature_file.store_tabix_GFF_feature(test_tabix_feature2, qtl)
 
         # store the relationships
         for item in test_feature_file.relationships:
-            test_feature_file.store_relationship(
-                organism, item["subject_id"], item["object_id"]
-            )
+            test_feature_file.store_relationship(item["subject_id"], item["object_id"])
 
         test_feature = Feature.objects.get(uniquename="id2")
         test_featureloc = Featureloc.objects.get(feature=test_feature)
@@ -379,12 +378,13 @@ class FeatureTest(TestCase):
         test_tabix_feature2.qual = 20
 
         # instantiate the loader
-        test_feature_file = FeatureLoader(filename="file.name", source="VCF_SOURCE")
+        test_feature_file = FeatureLoader(
+            filename="file.name", source="VCF_SOURCE", organism=test_organism
+        )
 
-        organism = "Mus musculus"
         # store the tabix feature
-        test_feature_file.store_tabix_VCF_feature(test_tabix_feature1, organism)
-        test_feature_file.store_tabix_VCF_feature(test_tabix_feature2, organism)
+        test_feature_file.store_tabix_VCF_feature(test_tabix_feature1)
+        test_feature_file.store_tabix_VCF_feature(test_tabix_feature2)
 
         test_feature = Feature.objects.get(uniquename="id2")
         test_featurelocs = Featureloc.objects.filter(feature=test_feature)
@@ -451,9 +451,16 @@ class FeatureTest(TestCase):
 
         Organism.objects.create(genus="test", species="organism")
 
+        organism_obj, created = Organism.objects.get_or_create(
+            abbreviation="multispecies",
+            genus="multispecies",
+            species="multispecies",
+            common_name="multispecies",
+        )
+
         # instantiate the loader
         test_feature_file = FeatureLoader(
-            filename="file.name", source="InterproScan_source"
+            filename="file.name", source="InterproScan_source", organism=organism_obj
         )
         # store the bio searchio hit
         # From interproscan
@@ -544,7 +551,9 @@ class FeatureTest(TestCase):
             timelastmodified=datetime.now(timezone.utc),
         )
 
-        test_feature_file = FeatureLoader(filename="file.name", source="GFF_loader")
+        test_feature_file = FeatureLoader(
+            filename="file.name", source="GFF_loader", organism=test_organism
+        )
 
         # store the feature annotation
         test_feature_file.store_feature_annotation(
@@ -675,7 +684,9 @@ class FeatureTest(TestCase):
             bibtest = PublicationLoader()
             bibtest.store_bibtex_entry(entry)
 
-        test_feature_file = FeatureLoader(filename="file.name", source="GFF_loader")
+        test_feature_file = FeatureLoader(
+            filename="file.name", source="GFF_loader", organism=test_organism
+        )
 
         test_feature_file.store_feature_publication(
             feature="feat_gene", soterm="gene", doi="10.1186/s12864-016-2535-300002"
@@ -733,7 +744,9 @@ class FeatureTest(TestCase):
             timelastmodified=datetime.now(timezone.utc),
         )
 
-        test_feature_file = FeatureLoader(filename="file.name", source="GFF_loader")
+        test_feature_file = FeatureLoader(
+            filename="file.name", source="GFF_loader", organism=test_organism
+        )
 
         # store the feature annotation
         test_feature_file.store_feature_dbxref(

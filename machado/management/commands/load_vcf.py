@@ -11,9 +11,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pysam
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator, get_num_lines
+from machado.loaders.common import FileValidator, get_num_lines, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 
@@ -68,6 +69,11 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+        try:
             index_file = "{}.tbi".format(file)
             FileValidator().validate(index_file)
         except ImportingError:
@@ -79,7 +85,7 @@ class Command(BaseCommand):
 
         try:
             feature_file = FeatureLoader(
-                filename=filename, source="VCF_SOURCE", doi=doi
+                filename=filename, source="VCF_SOURCE", organism=organism, doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -93,9 +99,7 @@ class Command(BaseCommand):
         with open(file) as tbx_file:
             tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
             for row in tqdm(tbx.fetch(parser=pysam.asVCF()), total=get_num_lines(file)):
-                tasks.append(
-                    pool.submit(feature_file.store_tabix_VCF_feature, row, organism)
-                )
+                tasks.append(pool.submit(feature_file.store_tabix_VCF_feature, row))
 
                 if len(tasks) >= chunk_size:
                     for task in as_completed(tasks):
