@@ -93,13 +93,13 @@ class SimilarityLoader(object):
         """Retrieve the query feature from searchio hsp."""
         try:
             query_feature_id = retrieve_feature_id(
-                accession=hsp.query_id, soterm=self.so_query
+                accession=hsp.query_id, soterm=self.so_query, organism=self.org_query
             )
         except ObjectDoesNotExist as e1:
             try:
                 query_id = self.retrieve_id_from_description(hsp.query_description)
                 query_feature_id = retrieve_feature_id(
-                    accession=query_id, soterm=self.so_query
+                    accession=query_id, soterm=self.so_query, organism=self.org_query
                 )
             except ObjectDoesNotExist as e2:
                 raise ImportingError(
@@ -111,13 +111,15 @@ class SimilarityLoader(object):
         """Retrieve the subject feature from searchio hsp."""
         try:
             subject_feature_id = retrieve_feature_id(
-                accession=hsp.hit_id, soterm=self.so_subject
+                accession=hsp.hit_id, soterm=self.so_subject, organism=self.org_subject
             )
         except ObjectDoesNotExist as e1:
             try:
                 subject_id = self.retrieve_id_from_description(hsp.hit_description)
                 subject_feature_id = retrieve_feature_id(
-                    accession=subject_id, soterm=self.so_subject
+                    accession=subject_id,
+                    soterm=self.so_subject,
+                    organism=self.org_subject,
                 )
             except ObjectDoesNotExist as e2:
                 raise ImportingError(
