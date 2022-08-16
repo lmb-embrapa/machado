@@ -7,7 +7,7 @@
 """Views."""
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -36,6 +36,7 @@ from machado.api.serializers import FeatureProteinMatchesSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.api.serializers import FeatureSimilaritySerializer
+from machado.api.serializers import OrganismIDSerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
@@ -346,6 +347,117 @@ class autocompleteViewSet(viewsets.GenericViewSet):
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(autocompleteViewSet, self).dispatch(*args, **kwargs)
+
+
+class OrganismIDViewSet(viewsets.GenericViewSet):
+    """Retrieve the organism ID by accession."""
+
+    lookup_field = "organism_id"
+    lookup_value_regex = r"^\d+$"
+    serializer_class = OrganismIDSerializer
+
+    genus_param = openapi.Parameter(
+        "genus",
+        openapi.IN_QUERY,
+        description="genus name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    species_param = openapi.Parameter(
+        "species",
+        openapi.IN_QUERY,
+        description="species name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    infraspecific_name_param = openapi.Parameter(
+        "infraspecific_name",
+        openapi.IN_QUERY,
+        description="infraspecific name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    abbreviation_param = openapi.Parameter(
+        "abbreviation",
+        openapi.IN_QUERY,
+        description="abbreviation",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    common_name_param = openapi.Parameter(
+        "common_name",
+        openapi.IN_QUERY,
+        description="common name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    operation_summary = "Retrieve organism ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_ORGANISM"):
+        operation_description += "<b>Example:</b><br />common_name={}".format(
+            settings.MACHADO_EXAMPLE_ORGANISM
+        )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            genus_param,
+            species_param,
+            infraspecific_name_param,
+            abbreviation_param,
+            common_name_param,
+        ],
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+    @method_decorator(cache_page(CACHE_TIMEOUT))
+    def list(self, request):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = OrganismIDSerializer(queryset, many=False)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        genus = self.request.query_params.get("genus")
+        species = self.request.query_params.get("species")
+        infraspecific_name = self.request.query_params.get("infraspecific_name")
+        abbreviation = self.request.query_params.get("abbreviation")
+        common_name = self.request.query_params.get("common_name")
+
+        qs = Organism.objects
+
+        if genus is not None:
+            qs.filter(genus=genus)
+
+        if species is not None:
+            qs.filter(species=species)
+
+        if infraspecific_name is not None:
+            qs.filter(infraspecific_name=infraspecific_name)
+
+        if abbreviation is not None:
+            qs.filter(abbreviation=abbreviation)
+
+        if common_name is not None:
+            qs.filter(common_name=common_name)
+
+        try:
+            organism_id = qs.get()
+            return {"organism_id": organism_id}
+        except MultipleObjectsReturned:
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @method_decorator(cache_page(CACHE_TIMEOUT))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(OrganismIDViewSet, self).dispatch(*args, **kwargs)
 
 
 class FeatureIDViewSet(viewsets.GenericViewSet):

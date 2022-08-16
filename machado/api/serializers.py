@@ -197,6 +197,12 @@ class autocompleteSerializer(serializers.Serializer):
         return obj
 
 
+class OrganismIDSerializer(serializers.Serializer):
+    """Organism ID serializer."""
+
+    organism_id = serializers.IntegerField()
+
+
 class FeatureIDSerializer(serializers.Serializer):
     """Feature ID serializer."""
 
