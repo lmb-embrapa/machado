@@ -37,7 +37,7 @@ from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.api.serializers import FeatureSimilaritySerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.models import Analysis, Analysisfeature, Cvterm, Pub
+from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 
 from re import escape, search, IGNORECASE
@@ -369,6 +369,13 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         required=True,
         type=openapi.TYPE_STRING,
     )
+    oragnism_id = openapi.Parameter(
+        "organism_id",
+        openapi.IN_QUERY,
+        description="organism id",
+        required=True,
+        type=openapi.TYPE_INTEGER,
+    )
 
     operation_summary = "Retrieve feature ID by accession"
     operation_description = operation_summary + "<br /><br />"
@@ -395,8 +402,10 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         """Get queryset."""
         accession = self.request.query_params.get("accession")
         soterm = self.request.query_params.get("soType")
+        organism_id = self.request.query_params.get("organism")
+        organism_obj = Organism.objects.get(organism_id=organism_id)
         try:
-            feature_id = retrieve_feature_id(accession, soterm)
+            feature_id = retrieve_feature_id(accession, soterm, organism_obj)
             return {"feature_id": feature_id}
         except ObjectDoesNotExist:
             return None
