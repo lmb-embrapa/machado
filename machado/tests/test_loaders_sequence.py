@@ -46,45 +46,39 @@ class SequenceTest(TestCase):
             is_obsolete=0,
             is_relationshiptype=0,
         )
+        Organism.objects.create(genus="Mus", species="musculus")
+        Organism.objects.create(genus="Homo", species="sapiens")
 
     def test_fail_biopython_seq_record(self):
         """Tests fail __init__ and store_biopython_seq_record."""
         # sequence already registered
-        Organism.objects.create(genus="Mus", species="musculus")
+        organism = Organism.objects.get(genus="Mus", species="musculus")
         with self.assertRaises(ImportingError):
-            test_seq_file = SequenceLoader(filename="sequence.fasta")
+            test_seq_file = SequenceLoader(filename="sequence.fasta", organism=organism)
             test_seq_obj = SeqRecord(
                 Seq("acgtgtgtgcatgctagatcgatgcatgca"),
                 id="chr1",
                 description="chromosome 1",
             )
-            test_seq_file.store_biopython_seq_record(
-                test_seq_obj, "assembly", "Mus musculus"
-            )
+            test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
             test_seq_obj = SeqRecord(
                 Seq("acgtgtgtgcatgctagatcgatgcatgca"),
                 id="chr1",
                 description="chromosome 1",
             )
-            test_seq_file.store_biopython_seq_record(
-                test_seq_obj, "assembly", "Mus musculus"
-            )
+            test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
 
     def test_store_biopython_seq_record(self):
         """Tests - __init__ and store_biopython_seq_record."""
         # test insert sequence
-        Organism.objects.create(genus="Mus", species="musculus")
-        test_seq_file = SequenceLoader(filename="sequence.fasta")
+        organism = Organism.objects.get(genus="Mus", species="musculus")
+        test_seq_file = SequenceLoader(filename="sequence.fasta", organism=organism)
         test_seq_obj = SeqRecord(
             Seq("acgtgtgtgcatgctagatcgatgcatgca"), id="chr1", description="chromosome 1"
         )
-        test_seq_file.store_biopython_seq_record(
-            test_seq_obj, "assembly", "Mus musculus"
-        )
+        test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
 
-        test_feature = Feature.objects.get(
-            uniquename="chr1", organism__genus="Mus", organism__species="musculus"
-        )
+        test_feature = Feature.objects.get(uniquename="chr1", organism=organism)
         self.assertEqual("chr1", test_feature.uniquename)
         self.assertEqual("chromosome 1", test_feature.name)
         self.assertEqual("acgtgtgtgcatgctagatcgatgcatgca", test_feature.residues)
@@ -92,25 +86,23 @@ class SequenceTest(TestCase):
         # test insert no sequence
         test_seq_obj = SeqRecord(Seq("acgtgtgtgcatgctagatcgatgcatgca"), id="chr2")
         test_seq_file.store_biopython_seq_record(
-            test_seq_obj, "assembly", "Mus musculus", ignore_residues=True
+            test_seq_obj, "assembly", ignore_residues=True
         )
-        test_feature = Feature.objects.get(uniquename="chr2")
+        test_feature = Feature.objects.get(uniquename="chr2", organism=organism)
         self.assertEqual("chr2", test_feature.uniquename)
         self.assertEqual("", test_feature.residues)
 
         # test fail insert same id, different organism
         # dbxref.accession must be unique
-        Organism.objects.create(genus="Homo", species="sapiens")
-        test_seq_file = SequenceLoader(filename="sequence2.fasta")
+        organism = Organism.objects.get(genus="Homo", species="sapiens")
+        test_seq_file = SequenceLoader(filename="sequence2.fasta", organism=organism)
         test_seq_obj = SeqRecord(
             Seq("atgctagctagcatgactgactggtgcagtgcatgca"),
             id="chr1",
             description="chromosome 1",
         )
         with self.assertRaises(IntegrityError):
-            test_seq_file.store_biopython_seq_record(
-                test_seq_obj, "assembly", "Homo sapiens"
-            )
+            test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
 
     def test_store_biopython_seq_record_DOI(self):
         """Tests - __init__ and store_biopython_seq_record with DOI."""
@@ -146,18 +138,18 @@ class SequenceTest(TestCase):
             "10.1186/s12864-016-2535-300002", test_bibtex3_dbxref.accession
         )
 
-        Organism.objects.create(genus="Mus", species="musculus")
+        organism = Organism.objects.get(genus="Mus", species="musculus")
         test_seq_file_pub = SequenceLoader(
-            filename="sequence_doi.fasta", doi="10.1186/s12864-016-2535-300002"
+            filename="sequence_doi.fasta",
+            organism=organism,
+            doi="10.1186/s12864-016-2535-300002",
         )
         test_seq_obj_pub = SeqRecord(
             Seq("acgtgtgtgcatgctagatcgatgcatgca"), id="chr2", description="chromosome 2"
         )
-        test_seq_file_pub.store_biopython_seq_record(
-            test_seq_obj_pub, "assembly", "Mus musculus"
-        )
+        test_seq_file_pub.store_biopython_seq_record(test_seq_obj_pub, "assembly")
 
-        test_feature_doi = Feature.objects.get(name="chromosome 2")
+        test_feature_doi = Feature.objects.get(name="chromosome 2", organism=organism)
 
         self.assertEqual("chr2", test_feature_doi.uniquename)
         test_feature_pub_doi = FeaturePub.objects.get(pub_id=test_bibtex3.pub_id)
@@ -172,19 +164,17 @@ class SequenceTest(TestCase):
     def test_add_sequence_to_feature(self):
         """Tests - add_sequence_to_feature."""
         # test insert sequence
-        Organism.objects.create(genus="Mus", species="musculus")
-        test_seq_file = SequenceLoader(filename="sequence.fasta")
+        organism = Organism.objects.get(genus="Mus", species="musculus")
+        test_seq_file = SequenceLoader(filename="sequence.fasta", organism=organism)
         test_seq_obj = SeqRecord(
             Seq("acgtgtgtgcatgctagatcgatgcatgca"), id="chr1", description="chromosome 1"
         )
-        test_seq_file.store_biopython_seq_record(
-            test_seq_obj, "assembly", "Mus musculus"
-        )
+        test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
 
         # test add_sequence_to_feature
         test_seq_obj = SeqRecord(
             Seq("aaaaaaaaaaaaaaaaaaaa"), id="chr1", description="chromosome 1"
         )
         test_seq_file.add_sequence_to_feature(test_seq_obj, "assembly")
-        test_feature_seq = Feature.objects.get(uniquename="chr1")
+        test_feature_seq = Feature.objects.get(uniquename="chr1", organism=organism)
         self.assertEqual("aaaaaaaaaaaaaaaaaaaa", test_feature_seq.residues)
