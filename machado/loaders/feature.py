@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy, VCFProxy
 
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.common import retrieve_feature_id
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.featureattributes import FeatureAttributesLoader
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism

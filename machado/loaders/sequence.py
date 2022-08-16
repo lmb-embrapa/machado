@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 
 from machado.decorators import close_db_connections
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.common import retrieve_feature_id
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub, Organism
 from machado.models import PubDbxref
