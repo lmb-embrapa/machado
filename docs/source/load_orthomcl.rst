@@ -16,7 +16,6 @@ Load OrthoMCL
 
 =============   ==================================================================================
 --file    		Output result from OrthoMCL software.*
---organism 	Species name (eg. Homo sapiens, Mus musculus) *
 --cpu 			Number of threads
 =============   ==================================================================================
 

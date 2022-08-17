@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from django.test import TestCase
 
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import MultispeciesFeatureLoader
 from machado.models import Cv, Cvterm, Organism
 from machado.models import Db, Dbxref, Feature
 from machado.models import Featureprop
@@ -130,6 +130,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc1,
                 dbxref__db__name="FASTA_SOURCE",
+                organism=organism1,
             ).exists()
         )
         # inserting: Bradi0180s00100.1.v3.1; Bradi2g20400.1.v3.1
@@ -151,6 +152,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc2,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism2,
             ).exists()
         )
         acc3 = "Bradi2g20400.1.v3.1"
@@ -171,6 +173,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc3,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism2,
             ).exists()
         )
         # inserting: Ciclev10013963m.v1.0; Ciclev10013962m.v1.0;
@@ -193,6 +196,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc4,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism3,
             ).exists()
         )
         acc5 = "Ciclev10013962m.v1.0"
@@ -213,6 +217,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc5,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism3,
             ).exists()
         )
         acc6 = "Ciclev10013970m.v1.0"
@@ -233,6 +238,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc6,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism3,
             ).exists()
         )
         # inserting: DCAR_032182.v1.0.388; DCAR_031986.v1.0.388;
@@ -255,6 +261,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc7,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism4,
             ).exists()
         )
         acc8 = "DCAR_031986.v1.0.388"
@@ -275,6 +282,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc8,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism4,
             ).exists()
         )
         acc9 = "DCAR_032223.v1.0.388"
@@ -295,6 +303,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc9,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism4,
             ).exists()
         )
         acc10 = "DCAR_000323.v1.0.388"
@@ -315,6 +324,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc10,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism4,
             ).exists()
         )
         # inserting: Eucgr.L02820.1.v2.0
@@ -336,6 +346,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc11,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism5,
             ).exists()
         )
         # inserting: mrna13067.1-v1.0-hybrid.v1.1
@@ -357,6 +368,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc12,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism6,
             ).exists()
         )
         # inserting: Glyma.10G030500.1.Wm82.a2.v1; Glyma.10G053100.1.Wm82.a2.v1
@@ -378,6 +390,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc13,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism7,
             ).exists()
         )
         acc14 = "Glyma.10G053100.1.Wm82.a2.v1"
@@ -398,6 +411,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc14,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism7,
             ).exists()
         )
         acc15 = "Glyma.10G008400.1.Wm82.a2.v1"
@@ -418,6 +432,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc15,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism7,
             ).exists()
         )
         # inserting: Kaladp0598s0001.1.v1.1
@@ -439,6 +454,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc16,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism8,
             ).exists()
         )
         acc17 = "Kaladp0598s0002.1.v1.1"
@@ -459,6 +475,7 @@ class OrthologyTest(TestCase):
                 type__name="polypeptide",
                 dbxref__accession=acc17,
                 dbxref__db__name__in=["GFF_SOURCE", "FASTA_SOURCE"],
+                organism=organism8,
             ).exists()
         )
         # ########################
@@ -472,8 +489,8 @@ class OrthologyTest(TestCase):
         )
         source = "null"
         soterm = "polypeptide"
-        test_orthology_loader = FeatureLoader(
-            source=source, filename=filename, organism=organism
+        test_orthology_loader = MultispeciesFeatureLoader(
+            source=source, filename=filename
         )
         # ####################
         # test store groups

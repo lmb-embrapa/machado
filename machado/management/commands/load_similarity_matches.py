@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import MultispeciesFeatureLoader
 from machado.models import Organism
 
 warnings.simplefilter("ignore", BiopythonWarning)
@@ -59,17 +59,11 @@ class Command(BaseCommand):
                 "interproscan-xml only, not {}".format(format)
             )
 
-        organism_obj, created = Organism.objects.get_or_create(
-            abbreviation="multispecies",
-            genus="multispecies",
-            species="multispecies",
-            common_name="multispecies",
-        )
-
         filename = os.path.basename(file)
         try:
-            feature_file = FeatureLoader(
-                filename=filename, source=source, organism=organism_obj
+            feature_file = MultispeciesFeatureLoader(
+                filename=filename,
+                source=source,
             )
         except ImportingError as e:
             raise CommandError(e)

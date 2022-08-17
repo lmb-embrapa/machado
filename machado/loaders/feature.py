@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy, VCFProxy
 
-from machado.loaders.common import retrieve_feature_id
+from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.featureattributes import FeatureAttributesLoader
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
@@ -24,14 +24,10 @@ from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Featureprop, FeaturePub, Pub, PubDbxref
 
 
-class FeatureLoader(object):
-    """Load feature records."""
+class FeatureLoaderBase(object):
+    """Shared base for loading feature records."""
 
-    help = "Load feature records."
-
-    def __init__(
-        self, source: str, filename: str, organism: Organism, doi: str = None
-    ) -> None:
+    def __init__(self, source: str, filename: str, doi: str = None) -> None:
         """Execute the init function."""
         # initialization of lists/sets to store ignored attributes,
         # ignored goterms, and relationships
@@ -40,8 +36,6 @@ class FeatureLoader(object):
         self.relationships: List[Dict[str, str]] = list()
         self.ignored_attrs: Set[str] = set()
         self.ignored_goterms: Set[str] = set()
-
-        self.organism = organism
 
         try:
             self.db, created = Db.objects.get_or_create(name=source.upper())
@@ -88,6 +82,24 @@ class FeatureLoader(object):
                 self.pub_dbxref_doi = PubDbxref.objects.get(dbxref=dbxref_doi)
             except ObjectDoesNotExist:
                 raise ImportingError("{} not registered.".format(doi))
+
+
+class FeatureLoader(FeatureLoaderBase):
+    """Load single-organism feature records."""
+
+    help = "Load single-organism feature records."
+
+    def __init__(
+        self, source: str, filename: str, organism: Organism, doi: str = None
+    ) -> None:
+        """Execute the init function."""
+
+        if organism is not None:
+            self.organism = organism
+        else:
+            raise ImportingError("FeatureLoader requires an organism parameter")
+
+        super(FeatureLoader, self).__init__(source, filename, doi)
 
     def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, qtl: bool) -> None:
         """Store tabix feature."""
@@ -387,65 +399,6 @@ class FeatureLoader(object):
                 raise ImportingError(e)
             rank += 1
 
-    def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
-        """Store bio searchio hit."""
-
-        if not hasattr(searchio_hit, "accession"):
-            searchio_hit.accession = None
-
-        # if interproscan-xml parsing, get db name from Hit.attributes.
-        if target == "InterPro":
-            db_name = searchio_hit.attributes["Target"].upper()
-            # prevents the creation of multiple databases for SIGNALP
-            if db_name.startswith("SIGNALP"):
-                db_name = "SIGNALP"
-            db, created = Db.objects.get_or_create(name=db_name)
-        # if blast-xml parsing, db name is self.db ("BLAST_source")
-        else:
-            db = self.db
-
-        dbxref, created = Dbxref.objects.get_or_create(db=db, accession=searchio_hit.id)
-        feature, created = Feature.objects.get_or_create(
-            organism=self.organism,
-            uniquename=searchio_hit.id,
-            type_id=self.so_term_protein_match.cvterm_id,
-            name=searchio_hit.accession,
-            dbxref=dbxref,
-            defaults={
-                "is_analysis": False,
-                "is_obsolete": False,
-                "timeaccessioned": datetime.now(timezone.utc),
-                "timelastmodified": datetime.now(timezone.utc),
-            },
-        )
-
-        for aux_dbxref in searchio_hit.dbxrefs:
-            aux_db, aux_term = aux_dbxref.split(":", 1)
-            if aux_db == "GO":
-                try:
-                    term_db = Db.objects.get(name=aux_db.upper())
-                    dbxref = Dbxref.objects.get(db=term_db, accession=aux_term)
-                    cvterm = Cvterm.objects.get(dbxref=dbxref)
-                    FeatureCvterm.objects.get_or_create(
-                        feature=feature,
-                        cvterm=cvterm,
-                        pub=self.pub,
-                        is_not=False,
-                        rank=0,
-                    )
-                except ObjectDoesNotExist:
-                    self.ignored_goterms.add(aux_dbxref)
-            else:
-                term_db, created = Db.objects.get_or_create(name=aux_db.upper())
-                dbxref, created = Dbxref.objects.get_or_create(
-                    db=term_db, accession=aux_term
-                )
-                FeatureDbxref.objects.get_or_create(
-                    feature=feature, dbxref=dbxref, is_current=1
-                )
-
-        return None
-
     def store_feature_annotation(
         self,
         feature: str,
@@ -541,6 +494,139 @@ class FeatureLoader(object):
         except IntegrityError as e:
             raise ImportingError(e)
 
+
+class MultispeciesFeatureLoader(FeatureLoaderBase):
+    """Load multi-organism feature records."""
+
+    help = "Load multi-organism feature records."
+
+    def retrieve_feature_id(self, accession: str, soterm: str) -> int:
+
+        """
+        like machado.loaders.common.retreive_feature_id, but assumes acession is unique across all organisms
+        """
+
+        """Retrieve feature object."""
+        # feature.uniquename
+        try:
+            return Feature.objects.get(
+                uniquename=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # soterm-feature.uniquename
+        try:
+            return Feature.objects.get(
+                uniquename="{}-{}".format(soterm, accession),
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # feature.name
+        try:
+            return Feature.objects.get(
+                name__iexact=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # feature.dbxref.accession
+        try:
+            return Feature.objects.get(
+                dbxref__accession__iexact=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # featuredbxref.dbxref.accession
+        try:
+            return FeatureDbxref.objects.get(
+                dbxref__accession__iexact=accession,
+                feature__type__cv__name="sequence",
+                feature__type__name=soterm,
+            ).feature_id
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist("{} {} does not exist".format(soterm, accession))
+        except MultipleObjectsReturned:
+            raise MultipleObjectsReturned(
+                "{} {} matches multiple features".format(soterm, accession)
+            )
+
+    def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
+        """Store bio searchio hit."""
+
+        organism_obj, created = Organism.objects.get_or_create(
+            abbreviation="multispecies",
+            genus="multispecies",
+            species="multispecies",
+            common_name="multispecies",
+        )
+
+        if not hasattr(searchio_hit, "accession"):
+            searchio_hit.accession = None
+
+        # if interproscan-xml parsing, get db name from Hit.attributes.
+        if target == "InterPro":
+            db_name = searchio_hit.attributes["Target"].upper()
+            # prevents the creation of multiple databases for SIGNALP
+            if db_name.startswith("SIGNALP"):
+                db_name = "SIGNALP"
+            db, created = Db.objects.get_or_create(name=db_name)
+        # if blast-xml parsing, db name is self.db ("BLAST_source")
+        else:
+            db = self.db
+
+        dbxref, created = Dbxref.objects.get_or_create(db=db, accession=searchio_hit.id)
+        feature, created = Feature.objects.get_or_create(
+            organism=organism_obj,
+            uniquename=searchio_hit.id,
+            type_id=self.so_term_protein_match.cvterm_id,
+            name=searchio_hit.accession,
+            dbxref=dbxref,
+            defaults={
+                "is_analysis": False,
+                "is_obsolete": False,
+                "timeaccessioned": datetime.now(timezone.utc),
+                "timelastmodified": datetime.now(timezone.utc),
+            },
+        )
+
+        for aux_dbxref in searchio_hit.dbxrefs:
+            aux_db, aux_term = aux_dbxref.split(":", 1)
+            if aux_db == "GO":
+                try:
+                    term_db = Db.objects.get(name=aux_db.upper())
+                    dbxref = Dbxref.objects.get(db=term_db, accession=aux_term)
+                    cvterm = Cvterm.objects.get(dbxref=dbxref)
+                    FeatureCvterm.objects.get_or_create(
+                        feature=feature,
+                        cvterm=cvterm,
+                        pub=self.pub,
+                        is_not=False,
+                        rank=0,
+                    )
+                except ObjectDoesNotExist:
+                    self.ignored_goterms.add(aux_dbxref)
+            else:
+                term_db, created = Db.objects.get_or_create(name=aux_db.upper())
+                dbxref, created = Dbxref.objects.get_or_create(
+                    db=term_db, accession=aux_term
+                )
+                FeatureDbxref.objects.get_or_create(
+                    feature=feature, dbxref=dbxref, is_current=1
+                )
+
+        return None
+
     def store_feature_groups(
         self,
         group: list,
@@ -561,11 +647,9 @@ class FeatureLoader(object):
             try:
                 # retrieves feature_id from dbxref's accession
                 feature_id_list.append(
-                    retrieve_feature_id(
-                        accession=acc, soterm=soterm, organism=self.organism
-                    )
+                    self.retrieve_feature_id(accession=acc, soterm=soterm)
                 )
-            except (MultipleObjectsReturned, ObjectDoesNotExist):
+            except (MultipleObjectsReturned, ObjectDoesNotExist) as e:
                 pass
 
         # only stores clusters with 2 or more members

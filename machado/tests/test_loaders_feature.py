@@ -12,7 +12,7 @@ from Bio.SearchIO._model import Hit
 from bibtexparser.bibdatabase import BibDatabase
 from django.test import TestCase
 
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import FeatureLoader, MultispeciesFeatureLoader
 from machado.loaders.publication import PublicationLoader
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureprop
@@ -451,16 +451,10 @@ class FeatureTest(TestCase):
 
         Organism.objects.create(genus="test", species="organism")
 
-        organism_obj, created = Organism.objects.get_or_create(
-            abbreviation="multispecies",
-            genus="multispecies",
-            species="multispecies",
-            common_name="multispecies",
-        )
-
         # instantiate the loader
-        test_feature_file = FeatureLoader(
-            filename="file.name", source="InterproScan_source", organism=organism_obj
+        test_feature_file = MultispeciesFeatureLoader(
+            filename="file.name",
+            source="InterproScan_source",
         )
         # store the bio searchio hit
         # From interproscan
