@@ -13,7 +13,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name="machado",
-    version="v0.3.0",
+    version="0.4.0",
     packages=find_packages(),
     include_package_data=True,
     license="GPL License",
@@ -24,7 +24,7 @@ setup(
     author_email="",
     classifiers=[
         "Environment :: Console",
-        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.2",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3",
     ],
