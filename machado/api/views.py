@@ -398,9 +398,9 @@ class OrganismIDViewSet(viewsets.GenericViewSet):
 
     operation_summary = "Retrieve organism ID"
     operation_description = operation_summary + "<br /><br />"
-    if hasattr(settings, "MACHADO_EXAMPLE_ORGANISM"):
+    if hasattr(settings, "MACHADO_EXAMPLE_ORGANISM_COMMON_NAME"):
         operation_description += "<b>Example:</b><br />common_name={}".format(
-            settings.MACHADO_EXAMPLE_ORGANISM
+            settings.MACHADO_EXAMPLE_ORGANISM_COMMON_NAME
         )
 
     @swagger_auto_schema(
@@ -491,11 +491,11 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
 
     operation_summary = "Retrieve feature ID by accession"
     operation_description = operation_summary + "<br /><br />"
-    if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC"):
-        operation_description += (
-            "<b>Example:</b><br />accession={}, soType=polypeptide".format(
-                settings.MACHADO_EXAMPLE_AA_ACC
-            )
+    if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC") and hasattr(
+        settings, "MACHADO_EXAMPLE_ORGANISM_ID"
+    ):
+        operation_description += "<b>Example:</b><br />accession={}, soType=polypeptide, organism_id={}".format(
+            settings.MACHADO_EXAMPLE_AA_ACC, settings.MACHADO_EXAMPLE_ORGANISM_ID
         )
 
     @swagger_auto_schema(
