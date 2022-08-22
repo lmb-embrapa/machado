@@ -481,7 +481,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         required=True,
         type=openapi.TYPE_STRING,
     )
-    oragnism_id = openapi.Parameter(
+    organism_id = openapi.Parameter(
         "organism_id",
         openapi.IN_QUERY,
         description="organism id",
