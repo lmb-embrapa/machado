@@ -209,6 +209,13 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
 
     serializer_class = JBrowseFeatureSerializer
 
+    organism_param = openapi.Parameter(
+        "organism",
+        openapi.IN_QUERY,
+        description="Species name",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
     start_param = openapi.Parameter(
         "start",
         openapi.IN_QUERY,
@@ -246,8 +253,10 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
+        refseq = self.kwargs.get("refseq")
+        organism = self.request.query_params.get("organism")
         refseq_feature_obj = Feature.objects.filter(
-            uniquename=self.kwargs.get("refseq")
+            uniquename=refseq, organism=retrieve_organism(organism)
         ).first()
         soType = self.request.query_params.get("soType")
         return {"refseq": refseq_feature_obj, "soType": soType}
@@ -255,8 +264,10 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     def get_queryset(self, *args, **kwargs):
         """Get queryset."""
         try:
-            refseq = Feature.objects.filter(
-                uniquename=self.kwargs.get("refseq")
+            refseq = self.kwargs.get("refseq")
+            organism = self.request.query_params.get("organism")
+            refseq_feature_obj = Feature.objects.filter(
+                uniquename=refseq, organism=retrieve_organism(organism)
             ).first()
 
         except ObjectDoesNotExist:
@@ -267,7 +278,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
             start = self.request.query_params.get("start", 1)
             end = self.request.query_params.get("end")
 
-            features_locs = Featureloc.objects.filter(srcfeature=refseq)
+            features_locs = Featureloc.objects.filter(srcfeature=refseq_feature_obj)
             if end is not None:
                 features_locs = features_locs.filter(fmin__lte=end)
             features_locs = features_locs.filter(fmax__gte=start)
