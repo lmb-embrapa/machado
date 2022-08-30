@@ -13,6 +13,7 @@ from Bio.SeqRecord import SeqRecord
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 
+from machado.decorators import close_db_connections
 from machado.loaders.common import retrieve_feature_id, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
@@ -50,6 +51,7 @@ class SequenceLoader(object):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
+    @close_db_connections
     def store_biopython_seq_record(
         self,
         seq_obj: SeqRecord,
@@ -58,7 +60,12 @@ class SequenceLoader(object):
         ignore_residues: bool = False,
     ) -> None:
         """Store Biopython SeqRecord."""
-        soterm_obj = Cvterm.objects.get(name=soterm, cv__name="sequence")
+        try:
+            soterm_obj = Cvterm.objects.get(name=soterm, cv__name="sequence")
+        except ObjectDoesNotExist as e:
+            raise ImportingError(
+                "The soterm {} is not registered ({}).".format(soterm, e)
+            )
         organism_obj = retrieve_organism(organism)
 
         try:
