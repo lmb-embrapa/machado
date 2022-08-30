@@ -117,7 +117,7 @@ class Command(BaseCommand):
                     continue
                 tasks.append(
                     pool.submit(
-                        feature_file.store_tabix_GFF_feature, row, organism, qtl
+                        feature_file.store_tabix_GFF_feature, row, qtl
                     )
                 )
 
