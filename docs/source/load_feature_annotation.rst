@@ -70,16 +70,16 @@ If, by any reason, you need to remove a feature sequence you should use the comm
 .. code-block:: bash
 
     >chr1
-    
+
     >chr2
-    
+
 
 Load Publication
 ----------------
 
 .. code-block:: bash
 
-    python manage.py load_feature_publication --file feature_publication.tab
+    python manage.py load_feature_publication --organism 'Arabidopsis thaliana' --file feature_publication.tab
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -89,6 +89,7 @@ Load Publication
 
 =============   ==========================================================================================
 --file 		Two-column tab separated file (feature.accession<TAB>DOI). *
+--organism  	Species name (eg. Homo sapiens, Mus musculus) *
 --cpu 		Number of threads
 =============   ==========================================================================================
 
