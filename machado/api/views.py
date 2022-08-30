@@ -239,7 +239,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     )
 
     @swagger_auto_schema(
-        manual_parameters=[sotype_param, start_param, end_param],
+        manual_parameters=[sotype_param, start_param, end_param, organism_param],
         operation_description="Retrieve features from reference sequence (refseq). https://jbrowse.org/docs/data_formats.html",
         operation_summary="Retrieve features from reference sequence",
     )
@@ -255,8 +255,10 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         """Get the serializer context."""
         refseq = self.kwargs.get("refseq")
         organism = self.request.query_params.get("organism")
+        if organism is not None:
+            organism = retrieve_organism(organism)
         refseq_feature_obj = Feature.objects.filter(
-            uniquename=refseq, organism=retrieve_organism(organism)
+            uniquename=refseq, organism=organism
         ).first()
         soType = self.request.query_params.get("soType")
         return {"refseq": refseq_feature_obj, "soType": soType}
@@ -443,23 +445,23 @@ class OrganismIDViewSet(viewsets.GenericViewSet):
         qs = Organism.objects
 
         if genus is not None:
-            qs.filter(genus=genus)
+            qs = qs.filter(genus=genus)
 
         if species is not None:
-            qs.filter(species=species)
+            qs = qs.filter(species=species)
 
         if infraspecific_name is not None:
-            qs.filter(infraspecific_name=infraspecific_name)
+            qs = qs.filter(infraspecific_name=infraspecific_name)
 
         if abbreviation is not None:
-            qs.filter(abbreviation=abbreviation)
+            qs = qs.filter(abbreviation=abbreviation)
 
         if common_name is not None:
-            qs.filter(common_name=common_name)
+            qs = qs.filter(common_name=common_name)
 
         try:
-            organism_id = qs.get()
-            return {"organism_id": organism_id}
+            organism = qs.get()
+            return {"organism_id": organism.organism_id}
         except MultipleObjectsReturned:
             return None
         except ObjectDoesNotExist:
@@ -510,7 +512,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         )
 
     @swagger_auto_schema(
-        manual_parameters=[accession_param, sotype_param],
+        manual_parameters=[accession_param, sotype_param, organism_id],
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
@@ -525,7 +527,7 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         """Get queryset."""
         accession = self.request.query_params.get("accession")
         soterm = self.request.query_params.get("soType")
-        organism_id = self.request.query_params.get("organism")
+        organism_id = self.request.query_params.get("organism_id")
         organism_obj = Organism.objects.get(organism_id=organism_id)
         try:
             feature_id = retrieve_feature_id(accession, soterm, organism_obj)
