@@ -9,7 +9,6 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
-from django.db import connections
 
 
 def get_feature_dbxrefs(self):
