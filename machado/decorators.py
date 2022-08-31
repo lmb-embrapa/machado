@@ -329,18 +329,3 @@ def machado_pub_methods():
         return cls
 
     return wrapper
-
-
-def close_db_connections(func, *args, **kwargs):
-    """Explicitly close db connections during threaded execution."""
-
-    def _close_db_connections(*args, **kwargs):
-        ret = None
-        try:
-            ret = func(*args, **kwargs)
-        finally:
-            for conn in connections.all():
-                conn.close()
-        return ret
-
-    return _close_db_connections

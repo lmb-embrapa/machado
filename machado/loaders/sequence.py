@@ -51,7 +51,6 @@ class SequenceLoader(object):
             except ObjectDoesNotExist as e:
                 raise ImportingError(e)
 
-    @close_db_connections
     def store_biopython_seq_record(
         self,
         seq_obj: SeqRecord,
