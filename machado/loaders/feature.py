@@ -137,7 +137,7 @@ class FeatureLoader(FeatureLoaderBase):
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=attrs_id
+                db=self.db, accession=attrs_id, version=self.filename
             )
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref,
