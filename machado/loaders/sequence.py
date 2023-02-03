@@ -13,9 +13,9 @@ from Bio.SeqRecord import SeqRecord
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.common import retrieve_feature_id
 from machado.loaders.exceptions import ImportingError
-from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub
+from machado.models import Cvterm, Db, Dbxref, Dbxrefprop, Feature, FeaturePub, Organism
 from machado.models import PubDbxref
 
 
@@ -23,7 +23,12 @@ class SequenceLoader(object):
     """Load sequence records."""
 
     def __init__(
-        self, filename: str, doi: str = None, description: str = None, url: str = None
+        self,
+        filename: str,
+        organism: Organism,
+        doi: str = None,
+        description: str = None,
+        url: str = None,
     ) -> None:
         """Execute the init function."""
         # Save DB file info
@@ -31,6 +36,7 @@ class SequenceLoader(object):
             name="FASTA_SOURCE", description=description, url=url
         )
         self.filename = filename
+        self.organism = organism
 
         # Retrieve sequence ontology object
         self.cvterm_contained_in = Cvterm.objects.get(
@@ -54,7 +60,6 @@ class SequenceLoader(object):
         self,
         seq_obj: SeqRecord,
         soterm: str,
-        organism: str,
         ignore_residues: bool = False,
     ) -> None:
         """Store Biopython SeqRecord."""
@@ -64,11 +69,10 @@ class SequenceLoader(object):
             raise ImportingError(
                 "The soterm {} is not registered ({}).".format(soterm, e)
             )
-        organism_obj = retrieve_organism(organism)
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=seq_obj.id
+                db=self.db, accession=seq_obj.id, version=self.filename
             )
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref,
@@ -76,7 +80,9 @@ class SequenceLoader(object):
                 value=self.filename,
                 rank=0,
             )
-            retrieve_feature_id(accession=seq_obj.id, soterm=soterm)
+            retrieve_feature_id(
+                accession=seq_obj.id, soterm=soterm, organism=self.organism
+            )
             raise ImportingError(
                 "The sequence {} is already registered.".format(seq_obj.id)
             )
@@ -94,7 +100,7 @@ class SequenceLoader(object):
             # storing feature
             feature = Feature(
                 dbxref=dbxref,
-                organism=organism_obj,
+                organism=self.organism,
                 uniquename=seq_obj.id,
                 name=name,
                 residues=residues,
@@ -120,7 +126,9 @@ class SequenceLoader(object):
     def add_sequence_to_feature(self, seq_obj: SeqRecord, soterm: str) -> None:
         """Store Biopython SeqRecord."""
         try:
-            feature_id = retrieve_feature_id(accession=seq_obj.id, soterm=soterm)
+            feature_id = retrieve_feature_id(
+                accession=seq_obj.id, soterm=soterm, organism=self.organism
+            )
         except ObjectDoesNotExist:
             raise ImportingError("The feature {} does NOT exist.".format(seq_obj.id))
 

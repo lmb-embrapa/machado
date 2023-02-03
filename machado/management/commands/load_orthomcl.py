@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import MultispeciesFeatureLoader
 from machado.models import Cv, Cvterm, Dbxref, Db
 
 
@@ -34,12 +34,15 @@ The feature members need to be loaded previously."""
         parser.add_argument("--file", help="'groups.txt' File", required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
+    def handle(
+        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
+    ):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
         except ImportingError as e:
             raise CommandError(e)
+
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
@@ -67,7 +70,7 @@ The feature members need to be loaded previously."""
         soterm = "polypeptide"
 
         source = "null"
-        featureloader = FeatureLoader(source=source, filename=filename)
+        featureloader = MultispeciesFeatureLoader(source=source, filename=filename)
         # each line is an orthologous group
         for line in groups:
             members = []

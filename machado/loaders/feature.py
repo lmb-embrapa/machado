@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy, VCFProxy
 
-from machado.loaders.common import retrieve_feature_id, retrieve_organism
+from machado.loaders.common import retrieve_feature_id
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.featureattributes import FeatureAttributesLoader
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
@@ -24,10 +24,8 @@ from machado.models import FeatureRelationship, FeatureRelationshipprop
 from machado.models import Featureprop, FeaturePub, Pub, PubDbxref
 
 
-class FeatureLoader(object):
-    """Load feature records."""
-
-    help = "Load feature records."
+class FeatureLoaderBase(object):
+    """Shared base for loading feature records."""
 
     def __init__(self, source: str, filename: str, doi: str = None) -> None:
         """Execute the init function."""
@@ -85,11 +83,26 @@ class FeatureLoader(object):
             except ObjectDoesNotExist:
                 raise ImportingError("{} not registered.".format(doi))
 
-    def store_tabix_GFF_feature(
-        self, tabix_feature: GTFProxy, organism: str, qtl: bool
+
+class FeatureLoader(FeatureLoaderBase):
+    """Load single-organism feature records."""
+
+    help = "Load single-organism feature records."
+
+    def __init__(
+        self, source: str, filename: str, organism: Organism, doi: str = None
     ) -> None:
+        """Execute the init function."""
+
+        if organism is not None:
+            self.organism = organism
+        else:
+            raise ImportingError("FeatureLoader requires an organism parameter")
+
+        super(FeatureLoader, self).__init__(source, filename, doi)
+
+    def store_tabix_GFF_feature(self, tabix_feature: GTFProxy, qtl: bool) -> None:
         """Store tabix feature."""
-        organism_obj = retrieve_organism(organism)
 
         filecontent = "qtl" if qtl else "genome"
 
@@ -124,7 +137,7 @@ class FeatureLoader(object):
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=attrs_id
+                db=self.db, accession=attrs_id, version=self.filename
             )
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref,
@@ -133,7 +146,7 @@ class FeatureLoader(object):
                 rank=0,
             )
             feature_id = Feature.objects.create(
-                organism=organism_obj,
+                organism=self.organism,
                 uniquename=attrs_id,
                 type_id=cvterm.cvterm_id,
                 name=attrs_name,
@@ -158,7 +171,7 @@ class FeatureLoader(object):
         srcdb = Db.objects.get(name="FASTA_SOURCE")
         srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig, db=srcdb)
         srcfeature = Feature.objects.filter(
-            dbxref=srcdbxref, organism=organism_obj
+            dbxref=srcdbxref, organism=self.organism
         ).values_list("feature_id", flat=True)
         if len(srcfeature) == 1:
             srcfeature_id = srcfeature.first()
@@ -223,7 +236,7 @@ class FeatureLoader(object):
                 name="translation_of", cv__name="sequence"
             )
             feature_mRNA_translation_id = Feature.objects.create(
-                organism=organism_obj,
+                organism=self.organism,
                 uniquename=attrs_id,
                 type_id=self.aa_cvterm.cvterm_id,
                 name=attrs_name,
@@ -241,19 +254,18 @@ class FeatureLoader(object):
             )
 
     def store_relationship(
-        self, organism: str, subject_id: int, object_id: int
+        self, subject_id: int, object_id: int
     ) -> FeatureRelationship:
         """Retrieve the relationship object."""
-        organism_obj = retrieve_organism(organism)
         part_of = Cvterm.objects.get(name="part_of", cv__name="sequence")
 
         try:
             fr = FeatureRelationship(
                 subject_id=Feature.objects.exclude(type=self.aa_cvterm)
-                .get(uniquename=subject_id, organism=organism_obj)
+                .get(uniquename=subject_id, organism=self.organism)
                 .feature_id,
                 object_id=Feature.objects.exclude(type=self.aa_cvterm)
-                .get(uniquename=object_id, organism=organism_obj)
+                .get(uniquename=object_id, organism=self.organism)
                 .feature_id,
                 type_id=part_of.cvterm_id,
                 rank=0,
@@ -264,9 +276,8 @@ class FeatureLoader(object):
                 "Parent/Feature ({}/{}) not registered.".format(object_id, subject_id)
             )
 
-    def store_tabix_VCF_feature(self, tabix_feature: VCFProxy, organism: str) -> None:
+    def store_tabix_VCF_feature(self, tabix_feature: VCFProxy) -> None:
         """Store tabix feature from VCF files."""
-        organism_obj = retrieve_organism(organism)
 
         attrs_loader = FeatureAttributesLoader(filecontent="polymorphism")
         attrs_dict = attrs_loader.get_attributes(tabix_feature.info)
@@ -303,7 +314,7 @@ class FeatureLoader(object):
             )
             name = "{}->{}".format(tabix_feature.ref, tabix_feature.alt)
             feature_id = Feature.objects.create(
-                organism=organism_obj,
+                organism=self.organism,
                 uniquename=tabix_feature.id,
                 name=name,
                 type_id=cvterm.cvterm_id,
@@ -340,7 +351,7 @@ class FeatureLoader(object):
         srcdb = Db.objects.get(name="FASTA_SOURCE")
         srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig, db=srcdb)
         srcfeature = Feature.objects.filter(
-            dbxref=srcdbxref, organism=organism_obj
+            dbxref=srcdbxref, organism=self.organism
         ).values_list("feature_id", flat=True)
         if len(srcfeature) == 1:
             srcfeature_id = srcfeature.first()
@@ -388,8 +399,171 @@ class FeatureLoader(object):
                 raise ImportingError(e)
             rank += 1
 
+    def store_feature_annotation(
+        self,
+        feature: str,
+        soterm: str,
+        cvterm: str,
+        annotation: str,
+        doi: Union[str, None],
+    ) -> None:
+        """Store feature annotation."""
+        feature_id = retrieve_feature_id(
+            accession=feature, soterm=soterm, organism=self.organism
+        )
+        attrs_str = "{}={};".format(cvterm, annotation)
+
+        attrs_loader = FeatureAttributesLoader(filecontent="genome", doi=doi)
+        attrs_dict = attrs_loader.get_attributes(attrs_str)
+        attrs_loader.process_attributes(feature_id, attrs_dict)
+        self.ignored_attrs = attrs_loader.ignored_attrs
+        self.ignored_goterms = attrs_loader.ignored_goterms
+
+    def store_feature_dbxref(self, feature: str, soterm: str, dbxref: str) -> None:
+        """Store feature dbxref."""
+        feature_id = retrieve_feature_id(
+            accession=feature, soterm=soterm, organism=self.organism
+        )
+
+        try:
+            db_name, dbxref_accession = dbxref.split(":", 1)
+        except ValueError:
+            raise ImportingError(
+                "Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).".format(
+                    dbxref
+                )
+            )
+        db_obj, created = Db.objects.get_or_create(name=db_name)
+        dbxref_obj, created = Dbxref.objects.get_or_create(
+            db=db_obj, accession=dbxref_accession
+        )
+        FeatureDbxref.objects.get_or_create(
+            feature_id=feature_id, dbxref=dbxref_obj, is_current=True
+        )
+
+    def store_feature_publication(self, feature: str, soterm: str, doi: str) -> None:
+        """Store feature publication."""
+        feature_id = retrieve_feature_id(
+            accession=feature, soterm=soterm, organism=self.organism
+        )
+        try:
+            doi_obj = Dbxref.objects.get(accession=doi.lower(), db__name="DOI")
+            pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
+        except ObjectDoesNotExist:
+            raise ImportingError("{} not registered.".format(doi))
+
+        FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
+
+    def store_feature_pairs(
+        self,
+        pair: list,
+        term: Union[str, Cvterm],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
+    ) -> None:
+        """Store Feature Relationship Pairs."""
+        # only cvterm_id allowed
+        if isinstance(term, Cvterm):
+            cvterm_id = term.cvterm_id
+        else:
+            cvterm_id = term
+        # lets get feature_ids from the pair
+        try:
+            subject_id = retrieve_feature_id(
+                accession=pair[0], soterm=soterm, organism=self.organism
+            )
+            object_id = retrieve_feature_id(
+                accession=pair[1], soterm=soterm, organism=self.organism
+            )
+            frelationship_id = FeatureRelationship.objects.create(
+                subject_id=subject_id,
+                object_id=object_id,
+                type_id=cvterm_id,
+                value=value,
+                rank=0,
+            ).feature_relationship_id
+            FeatureRelationshipprop.objects.create(
+                feature_relationship_id=frelationship_id,
+                type_id=self.cvterm_contained_in.cvterm_id,
+                value=self.filename,
+                rank=0,
+            )
+        except ObjectDoesNotExist:
+            print("Feature from pair ({}/{}) not registered.".format(pair[0], pair[1]))
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+
+class MultispeciesFeatureLoader(FeatureLoaderBase):
+    """Load multi-organism feature records."""
+
+    help = "Load multi-organism feature records."
+
+    def retrieve_feature_id(self, accession: str, soterm: str) -> int:
+
+        """
+        like machado.loaders.common.retreive_feature_id, but assumes acession is unique across all organisms
+        """
+
+        """Retrieve feature object."""
+        # feature.uniquename
+        try:
+            return Feature.objects.get(
+                uniquename=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # soterm-feature.uniquename
+        try:
+            return Feature.objects.get(
+                uniquename="{}-{}".format(soterm, accession),
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # feature.name
+        try:
+            return Feature.objects.get(
+                name__iexact=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # feature.dbxref.accession
+        try:
+            return Feature.objects.get(
+                dbxref__accession__iexact=accession,
+                type__cv__name="sequence",
+                type__name=soterm,
+            ).feature_id
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            pass
+
+        # featuredbxref.dbxref.accession
+        try:
+            return FeatureDbxref.objects.get(
+                dbxref__accession__iexact=accession,
+                feature__type__cv__name="sequence",
+                feature__type__name=soterm,
+            ).feature_id
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist("{} {} does not exist".format(soterm, accession))
+        except MultipleObjectsReturned:
+            raise MultipleObjectsReturned(
+                "{} {} matches multiple features".format(soterm, accession)
+            )
+
     def store_bio_searchio_hit(self, searchio_hit: Hit, target: str) -> None:
         """Store bio searchio hit."""
+
         organism_obj, created = Organism.objects.get_or_create(
             abbreviation="multispecies",
             genus="multispecies",
@@ -453,91 +627,6 @@ class FeatureLoader(object):
 
         return None
 
-    def store_feature_annotation(
-        self,
-        feature: str,
-        soterm: str,
-        cvterm: str,
-        annotation: str,
-        doi: Union[str, None],
-    ) -> None:
-        """Store feature annotation."""
-        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
-        attrs_str = "{}={};".format(cvterm, annotation)
-
-        attrs_loader = FeatureAttributesLoader(filecontent="genome", doi=doi)
-        attrs_dict = attrs_loader.get_attributes(attrs_str)
-        attrs_loader.process_attributes(feature_id, attrs_dict)
-        self.ignored_attrs = attrs_loader.ignored_attrs
-        self.ignored_goterms = attrs_loader.ignored_goterms
-
-    def store_feature_dbxref(self, feature: str, soterm: str, dbxref: str) -> None:
-        """Store feature dbxref."""
-        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
-
-        try:
-            db_name, dbxref_accession = dbxref.split(":", 1)
-        except ValueError:
-            raise ImportingError(
-                "Incorrect DBxRef {}. It should have two colon-separated values (eg. DB:DBxREF).".format(
-                    dbxref
-                )
-            )
-        db_obj, created = Db.objects.get_or_create(name=db_name)
-        dbxref_obj, created = Dbxref.objects.get_or_create(
-            db=db_obj, accession=dbxref_accession
-        )
-        FeatureDbxref.objects.get_or_create(
-            feature_id=feature_id, dbxref=dbxref_obj, is_current=True
-        )
-
-    def store_feature_publication(self, feature: str, soterm: str, doi: str) -> None:
-        """Store feature publication."""
-        feature_id = retrieve_feature_id(accession=feature, soterm=soterm)
-        try:
-            doi_obj = Dbxref.objects.get(accession=doi.lower(), db__name="DOI")
-            pub_obj = Pub.objects.get(PubDbxref_pub_Pub__dbxref=doi_obj)
-        except ObjectDoesNotExist:
-            raise ImportingError("{} not registered.".format(doi))
-
-        FeaturePub.objects.get_or_create(feature_id=feature_id, pub=pub_obj)
-
-    def store_feature_pairs(
-        self,
-        pair: list,
-        term: Union[str, Cvterm],
-        soterm: str = "mRNA",
-        value: str = None,
-        cache: int = 0,
-    ) -> None:
-        """Store Feature Relationship Pairs."""
-        # only cvterm_id allowed
-        if isinstance(term, Cvterm):
-            cvterm_id = term.cvterm_id
-        else:
-            cvterm_id = term
-        # lets get feature_ids from the pair
-        try:
-            subject_id = retrieve_feature_id(accession=pair[0], soterm=soterm)
-            object_id = retrieve_feature_id(accession=pair[1], soterm=soterm)
-            frelationship_id = FeatureRelationship.objects.create(
-                subject_id=subject_id,
-                object_id=object_id,
-                type_id=cvterm_id,
-                value=value,
-                rank=0,
-            ).feature_relationship_id
-            FeatureRelationshipprop.objects.create(
-                feature_relationship_id=frelationship_id,
-                type_id=self.cvterm_contained_in.cvterm_id,
-                value=self.filename,
-                rank=0,
-            )
-        except ObjectDoesNotExist:
-            print("Feature from pair ({}/{}) not registered.".format(pair[0], pair[1]))
-        except IntegrityError as e:
-            raise ImportingError(e)
-
     def store_feature_groups(
         self,
         group: list,
@@ -558,7 +647,7 @@ class FeatureLoader(object):
             try:
                 # retrieves feature_id from dbxref's accession
                 feature_id_list.append(
-                    retrieve_feature_id(accession=acc, soterm=soterm)
+                    self.retrieve_feature_id(accession=acc, soterm=soterm)
                 )
             except (MultipleObjectsReturned, ObjectDoesNotExist):
                 pass

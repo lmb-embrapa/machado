@@ -11,9 +11,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pysam
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator, get_num_lines
+from machado.loaders.common import FileValidator, get_num_lines, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 
@@ -82,6 +83,11 @@ class Command(BaseCommand):
             raise CommandError(e)
 
         try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
+        try:
             index_file = "{}.tbi".format(file)
             FileValidator().validate(index_file)
         except ImportingError:
@@ -93,7 +99,7 @@ class Command(BaseCommand):
 
         try:
             feature_file = FeatureLoader(
-                filename=filename, source="GFF_SOURCE", doi=doi
+                filename=filename, source="GFF_SOURCE", organism=organism, doi=doi
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -110,9 +116,7 @@ class Command(BaseCommand):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(
-                    pool.submit(
-                        feature_file.store_tabix_GFF_feature, row, organism, qtl
-                    )
+                    pool.submit(feature_file.store_tabix_GFF_feature, row, qtl)
                 )
 
                 if len(tasks) >= chunk_size:
@@ -142,7 +146,6 @@ class Command(BaseCommand):
             tasks.append(
                 pool.submit(
                     feature_file.store_relationship,
-                    organism,
                     item["subject_id"],
                     item["object_id"],
                 )

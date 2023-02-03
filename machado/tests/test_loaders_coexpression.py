@@ -10,7 +10,7 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import FeatureLoader, MultispeciesFeatureLoader
 from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, Featureprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
@@ -137,7 +137,9 @@ class CoexpressionTest(TestCase):
         test_filename = "pcc.mcl.dummy.txt"
         source = "null"
         soterm = "polypeptide"
-        test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
+        test_coexpression_loader = FeatureLoader(
+            source=source, filename=test_filename, organism=test_organism
+        )
         test_coexpression_loader.store_feature_pairs(
             pair=test_pair1, soterm=soterm, term=term, value=test_pcc_value1
         )
@@ -353,7 +355,9 @@ class CoexpressionTest(TestCase):
         test_cluster3 = [test_featurename6]
         test_filename = "mcl.clusters.dummy.txt"
         source = "null"
-        test_coexpression_loader = FeatureLoader(source=source, filename=test_filename)
+        test_coexpression_loader = MultispeciesFeatureLoader(
+            source=source, filename=test_filename
+        )
         soterm = "polypeptide"
         test_coexpression_loader.store_feature_groups(
             group=test_cluster1, soterm=soterm, term=term, value=test_cluster1_name

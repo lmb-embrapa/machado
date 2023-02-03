@@ -102,7 +102,7 @@ class FeatureTest(TestCase):
         )
 
         # new FeatureLoader
-        FeatureLoader(filename="file.name", source="GFF_source")
+        FeatureLoader(filename="file.name", source="GFF_source", organism=test_organism)
         # running get_attributes
         test_attrs_file = FeatureAttributesLoader(filecontent="genome")
         test_attrs = test_attrs_file.get_attributes(

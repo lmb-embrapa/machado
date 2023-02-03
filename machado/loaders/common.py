@@ -19,6 +19,8 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from machado.loaders.exceptions import ImportingError
 from machado.models import Feature, FeatureDbxref, Organism
 
+from typing import Union
+
 
 class FileValidator(object):
     """Validate input file."""
@@ -149,12 +151,21 @@ def retrieve_organism(organism: str) -> Organism:
     return organism_obj
 
 
-def retrieve_feature_id(accession: str, soterm: str) -> int:
+def retrieve_feature_id(
+    accession: str, soterm: str, organism: Union[str, Organism]
+) -> int:
+
+    if not isinstance(organism, Organism):
+        organism = retrieve_organism(organism)
+
     """Retrieve feature object."""
     # feature.uniquename
     try:
         return Feature.objects.get(
-            uniquename=accession, type__cv__name="sequence", type__name=soterm
+            uniquename=accession,
+            type__cv__name="sequence",
+            type__name=soterm,
+            organism=organism,
         ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
@@ -165,6 +176,7 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
             uniquename="{}-{}".format(soterm, accession),
             type__cv__name="sequence",
             type__name=soterm,
+            organism=organism,
         ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
@@ -172,7 +184,10 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
     # feature.name
     try:
         return Feature.objects.get(
-            name__iexact=accession, type__cv__name="sequence", type__name=soterm
+            name__iexact=accession,
+            type__cv__name="sequence",
+            type__name=soterm,
+            organism=organism,
         ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
@@ -183,6 +198,7 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
             dbxref__accession__iexact=accession,
             type__cv__name="sequence",
             type__name=soterm,
+            organism=organism,
         ).feature_id
     except (MultipleObjectsReturned, ObjectDoesNotExist):
         pass
@@ -193,6 +209,7 @@ def retrieve_feature_id(accession: str, soterm: str) -> int:
             dbxref__accession__iexact=accession,
             feature__type__cv__name="sequence",
             feature__type__name=soterm,
+            feature__organism=organism,
         ).feature_id
     except ObjectDoesNotExist:
         raise ObjectDoesNotExist("{} {} does not exist".format(soterm, accession))

@@ -13,7 +13,7 @@ from Bio import SeqIO
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.sequence import SequenceLoader
 
@@ -79,11 +79,20 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
+        try:
+            organism = retrieve_organism(organism)
+        except ImportingError as e:
+            raise CommandError(e)
+
         # retrieve only the file name
         filename = os.path.basename(file)
         try:
             sequence_file = SequenceLoader(
-                filename=filename, description=description, url=url, doi=doi
+                filename=filename,
+                organism=organism,
+                description=description,
+                url=url,
+                doi=doi,
             )
         except ImportingError as e:
             raise CommandError(e)
@@ -98,7 +107,6 @@ class Command(BaseCommand):
                     sequence_file.store_biopython_seq_record,
                     fasta,
                     soterm,
-                    organism,
                     nosequence,
                 )
             )

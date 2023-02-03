@@ -13,7 +13,7 @@ from Bio import SeqIO
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.sequence import SequenceLoader
 
@@ -32,10 +32,22 @@ class Command(BaseCommand):
             required=True,
             type=str,
         )
+        parser.add_argument(
+            "--organism",
+            help="Species name (eg. Homo sapiens, Mus musculus)",
+            required=True,
+            type=str,
+        )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self, file: str, soterm: str, verbosity: int = 1, cpu: int = 1, **options
+        self,
+        file: str,
+        soterm: str,
+        organism: str,
+        verbosity: int = 1,
+        cpu: int = 1,
+        **options
     ):
         """Execute the main function."""
         try:
@@ -43,10 +55,15 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
+        try:
+            organism = retrieve_organism(organism)
+        except ImportingError as e:
+            raise CommandError(e)
+
         # retrieve only the file name
         filename = os.path.basename(file)
         try:
-            sequence_file = SequenceLoader(filename=filename)
+            sequence_file = SequenceLoader(filename=filename, organism=organism)
         except ImportingError as e:
             raise CommandError(e)
 

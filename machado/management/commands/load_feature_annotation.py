@@ -10,9 +10,10 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from tqdm import tqdm
 
-from machado.loaders.common import FileValidator
+from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
 
@@ -28,6 +29,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--file",
             help="Two-column tab separated file. (feature.dbxref\\tannotation text)",
+            required=True,
+            type=str,
+        )
+        parser.add_argument(
+            "--organism",
+            help="Species name (eg. Homo sapiens, Mus musculus)",
             required=True,
             type=str,
         )
@@ -57,6 +64,7 @@ class Command(BaseCommand):
     def handle(
         self,
         file: str,
+        organism: str,
         cvterm: str,
         soterm: str,
         doi: str = None,
@@ -73,11 +81,18 @@ class Command(BaseCommand):
         except ImportingError as e:
             raise CommandError(e)
 
+        try:
+            organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+
         # retrieve only the file name
         filename = os.path.basename(file)
 
         try:
-            feature_file = FeatureLoader(filename=filename, source="GFF_source")
+            feature_file = FeatureLoader(
+                filename=filename, source="GFF_source", organism=organism
+            )
         except ImportingError as e:
             raise CommandError(e)
 

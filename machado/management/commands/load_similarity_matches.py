@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
-from machado.loaders.feature import FeatureLoader
+from machado.loaders.feature import MultispeciesFeatureLoader
 
 warnings.simplefilter("ignore", BiopythonWarning)
 # with warnings.catch_warnings():
@@ -60,7 +60,10 @@ class Command(BaseCommand):
 
         filename = os.path.basename(file)
         try:
-            feature_file = FeatureLoader(filename=filename, source=source)
+            feature_file = MultispeciesFeatureLoader(
+                filename=filename,
+                source=source,
+            )
         except ImportingError as e:
             raise CommandError(e)
 

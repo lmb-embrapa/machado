@@ -7,7 +7,7 @@
 """Views."""
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -36,8 +36,9 @@ from machado.api.serializers import FeatureProteinMatchesSerializer
 from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.api.serializers import FeatureSimilaritySerializer
+from machado.api.serializers import OrganismIDSerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
-from machado.models import Analysis, Analysisfeature, Cvterm, Pub
+from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
 
 from re import escape, search, IGNORECASE
@@ -208,6 +209,13 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
 
     serializer_class = JBrowseFeatureSerializer
 
+    organism_param = openapi.Parameter(
+        "organism",
+        openapi.IN_QUERY,
+        description="Species name",
+        required=True,
+        type=openapi.TYPE_STRING,
+    )
     start_param = openapi.Parameter(
         "start",
         openapi.IN_QUERY,
@@ -231,7 +239,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     )
 
     @swagger_auto_schema(
-        manual_parameters=[sotype_param, start_param, end_param],
+        manual_parameters=[sotype_param, start_param, end_param, organism_param],
         operation_description="Retrieve features from reference sequence (refseq). https://jbrowse.org/docs/data_formats.html",
         operation_summary="Retrieve features from reference sequence",
     )
@@ -245,8 +253,12 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
 
     def get_serializer_context(self):
         """Get the serializer context."""
+        refseq = self.kwargs.get("refseq")
+        organism = self.request.query_params.get("organism")
+        if organism is not None:
+            organism = retrieve_organism(organism)
         refseq_feature_obj = Feature.objects.filter(
-            uniquename=self.kwargs.get("refseq")
+            uniquename=refseq, organism=organism
         ).first()
         soType = self.request.query_params.get("soType")
         return {"refseq": refseq_feature_obj, "soType": soType}
@@ -254,8 +266,10 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
     def get_queryset(self, *args, **kwargs):
         """Get queryset."""
         try:
-            refseq = Feature.objects.filter(
-                uniquename=self.kwargs.get("refseq")
+            refseq = self.kwargs.get("refseq")
+            organism = self.request.query_params.get("organism")
+            refseq_feature_obj = Feature.objects.filter(
+                uniquename=refseq, organism=retrieve_organism(organism)
             ).first()
 
         except ObjectDoesNotExist:
@@ -266,7 +280,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
             start = self.request.query_params.get("start", 1)
             end = self.request.query_params.get("end")
 
-            features_locs = Featureloc.objects.filter(srcfeature=refseq)
+            features_locs = Featureloc.objects.filter(srcfeature=refseq_feature_obj)
             if end is not None:
                 features_locs = features_locs.filter(fmin__lte=end)
             features_locs = features_locs.filter(fmax__gte=start)
@@ -348,6 +362,117 @@ class autocompleteViewSet(viewsets.GenericViewSet):
         return super(autocompleteViewSet, self).dispatch(*args, **kwargs)
 
 
+class OrganismIDViewSet(viewsets.GenericViewSet):
+    """Retrieve the organism ID by accession."""
+
+    lookup_field = "organism_id"
+    lookup_value_regex = r"^\d+$"
+    serializer_class = OrganismIDSerializer
+
+    genus_param = openapi.Parameter(
+        "genus",
+        openapi.IN_QUERY,
+        description="genus name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    species_param = openapi.Parameter(
+        "species",
+        openapi.IN_QUERY,
+        description="species name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    infraspecific_name_param = openapi.Parameter(
+        "infraspecific_name",
+        openapi.IN_QUERY,
+        description="infraspecific name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    abbreviation_param = openapi.Parameter(
+        "abbreviation",
+        openapi.IN_QUERY,
+        description="abbreviation",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    common_name_param = openapi.Parameter(
+        "common_name",
+        openapi.IN_QUERY,
+        description="common name",
+        required=False,
+        type=openapi.TYPE_STRING,
+    )
+
+    operation_summary = "Retrieve organism ID"
+    operation_description = operation_summary + "<br /><br />"
+    if hasattr(settings, "MACHADO_EXAMPLE_ORGANISM_COMMON_NAME"):
+        operation_description += "<b>Example:</b><br />common_name={}".format(
+            settings.MACHADO_EXAMPLE_ORGANISM_COMMON_NAME
+        )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            genus_param,
+            species_param,
+            infraspecific_name_param,
+            abbreviation_param,
+            common_name_param,
+        ],
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+    @method_decorator(cache_page(CACHE_TIMEOUT))
+    def list(self, request):
+        """List."""
+        queryset = self.get_queryset()
+        serializer = OrganismIDSerializer(queryset, many=False)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        """Get queryset."""
+        genus = self.request.query_params.get("genus")
+        species = self.request.query_params.get("species")
+        infraspecific_name = self.request.query_params.get("infraspecific_name")
+        abbreviation = self.request.query_params.get("abbreviation")
+        common_name = self.request.query_params.get("common_name")
+
+        qs = Organism.objects
+
+        if genus is not None:
+            qs = qs.filter(genus=genus)
+
+        if species is not None:
+            qs = qs.filter(species=species)
+
+        if infraspecific_name is not None:
+            qs = qs.filter(infraspecific_name=infraspecific_name)
+
+        if abbreviation is not None:
+            qs = qs.filter(abbreviation=abbreviation)
+
+        if common_name is not None:
+            qs = qs.filter(common_name=common_name)
+
+        try:
+            organism = qs.get()
+            return {"organism_id": organism.organism_id}
+        except MultipleObjectsReturned:
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @method_decorator(cache_page(CACHE_TIMEOUT))
+    def dispatch(self, *args, **kwargs):
+        """Dispatch."""
+        return super(OrganismIDViewSet, self).dispatch(*args, **kwargs)
+
+
 class FeatureIDViewSet(viewsets.GenericViewSet):
     """Retrieve the feature ID by accession."""
 
@@ -369,18 +494,25 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         required=True,
         type=openapi.TYPE_STRING,
     )
+    organism_id = openapi.Parameter(
+        "organism_id",
+        openapi.IN_QUERY,
+        description="organism id",
+        required=True,
+        type=openapi.TYPE_INTEGER,
+    )
 
     operation_summary = "Retrieve feature ID by accession"
     operation_description = operation_summary + "<br /><br />"
-    if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC"):
-        operation_description += (
-            "<b>Example:</b><br />accession={}, soType=polypeptide".format(
-                settings.MACHADO_EXAMPLE_AA_ACC
-            )
+    if hasattr(settings, "MACHADO_EXAMPLE_AA_ACC") and hasattr(
+        settings, "MACHADO_EXAMPLE_ORGANISM_ID"
+    ):
+        operation_description += "<b>Example:</b><br />accession={}, soType=polypeptide, organism_id={}".format(
+            settings.MACHADO_EXAMPLE_AA_ACC, settings.MACHADO_EXAMPLE_ORGANISM_ID
         )
 
     @swagger_auto_schema(
-        manual_parameters=[accession_param, sotype_param],
+        manual_parameters=[accession_param, sotype_param, organism_id],
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
@@ -395,8 +527,10 @@ class FeatureIDViewSet(viewsets.GenericViewSet):
         """Get queryset."""
         accession = self.request.query_params.get("accession")
         soterm = self.request.query_params.get("soType")
+        organism_id = self.request.query_params.get("organism_id")
+        organism_obj = Organism.objects.get(organism_id=organism_id)
         try:
-            feature_id = retrieve_feature_id(accession, soterm)
+            feature_id = retrieve_feature_id(accession, soterm, organism_obj)
             return {"feature_id": feature_id}
         except ObjectDoesNotExist:
             return None
