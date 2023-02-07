@@ -72,7 +72,7 @@ class SequenceLoader(object):
 
         try:
             dbxref, created = Dbxref.objects.get_or_create(
-                db=self.db, accession=seq_obj.id, version=self.filename
+                db=self.db, accession=seq_obj.id
             )
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref,
