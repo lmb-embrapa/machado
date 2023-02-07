@@ -92,16 +92,16 @@ class SequenceTest(TestCase):
         self.assertEqual("chr2", test_feature.uniquename)
         self.assertEqual("", test_feature.residues)
 
-        # test fail insert same id, different organism
+        # test fail insert same id, same organism
         # dbxref.accession must be unique
-        organism = Organism.objects.get(genus="Homo", species="sapiens")
+        organism = Organism.objects.get(genus="Mus", species="musculus")
         test_seq_file = SequenceLoader(filename="sequence2.fasta", organism=organism)
         test_seq_obj = SeqRecord(
             Seq("atgctagctagcatgactgactggtgcagtgcatgca"),
             id="chr1",
             description="chromosome 1",
         )
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ImportingError):
             test_seq_file.store_biopython_seq_record(test_seq_obj, "assembly")
 
     def test_store_biopython_seq_record_DOI(self):

@@ -1,70 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>2.2. Loading taxonomy &mdash; machado 0.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2.3. Inserting a new organism" href="insert_organism.html" />
     <link rel="prev" title="2.1. Loading ontologies" href="load_ontologies.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> machado
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
@@ -106,155 +61,96 @@
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
-        
-      <li><span class="section-number">2.2. </span>Loading taxonomy</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.2. </span>Loading taxonomy</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/load_taxonomy.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="loading-taxonomy">
-<h1><span class="section-number">2.2. </span>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="loading-taxonomy">
+<h1><span class="section-number">2.2. </span>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this heading"></a></h1>
 <p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
 These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.</p>
 <p><strong>This step is optional.</strong>
 If you decide to skip this step, you should insert the organisms individually using the command <em>insert_organism</em>.</p>
-<div class="section" id="ncbi-taxonomy">
-<h2><span class="section-number">2.2.1. </span>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this headline">¶</a></h2>
+<section id="ncbi-taxonomy">
+<h2><span class="section-number">2.2.1. </span>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this heading"></a></h2>
 <p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
 <ul class="simple">
 <li><p><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></p></li>
 <li><p><strong>File</strong>: <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz</a></p></li>
 </ul>
 <p>After unpacking the file you’ll have the required files.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_organism --file names.dmp --name DB:NCBI_taxonomy
-python manage.py load_phylotree --file nodes.dmp --name <span class="s1">&#39;NCBI taxonomy tree&#39;</span> --organismdb <span class="s1">&#39;DB:NCBI_taxonomy&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_organism<span class="w"> </span>--file<span class="w"> </span>names.dmp<span class="w"> </span>--name<span class="w"> </span>DB:NCBI_taxonomy
+python<span class="w"> </span>manage.py<span class="w"> </span>load_phylotree<span class="w"> </span>--file<span class="w"> </span>nodes.dmp<span class="w"> </span>--name<span class="w"> </span><span class="s1">&#39;NCBI taxonomy tree&#39;</span><span class="w"> </span>--organismdb<span class="w"> </span><span class="s1">&#39;DB:NCBI_taxonomy&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Loading these files can be faster if you increase the number of threads (–cpu).</p></li>
 <li><p>It will take a long time anyway (hours).</p></li>
 </ul>
-</div>
-<div class="section" id="remove-taxonomy">
-<h2><span class="section-number">2.2.2. </span>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="remove-taxonomy">
+<h2><span class="section-number">2.2.2. </span>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Permalink to this heading"></a></h2>
 <p>If, by any reason, you need to remove a taxonomy you should use the command <em>remove_phylotree</em> and <em>remove_organisms</em>. Most data files you’ll load depend on the organism database (eg. fasta, gff, blast). <strong>If you delete an organism database, every data file you loaded will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_phylotree --help
-python manage.py remove_organisms --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_phylotree<span class="w"> </span>--help
+python<span class="w"> </span>manage.py<span class="w"> </span>remove_organisms<span class="w"> </span>--help
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>These commands require the names of the databases (Db.name)</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="insert_organism.html" class="btn btn-neutral float-right" title="2.3. Inserting a new organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="load_ontologies.html" class="btn btn-neutral float-left" title="2.1. Loading ontologies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="insert_organism.html" class="btn btn-neutral float-right" title="2.3. Inserting a new organism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018, Embrapa.
-
-    </p>
+    <p>&#169; Copyright 2018, Embrapa.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

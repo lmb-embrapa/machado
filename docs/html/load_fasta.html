@@ -1,70 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>2.5. Loading FASTA files &mdash; machado 0.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2.6. Loading GFF files" href="load_gff.html" />
     <link rel="prev" title="2.4. Loading publication files" href="load_publication.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> machado
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
@@ -106,88 +61,46 @@
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
-        
-      <li><span class="section-number">2.5. </span>Loading FASTA files</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.5. </span>Loading FASTA files</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/load_fasta.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="loading-fasta-files">
-<h1><span class="section-number">2.5. </span>Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="loading-fasta-files">
+<h1><span class="section-number">2.5. </span>Loading FASTA files<a class="headerlink" href="#loading-fasta-files" title="Permalink to this heading"></a></h1>
 <p>This command is mostly used to load the reference genome.
 The reference sequences are exclusively used to feed JBrowse.</p>
 <p>If the reference sequences are really long (&gt;200Mbp), there may be memory issues during the loading process and JBrowse may take too long to render the tracks.
 To avoid that, it’s possible to use the parameter (–nosequence) and configure JBrowse to get the reference data from a FASTA file.</p>
-<div class="section" id="load-fasta">
-<h2><span class="section-number">2.5.1. </span>Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --file organism_chrs.fa --soterm chromosome --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+<section id="load-fasta">
+<h2><span class="section-number">2.5.1. </span>Load FASTA<a class="headerlink" href="#load-fasta" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_fasta<span class="w"> </span>--file<span class="w"> </span>organism_chrs.fa<span class="w"> </span>--soterm<span class="w"> </span>chromosome<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_fasta --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_fasta<span class="w"> </span>--help
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -223,65 +136,48 @@ To avoid that, it’s possible to use the parameter (–nosequence) and configur
 </tbody>
 </table>
 <p>* required fields</p>
-</div>
-<div class="section" id="remove-file">
-<h2><span class="section-number">2.5.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="remove-file">
+<h2><span class="section-number">2.5.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this heading"></a></h2>
 <p>If, by any reason, you need to remove a fasta dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_file --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_file<span class="w"> </span>--help
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>This command requires the file name (Dbxrefprop.value)</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="load_gff.html" class="btn btn-neutral float-right" title="2.6. Loading GFF files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="load_publication.html" class="btn btn-neutral float-left" title="2.4. Loading publication files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="load_gff.html" class="btn btn-neutral float-right" title="2.6. Loading GFF files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018, Embrapa.
-
-    </p>
+    <p>&#169; Copyright 2018, Embrapa.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

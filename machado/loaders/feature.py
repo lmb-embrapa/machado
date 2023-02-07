@@ -309,7 +309,6 @@ class FeatureLoader(FeatureLoaderBase):
             Dbxrefprop.objects.get_or_create(
                 dbxref=dbxref,
                 type_id=self.cvterm_contained_in.cvterm_id,
-                value=self.filename,
                 rank=0,
             )
             name = "{}->{}".format(tabix_feature.ref, tabix_feature.alt)
