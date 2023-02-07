@@ -1,70 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>2.1. Loading ontologies &mdash; machado 0.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2.2. Loading taxonomy" href="load_taxonomy.html" />
     <link rel="prev" title="2. Data loading" href="dataload.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> machado
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
@@ -106,172 +61,113 @@
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
-        
-      <li><span class="section-number">2.1. </span>Loading ontologies</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.1. </span>Loading ontologies</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/load_ontologies.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="loading-ontologies">
-<h1><span class="section-number">2.1. </span>Loading ontologies<a class="headerlink" href="#loading-ontologies" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="loading-ontologies">
+<h1><span class="section-number">2.1. </span>Loading ontologies<a class="headerlink" href="#loading-ontologies" title="Permalink to this heading"></a></h1>
 <p>The ontologies are required and must be loaded first.</p>
-<div class="section" id="relations-ontology">
-<h2><span class="section-number">2.1.1. </span>Relations ontology<a class="headerlink" href="#relations-ontology" title="Permalink to this headline">¶</a></h2>
+<section id="relations-ontology">
+<h2><span class="section-number">2.1.1. </span>Relations ontology<a class="headerlink" href="#relations-ontology" title="Permalink to this heading"></a></h2>
 <p>RO is an ontology of relations for use with biological ontologies.</p>
 <ul class="simple">
 <li><p><strong>URL</strong>: <a class="reference external" href="https://github.com/oborel/obo-relations">https://github.com/oborel/obo-relations</a></p></li>
 <li><p><strong>File</strong>: ro.obo</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_relations_ontology --file ro.obo
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_relations_ontology<span class="w"> </span>--file<span class="w"> </span>ro.obo
 </pre></div>
 </div>
-</div>
-<div class="section" id="sequence-ontology">
-<h2><span class="section-number">2.1.2. </span>Sequence ontology<a class="headerlink" href="#sequence-ontology" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="sequence-ontology">
+<h2><span class="section-number">2.1.2. </span>Sequence ontology<a class="headerlink" href="#sequence-ontology" title="Permalink to this heading"></a></h2>
 <p>Collect of SO Ontologies.</p>
 <ul class="simple">
 <li><p><strong>URL</strong>: <a class="reference external" href="https://github.com/The-Sequence-Ontology/SO-Ontologies">https://github.com/The-Sequence-Ontology/SO-Ontologies</a></p></li>
 <li><p><strong>File</strong>: so.obo</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_sequence_ontology --file so.obo
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_sequence_ontology<span class="w"> </span>--file<span class="w"> </span>so.obo
 </pre></div>
 </div>
-</div>
-<div class="section" id="gene-ontology">
-<h2><span class="section-number">2.1.3. </span>Gene ontology<a class="headerlink" href="#gene-ontology" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="gene-ontology">
+<h2><span class="section-number">2.1.3. </span>Gene ontology<a class="headerlink" href="#gene-ontology" title="Permalink to this heading"></a></h2>
 <p>Source ontology files for the Gene Ontology.</p>
 <ul class="simple">
 <li><p><strong>URL</strong>: <a class="reference external" href="http://current.geneontology.org/ontology/">http://current.geneontology.org/ontology/</a></p></li>
 <li><p><strong>File</strong>: go.obo</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_gene_ontology --file go.obo
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_gene_ontology<span class="w"> </span>--file<span class="w"> </span>go.obo
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Loading the gene ontology can be faster if you increase the number of threads (–cpu).</p></li>
 <li><p>After loading the gene ontology the following records will be created in the Cv table: gene_ontology, external, molecular_function, cellular_component, and biological_process.</p></li>
 </ul>
-</div>
-<div class="section" id="remove-ontology">
-<h2><span class="section-number">2.1.4. </span>Remove ontology<a class="headerlink" href="#remove-ontology" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="remove-ontology">
+<h2><span class="section-number">2.1.4. </span>Remove ontology<a class="headerlink" href="#remove-ontology" title="Permalink to this heading"></a></h2>
 <p>If, by any reason, you need to remove an ontology you should use the command <em>remove_ontology</em>. Most data files you’ll load depend on the ontologies (eg. fasta, gff, blast). You should <strong>never</strong> delete an ontology after having data files loaded.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_ontology --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_ontology<span class="w"> </span>--help
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>This command requires the name of the ontology (Cv.name)</p></li>
 <li><p>There are dependencies between the Gene ontology records, therefore you need to delete the entry <em>external</em> first.</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="load_taxonomy.html" class="btn btn-neutral float-right" title="2.2. Loading taxonomy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="dataload.html" class="btn btn-neutral float-left" title="2. Data loading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="load_taxonomy.html" class="btn btn-neutral float-right" title="2.2. Loading taxonomy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018, Embrapa.
-
-    </p>
+    <p>&#169; Copyright 2018, Embrapa.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

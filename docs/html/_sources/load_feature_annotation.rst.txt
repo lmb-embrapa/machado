@@ -9,7 +9,7 @@ Load Annotation
 
 .. code-block:: bash
 
-    python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display
+    python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -19,6 +19,7 @@ Load Annotation
 
 =============   ==========================================================================================
 --file 		    Two-column tab separated file (feature.accession<TAB>annotation text). *
+--organism  	Species name (eg. Homo sapiens, Mus musculus) *
 --soterm        SO Sequence Ontology Term (eg. mRNA, polypeptide) *
 --cvterm 	    cvterm.name from cv feature_property. (eg. display, note, product, alias, ontology_term, annotation) *
 --doi 		    DOI of a reference stored using *load_publication* (eg. 10.1111/s12122-012-1313-4)
@@ -43,7 +44,7 @@ Load Sequence
 
 .. code-block:: bash
 
-    python manage.py load_feature_sequence --file Athaliana_transcripts.fasta --soterm mRNA
+    python manage.py load_feature_sequence --organism 'Arabidopsis thaliana' --file Athaliana_transcripts.fasta --soterm mRNA
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -53,6 +54,7 @@ Load Sequence
 
 =============== ==========================================================================================
 --file 		FASTA file. *
+--organism  	Species name (eg. Homo sapiens, Mus musculus) *
 --soterm        SO Sequence Ontology Term (eg. chromosome, assembly, mRNA, polypeptide) *
 --cpu 		Number of threads
 =============== ==========================================================================================
@@ -68,16 +70,16 @@ If, by any reason, you need to remove a feature sequence you should use the comm
 .. code-block:: bash
 
     >chr1
-    
+
     >chr2
-    
+
 
 Load Publication
 ----------------
 
 .. code-block:: bash
 
-    python manage.py load_feature_publication --file feature_publication.tab
+    python manage.py load_feature_publication --organism 'Arabidopsis thaliana' --file feature_publication.tab
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -87,6 +89,7 @@ Load Publication
 
 =============   ==========================================================================================
 --file 		Two-column tab separated file (feature.accession<TAB>DOI). *
+--organism  	Species name (eg. Homo sapiens, Mus musculus) *
 --cpu 		Number of threads
 =============   ==========================================================================================
 
@@ -108,7 +111,7 @@ Load DBxRef
 
 .. code-block:: bash
 
-    python manage.py load_feature_dbxrefs --file feature_dbxrefs.tab --soterm mRNA
+    python manage.py load_feature_dbxrefs --organism 'Arabidopsis thaliana' --file feature_dbxrefs.tab --soterm mRNA
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 
@@ -118,6 +121,7 @@ Load DBxRef
 
 =============   ==========================================================================================
 --file 		Two-column tab separated file (feature.accession<TAB>db:dbxref). *
+--organism  	Species name (eg. Homo sapiens, Mus musculus) *
 --soterm        SOTERM SO Sequence Ontology Term (eg. chromosome, assembly, mRNA, polypeptide) *
 --cpu 		Number of threads
 =============   ==========================================================================================

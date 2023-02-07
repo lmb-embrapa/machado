@@ -9,7 +9,7 @@ Load Annotation
 
 .. code-block:: bash
 
-    python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display
+    python manage.py load_feature_annotation --file feature_annotation.tab --soterm polypeptide --cvterm display --organism 'Arabidopsis thaliana'
 
 * Loading this file can be faster if you increase the number of threads (--cpu).
 

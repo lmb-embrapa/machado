@@ -1,70 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>2.12. Loading Coexpression analyzes &mdash; machado 0.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3. Visualization" href="visualization.html" />
     <link rel="prev" title="2.11. Loading RNA-seq data" href="load_rnaseq.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> machado
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dataload.html">2. Data loading</a><ul class="current">
@@ -106,77 +61,35 @@
 <li class="toctree-l1"><a class="reference internal" href="models.html">5. Models</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">machado</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="dataload.html"><span class="section-number">2. </span>Data loading</a> &raquo;</li>
-        
-      <li><span class="section-number">2.12. </span>Loading Coexpression analyzes</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.12. </span>Loading Coexpression analyzes</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/load_coexpression.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="loading-coexpression-analyzes">
-<h1><span class="section-number">2.12. </span>Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="load-coexpression-correlated-pairs-of-features">
-<h2><span class="section-number">2.12.1. </span>Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="loading-coexpression-analyzes">
+<h1><span class="section-number">2.12. </span>Loading Coexpression analyzes<a class="headerlink" href="#loading-coexpression-analyzes" title="Permalink to this heading"></a></h1>
+<section id="load-coexpression-correlated-pairs-of-features">
+<h2><span class="section-number">2.12.1. </span>Load Coexpression correlated pairs of features<a class="headerlink" href="#load-coexpression-correlated-pairs-of-features" title="Permalink to this heading"></a></h2>
 <p>Coexpression analyzes usually generate correlation statistics regarding gene sets in a pairwise manner.
 For example, LSTrAP can generate a table with the Pearson correlation coefficient for every pair of genes in
 a RNA-seq experiment.</p>
@@ -185,19 +98,19 @@ containing the correlated pair of IDs for the genes/features and the third colum
 coefficient among them. In the case of the output of the LSTrAP software, the coefficient is subtracted by 0.7
 for normalization sakes.</p>
 <p>A one line sample from such a table is showed below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AT2G44195.1.TAIR10      AT1G30080.1.TAIR10      <span class="m">0</span>.18189286870895194
-AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779378273995
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AT2G44195.1.TAIR10<span class="w">      </span>AT1G30080.1.TAIR10<span class="w">      </span><span class="m">0</span>.18189286870895194
+AT2G44195.1.TAIR10<span class="w">      </span>AT5G24750.1.TAIR10<span class="w">      </span><span class="m">0</span>.1715779378273995
 </pre></div>
 </div>
 <p>Note: The feature pairs from columns 1 and 2 need to be loaded previously.</p>
 <p>To load such a table, one can run the command below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --file pcc.mcl.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_coexpression_pairs<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span><span class="w"> </span>--file<span class="w"> </span>pcc.mcl.txt
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_pairs --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_coexpression_pairs<span class="w"> </span>--help
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -209,22 +122,25 @@ AT2G44195.1.TAIR10      AT5G24750.1.TAIR10      <span class="m">0</span>.1715779
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>‘pcc.mcl.txt’ File *</p></td>
 </tr>
-<tr class="row-even"><td><p>–soterm</p></td>
+<tr class="row-even"><td><p>–organism</p></td>
+<td><p>Species name (eg. Homo sapiens, Mus musculus) *</p></td>
+</tr>
+<tr class="row-odd"><td><p>–soterm</p></td>
 <td><p>‘mRNA’ sequence ontology term <em>default</em></p></td>
 </tr>
-<tr class="row-odd"><td><p>–cpu</p></td>
+<tr class="row-even"><td><p>–cpu</p></td>
 <td><p>Number of threads</p></td>
 </tr>
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
-</div>
-<div class="section" id="remove-coexpression-pairs">
-<h2><span class="section-number">2.12.2. </span>Remove coexpression pairs<a class="headerlink" href="#remove-coexpression-pairs" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="remove-coexpression-pairs">
+<h2><span class="section-number">2.12.2. </span>Remove coexpression pairs<a class="headerlink" href="#remove-coexpression-pairs" title="Permalink to this heading"></a></h2>
 <p>If, by any reason, you need to remove coexpression pair analyzes, all you need to do is pass
 the filename used to load the analyzes to the remove_relationships command: remove_relationship –file &lt;coexpression_file&gt;’
 <strong>Every coexpression relations from coexpression_file (e.g. ‘pcc.mcl.txt’ from LSTrAP) will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_relationship --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_relationship<span class="w"> </span>--help
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -239,9 +155,9 @@ the filename used to load the analyzes to the remove_relationships command: remo
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
-</div>
-<div class="section" id="load-coexpression-clusters">
-<h2><span class="section-number">2.12.3. </span>Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="load-coexpression-clusters">
+<h2><span class="section-number">2.12.3. </span>Load Coexpression clusters<a class="headerlink" href="#load-coexpression-clusters" title="Permalink to this heading"></a></h2>
 <p>Other type of coexpression analyzes involve clustering features using its correlation values.
 LSTrAP does that using the ‘mcl’ software. To load data from such analyzes, the input file must be
 headless and fields tab separated, with each line representing one cluster, and each column representing
@@ -250,20 +166,20 @@ format: “&lt;cluster_name&gt;:”.
 Three-cluster sample from such a file is shown below, the first line
 represents a cluster with three individuals, the second line a cluster with two, and the third line an
 orphaned cluster with only one individual (obs: orphaned clusters are discarded).:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ath_1:    AT3G18715.1.TAIR10      AT3G08790.1.TAIR10      AT5G42230.1.TAIR10
-ath_2:    AT1G27040.1.TAIR10      AT1G71692.1.TAIR10
-ath_3:    AT5G24750.1.TAIR10
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ath_1:<span class="w">    </span>AT3G18715.1.TAIR10<span class="w">      </span>AT3G08790.1.TAIR10<span class="w">      </span>AT5G42230.1.TAIR10
+ath_2:<span class="w">    </span>AT1G27040.1.TAIR10<span class="w">      </span>AT1G71692.1.TAIR10
+ath_3:<span class="w">    </span>AT5G24750.1.TAIR10
 </pre></div>
 </div>
 <p>Note: The genes/features from each column must be loaded previously.</p>
 <p>To load such a file, one can run the command below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --file mcl.clusters.txt --organism <span class="s1">&#39;Arabidopsis thaliana&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_coexpression_clusters<span class="w"> </span>--file<span class="w"> </span>mcl.clusters.txt<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Loading this file can be faster if you increase the number of threads (–cpu).</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py load_coexpression_clusters --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_coexpression_clusters<span class="w"> </span>--help
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -287,14 +203,14 @@ ath_3:    AT5G24750.1.TAIR10
 </tbody>
 </table>
 <p>* example output file from LSTrAP software.</p>
-</div>
-<div class="section" id="remove-coexpression-clusters">
-<h2><span class="section-number">2.12.4. </span>Remove coexpression clusters<a class="headerlink" href="#remove-coexpression-clusters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="remove-coexpression-clusters">
+<h2><span class="section-number">2.12.4. </span>Remove coexpression clusters<a class="headerlink" href="#remove-coexpression-clusters" title="Permalink to this heading"></a></h2>
 <p>If, by any reason, you need to remove coexpression cluster analyzes, you need to pass
 the controlled vocabulary term ‘coexpression group’ and the organism scientific name to
 the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpression group’ –organism ‘Arabidopsis thaliana’</em> *</p>
 <p>*Every coexpression group relations from that organism will be deleted on cascade**.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py remove_feature_annotation --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_feature_annotation<span class="w"> </span>--help
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -311,55 +227,38 @@ the command remove_feature_group: <em>remove_feature_group –cvterm ‘coexpres
 </tr>
 </tbody>
 </table>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="load_rnaseq.html" class="btn btn-neutral float-left" title="2.11. Loading RNA-seq data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualization.html" class="btn btn-neutral float-right" title="3. Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2018, Embrapa.
-
-    </p>
+    <p>&#169; Copyright 2018, Embrapa.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
