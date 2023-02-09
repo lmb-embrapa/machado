@@ -9,13 +9,13 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from bibtexparser.bibdatabase import BibDatabase
-from django.core.management import call_command
+# from django.core.management import call_command
 from django.test import TestCase
 
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.publication import PublicationLoader
 from machado.loaders.sequence import SequenceLoader
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Dbxrefprop
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, FeaturePub
 from machado.models import Pub, PubDbxref
 
