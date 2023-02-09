@@ -11,7 +11,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: [3.8]
 
     services:
       postgres:
@@ -39,9 +39,9 @@ jobs:
       run: |
         pip install flake8
         flake8 machado
-    - name: Run migrations
+    - name: Create project
       run: |
-        python manage.py migrate
+        django-admin startproject WEBPROJECT
     - name: Run Tests
       run: |
-        python manage.py test machado --settings machado.tests.settings
+        python WEBPROJECT/manage.py test machado --settings machado.tests.settings
