@@ -47,7 +47,7 @@ Just grab the code using GIT and install it:
 .. code-block:: bash
 
     git clone https://github.com/lmb-embrapa/machado.git src/machado
-    python src/machado/setup.py install
+    pip install ./src/machado
 
 Preparation
 -----------
