@@ -9,6 +9,7 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from bibtexparser.bibdatabase import BibDatabase
+
 # from django.core.management import call_command
 from django.test import TestCase
 

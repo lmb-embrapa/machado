@@ -139,12 +139,12 @@ To avoid that, it’s possible to use the parameter (–nosequence) and configur
 </section>
 <section id="remove-file">
 <h2><span class="section-number">2.5.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this heading"></a></h2>
-<p>If, by any reason, you need to remove a fasta dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_file<span class="w"> </span>--help
+<p>If, by any reason, you need to remove a FASTA file you should use the command remove_organism. Most data files you’ll load depend on the organism record (eg. fasta, gff, blast). <strong>If you delete an organism, every data file you loaded that depend on it will be deleted on cascade</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_organism<span class="w"> </span>--help
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>This command requires the file name (Dbxrefprop.value)</p></li>
+<li><p>These commands require the following info: Organism.genus and Organism.species</p></li>
 </ul>
 </section>
 </section>

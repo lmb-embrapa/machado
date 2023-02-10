@@ -47,7 +47,6 @@ class Command(BaseCommand):
         )
 
         if analysisprop_list.count() > 0:
-
             for analysisprop in tqdm(
                 analysisprop_list,
                 total=len(analysisprop_list),

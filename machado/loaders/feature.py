@@ -500,7 +500,6 @@ class MultispeciesFeatureLoader(FeatureLoaderBase):
     help = "Load multi-organism feature records."
 
     def retrieve_feature_id(self, accession: str, soterm: str) -> int:
-
         """
         like machado.loaders.common.retreive_feature_id, but assumes acession is unique across all organisms
         """

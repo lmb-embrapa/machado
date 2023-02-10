@@ -154,7 +154,6 @@ def retrieve_organism(organism: str) -> Organism:
 def retrieve_feature_id(
     accession: str, soterm: str, organism: Union[str, Organism]
 ) -> int:
-
     if not isinstance(organism, Organism):
         organism = retrieve_organism(organism)
 

@@ -160,7 +160,6 @@ class FeatureIndex(indexes.SearchIndex, indexes.Indexable):
 
         # IDs of overlapping features
         if self.has_overlapping_features:
-
             try:
                 for location in obj.Featureloc_feature_Feature.filter(
                     feature__type__name__in=settings.MACHADO_VALID_TYPES
