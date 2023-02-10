@@ -9,14 +9,14 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from bibtexparser.bibdatabase import BibDatabase
-from django.core.management import call_command
-from django.db.utils import IntegrityError
+
+# from django.core.management import call_command
 from django.test import TestCase
 
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.publication import PublicationLoader
 from machado.loaders.sequence import SequenceLoader
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Dbxrefprop
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism
 from machado.models import Feature, FeaturePub
 from machado.models import Pub, PubDbxref
 
@@ -157,9 +157,9 @@ class SequenceTest(TestCase):
         test_dbxref_doi = Dbxref.objects.get(dbxref_id=test_pub_dbxref_doi.dbxref_id)
         self.assertEqual("10.1186/s12864-016-2535-300002", test_dbxref_doi.accession)
         # test remove_file
-        self.assertTrue(Dbxrefprop.objects.filter(value="sequence_doi.fasta").exists())
-        call_command("remove_file", "--name=sequence_doi.fasta", "--verbosity=0")
-        self.assertFalse(Dbxrefprop.objects.filter(value="sequence_doi.fasta").exists())
+        # self.assertTrue(Dbxrefprop.objects.filter(value="sequence_doi.fasta").exists())
+        # call_command("remove_file", "--name=sequence_doi.fasta", "--verbosity=0")
+        # self.assertFalse(Dbxrefprop.objects.filter(value="sequence_doi.fasta").exists())
 
     def test_add_sequence_to_feature(self):
         """Tests - add_sequence_to_feature."""

@@ -38,10 +38,10 @@ Load FASTA
 Remove file
 -----------
 
-If, by any reason, you need to remove a fasta dataset you should use the command *remove_file*. **If you delete a file, every record that depend on it will be deleted on cascade**.
+If, by any reason, you need to remove a FASTA file you should use the command remove_organism. Most data files you’ll load depend on the organism record (eg. fasta, gff, blast). **If you delete an organism, every data file you loaded that depend on it will be deleted on cascade**.
 
 .. code-block:: bash
 
-    python manage.py remove_file --help
+    python manage.py remove_organism --help
 
-* This command requires the file name (Dbxrefprop.value)
+* These commands require the following info: Organism.genus and Organism.species

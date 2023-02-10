@@ -18,9 +18,10 @@ It contains a few small FASTA and GFF files, together with a README file with ex
    Publication <load_publication>
    FASTA <load_fasta>
    GFF <load_gff>
-   Feature additional info<load_feature_annotation>
+   Feature additional info <load_feature_annotation>
    Blast <load_blast>
    InterproScan <load_interproscan>
    OrthoMCL <load_orthomcl>
    RNA-seq <load_rnaseq>
    Coexpression <load_coexpression>
+   VCF <load_vcf>

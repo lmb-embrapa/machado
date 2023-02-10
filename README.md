@@ -1,4 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![CI: Machado](https://github.com/lmb-embrapa/machado/actions/workflows/django.yml/badge.svg)](https://github.com/lmb-embrapa/machado/actions/workflows/django.yml)
 
 # Machado
 

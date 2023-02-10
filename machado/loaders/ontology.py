@@ -339,7 +339,6 @@ class OntologyLoader(object):
             dbxrefs = ""
 
         if dbxrefs:
-
             dbxref_list = dbxrefs.split(", ")
 
             # Save all dbxrefs
@@ -371,7 +370,6 @@ class OntologyLoader(object):
     ) -> None:
         """Process cvterm_xref."""
         if xref:
-
             ref_db, ref_content = xref.split(":", 1)
 
             if ref_db == "http":
