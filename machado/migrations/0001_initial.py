@@ -17,8 +17,7 @@ def load_data_from_sql(apps, schema_editor):
     )
     sql_statement = ""
     for line in open(file_path).readlines():
-        line = line.replace("(create_point", "(public.create_point")
-        line = line.replace(", create_point", ", public.create_point")
+        line = line.replace("@ boxrange", "<@ boxrange")
         sql_statement += line
     with connection.cursor() as c:
         c.execute(sql_statement)
