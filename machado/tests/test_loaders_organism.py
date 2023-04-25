@@ -50,8 +50,7 @@ class OrganismTest(TestCase):
         )
         call_command(
             "remove_organism",
-            "--genus=Ilex",
-            "--species=paraguariensis",
+            "--organism=Ilex paraguariensis",
             "--verbosity=0",
         )
         self.assertFalse(
