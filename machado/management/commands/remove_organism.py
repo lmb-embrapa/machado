@@ -36,9 +36,4 @@ class Command(BaseCommand):
                     )
 
         except ObjectDoesNotExist:
-            raise CommandError("
-                               
-                               
-                               
-                               
-                               does not exist in database!")
+            raise CommandError("Organism does not exist in database!")
