@@ -7,7 +7,7 @@
 """Remove organism."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
-from machado.loaders.common import FileValidator, retrieve_organism
+from machado.loaders.common import retrieve_organism
 
 
 class Command(BaseCommand):
