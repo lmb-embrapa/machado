@@ -7,6 +7,7 @@
 """Remove organism."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
+from machado.loaders.common import FileValidator, retrieve_organism
 
 from machado.models import Organism
 
@@ -18,18 +19,22 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """Define the arguments."""
-        parser.add_argument("--genus", help="genus", required=True, type=str)
-        parser.add_argument("--species", help="species", required=True, type=str)
+        parser.add_argument(
+            "--organism",
+            help="Species name (eg. Homo sapiens, Mus musculus)",
+            required=True,
+            type=str,
+        )
 
-    def handle(self, genus: str, species: str, verbosity: int = 1, **options):
+    def handle(self, organism: str, verbosity: int = 1, **options):
         """Execute the main function."""
         try:
-            organism = Organism.objects.get(species=species, genus=genus)
-            if organism:
-                organism.delete()
+            organism_obj = retrieve_organism(organism)
+            if organism_obj:
+                organism_obj.delete()
                 if verbosity > 0:
                     self.stdout.write(
-                        self.style.SUCCESS("{} {} removed".format(genus, species))
+                        self.style.SUCCESS("{} {} removed".format(organism))
                     )
 
         except ObjectDoesNotExist:
