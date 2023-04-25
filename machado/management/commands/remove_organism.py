@@ -31,9 +31,7 @@ class Command(BaseCommand):
             if organism_obj:
                 organism_obj.delete()
                 if verbosity > 0:
-                    self.stdout.write(
-                        self.style.SUCCESS("{} removed".format(organism))
-                    )
+                    self.stdout.write(self.style.SUCCESS("{} removed".format(organism)))
 
         except ObjectDoesNotExist:
             raise CommandError("Organism does not exist in database!")
