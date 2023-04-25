@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 organism_obj.delete()
                 if verbosity > 0:
                     self.stdout.write(
-                        self.style.SUCCESS("{} {} removed".format(organism))
+                        self.style.SUCCESS("{} removed".format(organism))
                     )
 
         except ObjectDoesNotExist:
