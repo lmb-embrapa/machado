@@ -9,8 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from machado.loaders.common import FileValidator, retrieve_organism
 
-from machado.models import Organism
-
 
 class Command(BaseCommand):
     """Remove organism."""
@@ -38,4 +36,9 @@ class Command(BaseCommand):
                     )
 
         except ObjectDoesNotExist:
-            raise CommandError("Organism does not exist in database!")
+            raise CommandError("
+                               
+                               
+                               
+                               
+                               does not exist in database!")
