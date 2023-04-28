@@ -230,8 +230,8 @@ class FeatureLoader(FeatureLoaderBase):
         for parent in attrs_parent:
             self.relationships.append({"object_id": attrs_id, "subject_id": parent})
 
-        # Additional protrein record for each mRNA with the exact same ID
-        if tabix_feature.feature == "mRNA":
+        # Additional protein record for each transcript with the exact same ID
+        if tabix_feature.feature in list("mRNA", "C_gene_segment", "V_gene_segment"):
             translation_of = Cvterm.objects.get(
                 name="translation_of", cv__name="sequence"
             )
