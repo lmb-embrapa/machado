@@ -231,7 +231,8 @@ class FeatureLoader(FeatureLoaderBase):
             self.relationships.append({"object_id": attrs_id, "subject_id": parent})
 
         # Additional protein record for each transcript with the exact same ID
-        if tabix_feature.feature in list("mRNA", "C_gene_segment", "V_gene_segment"):
+        transcripts_types = ["mRNA", "C_gene_segment", "V_gene_segment"]
+        if tabix_feature.feature in transcripts_types:
             translation_of = Cvterm.objects.get(
                 name="translation_of", cv__name="sequence"
             )
