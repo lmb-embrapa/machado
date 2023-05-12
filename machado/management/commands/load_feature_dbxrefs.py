@@ -90,6 +90,7 @@ class Command(BaseCommand):
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        not_found = list()
 
         # Load the dbxrefs file
         with open(file) as tab_file:
@@ -101,18 +102,16 @@ class Command(BaseCommand):
                     )
                 )
 
-        not_found = list()
         if verbosity > 0:
             self.stdout.write("Loading features DBxRefs")
+
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
             except ObjectDoesNotExist as e:
-                if ignorenotfound:
-                    not_found.append(e)
-                else:
+                not_found.append(e)
+                if not ignorenotfound:
                     raise CommandError(e)
-
             except ImportingError as e:
                 raise CommandError(e)
         pool.shutdown()
@@ -121,5 +120,6 @@ class Command(BaseCommand):
             self.stdout.write("List of features not found:")
             for item in not_found:
                 self.stdout.write(f"{item}\n")
+
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))
