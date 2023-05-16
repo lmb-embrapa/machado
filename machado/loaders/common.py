@@ -166,8 +166,12 @@ def retrieve_feature_id(
             type__name=soterm,
             organism=organism,
         ).feature_id
-    except (MultipleObjectsReturned, ObjectDoesNotExist):
+    except ObjectDoesNotExist:
         pass
+    except MultipleObjectsReturned:
+        raise MultipleObjectsReturned(
+            "{} {} matches multiple features".format(soterm, accession)
+        )
 
     # soterm-feature.uniquename
     try:
@@ -177,8 +181,12 @@ def retrieve_feature_id(
             type__name=soterm,
             organism=organism,
         ).feature_id
-    except (MultipleObjectsReturned, ObjectDoesNotExist):
+    except ObjectDoesNotExist:
         pass
+    except MultipleObjectsReturned:
+        raise MultipleObjectsReturned(
+            "{} {} matches multiple features".format(soterm, accession)
+        )
 
     # feature.name
     try:
@@ -188,8 +196,12 @@ def retrieve_feature_id(
             type__name=soterm,
             organism=organism,
         ).feature_id
-    except (MultipleObjectsReturned, ObjectDoesNotExist):
+    except ObjectDoesNotExist:
         pass
+    except MultipleObjectsReturned:
+        raise MultipleObjectsReturned(
+            "{} {} matches multiple features".format(soterm, accession)
+        )
 
     # feature.dbxref.accession
     try:
@@ -199,8 +211,12 @@ def retrieve_feature_id(
             type__name=soterm,
             organism=organism,
         ).feature_id
-    except (MultipleObjectsReturned, ObjectDoesNotExist):
+    except ObjectDoesNotExist:
         pass
+    except MultipleObjectsReturned:
+        raise MultipleObjectsReturned(
+            "{} {} matches multiple features".format(soterm, accession)
+        )
 
     # featuredbxref.dbxref.accession
     try:

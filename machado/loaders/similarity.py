@@ -13,6 +13,7 @@ from typing import Optional
 
 from Bio import BiopythonWarning
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Max
 from django.db.utils import IntegrityError
 
 from machado.loaders.analysis import AnalysisLoader
@@ -200,12 +201,30 @@ class SimilarityLoader(object):
             type=self.ro_term_similarity,
             defaults={"rank": 0},
         )
-        FeatureRelationshipprop.objects.get_or_create(
-            feature_relationship=feature_relation,
-            type=self.cvterm_contained_in,
-            value=self.analysis.sourcename,
-            defaults={"rank": 0},
-        )
+        try:
+            rank = 0
+            FeatureRelationshipprop.objects.get_or_create(
+                feature_relationship=feature_relation,
+                type=self.cvterm_contained_in,
+                value=self.analysis.sourcename,
+                defaults={"rank": rank},
+            )
+        except IntegrityError:
+            rank = (
+                FeatureRelationshipprop.objects.filter(
+                    feature_relationship=feature_relation, type=self.cvterm_contained_in
+                )
+                .aggregate(Max("rank"))
+                .get("rank__max")
+            )
+
+            rank += 1
+            FeatureRelationshipprop.objects.get_or_create(
+                feature_relationship=feature_relation,
+                type=self.cvterm_contained_in,
+                value=self.analysis.sourcename,
+                defaults={"rank": rank},
+            )
 
         # ontology terms
         subject_feature_cvterms = FeatureCvterm.objects.filter(
@@ -219,12 +238,30 @@ class SimilarityLoader(object):
                 is_not=subject_feature_cvterm.is_not,
                 rank=subject_feature_cvterm.rank,
             )
-            FeatureCvtermprop.objects.get_or_create(
-                feature_cvterm=query_feature_cvterm,
-                type=self.cvterm_contained_in,
-                value=self.analysis.sourcename,
-                defaults={"rank": 0},
-            )
+            try:
+                FeatureCvtermprop.objects.get_or_create(
+                    feature_cvterm=query_feature_cvterm,
+                    type=self.cvterm_contained_in,
+                    value=self.analysis.sourcename,
+                    defaults={"rank": 0},
+                )
+            except IntegrityError:
+                rank = (
+                    FeatureCvtermprop.objects.filter(
+                        feature_cvterm=query_feature_cvterm,
+                        type=self.cvterm_contained_in,
+                    )
+                    .aggregate(Max("rank"))
+                    .get("rank__max")
+                )
+
+                rank += 1
+                FeatureCvtermprop.objects.get_or_create(
+                    feature_cvterm=query_feature_cvterm,
+                    type=self.cvterm_contained_in,
+                    value=self.analysis.sourcename,
+                    defaults={"rank": rank},
+                )
 
     def store_bio_searchio_query_result(self, query_result: query.QueryResult) -> None:
         """Store bio_searchio_query_result."""

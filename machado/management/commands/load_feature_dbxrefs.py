@@ -9,12 +9,14 @@
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from tqdm import tqdm
 
 from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
+
 from machado.loaders.feature import FeatureLoader
 
 
@@ -45,6 +47,12 @@ class Command(BaseCommand):
             type=str,
         )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
+        parser.add_argument(
+            "--ignorenotfound",
+            help="Don't raise error and exit if feature not found",
+            required=False,
+            action="store_true",
+        )
 
     def handle(
         self,
@@ -53,7 +61,8 @@ class Command(BaseCommand):
         soterm: str,
         verbosity: int = 1,
         cpu: int = 1,
-        **options
+        ignorenotfound: bool = False,
+        **options,
     ):
         """Execute the main function."""
         if verbosity > 0:
@@ -81,6 +90,7 @@ class Command(BaseCommand):
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        not_found = list()
 
         # Load the dbxrefs file
         with open(file) as tab_file:
@@ -94,12 +104,22 @@ class Command(BaseCommand):
 
         if verbosity > 0:
             self.stdout.write("Loading features DBxRefs")
+
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
+            except ObjectDoesNotExist as e:
+                not_found.append(e)
+                if not ignorenotfound:
+                    raise CommandError(e)
             except ImportingError as e:
                 raise CommandError(e)
         pool.shutdown()
+
+        if verbosity > 0:
+            self.stdout.write("List of features not found:")
+            for item in not_found:
+                self.stdout.write(f"{item}\n")
 
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))
