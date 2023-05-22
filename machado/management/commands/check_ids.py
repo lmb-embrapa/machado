@@ -6,7 +6,7 @@
 
 """Check IDs."""
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from machado.loaders.common import retrieve_feature_id, FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from django.core.management.base import BaseCommand, CommandError
@@ -32,14 +32,15 @@ class Command(BaseCommand):
             type=str,
         )
         parser.add_argument(
-            "--soterm",
-            help="SO Sequence Ontology Term (eg. chromosome, assembly)",
+            "--soterms",
+            help="SO Sequence Ontology Terms (eg. gene, mRNA, miRNA)",
             required=True,
+            nargs="+",
             type=str,
         )
 
     def handle(
-        self, file: str, organism: str, soterm: str, verbosity: int = 1, **options
+        self, file: str, organism: str, soterms: list, verbosity: int = 1, **options
     ) -> None:
         """Execute the main function."""
         if verbosity > 0:
@@ -54,16 +55,24 @@ class Command(BaseCommand):
             organism = retrieve_organism(organism)
         except ImportingError as e:
             raise CommandError(e)
+
         f = open(file, "r+")
         for line in f.readlines():
+            notfound = set()
             accession = line.split()[0]
-            try:
-                retrieve_feature_id(
-                    accession=accession, soterm=soterm, organism=organism
-                )
-                continue
-            except ObjectDoesNotExist:
-                self.stdout.write(f"{accession} not found\n")
+            for soterm in soterms:
+                try:
+                    retrieve_feature_id(
+                        accession=accession, soterm=soterm, organism=organism
+                    )
+                    break
+                except ObjectDoesNotExist:
+                    notfound.add(soterm)
+                except MultipleObjectsReturned:
+                    self.stdout.write(f"{accession} matches to multiple records\n")
+                    break
+            if len(notfound) == len(soterms):
+                self.stdout.write(f"{accession} {str(notfound)} not found\n")
         f.close()
 
         if verbosity > 0:
