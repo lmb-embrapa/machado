@@ -247,4 +247,4 @@ def retrieve_cvterm(cv: str, term: str) -> Cvterm:
         return Cvtermsynonym.objects.get(synonym=term, cvterm__cv__name=cv).cvterm
 
     except ObjectDoesNotExist:
-        raise ImportingError("{} is not a sequence ontology term.".format(attrs_class))
+        raise ImportingError("{} is not a {} ontology term.".format(term, cv))
