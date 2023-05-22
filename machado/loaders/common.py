@@ -17,7 +17,7 @@ import os
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from machado.loaders.exceptions import ImportingError
-from machado.models import Feature, FeatureDbxref, Organism
+from machado.models import Cvterm, Cvtermsynonym, Feature, FeatureDbxref, Organism
 
 from typing import Union
 
@@ -232,3 +232,19 @@ def retrieve_feature_id(
         raise MultipleObjectsReturned(
             "{} {} matches multiple features".format(soterm, accession)
         )
+
+
+def retrieve_cvterm(cv: str, term: str) -> Cvterm:
+    """Retrieve cvterm object."""
+    # cvterm.name
+    try:
+        return Cvterm.objects.get(cv__name=cv, name=term)
+    except ObjectDoesNotExist:
+        pass
+
+    # cvtermsynonym.synonym
+    try:
+        return Cvtermsynonym.objects.get(synonym=term, cvterm__cv__name=cv).cvterm
+
+    except ObjectDoesNotExist:
+        raise ImportingError("{} is not a {} ontology term.".format(term, cv))

@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from pysam.libctabixproxies import GTFProxy, VCFProxy
 
-from machado.loaders.common import retrieve_feature_id
+from machado.loaders.common import retrieve_feature_id, retrieve_cvterm
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.featureattributes import FeatureAttributesLoader
 from machado.models import Cv, Db, Cvterm, Dbxref, Dbxrefprop, Organism
@@ -297,7 +297,7 @@ class FeatureLoader(FeatureLoaderBase):
             )
 
         try:
-            cvterm = Cvterm.objects.get(name=attrs_class, cv__name="sequence")
+            cvterm = retrieve_cvterm(cv="sequence", term=attrs_class)
         except ObjectDoesNotExist:
             raise ImportingError(
                 "{} is not a sequence ontology term.".format(attrs_class)
