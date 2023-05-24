@@ -172,7 +172,9 @@ class FeatureLoader(FeatureLoaderBase):
         try:
             srcdbxref = Dbxref.objects.get(accession=tabix_feature.contig, db=srcdb)
         except ObjectDoesNotExist as e:
-            raise ImportingError("{} {} ({})".format(srcdb.name, tabix_feature.contig, e))
+            raise ImportingError(
+                "{} {} ({})".format(srcdb.name, tabix_feature.contig, e)
+            )
         srcfeature = Feature.objects.filter(
             dbxref=srcdbxref, organism=self.organism
         ).values_list("feature_id", flat=True)
