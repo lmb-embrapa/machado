@@ -78,7 +78,7 @@ class Command(BaseCommand):
         verbosity: int = 1,
         cpu: int = 1,
         ignorenotfound: bool = False,
-        **options
+        **options,
     ):
         """Execute the main function."""
         if verbosity > 0:
