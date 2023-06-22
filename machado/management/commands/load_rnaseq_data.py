@@ -105,7 +105,7 @@ class Command(BaseCommand):
         cpu: int = 1,
         verbosity: int = 0,
         ignorenotfound: bool = False,
-        **options
+        **options,
     ):
         """Execute the main function."""
         filename = os.path.basename(file)
