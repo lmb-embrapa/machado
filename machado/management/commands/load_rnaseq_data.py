@@ -10,6 +10,7 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from tqdm import tqdm
@@ -81,6 +82,12 @@ class Command(BaseCommand):
             default=1,
             type=int,
         )
+        parser.add_argument(
+            "--ignorenotfound",
+            help="Don't raise error and exit if feature not found",
+            required=False,
+            action="store_true",
+        )
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
@@ -97,6 +104,7 @@ class Command(BaseCommand):
         norm: int = 1,
         cpu: int = 1,
         verbosity: int = 0,
+        ignorenotfound: bool = False,
         **options
     ):
         """Execute the main function."""
@@ -121,6 +129,7 @@ class Command(BaseCommand):
         analysis_file = AnalysisLoader()
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
+        not_found = list()
         for line in rnaseq_data:
             fields = re.split("\t", line.rstrip())
             nfields = len(fields)
@@ -150,6 +159,7 @@ class Command(BaseCommand):
                             programversion=programversion,
                             timeexecuted=timeexecuted,
                             algorithm=algorithm,
+                            assaydb=assaydb,
                             name=assay,
                             description=description,
                             filename=filename,
@@ -159,7 +169,7 @@ class Command(BaseCommand):
                     # store quantification
                     try:
                         analysis_file.store_quantification(
-                            analysis=analysis, assayacc=assay
+                            analysis=analysis, assayacc=assay, assaydb=assaydb
                         )
                     except ImportingError as e:
                         raise CommandError(e)
@@ -187,13 +197,25 @@ class Command(BaseCommand):
                             normscore,
                         )
                     )
+
         if verbosity > 0:
             self.stdout.write("Loading")
+
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             try:
                 task.result()
+            except ObjectDoesNotExist as e:
+                not_found.append(e)
+                if not ignorenotfound:
+                    raise CommandError(e)
             except ImportingError as e:
                 raise CommandError(e)
         pool.shutdown()
+
         if verbosity > 0:
-            self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))
+            self.stdout.write("List of features not found:")
+            for item in not_found:
+                self.stdout.write(f"{item}\n")
+
+        if verbosity > 0:
+            self.stdout.write(self.style.SUCCESS("Done."))
