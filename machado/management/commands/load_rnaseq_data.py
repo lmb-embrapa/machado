@@ -159,7 +159,6 @@ class Command(BaseCommand):
                             programversion=programversion,
                             timeexecuted=timeexecuted,
                             algorithm=algorithm,
-                            assaydb=assaydb,
                             name=assay,
                             description=description,
                             filename=filename,
