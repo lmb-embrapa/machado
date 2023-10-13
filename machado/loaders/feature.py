@@ -64,7 +64,7 @@ class FeatureLoaderBase(object):
         )
 
         self.cvterm_contained_in = Cvterm.objects.get(
-            name="contained in", cv__name="relationship"
+            name="located in", cv__name="relationship"
         )
         self.aa_cvterm = Cvterm.objects.get(name="polypeptide", cv__name="sequence")
         self.so_term_protein_match = Cvterm.objects.get(

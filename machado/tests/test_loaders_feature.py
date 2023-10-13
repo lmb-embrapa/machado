@@ -89,12 +89,12 @@ class FeatureTest(TestCase):
             is_obsolete=0,
             is_relationshiptype=0,
         )
-        # create RO term: contained in
+        # create RO term: located in
         test_db = Db.objects.create(name="RO")
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,
@@ -282,12 +282,12 @@ class FeatureTest(TestCase):
             is_relationshiptype=0,
         )
 
-        # create RO term: contained in
+        # create RO term: located in
         test_db = Db.objects.create(name="RO")
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,
@@ -399,12 +399,12 @@ class FeatureTest(TestCase):
 
     def test_store_bio_searchio_hit(self):
         """Tests - store bio searchio hit."""
-        # create RO term: contained in
+        # create RO term: located in
         test_db = Db.objects.create(name="RO")
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,
@@ -493,7 +493,7 @@ class FeatureTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,
@@ -606,7 +606,7 @@ class FeatureTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,
@@ -697,7 +697,7 @@ class FeatureTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,

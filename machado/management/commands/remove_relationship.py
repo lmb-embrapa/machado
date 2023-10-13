@@ -29,9 +29,9 @@ class Command(BaseCommand):
 
     def handle(self, file: str, verbosity: int = 0, **options):
         """Execute the main function."""
-        # get cvterm for contained in
+        # get cvterm for located in
         try:
-            cvterm = Cvterm.objects.get(name="contained in", cv__name="relationship")
+            cvterm = Cvterm.objects.get(name="located in", cv__name="relationship")
         except IntegrityError as e:
             raise ImportingError(e)
         filename = os.path.basename(file)

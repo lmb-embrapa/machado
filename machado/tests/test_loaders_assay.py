@@ -25,7 +25,7 @@ class AssayTest(TestCase):
         test_dbxref = Dbxref.objects.create(accession="00002", db=test_db)
         test_cv = Cv.objects.create(name="relationship")
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv,
             dbxref=test_dbxref,
             is_obsolete=0,

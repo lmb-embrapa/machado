@@ -24,7 +24,7 @@ class BiomaterialLoader(object):
     def __init__(self) -> None:
         """Execute the init function."""
         self.cvterm_contained_in = Cvterm.objects.get(
-            name="contained in", cv__name="relationship"
+            name="located in", cv__name="relationship"
         )
 
     def store_biomaterial(

@@ -62,7 +62,7 @@ class CoexpressionTest(TestCase):
         #    is_obsolete=0, is_relationshiptype=0)
         # register features.
         cvterm_contained_in = Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv2,
             dbxref=test_dbxref2,
             is_obsolete=0,
@@ -232,7 +232,7 @@ class CoexpressionTest(TestCase):
         #    is_obsolete=0, is_relationshiptype=0)
         # register features.
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv2,
             dbxref=test_dbxref2,
             is_obsolete=0,

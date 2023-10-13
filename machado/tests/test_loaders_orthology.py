@@ -35,7 +35,7 @@ class OrthologyTest(TestCase):
         ro_dbxref = Dbxref.objects.create(accession="658", db=ro_db)
         # creating test SO term
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=ro_cv,
             dbxref=ro_dbxref,
             is_obsolete=0,

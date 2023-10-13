@@ -79,7 +79,7 @@ class SimilarityTest(TestCase):
         )
         test_dbxref4 = Dbxref.objects.create(accession="12345678", db=test_db2)
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv2,
             dbxref=test_dbxref4,
             is_obsolete=0,

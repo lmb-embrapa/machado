@@ -40,7 +40,7 @@ class SequenceLoader(object):
 
         # Retrieve sequence ontology object
         self.cvterm_contained_in = Cvterm.objects.get(
-            name="contained in", cv__name="relationship"
+            name="located in", cv__name="relationship"
         )
 
         # Retrieve DOI's Dbxref
