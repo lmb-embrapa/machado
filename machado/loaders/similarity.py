@@ -61,7 +61,7 @@ class SimilarityLoader(object):
                 name="in similarity relationship with", cv__name="relationship"
             )
             self.cvterm_contained_in = Cvterm.objects.get(
-                name="contained in", cv__name="relationship"
+                name="located in", cv__name="relationship"
             )
             self.analysis_loader = AnalysisLoader()
             self.analysis = self.analysis_loader.store_analysis(

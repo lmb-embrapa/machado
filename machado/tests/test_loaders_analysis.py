@@ -55,7 +55,7 @@ class AnalysisTest(TestCase):
             is_relationshiptype=0,
         )
         Cvterm.objects.create(
-            name="contained in",
+            name="located in",
             cv=test_cv2,
             dbxref=test_dbxref2,
             is_obsolete=0,

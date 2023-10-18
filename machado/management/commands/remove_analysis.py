@@ -40,7 +40,7 @@ class Command(BaseCommand):
             )
 
         cvterm_contained_in = Cvterm.objects.get(
-            name="contained in", cv__name="relationship"
+            name="located in", cv__name="relationship"
         )
         analysisprop_list = Analysisprop.objects.filter(
             value=name, type_id=cvterm_contained_in.cvterm_id
