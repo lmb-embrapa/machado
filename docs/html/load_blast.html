@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2.8. Loading Blast results &mdash; machado 0.1.0 documentation</title>
@@ -11,12 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> machado
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            machado
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_vcf.html">2.13. VCF</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -74,7 +78,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
       <li class="breadcrumb-item active"><span class="section-number">2.8. </span>Loading Blast results</li>
       <li class="wy-breadcrumbs-aside">
@@ -87,10 +91,10 @@
            <div itemprop="articleBody">
              
   <section id="loading-blast-results">
-<h1><span class="section-number">2.8. </span>Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">2.8. </span>Loading Blast results<a class="headerlink" href="#loading-blast-results" title="Link to this heading"></a></h1>
 <p>In order to load a BLAST xml result file, both the query and the subject records must be previously stored (see below). The current version was tested for loading BLAST analysis on <strong>proteins</strong>.</p>
 <section id="load-blast-subject-records">
-<h2><span class="section-number">2.8.1. </span>Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.8.1. </span>Load BLAST subject records<a class="headerlink" href="#load-blast-subject-records" title="Link to this heading"></a></h2>
 <p>In case you did a BLAST against a multispecies protein database, like NCBI’s nr or Uniprot’s trembl or swissprot, you need to load previously all subject matches before loading the result itself. To do so, use the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_similarity_matches<span class="w"> </span>--file<span class="w"> </span>blast_result.xml<span class="w"> </span>--format<span class="w"> </span>blast-xml
 </pre></div>
@@ -100,7 +104,7 @@
 </ul>
 </section>
 <section id="load-blast">
-<h2><span class="section-number">2.8.2. </span>Load BLAST<a class="headerlink" href="#load-blast" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.8.2. </span>Load BLAST<a class="headerlink" href="#load-blast" title="Link to this heading"></a></h2>
 <p>If all queries and subjects are already loaded you can run the following command to load a BLAST xml result:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_similarity<span class="w"> </span>--file<span class="w"> </span>blast_result.xml<span class="w"> </span>--format<span class="w"> </span>blast-xml<span class="w"> </span>--so_query<span class="w"> </span>polypeptide<span class="w"> </span>--so_subject<span class="w"> </span>protein_match<span class="w"> </span>--program<span class="w"> </span>diamond<span class="w"> </span>--programversion<span class="w"> </span><span class="m">0</span>.9.24<span class="w"> </span>--organism_query<span class="w"> </span><span class="s1">&#39;Oryza sativa&#39;</span><span class="w"> </span>--organism_subject<span class="w"> </span><span class="s1">&#39;multispecies multispecies&#39;</span>
 </pre></div>
@@ -112,10 +116,6 @@
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>Blast XML file *</p></td>
@@ -158,7 +158,7 @@
 <p>* required fields</p>
 </section>
 <section id="remove-file">
-<h2><span class="section-number">2.8.3. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.8.3. </span>Remove file<a class="headerlink" href="#remove-file" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a Blast result set you should use the command <em>remove_analysis</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_analysis<span class="w"> </span>--help
 </pre></div>

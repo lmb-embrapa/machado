@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2.13. Loading VCF files &mdash; machado 0.1.0 documentation</title>
@@ -11,12 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> machado
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            machado
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,7 +78,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
       <li class="breadcrumb-item active"><span class="section-number">2.13. </span>Loading VCF files</li>
       <li class="wy-breadcrumbs-aside">
@@ -88,12 +91,12 @@
            <div itemprop="articleBody">
              
   <section id="loading-vcf-files">
-<h1><span class="section-number">2.13. </span>Loading VCF files<a class="headerlink" href="#loading-vcf-files" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">2.13. </span>Loading VCF files<a class="headerlink" href="#loading-vcf-files" title="Link to this heading"></a></h1>
 <p>The first column of a VCF file is the reference sequence ID.
 In order to load a VCF file, it’s required to have a reference FASTA file loaded.</p>
 <p>The VCF file must be indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a>.</p>
 <section id="load-vcf">
-<h2><span class="section-number">2.13.1. </span>Load VCF<a class="headerlink" href="#load-vcf" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.13.1. </span>Load VCF<a class="headerlink" href="#load-vcf" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_vcf<span class="w"> </span>--file<span class="w"> </span>organism_snv_sorted.vcf.gz<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
@@ -104,10 +107,6 @@ In order to load a VCF file, it’s required to have a reference FASTA file load
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>VCF genome file indexed with tabix (see <a class="reference external" href="http://www.htslib.org/doc/tabix.html">http://www.htslib.org/doc/tabix.html</a>) *</p></td>
@@ -126,7 +125,7 @@ In order to load a VCF file, it’s required to have a reference FASTA file load
 <p>* required fields</p>
 </section>
 <section id="remove-file">
-<h2><span class="section-number">2.13.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.13.2. </span>Remove file<a class="headerlink" href="#remove-file" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a VCF dataset you should use the command <em>remove_file</em>. <strong>If you delete a file, every record that depend on it will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_file<span class="w"> </span>--help
 </pre></div>

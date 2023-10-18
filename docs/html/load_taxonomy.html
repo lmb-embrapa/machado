@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2.2. Loading taxonomy &mdash; machado 0.1.0 documentation</title>
@@ -11,12 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> machado
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            machado
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_vcf.html">2.13. VCF</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -74,7 +78,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
       <li class="breadcrumb-item active"><span class="section-number">2.2. </span>Loading taxonomy</li>
       <li class="wy-breadcrumbs-aside">
@@ -87,13 +91,13 @@
            <div itemprop="articleBody">
              
   <section id="loading-taxonomy">
-<h1><span class="section-number">2.2. </span>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">2.2. </span>Loading taxonomy<a class="headerlink" href="#loading-taxonomy" title="Link to this heading"></a></h1>
 <p>Every data file you’ll load (eg. fasta, gff, blast) must belong to an organism.
 These are instructions to load the NCBI taxonomy, that contains most organisms you’ll need.</p>
 <p><strong>This step is optional.</strong>
 If you decide to skip this step, you should insert the organisms individually using the command <em>insert_organism</em>.</p>
 <section id="ncbi-taxonomy">
-<h2><span class="section-number">2.2.1. </span>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.2.1. </span>NCBI Taxonomy<a class="headerlink" href="#ncbi-taxonomy" title="Link to this heading"></a></h2>
 <p>Contains the names and phylogenetic lineages of more than 160,000 organisms that have molecular data in the NCBI databases.</p>
 <ul class="simple">
 <li><p><strong>URL</strong>: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/taxonomy">https://www.ncbi.nlm.nih.gov/taxonomy</a></p></li>
@@ -110,7 +114,7 @@ python<span class="w"> </span>manage.py<span class="w"> </span>load_phylotree<sp
 </ul>
 </section>
 <section id="remove-taxonomy">
-<h2><span class="section-number">2.2.2. </span>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.2.2. </span>Remove taxonomy<a class="headerlink" href="#remove-taxonomy" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a taxonomy you should use the command <em>remove_phylotree</em> and <em>remove_organisms</em>. Most data files you’ll load depend on the organism database (eg. fasta, gff, blast). <strong>If you delete an organism database, every data file you loaded will be deleted on cascade</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_phylotree<span class="w"> </span>--help
 python<span class="w"> </span>manage.py<span class="w"> </span>remove_organisms<span class="w"> </span>--help

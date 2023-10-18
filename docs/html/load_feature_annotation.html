@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2.7. Loading Feature Additional Info &mdash; machado 0.1.0 documentation</title>
@@ -11,12 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> machado
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            machado
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="load_orthomcl.html">2.10. OrthoMCL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_rnaseq.html">2.11. RNA-seq</a></li>
 <li class="toctree-l2"><a class="reference internal" href="load_coexpression.html">2.12. Coexpression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_vcf.html">2.13. VCF</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">3. Visualization</a></li>
@@ -74,7 +78,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="dataload.html"><span class="section-number">2. </span>Data loading</a></li>
       <li class="breadcrumb-item active"><span class="section-number">2.7. </span>Loading Feature Additional Info</li>
       <li class="wy-breadcrumbs-aside">
@@ -87,11 +91,11 @@
            <div itemprop="articleBody">
              
   <section id="loading-feature-additional-info">
-<h1><span class="section-number">2.7. </span>Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Permalink to this heading"></a></h1>
+<h1><span class="section-number">2.7. </span>Loading Feature Additional Info<a class="headerlink" href="#loading-feature-additional-info" title="Link to this heading"></a></h1>
 <p>Please notice the features must be loaded in advance.
 If the annotation or sequence was loaded previously, it will be replaced.</p>
 <section id="load-annotation">
-<h2><span class="section-number">2.7.1. </span>Load Annotation<a class="headerlink" href="#load-annotation" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.1. </span>Load Annotation<a class="headerlink" href="#load-annotation" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_feature_annotation<span class="w"> </span>--file<span class="w"> </span>feature_annotation.tab<span class="w"> </span>--soterm<span class="w"> </span>polypeptide<span class="w"> </span>--cvterm<span class="w"> </span>display<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span>
 </pre></div>
 </div>
@@ -102,10 +106,6 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 89%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>Two-column tab separated file (feature.accession&lt;TAB&gt;annotation text). *</p></td>
@@ -130,14 +130,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </section>
 <section id="remove-annotation">
-<h2><span class="section-number">2.7.2. </span>Remove Annotation<a class="headerlink" href="#remove-annotation" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.2. </span>Remove Annotation<a class="headerlink" href="#remove-annotation" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a feature annotation you should use the command <em>remove_feature_annotation</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_feature_annotation<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>
 <section id="load-sequence">
-<h2><span class="section-number">2.7.3. </span>Load Sequence<a class="headerlink" href="#load-sequence" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.3. </span>Load Sequence<a class="headerlink" href="#load-sequence" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_feature_sequence<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span><span class="w"> </span>--file<span class="w"> </span>Athaliana_transcripts.fasta<span class="w"> </span>--soterm<span class="w"> </span>mRNA
 </pre></div>
 </div>
@@ -148,10 +148,6 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>FASTA file. *</p></td>
@@ -170,7 +166,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </section>
 <section id="remove-sequence">
-<h2><span class="section-number">2.7.4. </span>Remove Sequence<a class="headerlink" href="#remove-sequence" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.4. </span>Remove Sequence<a class="headerlink" href="#remove-sequence" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a feature sequence you should use the command <em>load_feature_sequence</em> itself and provide a FASTA file with no sequence. For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;chr1
 
@@ -179,7 +175,7 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </div>
 </section>
 <section id="load-publication">
-<h2><span class="section-number">2.7.5. </span>Load Publication<a class="headerlink" href="#load-publication" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.5. </span>Load Publication<a class="headerlink" href="#load-publication" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_feature_publication<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span><span class="w"> </span>--file<span class="w"> </span>feature_publication.tab
 </pre></div>
 </div>
@@ -190,10 +186,6 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 87%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>Two-column tab separated file (feature.accession&lt;TAB&gt;DOI). *</p></td>
@@ -209,14 +201,14 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 <p>* required fields</p>
 </section>
 <section id="remove-publication">
-<h2><span class="section-number">2.7.6. </span>Remove Publication<a class="headerlink" href="#remove-publication" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.6. </span>Remove Publication<a class="headerlink" href="#remove-publication" title="Link to this heading"></a></h2>
 <p>If, by any reason, you need to remove a feature publication attribution, you should use the command <em>remove_publication</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>remove_publication<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>
 <section id="load-dbxref">
-<h2><span class="section-number">2.7.7. </span>Load DBxRef<a class="headerlink" href="#load-dbxref" title="Permalink to this heading"></a></h2>
+<h2><span class="section-number">2.7.7. </span>Load DBxRef<a class="headerlink" href="#load-dbxref" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>load_feature_dbxrefs<span class="w"> </span>--organism<span class="w"> </span><span class="s1">&#39;Arabidopsis thaliana&#39;</span><span class="w"> </span>--file<span class="w"> </span>feature_dbxrefs.tab<span class="w"> </span>--soterm<span class="w"> </span>mRNA
 </pre></div>
 </div>
@@ -227,10 +219,6 @@ If the annotation or sequence was loaded previously, it will be replaced.</p>
 </pre></div>
 </div>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 87%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>–file</p></td>
 <td><p>Two-column tab separated file (feature.accession&lt;TAB&gt;db:dbxref). *</p></td>
