@@ -35,7 +35,7 @@ setup(
         "networkx~=2.8.8",
         "obonet~=0.3.1",
         "biopython~=1.80",
-        "tqdm~=4.64.1",
+        "tqdm~=4.66.3",
         "typing~=3.7.4.3",
         "bibtexparser~=1.4.0",
         "djangorestframework~=3.14.0",
