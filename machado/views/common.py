@@ -83,9 +83,11 @@ class DataSummaryView(View):
             organism_name = "{} {} {}".format(
                 item["organism__genus"],
                 item["organism__species"],
-                item["organism__infraspecific_name"]
-                if item["organism__infraspecific_name"] is not None
-                else "",
+                (
+                    item["organism__infraspecific_name"]
+                    if item["organism__infraspecific_name"] is not None
+                    else ""
+                ),
             )
             data.setdefault(organism_name, {}).setdefault("counts", []).append(item)
 
