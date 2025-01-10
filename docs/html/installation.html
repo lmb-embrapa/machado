@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>1. Installation &mdash; machado 0.1.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=01f34227"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -95,10 +95,12 @@ alter<span class="w"> </span>user<span class="w"> </span>username<span class="w"
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>zlib1g-dev<span class="w"> </span>libbz2-dev<span class="w"> </span>liblzma-dev<span class="w"> </span>python3-dev
 </pre></div>
 </div>
-<p><strong>Python 3.8</strong></p>
+<p><strong>Python 3.12</strong></p>
 <p>We strongly recommend creating a new virtualenv for your project</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virtualenv<span class="w"> </span>-p<span class="w"> </span>/usr/bin/python3.8<span class="w"> </span>YOURPROJECT
-<span class="nb">cd</span><span class="w"> </span>YOURPROJECT
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>mkdir<span class="w"> </span>/var/www/YOURPROJECT
+sudo<span class="w"> </span>chown<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>/var/www/YOURPROJECT
+virtualenv<span class="w"> </span>-p<span class="w"> </span>/usr/bin/python3.12<span class="w"> </span>/var/www/YOURPROJECT
+<span class="nb">cd</span><span class="w"> </span>/var/www/YOURPROJECT
 <span class="nb">source</span><span class="w"> </span>bin/activate
 </pre></div>
 </div>
@@ -114,8 +116,7 @@ pip<span class="w"> </span>install<span class="w"> </span>./src/machado
 <p>From this point on it is assumed you have read the <a class="reference external" href="https://docs.djangoproject.com">Django introduction and tutorial</a> on the Django project website.</p>
 <p><strong>Create a Django project</strong></p>
 <p>Inside YOURPROJECT directory create a Django project with the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin<span class="w"> </span>startproject<span class="w"> </span>WEBPROJECT
-<span class="nb">cd</span><span class="w"> </span>WEBPROJECT
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>django-admin<span class="w"> </span>startproject<span class="w"> </span>WEBPROJECT<span class="w"> </span>.
 </pre></div>
 </div>
 <p>Then, configure the WEBPROJECT/settings.py file to connect to your Chado database.</p>
@@ -154,7 +155,8 @@ pip<span class="w"> </span>install<span class="w"> </span>./src/machado
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>migrate
 </pre></div>
 </div>
-<p>Run tests to check the instalation:</p>
+<p>Just ignore the warnings about unapplied migrations.
+Run tests to check the instalation:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span><span class="nb">test</span><span class="w"> </span>machado
 </pre></div>
 </div>
@@ -162,7 +164,6 @@ pip<span class="w"> </span>install<span class="w"> </span>./src/machado
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>runserver
 </pre></div>
 </div>
-<p>The API interface will be available at <a class="reference external" href="http://localhost:8000/machado/api">http://localhost:8000/machado/api</a></p>
 </section>
 <section id="references">
 <h2><span class="section-number">1.4. </span>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>

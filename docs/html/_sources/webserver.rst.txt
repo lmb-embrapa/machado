@@ -33,20 +33,12 @@ take care of this process. It will be necessary to install the following package
 
     sudo apt install libapache2-mod-wsgi-py3
 
-Now symlink the directory of YOURPROJECT to '/var/www/' (tested in Ubuntu 20.04):
-
-.. code-block:: bash
-
-    sudo ln -s /FULL/PATH/TO/YOURPROJECT /var/www/
-
-* Make sure this directory and sub-directories have 755 permissions
-
 Now configure Apache to use the WSGI module.
 Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
 
 .. code-block:: bash
 
-    <Directory "/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT">
+    <Directory "/var/www/YOURPROJECT/WEBPROJECT">
     <Files "wsgi.py">
         Require all granted
     </Files>
@@ -60,8 +52,8 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
 
     WSGIDaemonProcess WEBPROJECT
     WSGIPythonHome /var/www/YOURPROJECT
-    WSGIPythonPath /var/www/YOURPROJECT/WEBPROJECT
-    WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
+    WSGIPythonPath /var/www/YOURPROJECT
+    WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/wsgi.py
 
 * In this example the whole project is in /var/www/YOURPROJECT, but it's not required to be there.
 * This directory and sub-directories must have 755 permissions

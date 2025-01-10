@@ -38,7 +38,7 @@ setup(
         "typing~=3.7.4.3",
         "bibtexparser~=1.4.1",
         "djangorestframework~=3.15.2",
-        "drf-yasg==1.21.7",
+        "drf-yasg==1.21.8",
         "drf-nested-routers~=0.94.1",
         "pysam~=0.22.1",
         "django-haystack~=3.3.0",

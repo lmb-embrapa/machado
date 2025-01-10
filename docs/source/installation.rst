@@ -30,14 +30,16 @@ Be sure to have the following dependencies installed
 
     sudo apt install zlib1g-dev libbz2-dev liblzma-dev python3-dev
 
-**Python 3.8**
+**Python 3.12**
 
 We strongly recommend creating a new virtualenv for your project
 
 .. code-block:: bash
 
-    virtualenv -p /usr/bin/python3.8 YOURPROJECT
-    cd YOURPROJECT
+    sudo mkdir /var/www/YOURPROJECT
+    sudo chown $USER:$USER /var/www/YOURPROJECT
+    virtualenv -p /usr/bin/python3.12 /var/www/YOURPROJECT
+    cd /var/www/YOURPROJECT
     source bin/activate
 
 **machado**
@@ -60,8 +62,7 @@ Inside YOURPROJECT directory create a Django project with the following command:
 
 .. code-block:: bash
 
-    django-admin startproject WEBPROJECT
-    cd WEBPROJECT
+    django-admin startproject WEBPROJECT .
 
 Then, configure the WEBPROJECT/settings.py file to connect to your Chado database.
 
@@ -109,6 +110,7 @@ You have to run the following command to create django admin tables:
 
     python manage.py migrate
 
+Just ignore the warnings about unapplied migrations.
 Run tests to check the instalation:
 
 .. code-block:: bash
@@ -121,7 +123,6 @@ Now, just run the DJango server to access the web interface:
 
     python manage.py runserver
 
-The API interface will be available at http://localhost:8000/machado/api
 
 
 References
