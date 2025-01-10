@@ -105,16 +105,9 @@ take care of this process. It will be necessary to install the following package
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libapache2-mod-wsgi-py3
 </pre></div>
 </div>
-<p>Now symlink the directory of YOURPROJECT to ‘/var/www/’ (tested in Ubuntu 20.04):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>/FULL/PATH/TO/YOURPROJECT<span class="w"> </span>/var/www/
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>Make sure this directory and sub-directories have 755 permissions</p></li>
-</ul>
 <p>Now configure Apache to use the WSGI module.
 Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;Directory<span class="w"> </span><span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT&quot;</span>&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;Directory<span class="w"> </span><span class="s2">&quot;/var/www/YOURPROJECT/WEBPROJECT&quot;</span>&gt;
 &lt;Files<span class="w"> </span><span class="s2">&quot;wsgi.py&quot;</span>&gt;
 <span class="w">    </span>Require<span class="w"> </span>all<span class="w"> </span>granted
 &lt;/Files&gt;
@@ -128,8 +121,8 @@ Alias<span class="w"> </span>/YOURPROJECT/static/<span class="w"> </span>/var/ww
 
 WSGIDaemonProcess<span class="w"> </span>WEBPROJECT
 WSGIPythonHome<span class="w"> </span>/var/www/YOURPROJECT
-WSGIPythonPath<span class="w"> </span>/var/www/YOURPROJECT/WEBPROJECT
-WSGIScriptAlias<span class="w"> </span>/YOURPROJECT<span class="w"> </span>/var/www/YOURPROJECT/WEBPROJECT/WEBPROJECT/wsgi.py
+WSGIPythonPath<span class="w"> </span>/var/www/YOURPROJECT
+WSGIScriptAlias<span class="w"> </span>/YOURPROJECT<span class="w"> </span>/var/www/YOURPROJECT/WEBPROJECT/wsgi.py
 </pre></div>
 </div>
 <ul class="simple">

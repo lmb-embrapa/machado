@@ -21,8 +21,8 @@ Now, proceding with elasticsearch instalation, run the following commands:
     cd YOURPROJECT
     source bin/activate
     cd src
-    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.3-amd64.deb
-    sudo dpkg -i elasticsearch-7.17.3-amd64.deb
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.26-amd64.deb
+    sudo dpkg -i elasticsearch-7.17.26-amd64.deb
     sudo systemctl daemon-reload
     sudo systemctl enable elasticsearch.service
     sudo systemctl start elasticsearch.service

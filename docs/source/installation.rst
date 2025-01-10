@@ -36,8 +36,10 @@ We strongly recommend creating a new virtualenv for your project
 
 .. code-block:: bash
 
-    virtualenv -p /usr/bin/python3.12 YOURPROJECT
-    cd YOURPROJECT
+    sudo mkdir /var/www/YOURPROJECT
+    sudo chown $USER:$USER /var/www/YOURPROJECT
+    virtualenv -p /usr/bin/python3.12 /var/www/YOURPROJECT
+    cd /var/www/YOURPROJECT
     source bin/activate
 
 **machado**
@@ -108,6 +110,7 @@ You have to run the following command to create django admin tables:
 
     python manage.py migrate
 
+Just ignore the warnings about unapplied migrations.
 Run tests to check the instalation:
 
 .. code-block:: bash
