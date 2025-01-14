@@ -32,6 +32,7 @@ router.register(
 router.register(r"autocomplete", views.autocompleteViewSet, basename="autocomplete")
 
 router.register(r"organism/id", views.OrganismIDViewSet, basename="organism_id")
+router.register(r"organism/list", views.OrganismViewSet, basename="organism_list")
 router.register(r"feature/id", views.FeatureIDViewSet, basename="feature_id")
 router.register(
     r"feature/ontology/(?P<feature_id>\d+)",

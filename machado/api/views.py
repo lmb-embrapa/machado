@@ -37,6 +37,7 @@ from machado.api.serializers import FeaturePublicationSerializer
 from machado.api.serializers import FeatureSequenceSerializer
 from machado.api.serializers import FeatureSimilaritySerializer
 from machado.api.serializers import OrganismIDSerializer
+from machado.api.serializers import OrganismSerializer
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
@@ -471,6 +472,16 @@ class OrganismIDViewSet(viewsets.GenericViewSet):
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(OrganismIDViewSet, self).dispatch(*args, **kwargs)
+
+
+class OrganismViewSet(viewsets.ViewSet):
+    """Retrieve all the organisms."""
+
+    def list(self, request):
+        """List."""
+        queryset = Organism.objects.exclude(genus="multispecies")
+        serializer = OrganismSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class FeatureIDViewSet(viewsets.GenericViewSet):
