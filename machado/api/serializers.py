@@ -203,7 +203,7 @@ class OrganismIDSerializer(serializers.Serializer):
     organism_id = serializers.IntegerField()
 
 
-class OrganismSerializer(serializers.ModelSerializer):
+class OrganismListSerializer(serializers.ModelSerializer):
     """Organism serializer."""
 
     genus = serializers.CharField(required=True, help_text="The genus of the organism.")
