@@ -12,79 +12,91 @@ from rest_framework import routers
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from machado.api.views import read as readView
+from machado.api.views import read as readViews
+from machado.api.views import load as loadViews
 
 
 router = routers.SimpleRouter(trailing_slash=False)
 
+# readViews
+
 router.register(
-    "jbrowse/stats/global", readView.JBrowseGlobalViewSet, basename="jbrowse_global"
+    "jbrowse/stats/global", readViews.JBrowseGlobalViewSet, basename="jbrowse_global"
 )
 router.register(
     r"jbrowse/features/(?P<refseq>.+)",
-    readView.JBrowseFeatureViewSet,
+    readViews.JBrowseFeatureViewSet,
     basename="jbrowse_features",
 )
-router.register(r"jbrowse/names", readView.JBrowseNamesViewSet, basename="jbrowse_names")
 router.register(
-    r"jbrowse/refSeqs.json", readView.JBrowseRefSeqsViewSet, basename="jbrowse_refseqs"
+    r"jbrowse/names", readViews.JBrowseNamesViewSet, basename="jbrowse_names"
 )
-router.register(r"autocomplete", readView.autocompleteViewSet, basename="autocomplete")
+router.register(
+    r"jbrowse/refSeqs.json", readViews.JBrowseRefSeqsViewSet, basename="jbrowse_refseqs"
+)
+router.register(r"autocomplete", readViews.autocompleteViewSet, basename="autocomplete")
 
-router.register(r"organism/id", readView.OrganismIDViewSet, basename="organism_id")
-router.register(r"organism/list", readView.OrganismListViewSet, basename="organism_list")
-router.register(r"feature/id", readView.FeatureIDViewSet, basename="feature_id")
+router.register(r"organism/id", readViews.OrganismIDViewSet, basename="organism_id")
+router.register(
+    r"organism/list", readViews.OrganismListViewSet, basename="organism_list"
+)
+router.register(r"feature/id", readViews.FeatureIDViewSet, basename="feature_id")
 router.register(
     r"feature/ontology/(?P<feature_id>\d+)",
-    readView.FeatureOntologyViewSet,
+    readViews.FeatureOntologyViewSet,
     basename="feature_ontology",
 )
 
 router.register(
     r"feature/ortholog/(?P<feature_id>\d+)",
-    readView.FeatureOrthologViewSet,
+    readViews.FeatureOrthologViewSet,
     basename="feature_ortholog",
 )
 router.register(
     r"feature/proteinmatches/(?P<feature_id>\d+)",
-    readView.FeatureProteinMatchesViewSet,
+    readViews.FeatureProteinMatchesViewSet,
     basename="feature_proteinmatches",
 )
 router.register(
     r"feature/expression/(?P<feature_id>\d+)",
-    readView.FeatureExpressionViewSet,
+    readViews.FeatureExpressionViewSet,
     basename="feature_expression",
 )
 router.register(
     r"feature/coexpression/(?P<feature_id>\d+)",
-    readView.FeatureCoexpressionViewSet,
+    readViews.FeatureCoexpressionViewSet,
     basename="feature_coexpression",
 )
 router.register(
     r"feature/info/(?P<feature_id>\d+)",
-    readView.FeatureInfoViewSet,
+    readViews.FeatureInfoViewSet,
     basename="feature_info",
 )
 router.register(
     r"feature/location/(?P<feature_id>\d+)",
-    readView.FeatureLocationViewSet,
+    readViews.FeatureLocationViewSet,
     basename="feature_location",
 )
 router.register(
     r"feature/publication/(?P<feature_id>\d+)",
-    readView.FeaturePublicationViewSet,
+    readViews.FeaturePublicationViewSet,
     basename="feature_publication",
 )
 router.register(
     r"feature/sequence/(?P<feature_id>\d+)",
-    readView.FeatureSequenceViewSet,
+    readViews.FeatureSequenceViewSet,
     basename="feature_sequence",
 )
 router.register(
     r"feature/similarity/(?P<feature_id>\d+)",
-    readView.FeatureSimilarityViewSet,
+    readViews.FeatureSimilarityViewSet,
     basename="feature_similarity",
 )
+
+
+# loadViews
+
+router.register(r"organism", loadViews.OrganismViewSet, basename="organism_load")
 
 
 baseurl = None
