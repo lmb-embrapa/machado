@@ -4325,7 +4325,7 @@ class History(models.Model):
     exit_code = models.IntegerField(null=True, blank=True)  # 0 = success, 1 = error
 
     class Meta:
-        db_table = 'history'
+        db_table = "history"
 
     def start(self, command: str, params: str) -> None:
         """Create new entry."""

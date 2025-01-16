@@ -46,7 +46,7 @@ class Command(BaseCommand):
     ) -> None:
         """Execute the main function."""
         history_obj = History()
-        history_obj.start(command='insert_organism', params=locals())
+        history_obj.start(command="insert_organism", params=locals())
 
         try:
             insert_organism(

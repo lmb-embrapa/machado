@@ -28,7 +28,7 @@ class Command(BaseCommand):
     def handle(self, organism: str, verbosity: int = 1, **options):
         """Execute the main function."""
         history_obj = History()
-        history_obj.start(command='remove_organism', params=locals())
+        history_obj.start(command="remove_organism", params=locals())
         try:
             organism_obj = retrieve_organism(organism)
             if organism_obj:
