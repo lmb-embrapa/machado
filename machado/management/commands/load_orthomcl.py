@@ -16,7 +16,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import MultispeciesFeatureLoader
-from machado.models import Cv, Cvterm, Dbxref, Db
+from machado.models import Cv, Cvterm, Dbxref, Db, History
 
 
 class Command(BaseCommand):
@@ -38,9 +38,12 @@ The feature members need to be loaded previously."""
         self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
     ):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_orthomcl", params=locals())
         try:
             FileValidator().validate(file)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         filename = os.path.basename(file)
@@ -50,6 +53,7 @@ The feature members need to be loaded previously."""
             groups = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
@@ -86,6 +90,7 @@ The feature members need to be loaded previously."""
                         ident = member_field.group(2)
                         members.append(ident)
             else:
+                history_obj.failure(description="Cluster has no identification, check.")
                 raise CommandError("Cluster has no identification, check.")
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
@@ -102,7 +107,10 @@ The feature members need to be loaded previously."""
             self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                raise (task.result())
+                e = task.result()
+                history_obj.failure(description=str(e))
+                raise (e)
         pool.shutdown()
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

@@ -13,6 +13,7 @@ from Bio import SeqIO
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
+from machado.models import History
 from machado.loaders.common import FileValidator, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.sequence import SequenceLoader
@@ -71,17 +72,17 @@ class Command(BaseCommand):
         **options
     ) -> None:
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_fasta", params=locals())
+
         if verbosity > 0:
             self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
-        except ImportingError as e:
-            raise CommandError(e)
-
-        try:
             organism = retrieve_organism(organism)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         # retrieve only the file name
@@ -117,5 +118,6 @@ class Command(BaseCommand):
                 raise (task.result())
         pool.shutdown()
 
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))

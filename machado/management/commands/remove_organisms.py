@@ -8,7 +8,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 
-from machado.models import Db, Dbxref, Organism, OrganismDbxref
+from machado.models import Db, Dbxref, Organism, OrganismDbxref, History
 
 
 class Command(BaseCommand):
@@ -24,6 +24,8 @@ class Command(BaseCommand):
 
     def handle(self, dbname: str, verbosity: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="remove_organisms", params=locals())
         try:
             db = Db.objects.get(name=dbname)
             dbxref_ids = list(
@@ -38,7 +40,11 @@ class Command(BaseCommand):
             Dbxref.objects.filter(db=db).delete()
             db.delete()
 
+            history_obj.success(description="Done")
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS("Done"))
         except ObjectDoesNotExist:
+            history_obj.failure(
+                description="Cannot remove {} (not registered)".format(dbname)
+            )
             raise CommandError("Cannot remove {} (not registered)".format(dbname))

@@ -13,7 +13,6 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.ontology import OntologyLoader
-
 from machado.models import History
 
 

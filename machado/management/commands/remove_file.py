@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, name: str, verbosity: int = 0, **options):
         """Execute the main function."""
         history_obj = History()
-        history_obj.start(command="insert_organism", params=locals())
+        history_obj.start(command="remove_file", params=locals())
         filename = os.path.basename(name)
         # Handling Features
         if verbosity > 1:

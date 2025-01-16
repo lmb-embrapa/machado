@@ -18,6 +18,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import MultispeciesFeatureLoader
+from machado.models import History
 
 warnings.simplefilter("ignore", BiopythonWarning)
 # with warnings.catch_warnings():
@@ -43,16 +44,24 @@ class Command(BaseCommand):
         self, file: str, format: str, cpu: int = 1, verbosity: int = 1, **options
     ):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_similarity_matches", params=locals())
         # retrieve only the file name
         try:
             FileValidator().validate(file)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
         if format == "blast-xml":
             source = "BLAST_source"
         elif format == "interproscan-xml":
             source = "InterproScan_source"
         else:
+            history_obj.failure(
+                description=str(
+                    "Format allowed options are blast-xml or interproscan-xml only"
+                )
+            )
             raise CommandError(
                 "Format allowed options are blast-xml or "
                 "interproscan-xml only, not {}".format(format)
@@ -65,6 +74,7 @@ class Command(BaseCommand):
                 source=source,
             )
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         if verbosity > 0:
@@ -72,6 +82,7 @@ class Command(BaseCommand):
         try:
             records = SearchIO.parse(file, format)
         except ValueError as e:
+            history_obj.failure(description=str(e))
             return CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
@@ -87,6 +98,7 @@ class Command(BaseCommand):
             try:
                 task.result()
             except ImportingError as e:
+                history_obj.failure(description=str(e))
                 raise CommandError(e)
         pool.shutdown()
 
@@ -96,5 +108,6 @@ class Command(BaseCommand):
                     "Ignored GO terms: {}".format(feature_file.ignored_goterms)
                 )
             )
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

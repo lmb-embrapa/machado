@@ -10,11 +10,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from machado.models import Analysisprop, Analysis, Analysisfeature
+from machado.models import Acquisition, Analysisprop, Analysis, Analysisfeature
 from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureCvterm, FeatureCvtermprop
 from machado.models import FeatureRelationship, FeatureRelationshipprop
-from machado.models import Quantification, Acquisition
+from machado.models import Quantification, History
 
 
 class Command(BaseCommand):
@@ -34,6 +34,8 @@ class Command(BaseCommand):
 
     def handle(self, name: str, verbosity: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="remove_analysis", params=locals())
         if verbosity > 0:
             self.stdout.write(
                 "Deleting {} and every child record (CASCADE)".format(name)
@@ -96,6 +98,7 @@ class Command(BaseCommand):
                     pass
                 # finally removes analysis...
                 analysis.delete()
+            history_obj.success(description="Done")
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS("Done"))
         else:
