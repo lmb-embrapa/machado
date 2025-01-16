@@ -4330,6 +4330,7 @@ class History(models.Model):
     def start(self, command: str, params: str) -> None:
         """Create new entry."""
         self.command = command
+        self.params = params
         self.created_at = timezone.now()
         self.save()
 
