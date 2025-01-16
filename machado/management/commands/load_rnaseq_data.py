@@ -142,7 +142,7 @@ class Command(BaseCommand):
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
-            history_obj.failure(description=str(e))
+                history_obj.failure(description=str(e))
                 raise CommandError(e)
                 # read header and instantiate analysis object for each assay
                 # e.g. SRR12345.
