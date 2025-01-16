@@ -35,7 +35,7 @@ class Command(BaseCommand):
     def handle(self, file: str, verbosity: int = 1, **options):
         """Execute the main function."""
         history_obj = History()
-        history_obj.start(command="insert_organism", params=locals())
+        history_obj.start(command="load_sequence_ontology", params=locals())
         try:
             FileValidator().validate(file)
         except ImportingError as e:
