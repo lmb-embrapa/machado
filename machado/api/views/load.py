@@ -12,10 +12,13 @@ from django.core.management import call_command
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-from rest_framework.decorators import action
+from machado.api.serializers import LoadCallSerializer
+
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from threading import Thread
 
@@ -23,6 +26,8 @@ from threading import Thread
 class OrganismViewSet(viewsets.GenericViewSet):
     """ViewSet for loading organism."""
 
+    serializer_class = LoadCallSerializer
+    permission_classes = [IsAuthenticated]
     operation_summary = "Load organism"
     operation_description = operation_summary + "<br /><br />"
     if hasattr(settings, "MACHADO_EXAMPLE_ORGANISM_COMMON_NAME"):
