@@ -58,8 +58,7 @@ class OrganismViewSet(viewsets.GenericViewSet):
         operation_summary=operation_summary,
         operation_description=operation_description,
     )
-    @action(detail=False, methods=["post"])
-    def load(self, request):
+    def create(self, request):
         """Handle the POST request for loading organism."""
         genus = request.data.get("genus")
         species = request.data.get("species")

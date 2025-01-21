@@ -96,7 +96,7 @@ router.register(
 
 # loadViews
 
-router.register(r"organism", loadViews.OrganismViewSet, basename="organism_load")
+router.register(r"load/organism", loadViews.OrganismViewSet, basename="load_organism")
 
 
 baseurl = None
