@@ -494,3 +494,7 @@ class FeatureLocationSerializer(serializers.Serializer):
     strand = serializers.IntegerField()
     ref = serializers.CharField()
     jbrowse_url = serializers.CharField()
+
+
+class LoadCallSerializer(serializers.Serializer):
+    """Load call serializer."""
