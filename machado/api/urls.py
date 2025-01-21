@@ -98,7 +98,6 @@ router.register(
 
 router.register(r"load/organism", loadViews.OrganismViewSet, basename="load_organism")
 
-
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):
     baseurl = "{}/api/".format(settings.MACHADO_URL)
