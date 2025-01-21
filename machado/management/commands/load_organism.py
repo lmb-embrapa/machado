@@ -15,6 +15,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.organism import OrganismLoader
+from machado.models import History
 
 
 class Command(BaseCommand):
@@ -34,17 +35,16 @@ class Command(BaseCommand):
 
     def handle(self, file: str, name: str, verbosity: int = 1, cpu: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_organism", params=locals())
         if verbosity > 0:
             self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
-        except ImportingError as e:
-            raise CommandError(e)
-
-        try:
             organism_db = OrganismLoader(organism_db=name)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         file_names = open(file)
@@ -99,7 +99,10 @@ class Command(BaseCommand):
             self.stdout.write("Loading names file")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                raise (task.result())
+                e = task.result()
+                history_obj.failure(description=str(e))
+                raise (e)
         pool.shutdown()
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))

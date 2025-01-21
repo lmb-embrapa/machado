@@ -17,6 +17,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator, get_num_lines, retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
+from machado.models import History
 
 
 class Command(BaseCommand):
@@ -73,18 +74,20 @@ class Command(BaseCommand):
     ):
         """Execute the main function."""
         # retrieve only the file name
+        history_obj = History()
+        history_obj.start(command="load_gff", params=locals())
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
 
         try:
             FileValidator().validate(file)
-        except ImportingError as e:
-            raise CommandError(e)
-
-        try:
             organism = retrieve_organism(organism)
+        except ImportingError as e:
+            history_obj.failure(description=str(e))
+            raise CommandError(e)
         except IntegrityError as e:
+            history_obj.failure(description=str(e))
             raise ImportingError(e)
 
         try:
@@ -95,6 +98,7 @@ class Command(BaseCommand):
                 index_file = "{}.csi".format(file)
                 FileValidator().validate(index_file)
             except ImportingError:
+                history_obj.failure(description="No index found (.tbi/.csi)")
                 raise CommandError("No index found (.tbi/.csi)")
 
         try:
@@ -102,6 +106,7 @@ class Command(BaseCommand):
                 filename=filename, source="GFF_SOURCE", organism=organism, doi=doi
             )
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         pool = ThreadPoolExecutor(max_workers=cpu)
@@ -124,6 +129,7 @@ class Command(BaseCommand):
                         try:
                             task.result()
                         except ImportingError as e:
+                            history_obj.failure(description=str(e))
                             raise CommandError(e)
                     tasks.clear()
             else:
@@ -131,6 +137,7 @@ class Command(BaseCommand):
                     try:
                         task.result()
                     except ImportingError as e:
+                        history_obj.failure(description=str(e))
                         raise CommandError(e)
                 tasks.clear()
 
@@ -155,6 +162,7 @@ class Command(BaseCommand):
             try:
                 task.result()
             except ImportingError as e:
+                history_obj.failure(description=str(e))
                 raise CommandError(e)
         pool.shutdown()
 
@@ -165,5 +173,6 @@ class Command(BaseCommand):
                 )
             )
 
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))

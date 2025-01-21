@@ -9,7 +9,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 
-from machado.models import Phylotree, Phylonode, PhylonodeOrganism
+from machado.models import History, Phylotree, Phylonode, PhylonodeOrganism
 
 
 class Command(BaseCommand):
@@ -23,6 +23,8 @@ class Command(BaseCommand):
 
     def handle(self, name: str, verbosity: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="remove_phylotree", params=locals())
         try:
             if verbosity > 0:
                 self.stdout.write(
@@ -37,7 +39,12 @@ class Command(BaseCommand):
             PhylonodeOrganism.objects.filter(phylonode_id__in=phylonode_ids).delete()
             Phylonode.objects.filter(phylotree=phylotree).delete()
             phylotree.delete()
+
+            history_obj.success(description="Done")
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS("Done"))
         except ObjectDoesNotExist:
+            history_obj.failure(
+                description="Cannot remove {} (not registered)".format(name)
+            )
             raise CommandError("Cannot remove {} (not registered)".format(name))

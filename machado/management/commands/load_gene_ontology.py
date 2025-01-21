@@ -16,6 +16,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.ontology import OntologyLoader
+from machado.models import History
 
 
 class Command(BaseCommand):
@@ -37,9 +38,12 @@ class Command(BaseCommand):
 
     def handle(self, file: str, cpu: int = 1, verbosity: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_gene_ontology", params=locals())
         try:
             FileValidator().validate(file)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         # Load the ontology file
@@ -62,6 +66,7 @@ class Command(BaseCommand):
             ontology = OntologyLoader("external", cv_definition)
             ontology = OntologyLoader("gene_ontology", cv_definition)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         # Load typedefs as Dbxrefs and Cvterm
@@ -100,5 +105,6 @@ class Command(BaseCommand):
                 raise (task.result())
         pool.shutdown()
 
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))

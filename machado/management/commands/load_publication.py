@@ -16,6 +16,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.publication import PublicationLoader
+from machado.models import History
 
 
 class Command(BaseCommand):
@@ -30,12 +31,15 @@ class Command(BaseCommand):
 
     def handle(self, file=str, verbosity: int = 1, cpu: int = 1, **options):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_publication", params=locals())
         if verbosity > 0:
             self.stdout.write("Preprocessing")
 
         try:
             FileValidator().validate(file)
         except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         # filename = os.path.basename(file)
@@ -43,6 +47,7 @@ class Command(BaseCommand):
         try:
             bib_database = bibtexparser.load(open(file))
         except ValueError as e:
+            history_obj.failure(description=str(e))
             return CommandError(e)
 
         bibtex = PublicationLoader()
@@ -63,8 +68,10 @@ class Command(BaseCommand):
             try:
                 task.result()
             except ImportingError as e:
+                history_obj.failure(description=str(e))
                 raise CommandError(e)
         pool.shutdown()
 
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done"))
