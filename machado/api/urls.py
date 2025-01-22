@@ -97,6 +97,12 @@ router.register(
 # loadViews
 
 router.register(r"load/organism", loadViews.OrganismViewSet, basename="load_organism")
+router.register(
+    r"load/relations_ontology",
+    loadViews.RelationsOntologyViewSet,
+    basename="load_relations_ontology",
+)
+
 
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):
