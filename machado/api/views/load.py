@@ -133,19 +133,19 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
             temp_file.write(file_content)
             call_command("load_relations_ontology", file=temp_file.name)
 
-#        thread = Thread(
-#            target=call_command,
-#            args=("load_relations_ontology",),
-#            kwargs=(
-#                {
-#                    "file": file,
-#                    "verbosity": 0,
-#                }
-#            ),
-#            daemon=True,
-#        )
-#
-#        thread.start()
+        #        thread = Thread(
+        #            target=call_command,
+        #            args=("load_relations_ontology",),
+        #            kwargs=(
+        #                {
+        #                    "file": file,
+        #                    "verbosity": 0,
+        #                }
+        #            ),
+        #            daemon=True,
+        #        )
+        #
+        #        thread.start()
 
         return Response(
             {
