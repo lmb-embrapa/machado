@@ -8,8 +8,10 @@
 from rest_framework import serializers
 
 
-class LoadCallSerializer(serializers.Serializer):
-    """Load call serializer."""
+class FileSerializer(serializers.Serializer):
+    """File serializer."""
+
+    file = serializers.FileField()
 
 
 class OrganismSerializer(serializers.Serializer):

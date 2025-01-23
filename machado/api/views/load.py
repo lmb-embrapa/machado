@@ -5,6 +5,7 @@
 # have been included as part of this package for licensing information.
 
 """Load views."""
+import codecs
 
 from django.conf import settings
 from django.core.management import call_command
@@ -19,13 +20,14 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from tempfile import NamedTemporaryFile
 from threading import Thread
 
 
 class OrganismViewSet(viewsets.GenericViewSet):
     """ViewSet for loading organism."""
 
-    serializer_class = loadSerializers.LoadCallSerializer
+    serializer_class = loadSerializers.OrganismSerializer
     permission_classes = [IsAuthenticated]
     operation_summary = "Load organism"
     operation_description = operation_summary + "<br /><br />"
@@ -102,14 +104,14 @@ class OrganismViewSet(viewsets.GenericViewSet):
 class RelationsOntologyViewSet(viewsets.GenericViewSet):
     """ViewSet for loading relations ontology."""
 
-    serializer_class = loadSerializers.LoadCallSerializer
+    serializer_class = loadSerializers.FileSerializer
     permission_classes = [IsAuthenticated]
     operation_summary = "Load relations ontology"
     operation_description = operation_summary + "<br /><br />"
     operation_description += "<li>URL: https://github.com/oborel/obo-relations</li>"
     operation_description += "<li>File: ro.obo</li>"
 
-    file = openapi.Parameter(
+    file_param = openapi.Parameter(
         "file",
         openapi.IN_QUERY,
         description="so.obo file",
@@ -119,7 +121,7 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
-            file,
+            file_param,
         ],
         operation_summary=operation_summary,
         operation_description=operation_description,
@@ -127,20 +129,25 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
     def create(self, request):
         """Handle the POST request for loading organism."""
         file = request.data.get("file")
+        file_content = file.read()
 
-        thread = Thread(
-            target=call_command,
-            args=("load_relations_ontology",),
-            kwargs=(
-                {
-                    "file": file,
-                    "verbosity": 0,
-                }
-            ),
-            daemon=True,
-        )
+        with NamedTemporaryFile(mode="w", delete=True) as temp_file:
+            temp_file.write(file_content)
+            call_command("load_relations_ontology", file=temp_file.name)
 
-        thread.start()
+#        thread = Thread(
+#            target=call_command,
+#            args=("load_relations_ontology",),
+#            kwargs=(
+#                {
+#                    "file": file,
+#                    "verbosity": 0,
+#                }
+#            ),
+#            daemon=True,
+#        )
+#
+#        thread.start()
 
         return Response(
             {

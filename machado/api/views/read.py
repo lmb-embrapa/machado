@@ -232,9 +232,7 @@ class JBrowseFeatureViewSet(viewsets.GenericViewSet):
         """List."""
         queryset = self.get_queryset()
         context = self.get_serializer_context()
-        serializer = readSerializers.JBrowseFeatureSerializer(
-            queryset, context=context, many=True
-        )
+        serializer = readSerializers.JBrowseFeatureSerializer(queryset, context=context, many=True)
         return Response({"features": serializer.data})
 
     def get_serializer_context(self):
@@ -896,9 +894,7 @@ class FeatureProteinMatchesViewSet(viewsets.GenericViewSet):
     def list(self, *args, **kwargs):
         """List."""
         queryset = self.get_queryset()
-        serializer = readSerializers.FeatureProteinMatchesSerializer(
-            queryset, many=True
-        )
+        serializer = readSerializers.FeatureProteinMatchesSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def get_queryset(self):
