@@ -7,6 +7,7 @@
 """Load views."""
 from django.conf import settings
 from django.core.management import call_command
+from django.core.files.storage import FileSystemStorage
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -18,7 +19,6 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from tempfile import NamedTemporaryFile
 from threading import Thread
 
 
@@ -126,26 +126,23 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
     )
     def create(self, request):
         """Handle the POST request for loading organism."""
-        file = request.data.get("file")
-        file_content = file.read()
+        fs = FileSystemStorage(location="/tmp")
+        file = request.FILES["file"]
+        file_name = fs.save(file.name, file)
 
-        with NamedTemporaryFile(mode="w", delete=True) as temp_file:
-            temp_file.write(file_content)
-            call_command("load_relations_ontology", file=temp_file.name)
+        thread = Thread(
+            target=call_command,
+            args=("load_relations_ontology",),
+            kwargs=(
+                {
+                    "file": f"/tmp/{file_name}",
+                    "verbosity": 0,
+                }
+            ),
+            daemon=True,
+        )
 
-        #        thread = Thread(
-        #            target=call_command,
-        #            args=("load_relations_ontology",),
-        #            kwargs=(
-        #                {
-        #                    "file": file,
-        #                    "verbosity": 0,
-        #                }
-        #            ),
-        #            daemon=True,
-        #        )
-        #
-        #        thread.start()
+        thread.start()
 
         return Response(
             {
