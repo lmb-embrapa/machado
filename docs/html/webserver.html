@@ -119,7 +119,7 @@ Alias<span class="w"> </span>/YOURPROJECT/static/<span class="w"> </span>/var/ww
 <span class="w">    </span>Require<span class="w"> </span>all<span class="w"> </span>granted
 &lt;/Directory&gt;
 
-WSGIDaemonProcess<span class="w"> </span>WEBPROJECT
+WSGIDaemonProcess<span class="w"> </span>WEBPROJECT<span class="w"> </span><span class="nv">lang</span><span class="o">=</span><span class="s1">&#39;en_US.UTF-8&#39;</span><span class="w"> </span><span class="nv">locale</span><span class="o">=</span><span class="s1">&#39;en_US.UTF-8&#39;</span>
 WSGIPythonHome<span class="w"> </span>/var/www/YOURPROJECT
 WSGIPythonPath<span class="w"> </span>/var/www/YOURPROJECT
 WSGIScriptAlias<span class="w"> </span>/YOURPROJECT<span class="w"> </span>/var/www/YOURPROJECT/WEBPROJECT/wsgi.py

@@ -50,7 +50,7 @@ Here is the configuration file (/etc/apache2/sites-available/YOURPROJECT.conf)
         Require all granted
     </Directory>
 
-    WSGIDaemonProcess WEBPROJECT
+    WSGIDaemonProcess WEBPROJECT lang='en_US.UTF-8' locale='en_US.UTF-8'
     WSGIPythonHome /var/www/YOURPROJECT
     WSGIPythonPath /var/www/YOURPROJECT
     WSGIScriptAlias /YOURPROJECT /var/www/YOURPROJECT/WEBPROJECT/wsgi.py
