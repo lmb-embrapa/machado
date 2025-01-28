@@ -5,14 +5,14 @@
 # have been included as part of this package for licensing information.
 
 """Load views."""
-
 from django.conf import settings
 from django.core.management import call_command
+from django.core.files.storage import FileSystemStorage
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-from machado.api.serializers import LoadCallSerializer
+from machado.api.serializers import load as loadSerializers
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -25,7 +25,7 @@ from threading import Thread
 class OrganismViewSet(viewsets.GenericViewSet):
     """ViewSet for loading organism."""
 
-    serializer_class = LoadCallSerializer
+    serializer_class = loadSerializers.OrganismSerializer
     permission_classes = [IsAuthenticated]
     operation_summary = "Load organism"
     operation_description = operation_summary + "<br /><br />"
@@ -94,6 +94,60 @@ class OrganismViewSet(viewsets.GenericViewSet):
             {
                 "status": "Submited successfully",
                 "call_command": "insert_organism",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class RelationsOntologyViewSet(viewsets.GenericViewSet):
+    """ViewSet for loading relations ontology."""
+
+    serializer_class = loadSerializers.FileSerializer
+    permission_classes = [IsAuthenticated]
+    operation_summary = "Load relations ontology"
+    operation_description = operation_summary + "<br /><br />"
+    operation_description += "<li>URL: https://github.com/oborel/obo-relations</li>"
+    operation_description += "<li>File: ro.obo</li>"
+
+    file_param = openapi.Parameter(
+        "file",
+        openapi.IN_QUERY,
+        description="so.obo file",
+        required=True,
+        type=openapi.TYPE_FILE,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            file_param,
+        ],
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+    def create(self, request):
+        """Handle the POST request for loading organism."""
+        fs = FileSystemStorage(location="/tmp")
+        file = request.FILES["file"]
+        file_name = fs.save(file.name, file)
+
+        thread = Thread(
+            target=call_command,
+            args=("load_relations_ontology",),
+            kwargs=(
+                {
+                    "file": f"/tmp/{file_name}",
+                    "verbosity": 0,
+                }
+            ),
+            daemon=True,
+        )
+
+        thread.start()
+
+        return Response(
+            {
+                "status": "Submited successfully",
+                "call_command": "load_relations_ontology",
             },
             status=status.HTTP_200_OK,
         )
