@@ -7,7 +7,6 @@
 """Load views."""
 from django.conf import settings
 from django.core.management import call_command
-from django.core.files.storage import FileSystemStorage
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -112,7 +111,7 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
     file_param = openapi.Parameter(
         "file",
         openapi.IN_QUERY,
-        description="so.obo file",
+        description="ro.obo file",
         required=True,
         type=openapi.TYPE_FILE,
     )
@@ -126,16 +125,20 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
     )
     def create(self, request):
         """Handle the POST request for loading organism."""
-        fs = FileSystemStorage(location="/tmp")
-        file = request.FILES["file"]
-        file_name = fs.save(file.name, file)
+        in_memory_file = request.FILES["file"]
+
+        print(in_memory_file.name)
+
+        destination = open(f"/tmp/{in_memory_file.name}", "wt")
+        destination.write(in_memory_file.read().decode("ascii", "ignore"))
+        destination.close()
 
         thread = Thread(
             target=call_command,
             args=("load_relations_ontology",),
             kwargs=(
                 {
-                    "file": f"/tmp/{file_name}",
+                    "file": f"/tmp/{in_memory_file.name}",
                     "verbosity": 0,
                 }
             ),
@@ -148,6 +151,7 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
             {
                 "status": "Submited successfully",
                 "call_command": "load_relations_ontology",
+                "file": f"/tmp/{in_memory_file.name}",
             },
             status=status.HTTP_200_OK,
         )

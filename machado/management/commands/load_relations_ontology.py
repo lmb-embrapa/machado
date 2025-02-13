@@ -52,7 +52,11 @@ class Command(BaseCommand):
         cv_name = "relationship"
 
         # Initializing ontology
-        ontology = OntologyLoader(cv_name)
+        try:
+            ontology = OntologyLoader(cv_name)
+        except ImportingError as e:
+            history_obj.failure(description=str(e))
+            raise CommandError(e)
 
         # Load typedefs as Dbxrefs and Cvterm
         if verbosity > 0:
