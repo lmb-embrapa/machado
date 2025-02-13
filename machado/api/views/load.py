@@ -7,7 +7,6 @@
 """Load views."""
 from django.conf import settings
 from django.core.management import call_command
-from django.core.files.storage import FileSystemStorage
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
