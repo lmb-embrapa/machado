@@ -15,10 +15,21 @@ def get_feature_dbxrefs(self):
     """Get the feature dbxrefs."""
     result = list()
     for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
-        result.append(
-            "{}:{}".format(
-                feature_dbxref.dbxref.db.name, feature_dbxref.dbxref.accession
+        if feature_dbxref.dbxref.db.url:
+            result.append(
+                    "<a href='{}://{}/{}' target='_blank'>{}:{}</a>".format(
+                        feature_dbxref.dbxref.db.urlprefix,
+                        feature_dbxref.dbxref.db.url,
+                        feature_dbxref.dbxref.accession,
+                        feature_dbxref.dbxref.db.name,
+                        feature_dbxref.dbxref.accession,
+                )
             )
+        else:
+            result.append(
+                    "{}:{}".format(
+                        feature_dbxref.dbxref.db.name, feature_dbxref.dbxref.accession
+                        )
         )
     return result
 

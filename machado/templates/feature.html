@@ -39,7 +39,11 @@
                 </p>
             </div>
             <div class="col">
-              {% if feature.get_dbxrefs %}<p><strong>DBxRefs:</strong> {{ feature.get_dbxrefs|join:', ' }}</p>{% endif %}
+              {% if feature.get_dbxrefs %}<p><strong>DBxRefs:</strong>
+                {% for dbxref in feature.get_dbxrefs %}
+                    {{ dbxref|safe }}  
+                {% endfor %}
+              </p>{% endif %}
               {% if feature.get_relationship %}
                 <p>
                 {% for relative in feature.get_relationship %}
