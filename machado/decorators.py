@@ -17,7 +17,7 @@ def get_feature_dbxrefs(self):
     for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
         if feature_dbxref.dbxref.db.url:
             result.append(
-                "<a href='{}://{}/{}' target='_blank'>{}:{}</a>".format(
+                "<a href='{}://{}{}' target='_blank'>{}:{}</a>".format(
                     feature_dbxref.dbxref.db.urlprefix,
                     feature_dbxref.dbxref.db.url,
                     feature_dbxref.dbxref.accession,
