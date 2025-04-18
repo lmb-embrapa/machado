@@ -21,7 +21,7 @@ Siga estes passos **apenas na primeira vez** que for rodar o projeto.
 Clone o repositório do projeto para o seu ambiente local:
 
 ```bash
-git clone https://github.com/rickxz/machado
+git clone https://github.com/ax-comp-scl/machado.git
 cd machado
 ```
 
