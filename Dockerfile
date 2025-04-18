@@ -5,7 +5,7 @@ RUN mkdir -p /usr/share/elasticsearch/data/nodes && \
 
 USER elasticsearch
 
-COPY --chown=elasticsearch:elasticsearch create-index.sh /usr/local/bin/create-index.sh
-RUN chmod +x /usr/local/bin/create-index.sh
+COPY --chown=elasticsearch:elasticsearch create_index.sh /usr/local/bin/create_index.sh
+RUN chmod +x /usr/local/bin/create_index.sh
 
-CMD ["sh", "-c", "create-index.sh & elasticsearch"]
+CMD ["sh", "-c", "create_index.sh & elasticsearch"]
