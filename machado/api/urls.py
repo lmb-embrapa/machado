@@ -103,6 +103,8 @@ router.register(
     basename="load_relations_ontology",
 )
 
+router.register(r"history", readViews.HistoryListViewSet, basename="loads_history")
+
 
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):

@@ -5,12 +5,14 @@
 # have been included as part of this package for licensing information.
 
 """Serializers."""
+import re
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureRelationship
 from machado.models import Organism, Pub
+from machado.models import History
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):
@@ -494,3 +496,46 @@ class FeatureLocationSerializer(serializers.Serializer):
     strand = serializers.IntegerField()
     ref = serializers.CharField()
     jbrowse_url = serializers.CharField()
+
+
+class HistoryListSerializer(serializers.ModelSerializer):
+    """History serializer."""
+    command = serializers.CharField()
+    params = serializers.SerializerMethodField()
+    description = serializers.CharField()
+    created_at = serializers.CharField()
+    finished_at = serializers.CharField()
+    exit_code = serializers.IntegerField()
+
+    def get_params(self, obj):
+        params_str = obj.params or ""
+
+        fields = ["genus", "species", "abbreviation", "common_name", "infraspecific_name", "comment"]
+        extracted = {}
+
+        for field in fields:
+            match = re.search(rf"'{field}': ([^,}}]+)", params_str)
+            if match:
+                raw_value = match.group(1).strip()
+                if raw_value == "None":
+                    value = None
+                else:
+                    value = raw_value.strip("'\"")
+                extracted[field] = value
+            else:
+                extracted[field] = None
+
+        return extracted
+
+    class Meta:
+        model = History
+        fields = [
+            "history_id",
+            "command",
+            "params",
+            "description",
+            "created_at",
+            "finished_at",
+            "exit_code",
+        ]
+    

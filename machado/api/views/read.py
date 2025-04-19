@@ -24,6 +24,7 @@ from machado.api.serializers import read as readSerializers
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
+from machado.models import History
 
 from re import escape, search, IGNORECASE
 
@@ -992,3 +993,12 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureSimilarityViewSet, self).dispatch(*args, **kwargs)
+
+class HistoryListViewSet(viewsets.ViewSet):
+    """Retrive all history of insertions."""
+    
+    def list(self, request):
+        """List"""
+        queryset = History.objects.all()
+        serializer = readSerializers.HistoryListSerializer(queryset, many=True)
+        return Response(serializer.data)
