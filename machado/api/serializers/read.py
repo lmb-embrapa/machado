@@ -6,6 +6,7 @@
 
 """Serializers."""
 import re
+import json
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
@@ -508,24 +509,10 @@ class HistoryListSerializer(serializers.ModelSerializer):
     exit_code = serializers.IntegerField()
 
     def get_params(self, obj):
-        params_str = obj.params or ""
-
-        fields = ["genus", "species", "abbreviation", "common_name", "infraspecific_name", "comment"]
-        extracted = {}
-
-        for field in fields:
-            match = re.search(rf"'{field}': ([^,}}]+)", params_str)
-            if match:
-                raw_value = match.group(1).strip()
-                if raw_value == "None":
-                    value = None
-                else:
-                    value = raw_value.strip("'\"")
-                extracted[field] = value
-            else:
-                extracted[field] = None
-
-        return extracted
+        try:
+            return json.loads(obj.params)
+        except (TypeError, json.JSONDecodeError):
+            return {}
 
     class Meta:
         model = History
