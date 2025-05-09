@@ -964,12 +964,11 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
             # it should have 2 records (query and hit)
             match_query = Featureloc.objects.filter(
                 feature_id=match_part_id, srcfeature_id=srcfeature_id
-            ).first()
+            )[0]
             match_hit = (
                 Featureloc.objects.filter(feature_id=match_part_id)
                 .exclude(srcfeature_id=srcfeature_id)
-                .first()
-            )
+            )[0]
 
             result.append(
                 {
