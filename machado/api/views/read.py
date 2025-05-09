@@ -966,8 +966,9 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
                 feature_id=match_part_id, srcfeature_id=srcfeature_id
             )[0]
             match_hit = (
-                Featureloc.objects.filter(feature_id=match_part_id)
-                .exclude(srcfeature_id=srcfeature_id)
+                Featureloc.objects.filter(feature_id=match_part_id).exclude(
+                    srcfeature_id=srcfeature_id
+                )
             )[0]
 
             result.append(
