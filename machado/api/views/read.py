@@ -10,13 +10,14 @@ from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -999,6 +1000,16 @@ class HistoryListViewSet(viewsets.ViewSet):
     
     def list(self, request):
         """List"""
-        queryset = History.objects.all()
-        serializer = readSerializers.HistoryListSerializer(queryset, many=True)
-        return Response(serializer.data)
+        paginate_by = 10
+        history_list = History.objects.all()
+        paginator = Paginator(history_list, paginate_by)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        serializer = readSerializers.HistoryListSerializer(page_obj, many=True)
+        response_data = {
+            'total_pages': paginator.num_pages,
+            'current_page': page_obj.number,
+            'results': serializer.data
+        }
+        return Response(data=response_data, status=status.HTTP_200_OK)
