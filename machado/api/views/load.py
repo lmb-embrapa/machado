@@ -214,3 +214,61 @@ class SequenceOntologyViewSet(viewsets.GenericViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+class GeneOntologyViewSet(viewsets.GenericViewSet):
+    """ViewSet for loading gene ontology."""
+
+    serializer_class = loadSerializers.FileSerializer
+    permission_classes = [IsAuthenticated]
+    operation_summary = "Load gene ontology"
+    operation_description = operation_summary + "<br /><br />"
+    operation_description += "<li>URL: https://current.geneontology.org/ontology/</li>" # o link está cagado
+    operation_description += "<li>File: go.obo</li>"
+
+    file_param = openapi.Parameter(
+        "file",
+        openapi.IN_QUERY,
+        description="go.obo file",
+        required=True,
+        type=openapi.TYPE_FILE,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            file_param,
+        ],
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+    def create(self, request):
+        """Handle the POST request for loading organism."""
+        in_memory_file = request.FILES["file"]
+
+        print(in_memory_file.name)
+
+        destination = open(f"/tmp/{in_memory_file.name}", "wt")
+        destination.write(in_memory_file.read().decode("ascii", "ignore"))
+        destination.close()
+
+        thread = Thread(
+            target=call_command,
+            args=("load_gene_ontology",),
+            kwargs=(
+                {
+                    "file": f"/tmp/{in_memory_file.name}",
+                    "verbosity": 0,
+                }
+            ),
+            daemon=True,
+        )
+
+        thread.start()
+
+        return Response(
+            {
+                "status": "Submited successfully",
+                "call_command": "load_gene_ontology",
+                "file": f"/tmp/{in_memory_file.name}",
+            },
+            status=status.HTTP_200_OK,
+        )

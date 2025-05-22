@@ -106,6 +106,12 @@ router.register(
     loadViews.RelationsOntologyViewSet,
     basename="load_relations_ontology")
 
+router.register(
+    r"load/gene_ontology",
+    loadViews.GeneOntologyViewSet,
+    basename="load_gene_ontology",
+)
+
 router.register(r"history", readViews.HistoryListViewSet, basename="loads_history")
 
 router.register(r"load/sequence_ontology",
