@@ -1001,9 +1001,10 @@ class HistoryListViewSet(viewsets.ViewSet):
     def list(self, request):
         """List"""
         paginate_by = 10
-        history_list = History.objects.all()
+        order_by = request.GET.get('ordering', 'created_at') 
+        history_list = History.objects.all().order_by(order_by)
         paginator = Paginator(history_list, paginate_by)
-        page_number = request.GET.get("page")
+        page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
 
         serializer = readSerializers.HistoryListSerializer(page_obj, many=True)
