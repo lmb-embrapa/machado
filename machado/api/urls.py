@@ -93,6 +93,12 @@ router.register(
     basename="feature_similarity",
 )
 
+router.register(
+    r'publications/load', 
+    PublicationViewSet, 
+    basename='publication-load'
+)
+
 
 # loadViews
 

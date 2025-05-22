@@ -4347,3 +4347,36 @@ class History(models.Model):
         self.exit_code = 1
         self.finished_at = timezone.now()
         self.save()
+
+class Publication(models.Model):
+    publication_id = models.AutoField(primary_key=True)
+    command = models.CharField(max_length=255)
+    params = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(blank=True, null=True)
+    exit_code = models.IntegerField(null=True, blank=True)  # 0 = success, 1 = error
+
+    class Meta:
+        db_table = "publication"
+
+    def start(self, command: str, params: str) -> None:
+        """Create new entry."""
+        self.command = command
+        self.params = params
+        self.created_at = timezone.now()
+        self.save()
+
+    def success(self, description: str = None) -> None:
+        """Update entry to log the finish."""
+        self.description = description
+        self.exit_code = 0
+        self.finished_at = timezone.now()
+        self.save()
+
+    def failure(self, description: str = None) -> None:
+        """Update entry to log the finish."""
+        self.description = description
+        self.exit_code = 1
+        self.finished_at = timezone.now()
+        self.save()
