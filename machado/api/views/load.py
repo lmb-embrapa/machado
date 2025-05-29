@@ -155,7 +155,70 @@ class RelationsOntologyViewSet(viewsets.GenericViewSet):
             },
             status=status.HTTP_200_OK,
         )
-    
+
+class PublicationViewSet(viewsets.GenericViewSet):
+    """ViewSet for loading publications from .bib file."""
+
+    serializer_class = loadSerializers.LoadPublicationSerializer
+    permission_classes = [IsAuthenticated]
+    operation_summary = "Load publications from BibTeX file"
+    operation_description = operation_summary + "<br /><br />"
+    operation_description += "<li>File: reference.bib</li>"
+
+    file_param = openapi.Parameter(
+        "file",
+        openapi.IN_QUERY,
+        description="BibTeX file",
+        required=True,
+        type=openapi.TYPE_FILE,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[file_param],
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+    def create(self, request):
+        """Handle the POST request for loading publication."""
+        uploaded_file = request.FILES.get("file")
+        cpu = int(request.data.get("cpu", 1))
+
+        if not uploaded_file:
+            return Response(
+                {"error": "No file uploaded."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Salvar arquivo temporariamente
+        file_path = f"/tmp/{uploaded_file.name}"
+        with open(file_path, "wb") as dest:
+            for chunk in uploaded_file.chunks():
+                dest.write(chunk)
+
+        # Rodar comando em segundo plano
+        thread = Thread(
+            target=call_command,
+            args=("load_publication",),
+            kwargs={
+                "file": file_path,
+                "cpu": cpu,
+                "verbosity": 0,
+            },
+            daemon=True,
+        )
+        thread.start()
+
+        return Response(
+            {
+                "status": "Submitted successfully",
+                "call_command": "load_publication",
+                "file": file_path,
+                "cpu": cpu,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class SequenceOntologyViewSet(viewsets.GenericViewSet):
     """ViewSet for loading sequence ontology."""
 
