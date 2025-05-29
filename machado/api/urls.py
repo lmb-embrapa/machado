@@ -93,13 +93,6 @@ router.register(
     basename="feature_similarity",
 )
 
-router.register(
-    r'publications/load', 
-    PublicationViewSet, 
-    basename='publication-load'
-)
-
-
 # loadViews
 
 router.register(
@@ -111,6 +104,18 @@ router.register(
     r"load/relations_ontology",
     loadViews.RelationsOntologyViewSet,
     basename="load_relations_ontology")
+
+router.register(
+    r"load/gene_ontology",
+    loadViews.GeneOntologyViewSet,
+    basename="load_gene_ontology",
+)
+
+router.register(
+    r'publications/load', 
+    loadViews.PublicationViewSet, 
+    basename='publication-load'
+)
 
 router.register(r"history", readViews.HistoryListViewSet, basename="loads_history")
 
