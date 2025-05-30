@@ -42,6 +42,10 @@ setup(
         "drf-nested-routers~=0.94.1",
         "pysam~=0.22.1",
         "django-haystack~=3.3.0",
+        "setuptools~=76.0.0",
+        "python-decouple~=3.8",
+        "elasticsearch >=7,<8",
+        "django-cors-headers~=4.7.0",
     ],
     zip_safe=False,
 )

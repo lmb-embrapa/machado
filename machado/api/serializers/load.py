@@ -13,6 +13,9 @@ class FileSerializer(serializers.Serializer):
 
     file = serializers.FileField()
 
+class LoadPublicationSerializer(serializers.Serializer):
+    file = serializers.FileField()
+    cpu = serializers.IntegerField(required=False, min_value=1, default=1)
 
 class OrganismSerializer(serializers.Serializer):
     """Organism serializer."""

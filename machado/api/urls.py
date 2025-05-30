@@ -93,16 +93,35 @@ router.register(
     basename="feature_similarity",
 )
 
-
 # loadViews
 
-router.register(r"load/organism", loadViews.OrganismViewSet, basename="load_organism")
+router.register(
+    r"load/organism", 
+    loadViews.OrganismViewSet, 
+    basename="load_organism")
+
 router.register(
     r"load/relations_ontology",
     loadViews.RelationsOntologyViewSet,
-    basename="load_relations_ontology",
+    basename="load_relations_ontology")
+
+router.register(
+    r"load/gene_ontology",
+    loadViews.GeneOntologyViewSet,
+    basename="load_gene_ontology",
 )
 
+router.register(
+    r'load/publication', 
+    loadViews.PublicationViewSet, 
+    basename='load_publication'
+)
+
+router.register(r"history", readViews.HistoryListViewSet, basename="loads_history")
+
+router.register(r"load/sequence_ontology",
+    loadViews.SequenceOntologyViewSet,
+    basename="load_sequence_ontology")
 
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):
