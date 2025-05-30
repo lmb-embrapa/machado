@@ -335,3 +335,94 @@ class GeneOntologyViewSet(viewsets.GenericViewSet):
             },
             status=status.HTTP_200_OK,
         )
+    
+class GFFViewSet(viewsets.GenericViewSet):
+    """ViewSet for loading sequence ontology."""
+
+    serializer_class = loadSerializers.FileSerializer
+    permission_classes = [IsAuthenticated]
+    operation_summary = "Load gff"
+    operation_description = operation_summary + "<br /><br />"
+    operation_description += "<li>URL: https://github.com/lmb-embrapa/machado/blob/master/extras/sample.tar.gz</li>"
+    operation_description += "<li>File: .gff3</li>"
+
+    file_param = openapi.Parameter(
+        "file",
+        openapi.IN_QUERY,
+        description=".gff3 file",
+        required=True,
+        type=openapi.TYPE_FILE,
+    )
+
+    request_body = openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "organism": openapi.Schema(type=openapi.TYPE_STRING, description="Organism"),
+                "doi": openapi.Schema(type=openapi.TYPE_STRING, description="DOI"),
+                "ignore": openapi.Schema(type=openapi.TYPE_STRING, description="Ignore"),
+                "cpu": openapi.Schema(type=openapi.TYPE_INTEGER, description="CPU"),
+                "qtl": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="QTL"),
+            },
+        )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            file_param,
+        ],
+        request_body= request_body,
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+
+    def create(self, request):
+        """Handle the POST request for loading GFF."""
+        in_memory_file = request.FILES["file"]
+        organism = request.data.get("organism")
+        doi = request.data.get("doi")
+        ignore = request.data.get("ignore")
+        cpu = request.data.get("")
+        qtl = request.data.get("qtl")
+        
+        print(in_memory_file.name)
+        if not in_memory_file or not organism:
+            return Response(
+                {"error": "Organism and GFF File are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        destination = open(f"/tmp/{in_memory_file.name}", "wt")
+        destination.write(in_memory_file.read().decode("ascii", "ignore"))
+        destination.close()
+
+        thread = Thread(
+            target=call_command,
+            args=("load_gff",),
+            kwargs=(
+                {
+                    "file": f"/tmp/{in_memory_file.name}",
+                    "organism": {organism},
+                    "doi": {doi},
+                    "ignore": {ignore},
+                    "qtl": {qtl},
+                    "cpu": {cpu},
+                    "verbosity": 0,
+                }
+            ),
+            daemon=True,
+        )
+
+        thread.start()
+
+        return Response(
+            {
+                "status": "Submited successfully",
+                "call_command": "load_gff",
+                "file": f"/tmp/{in_memory_file.name}",
+                "organism": {organism},
+                "doi": {doi},
+                "ignore": {ignore},
+                "qtl": {qtl},
+                "cpu": {cpu}
+            },
+            status=status.HTTP_200_OK,
+        )

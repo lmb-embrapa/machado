@@ -123,6 +123,10 @@ router.register(r"load/sequence_ontology",
     loadViews.SequenceOntologyViewSet,
     basename="load_sequence_ontology")
 
+router.register(r"load/gff",
+    loadViews.GFFViewSet,
+    basename="load_gff")
+
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):
     baseurl = "{}/api/".format(settings.MACHADO_URL)
