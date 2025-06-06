@@ -5,12 +5,15 @@
 # have been included as part of this package for licensing information.
 
 """Serializers."""
+import re
+import json
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from machado.models import Cvterm, Feature, Featureloc
 from machado.models import FeatureRelationship
 from machado.models import Organism, Pub
+from machado.models import History
 
 
 class JBrowseGlobalSerializer(serializers.Serializer):
@@ -494,3 +497,32 @@ class FeatureLocationSerializer(serializers.Serializer):
     strand = serializers.IntegerField()
     ref = serializers.CharField()
     jbrowse_url = serializers.CharField()
+
+
+class HistoryListSerializer(serializers.ModelSerializer):
+    """History serializer."""
+    command = serializers.CharField()
+    params = serializers.SerializerMethodField()
+    description = serializers.CharField()
+    created_at = serializers.CharField()
+    finished_at = serializers.CharField()
+    exit_code = serializers.IntegerField()
+
+    def get_params(self, obj):
+        try:
+            return json.loads(obj.params)
+        except (TypeError, json.JSONDecodeError):
+            return {}
+
+    class Meta:
+        model = History
+        fields = [
+            "history_id",
+            "command",
+            "params",
+            "description",
+            "created_at",
+            "finished_at",
+            "exit_code",
+        ]
+    

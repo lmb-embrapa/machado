@@ -10,13 +10,14 @@ from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from haystack.query import SearchQuerySet
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -24,6 +25,8 @@ from machado.api.serializers import read as readSerializers
 from machado.loaders.common import retrieve_organism, retrieve_feature_id
 from machado.models import Analysis, Analysisfeature, Cvterm, Organism, Pub
 from machado.models import Feature, Featureloc, Featureprop, FeatureRelationship
+from django.db.models import Q
+from machado.models import History
 
 from re import escape, search, IGNORECASE
 
@@ -992,3 +995,36 @@ class FeatureSimilarityViewSet(viewsets.GenericViewSet):
     def dispatch(self, *args, **kwargs):
         """Dispatch."""
         return super(FeatureSimilarityViewSet, self).dispatch(*args, **kwargs)
+
+class HistoryListViewSet(viewsets.ViewSet):
+    """Retrive all history of insertions."""
+    
+    def list(self, request):
+        """List"""
+        paginate_by = 10
+        order_by = request.GET.get('ordering', '-created_at')
+        allowed_ordering_fields = ['created_at', '-created_at', 'another_field', '-another_field']
+        if order_by not in allowed_ordering_fields:
+            order_by = '-created_at'
+        
+        search_term = request.GET.get('search', None)
+        history_list = History.objects.all()
+        if search_term:
+            history_list = history_list.filter(
+                Q(command__icontains=search_term) |
+                Q(description__icontains=search_term) 
+            )
+        
+        history_list = history_list.order_by(order_by)
+        
+        paginator = Paginator(history_list, paginate_by)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        serializer = readSerializers.HistoryListSerializer(page_obj, many=True)
+        response_data = {
+            'total_pages': paginator.num_pages,
+            'current_page': page_obj.number,
+            'results': serializer.data
+        }
+        return Response(data=response_data, status=status.HTTP_200_OK)
