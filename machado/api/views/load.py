@@ -426,3 +426,122 @@ class GFFViewSet(viewsets.GenericViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+class SimilarityViewSet(viewsets.GenericViewSet):
+    """ViewSet for loading interproScan similarity."""
+
+    serializer_class = loadSerializers.FileSerializer
+    permission_classes = [IsAuthenticated]
+    operation_summary = "Load similarity"
+    operation_description = operation_summary + "<br /><br />"
+    operation_description += "<li>URL: https://github.com/lmb-embrapa/machado/blob/master/extras/sample.tar.gz</li>"
+    operation_description += "<li>File: .xml</li>"
+
+    file_param = openapi.Parameter(
+        "file",
+        openapi.IN_QUERY,
+        description=".xml file",
+        required=True,
+        type=openapi.TYPE_FILE,
+    )
+
+    request_body = openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "format": openapi.Schema(type=openapi.TYPE_STRING, description="format"),
+                "so_query": openapi.Schema(type=openapi.TYPE_STRING, description="so_query"),
+                "so_subject": openapi.Schema(type=openapi.TYPE_STRING, description="so_subject"),
+                "organism_query": openapi.Schema(type=openapi.TYPE_STRING, description="organism_query"),
+                "organism_subject": openapi.Schema(type=openapi.TYPE_STRING, description="organism_subject"),
+                "program": openapi.Schema(type=openapi.TYPE_STRING, description="program"),
+                "programversion": openapi.Schema(type=openapi.TYPE_STRING, description="programversion"),
+                "name": openapi.Schema(type=openapi.TYPE_STRING, description="name"),
+                "description": openapi.Schema(type=openapi.TYPE_STRING, description="description"),
+                "algorithm": openapi.Schema(type=openapi.TYPE_STRING, description="algorithm"),
+                "cpu": openapi.Schema(type=openapi.TYPE_INTEGER, description="cpu"),
+            },
+        )
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            file_param,
+        ],
+        request_body= request_body,
+        operation_summary=operation_summary,
+        operation_description=operation_description,
+    )
+
+    def create(self, request):
+        """Handle the POST request for loading interproScan."""
+        in_memory_file = request.FILES["file"]
+        format = request.data.get("format")
+        so_query = request.data.get("so_query")
+        so_subject = request.data.get("so_subject")
+        organism_query = request.data.get("organism_query")
+        organism_subject = request.data.get("organism_subject")
+        program = request.data.get("program")
+        programversion = request.data.get("programversion")
+        name = request.data.get("name")
+        description = request.data.get("description")
+        algorithm = request.data.get("algorithm")
+        cpu = request.data.get("cpu")
+        
+        required_fields = [in_memory_file, format, so_query, 
+                            so_subject, organism_query, 
+                            organism_subject, program, programversion]
+
+        print(in_memory_file.name)
+        if not all(required_fields):
+            return Response(
+                {"error": "file is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        destination = open(f"/tmp/{in_memory_file.name}", "wt")
+        destination.write(in_memory_file.read().decode("ascii", "ignore"))
+        destination.close()
+
+        thread = Thread(
+            target=call_command,
+            args=("load_similarity",),
+            kwargs=(
+                {
+                    "file": f"/tmp/{in_memory_file.name}",
+                    "format": {format},
+                    "so_query": {so_query},
+                    "so_subject": {so_subject},
+                    "organism_query": {organism_query},
+                    "organism_subject": {organism_subject},
+                    "program": {program},
+                    "programversion": {programversion},
+                    "name": {name},
+                    "description": {description},
+                    "algorithm": {algorithm},
+                    "cpu": {cpu},
+                    "verbosity": 0,
+                }
+            ),
+            daemon=True,
+        )
+
+        thread.start()
+
+        return Response(
+            {
+                "status": "Submited successfully",
+                "call_command": "load_similarity",
+                "file": f"/tmp/{in_memory_file.name}",
+                "format": {format},
+                "so_query": {so_query},
+                "so_subject": {so_subject},
+                "organism_query": {organism_query},
+                "organism_subject": {organism_subject},
+                "program": {program},
+                "programversion": {programversion},
+                "name": {name},
+                "description": {description},
+                "algorithm": {algorithm},
+                "cpu": {cpu},
+            },
+            status=status.HTTP_200_OK,
+        )

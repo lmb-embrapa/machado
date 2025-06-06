@@ -127,6 +127,10 @@ router.register(r"load/gff",
     loadViews.GFFViewSet,
     basename="load_gff")
 
+router.register(r"load/similarity",
+    loadViews.SimilarityViewSet,
+    basename="load_similarity")
+
 baseurl = None
 if hasattr(settings, "MACHADO_URL"):
     baseurl = "{}/api/".format(settings.MACHADO_URL)
