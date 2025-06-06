@@ -55,6 +55,6 @@ Continous Integration
 Once you submit your pull request on GitHub, several automated tests should
 be run, and their results reported on the pull request.
 
-We use TravisCI to run the machado under Linux.
+We use GitHub Actions to run the machado under Linux.
 
-**The TravisCI checks must pass before your pull request will be merged.**
+**The GitHub Actions checks must pass before your pull request will be merged.**
