@@ -16,7 +16,7 @@ from tqdm import tqdm
 from machado.loaders.common import FileValidator
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import MultispeciesFeatureLoader
-from machado.models import Cv, Cvterm, Dbxref, Db, History
+from machado.models import Cv, Cvterm, Dbxref, Db
 
 
 class Command(BaseCommand):
@@ -35,15 +35,12 @@ The feature members need to be loaded previously."""
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
     def handle(
-        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
+        self, file: str, cpu: int = 1, verbosity: int = 0, **options
     ):
         """Execute the main function."""
-        history_obj = History()
-        history_obj.start(command="load_orthomcl", params=locals())
         try:
             FileValidator().validate(file)
         except ImportingError as e:
-            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         filename = os.path.basename(file)
@@ -53,7 +50,6 @@ The feature members need to be loaded previously."""
             groups = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
-            history_obj.failure(description=str(e))
             raise CommandError(e)
         pool = ThreadPoolExecutor(max_workers=cpu)
         tasks = list()
@@ -80,18 +76,10 @@ The feature members need to be loaded previously."""
             members = []
             name = ""
             fields = re.split(r"\s+", line.strip())
-            if re.search(r"^(\w+)\:", fields[0]):
-                group_field = re.match(r"^(\w+)\:", fields[0])
-                name = group_field.group(1)
-                fields.pop(0)
-                for field in fields:
-                    if re.search(r"^(\w+)\|(\S+)", field):
-                        member_field = re.match(r"^(\w+)\|(\S+)", field)
-                        ident = member_field.group(2)
-                        members.append(ident)
-            else:
-                history_obj.failure(description="Cluster has no identification, check.")
-                raise CommandError("Cluster has no identification, check.")
+            name = fields[0]
+            fields.pop(0)
+            for field in fields:
+                    members.append(field)
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
                 tasks.append(
@@ -107,10 +95,7 @@ The feature members need to be loaded previously."""
             self.stdout.write("Loading")
         for task in tqdm(as_completed(tasks), total=len(tasks)):
             if task.result():
-                e = task.result()
-                history_obj.failure(description=str(e))
-                raise (e)
+                raise (task.result())
         pool.shutdown()
-        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))
