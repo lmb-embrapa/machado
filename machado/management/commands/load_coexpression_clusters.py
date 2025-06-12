@@ -19,7 +19,7 @@ from machado.loaders.common import get_num_lines
 from machado.loaders.common import retrieve_organism
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from machado.models import Cv, Cvterm, Dbxref, Db, History
+from machado.models import Cv, Cvterm, Dbxref, Db
 
 
 class Command(BaseCommand):
@@ -65,22 +65,22 @@ The features need to be loaded previously or won't be registered."""
         **options
     ):
         """Execute the main function."""
-        history_obj = History()
-        history_obj.start(command="load_coexpression_clusters", params=locals())
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
 
         try:
             organism = retrieve_organism(organism)
+        except IntegrityError as e:
+            raise ImportingError(e)
+        try:
             FileValidator().validate(file)
+        except ImportingError as e:
+            raise CommandError(e)
+        try:
             clusters = open(file, "r")
             # retrieve only the file name
-        except IntegrityError as e:
-            history_obj.failure(description=str(e))
-            raise ImportingError(e)
         except ImportingError as e:
-            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         tasks = list()
@@ -111,14 +111,12 @@ The features need to be loaded previously or won't be registered."""
             try:
                 FieldsValidator().validate(nfields, fields)
             except ImportingError as e:
-                history_obj.failure(description=str(e))
                 raise CommandError(e)
 
             if re.search(r"^(\w+)\:", fields[0]):
                 group_field = re.match(r"^(\w+)\:", fields[0])
                 name = group_field.group(1)
             else:
-                history_obj.failure(description="Cluster identification has problems.")
                 raise CommandError("Cluster identification has problems.")
             # remove cluster name before loading
             fields.pop(0)
@@ -138,6 +136,5 @@ The features need to be loaded previously or won't be registered."""
             if task.result():
                 raise (task.result())
         pool.shutdown()
-        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))
