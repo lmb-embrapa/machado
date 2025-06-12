@@ -79,7 +79,7 @@ The feature members need to be loaded previously."""
             name = fields[0]
             fields.pop(0)
             for field in fields:
-                    members.append(field)
+                members.append(field)
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
                 tasks.append(
