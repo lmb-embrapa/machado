@@ -34,9 +34,7 @@ The feature members need to be loaded previously."""
         parser.add_argument("--file", help="'groups.txt' File", required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(
-        self, file: str, cpu: int = 1, verbosity: int = 0, **options
-    ):
+    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
         """Execute the main function."""
         try:
             FileValidator().validate(file)
