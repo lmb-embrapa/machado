@@ -504,6 +504,45 @@ class FeatureLoader(FeatureLoaderBase):
         except IntegrityError as e:
             raise ImportingError(e)
 
+    def store_feature_groups(
+        self,
+        group: list,
+        term: Union[int, Cvterm],
+        organism: Union[str, Organism],
+        soterm: str = "mRNA",
+        value: str = None,
+        cache: int = 0,
+    ) -> None:
+        """Store Feature Relationship Groups."""
+        # only cvterm_id allowed
+        if isinstance(term, Cvterm):
+            cvterm_id = term.cvterm_id
+        else:
+            cvterm_id = term
+        featureprops = list()
+        feature_id_list = list()
+        for acc in group:
+            try:
+                # retrieves feature_id from dbxref's accession
+                feature_id_list.append(
+                    retrieve_feature_id(accession=acc, soterm=soterm, organism=organism)
+                )
+            except (MultipleObjectsReturned, ObjectDoesNotExist):
+                pass
+
+        # only stores clusters with 2 or more members
+        if len(feature_id_list) > 1:
+            for feature_id in feature_id_list:
+                featureprops.append(
+                    Featureprop(
+                        feature_id=feature_id, type_id=cvterm_id, value=value, rank=0
+                    )
+                )
+            try:
+                Featureprop.objects.bulk_create(featureprops)
+            except IntegrityError as e:
+                raise ImportingError(e)
+
 
 class MultispeciesFeatureLoader(FeatureLoaderBase):
     """Load multi-organism feature records."""
