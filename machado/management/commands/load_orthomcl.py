@@ -78,10 +78,18 @@ The feature members need to be loaded previously."""
             members = []
             name = ""
             fields = re.split(r"\s+", line.strip())
-            name = fields[0]
-            fields.pop(0)
-            for field in fields:
-                members.append(field)
+
+            # cluster must have at least two fields, one cluster ID (name) and at least one member ID.
+            if len(fields) > 1:
+                name = fields[0]
+                fields.pop(0)
+                for field in fields:
+                    members.append(field)
+            else:
+                history_obj.failure(
+                    description="Cluster file has fields problems. Please, check."
+                )
+                raise CommandError("Cluster file has fields problems. Please, check.")
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
                 tasks.append(
