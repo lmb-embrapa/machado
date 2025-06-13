@@ -18,7 +18,7 @@ from machado.loaders.common import FileValidator, FieldsValidator, retrieve_orga
 from machado.loaders.common import get_num_lines
 from machado.loaders.exceptions import ImportingError
 from machado.loaders.feature import FeatureLoader
-from machado.models import Cvterm
+from machado.models import Cvterm, History
 
 
 class Command(BaseCommand):
@@ -65,24 +65,26 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
         **options
     ):
         """Execute the main function."""
+        history_obj = History()
+        history_obj.start(command="load_relations_coexpression_pairs", params=locals())
+
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
 
         try:
             FileValidator().validate(file)
-        except ImportingError as e:
-            raise CommandError(e)
-
-        try:
             organism = retrieve_organism(organism)
-        except IntegrityError as e:
-            raise ImportingError(e)
-
-        try:
             pairs = open(file, "r")
             # retrieve only the file name
         except ImportingError as e:
+            history_obj.failure(description=str(e))
+            raise CommandError(e)
+        except IntegrityError as e:
+            history_obj.failure(description=str(e))
+            raise ImportingError(e)
+        except ImportingError as e:
+            history_obj.failure(description=str(e))
             raise CommandError(e)
 
         cvterm_corel = Cvterm.objects.get(
@@ -104,6 +106,7 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                 try:
                     FieldsValidator().validate(nfields, fields)
                 except ImportingError as e:
+                    history_obj.failure(description=str(e))
                     raise CommandError(e)
                 # get corrected PCC value (last item from fields list)
                 value = float(fields.pop()) + 0.7
@@ -127,5 +130,6 @@ The feature pairs from columns 1 and 2 need to be loaded previously."""
                         raise (task.result())
                 tasks.clear()
             pool.shutdown()
+        history_obj.success(description="Done")
         if verbosity > 0:
             self.stdout.write(self.style.SUCCESS("Done with {}".format(filename)))
