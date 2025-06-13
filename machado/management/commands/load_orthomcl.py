@@ -34,9 +34,7 @@ The feature members need to be loaded previously."""
         parser.add_argument("--file", help="'groups.txt' File", required=True, type=str)
         parser.add_argument("--cpu", help="Number of threads", default=1, type=int)
 
-    def handle(
-        self, file: str, organism: str, cpu: int = 1, verbosity: int = 0, **options
-    ):
+    def handle(self, file: str, cpu: int = 1, verbosity: int = 0, **options):
         """Execute the main function."""
         history_obj = History()
         history_obj.start(command="load_orthomcl", params=locals())
@@ -80,18 +78,18 @@ The feature members need to be loaded previously."""
             members = []
             name = ""
             fields = re.split(r"\s+", line.strip())
-            if re.search(r"^(\w+)\:", fields[0]):
-                group_field = re.match(r"^(\w+)\:", fields[0])
-                name = group_field.group(1)
+
+            # cluster must have at least two fields, one cluster ID (name) and at least one member ID.
+            if len(fields) > 1:
+                name = fields[0]
                 fields.pop(0)
                 for field in fields:
-                    if re.search(r"^(\w+)\|(\S+)", field):
-                        member_field = re.match(r"^(\w+)\|(\S+)", field)
-                        ident = member_field.group(2)
-                        members.append(ident)
+                    members.append(field)
             else:
-                history_obj.failure(description="Cluster has no identification, check.")
-                raise CommandError("Cluster has no identification, check.")
+                history_obj.failure(
+                    description="Cluster file has fields problems. Please, check."
+                )
+                raise CommandError("Cluster file has fields problems. Please, check.")
             # only orthologous groups with 2 or more members allowed
             if len(members) > 1:
                 tasks.append(

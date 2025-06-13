@@ -73,15 +73,22 @@ The features need to be loaded previously or won't be registered."""
 
         try:
             organism = retrieve_organism(organism)
-            FileValidator().validate(file)
-            clusters = open(file, "r")
-            # retrieve only the file name
         except IntegrityError as e:
             history_obj.failure(description=str(e))
             raise ImportingError(e)
+
+        try:
+            FileValidator().validate(file)
         except ImportingError as e:
             history_obj.failure(description=str(e))
             raise CommandError(e)
+
+        try:
+            # retrieve only the file name
+            clusters = open(file, "r")
+        except IntegrityError as e:
+            history_obj.failure(description=str(e))
+            raise ImportingError(e)
 
         tasks = list()
         cv, created = Cv.objects.get_or_create(name="feature_property")
@@ -127,6 +134,7 @@ The features need to be loaded previously or won't be registered."""
                 pool.submit(
                     featureloader.store_feature_groups,
                     group=fields,
+                    organism=organism,
                     soterm=soterm,
                     term=cvterm_cluster.cvterm_id,
                     value=name,
