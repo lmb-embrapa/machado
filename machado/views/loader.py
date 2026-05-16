@@ -1008,10 +1008,18 @@ class CommandFormView(LoginRequiredMixin, View):
                         messages.error(request, f"Failed to download remote file: {str(e)}")
                         return redirect("loader_command_form", command_name=command_name)
                 
+                if arg["required"] and not file_path:
+                    messages.error(request, f"The file for '{arg['name']}' is required. Please upload a file or provide a URL.")
+                    return redirect("loader_command_form", command_name=command_name)
+
                 if file_path and arg["name"] != "index":
                     command_kwargs[arg["name"]] = file_path
             else:
                 val = request.POST.get(arg["name"])
+                if arg["required"] and not val:
+                    messages.error(request, f"Argument '{arg['name']}' is required.")
+                    return redirect("loader_command_form", command_name=command_name)
+
                 if val:
                     val = val.strip()
                     if arg["type"] == "organism":
@@ -1097,10 +1105,16 @@ class CommandFormView(LoginRequiredMixin, View):
                 def clean_output(text):
                     if not text: return text
                     import re
-                    # Pattern for tqdm progress bars: optional carriage return, percentage, pipe, bar, pipe
-                    # Example: 100%|██████████| 10/10 [00:01<00:00,  8.00it/s]
-                    pattern = r'(\r|^)\s*\d+%.*?\|.*?\|.*?(?=\r|\n|$)'
-                    return re.sub(pattern, '', text).strip()
+                    # Split by both \r and \n to handle tqdm updates
+                    lines = text.replace('\r', '\n').split('\n')
+                    cleaned_lines = []
+                    for line in lines:
+                        # tqdm progress bar pattern detection
+                        if re.search(r'\d+%.*?\|.*?\|', line):
+                            continue
+                        if line.strip():
+                            cleaned_lines.append(line)
+                    return '\n'.join(cleaned_lines).strip()
 
                 stdout_data = clean_output(stdout_data)
                 stderr_data = clean_output(stderr_data)
