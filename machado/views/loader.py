@@ -1,5 +1,7 @@
 import os
+import sys
 import threading
+import subprocess
 import urllib.request
 import tempfile
 from django.core.management import call_command
@@ -1039,14 +1041,85 @@ class CommandFormView(LoginRequiredMixin, View):
                         val = int(str(val).replace(",", ""))
                     command_kwargs[arg["name"]] = val
         
-        # Execute in background thread
-        def run_cmd():
-            try:
-                call_command(command_name, verbosity=0, **command_kwargs)
-            except Exception as e:
-                pass # The HistoryCommandMixin already logs failures
+        # Create History record
+        history = History.objects.create(command=command_name, params=str(command_kwargs), status="PENDING")
 
-        threading.Thread(target=run_cmd).start()
+        def run_subprocess():
+            # Find manage.py path
+            # BASE_DIR is usually the project root in a standard Django setup
+            manage_py_path = os.path.join(settings.BASE_DIR, "manage.py")
+            
+            if not os.path.exists(manage_py_path):
+                # Try project_template subdirectory (common in machado dev environment)
+                manage_py_path = os.path.join(settings.BASE_DIR, "project_template", "manage.py")
+            
+            if not os.path.exists(manage_py_path):
+                # Try to find it in the parent of settings.BASE_DIR if needed, 
+                # but let's stick to abspath fallback
+                manage_py_path = os.path.abspath("manage.py")
+
+            manage_py_path = os.path.abspath(manage_py_path)
+
+            cmd = [sys.executable, manage_py_path, command_name]
+            for k, v in command_kwargs.items():
+                if isinstance(v, bool):
+                    if v:
+                        cmd.append(f"--{k}")
+                else:
+                    cmd.append(f"--{k}")
+                    cmd.append(str(v))
+            
+            # Ensure verbosity is set to 1 to keep useful output
+            if "verbosity" not in command_kwargs:
+                cmd.extend(["--verbosity", "1"])
+
+            env = os.environ.copy()
+            env["MACHADO_HISTORY_ID"] = str(history.history_id)
+            env["PYTHONUNBUFFERED"] = "1"
+
+            try:
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=env,
+                    cwd=os.path.dirname(os.path.abspath(manage_py_path))
+                )
+                
+                history.pid = process.pid
+                history.status = "RUNNING"
+                history.save()
+
+                stdout_data, stderr_data = process.communicate()
+                
+                # Filter out tqdm progress bars from output
+                def clean_output(text):
+                    if not text: return text
+                    import re
+                    # Pattern for tqdm progress bars: optional carriage return, percentage, pipe, bar, pipe
+                    # Example: 100%|██████████| 10/10 [00:01<00:00,  8.00it/s]
+                    pattern = r'(\r|^)\s*\d+%.*?\|.*?\|.*?(?=\r|\n|$)'
+                    return re.sub(pattern, '', text).strip()
+
+                stdout_data = clean_output(stdout_data)
+                stderr_data = clean_output(stderr_data)
+
+                # Truncate if necessary (limit to 100,000 characters)
+                limit = 100000
+                if stdout_data and len(stdout_data) > limit:
+                    stdout_data = "...(truncated)...\n" + stdout_data[-limit:]
+                if stderr_data and len(stderr_data) > limit:
+                    stderr_data = "...(truncated)...\n" + stderr_data[-limit:]
+
+                if process.returncode == 0:
+                    history.success(stdout=stdout_data, stderr=stderr_data)
+                else:
+                    history.failure(stdout=stdout_data, stderr=stderr_data, exit_code=process.returncode)
+            except Exception as e:
+                history.failure(stderr=str(e))
+
+        threading.Thread(target=run_subprocess).start()
 
         messages.success(request, f"Command '{config['title']}' submitted successfully. Check its status below.")
         return redirect("loader_history")
@@ -1054,4 +1127,18 @@ class CommandFormView(LoginRequiredMixin, View):
 class HistoryListView(LoginRequiredMixin, View):
     def get(self, request):
         histories = History.objects.all().order_by("-created_at")[:50]
-        return render(request, "loader/history.html", {"histories": histories})
+        
+        # Check for DEAD processes
+        import os
+        for h in histories:
+            if h.status == "RUNNING" and h.pid:
+                try:
+                    # Check if process exists (signal 0 doesn't kill it)
+                    os.kill(h.pid, 0)
+                except OSError:
+                    # Process is not running
+                    h.status = "DEAD"
+                    h.save()
+                    
+        any_running = any(h.status == "RUNNING" for h in histories)
+        return render(request, "loader/history.html", {"histories": histories, "any_running": any_running})

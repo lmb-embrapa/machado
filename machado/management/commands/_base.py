@@ -4,6 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
+import os
 from django.core.management.base import CommandError
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
@@ -18,18 +19,26 @@ class HistoryCommandMixin:
     """
 
     def execute(self, *args, **options):
-        history_obj = History()
+        history_id = os.environ.get("MACHADO_HISTORY_ID")
+        if history_id:
+            try:
+                history_obj = History.objects.get(pk=int(history_id))
+            except (History.DoesNotExist, ValueError):
+                history_obj = History()
+        else:
+            history_obj = History()
+
         # Get the command name from the module path
         command_name = self.__class__.__module__.split(".")[-1]
 
         # Capture parameters
         params = str(options)
 
-        history_obj.start(command=command_name, params=params)
+        history_obj.start(command=command_name, params=params, pid=os.getpid())
 
         try:
             output = super().execute(*args, **options)
-            history_obj.success(description="Done")
+            history_obj.success()
             return output
         except (
             ImportingError,
@@ -40,7 +49,7 @@ class HistoryCommandMixin:
         ) as e:
             error_msg = str(e)
             # Log to history
-            history_obj.failure(description=error_msg)
+            history_obj.failure(stderr=error_msg)
 
             # Inform user through terminal with styling
             self.stdout.write(self.style.ERROR(f"ERROR: {error_msg}"))
@@ -52,6 +61,6 @@ class HistoryCommandMixin:
         except Exception as e:
             # Log ALL failures to history, including unexpected ones
             error_msg = str(e)
-            history_obj.failure(description=error_msg)
+            history_obj.failure(stderr=error_msg)
             self.stdout.write(self.style.ERROR(f"CRITICAL ERROR: {error_msg}"))
             raise e
