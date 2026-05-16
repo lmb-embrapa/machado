@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-3">
+      <div class="list-group">
+        <a href="{% url 'loader_dashboard' %}" class="list-group-item list-group-item-action active">Dashboard</a>
+        <a href="{% url 'loader_history' %}" class="list-group-item list-group-item-action">History Panel</a>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <h2>Data Loading Commands</h2>
+      <p>Select a command below to load data into Machado. The commands are ordered according to the official documentation workflow.</p>
+      <div class="list-group">
+        {% for cmd_name, config in commands.items %}
+          <a href="{% url 'loader_command_form' cmd_name %}" class="list-group-item list-group-item-action">
+            <h5 class="mb-1">{{ config.title }}</h5>
+            <small>Command: <code>python manage.py {{ cmd_name }}</code></small>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

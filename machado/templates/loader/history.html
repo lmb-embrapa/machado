@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-3">
+      <div class="list-group">
+        <a href="{% url 'loader_dashboard' %}" class="list-group-item list-group-item-action">Dashboard</a>
+        <a href="{% url 'loader_history' %}" class="list-group-item list-group-item-action active">History Panel</a>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <h2>Command History</h2>
+      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="location.reload();">Refresh</button>
+      <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Command</th>
+            <th>Started At</th>
+            <th>Status</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in histories %}
+          <tr>
+            <td>{{ h.history_id }}</td>
+            <td><code>{{ h.command }}</code></td>
+            <td>{{ h.created_at|date:"Y-m-d H:i:s" }}</td>
+            <td>
+              {% if h.exit_code is None %}
+                <span class="badge badge-warning">Running</span>
+              {% elif h.exit_code == 0 %}
+                <span class="badge badge-success">Done</span>
+              {% else %}
+                <span class="badge badge-danger">Failed</span>
+              {% endif %}
+            </td>
+            <td><small>{{ h.description|default:"-" }}</small></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center">No history records found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+  // Auto refresh every 10 seconds to check statuses
+  setInterval(function(){
+      location.reload();
+  }, 10000);
+</script>
+{% endblock %}

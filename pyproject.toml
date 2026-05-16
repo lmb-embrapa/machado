@@ -31,6 +31,7 @@ dependencies = [
     "tqdm~=4.67.3",
     "bibtexparser~=1.4.4",
     "pysam~=0.24.0",
+    "numpy~=2.2.3",
 ]
 
 [project.scripts]

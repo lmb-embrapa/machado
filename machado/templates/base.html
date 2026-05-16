@@ -48,9 +48,35 @@
             <a class="nav-link" href="{% url 'data_numbers' %}">Data summary</a>
           </li>
 
-          <li>
+          <li class="nav-item">
             <a class="nav-link" href="https://github.com/lmb-embrapa/machado" target="_blank">About</a>
-		      </li>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link text-warning font-weight-bold" href="{% url 'loader_dashboard' %}">
+                <i class="fas fa-database"></i> Data Loading Tools
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
+                <div class="dropdown-divider"></div>
+                <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-link nav-link text-dark w-100 text-left px-4">Logout</button>
+                </form>
+              </div>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+          {% endif %}
         </ul>
       </div>
     </nav>
@@ -65,6 +91,20 @@
 
   <div name="content">
     <input type="hidden" value="{% url 'home' %}" id="home_url" name="home_url"></input>
+    
+    <div class="container mt-3">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
     {% block content %}
     {% endblock %}
   </div>

@@ -68,7 +68,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         tasks = list()
         for typedef in G.graph["typedefs"]:
             tasks.append(pool.submit(ontology.store_type_def, typedef))
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             if task.result():
                 raise (task.result())
 
@@ -80,7 +80,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         tasks = list()
         for n, data in G.nodes(data=True):
             tasks.append(pool.submit(ontology.store_term, n, data, lock))
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             if task.result():
                 raise (task.result())
 
@@ -91,7 +91,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         tasks = list()
         for u, v, type in G.edges(keys=True):
             tasks.append(pool.submit(ontology.store_relationship, u, v, type))
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             if task.result():
                 raise (task.result())
         pool.shutdown()

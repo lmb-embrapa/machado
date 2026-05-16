@@ -104,7 +104,7 @@ class Command(HistoryCommandMixin, BaseCommand):
 
         pool = ThreadPoolExecutor(max_workers=cpu)
         # each line is an coexpression cluster group
-        for line in tqdm(clusters, total=get_num_lines(file)):
+        for line in tqdm(clusters, total=get_num_lines(file), disable=verbosity == 0):
             name = ""
             fields = re.split(r"\s+", line.strip())
             nfields = len(fields)
@@ -129,7 +129,7 @@ class Command(HistoryCommandMixin, BaseCommand):
             )
         if verbosity > 0:
             self.stdout.write("Loading data...")
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             if task.result():
                 raise (task.result())
         pool.shutdown()

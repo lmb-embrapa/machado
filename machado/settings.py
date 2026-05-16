@@ -76,3 +76,11 @@ def patch_all():
     settings.USE_THOUSAND_SEPARATOR = True
     settings.APPEND_SLASH = True
     settings.USE_TZ = False
+
+    # Auth redirects
+    settings.LOGIN_REDIRECT_URL = "home"
+    settings.LOGOUT_REDIRECT_URL = "home"
+
+    # Default email backend for dev/testing (prints to console)
+    if not hasattr(settings, "EMAIL_BACKEND"):
+        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

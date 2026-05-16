@@ -11,7 +11,6 @@ Usage:
 
 This replaces the former Haystack ``rebuild_index`` / ``update_index``
 commands.  It populates the ``FeatureSearchIndex`` table with denormalised
-from machado.models import (, FeatureSearchIndex
 data from the Chado schema and builds a tsvector column for full-text
 search.
 """
@@ -49,13 +48,10 @@ class Command(HistoryCommandMixin, BaseCommand):
             default=1000,
             help="Number of records to create per bulk insert (default: 1000).",
         )
-        parser.add_argument(
-            "--no-progress", action="store_true", help="Disable progress bar."
-        )
 
     def handle(self, *args, **options):
-        batch_size = options["batch_size"]
-        show_progress = not options["no_progress"]
+        verbosity = options.get("verbosity", 1)
+        batch_size = int(options.get("batch_size", 1000))
 
         try:
             valid_types = settings.MACHADO_VALID_TYPES
@@ -104,7 +100,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         iterator = tqdm(
             feature_qs.iterator(chunk_size=batch_size),
             total=total,
-            disable=not show_progress,
+            disable=verbosity == 0,
             desc="Building index",
         )
 

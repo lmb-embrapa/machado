@@ -84,7 +84,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         chunk = cpu * 5
         with ThreadPoolExecutor(max_workers=cpu) as pool:
             tasks = list()
-            for line in tqdm(pairs, total=size):
+            for line in tqdm(pairs, total=size, disable=verbosity == 0):
                 nfields = 3
                 fields = re.split(r"\s+", line.rstrip())
                 FieldsValidator().validate(nfields, fields)

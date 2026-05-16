@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block content %}
+<div class="container mt-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'loader_dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ config.title }}</li>
+    </ol>
+  </nav>
+  
+  {% if config.help %}
+  <div class="alert alert-info shadow-sm mb-4">
+    <i class="fas fa-info-circle mr-2"></i> {{ config.help|linebreaksbr }}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header">{{ config.title }}</div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for arg in config.args %}
+          <div class="form-group mb-4">
+            {% if arg.type == "file" %}
+              <label class="font-weight-bold">{{ arg.name|title }} Source {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <div class="card p-3 bg-light">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_upload_rad" value="upload" checked onchange="toggleSource('{{ arg.name }}', 'upload')">
+                  <label class="form-check-label" for="{{ arg.name }}_upload_rad">Upload Local File</label>
+                </div>
+                <input type="file" class="form-control-file mb-3" name="{{ arg.name }}_upload" id="{{ arg.name }}_upload_input">
+
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_url_rad" value="url" onchange="toggleSource('{{ arg.name }}', 'url')">
+                  <label class="form-check-label" for="{{ arg.name }}_url_rad">Provide Remote URL</label>
+                </div>
+                <input type="url" class="form-control" name="{{ arg.name }}_url" id="{{ arg.name }}_url_input" placeholder="http://example.com/file.gff" style="display: none;">
+              </div>
+            {% elif arg.type == "organism" %}
+              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                <option value="">-- Select Organism --</option>
+                {% for org in organisms %}
+                  <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }} ({{ org.common_name }})</option>
+                {% endfor %}
+              </select>
+            {% elif arg.type == "ontology" %}
+              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                <option value="">-- Select Ontology --</option>
+                {% for ont in ontologies %}
+                  <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
+                {% endfor %}
+              </select>
+            {% elif arg.type == "soterm" %}
+              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                <option value="">-- Select SO Term --</option>
+                {% for term in soterms %}
+                  <option value="{{ term.cvterm_id|unlocalize }}">{{ term.name }}</option>
+                {% endfor %}
+              </select>
+            {% elif arg.type == "uploaded_file" %}
+              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                <option value="">-- Select File to Remove --</option>
+                {% for filename in uploaded_files %}
+                  <option value="{{ filename }}">{{ filename }}</option>
+                {% endfor %}
+              </select>
+            {% elif arg.type == "checkbox" %}
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="{{ arg.name }}" name="{{ arg.name }}" value="true">
+                <label class="form-check-label font-weight-bold" for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}</label>
+              </div>
+            {% else %}
+              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+              <input type="text" class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %} value="{{ arg.default|default:'' }}">
+            {% endif %}
+            
+            {% if arg.help %}
+              <small class="form-text text-muted">
+                <i class="fas fa-question-circle mr-1"></i> {{ arg.help }}
+              </small>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Run Command</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleSource(argName, source) {
+    var uploadInput = document.getElementById(argName + '_upload_input');
+    var urlInput = document.getElementById(argName + '_url_input');
+    if (source === 'upload') {
+        uploadInput.style.display = 'block';
+        urlInput.style.display = 'none';
+        urlInput.value = '';
+    } else {
+        uploadInput.style.display = 'none';
+        urlInput.style.display = 'block';
+        uploadInput.value = '';
+    }
+}
+</script>
+{% endblock %}
