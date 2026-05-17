@@ -1,58 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<style>
-  .accordion-card {
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1rem;
-    transition: all 0.25s ease-in-out;
-  }
-  .accordion-card:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  }
-  .accordion-header-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 1.25rem 1.5rem;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px !important;
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-align: left;
-    text-decoration: none !important;
-    transition: background-color 0.2s;
-  }
-  .accordion-header-btn:hover {
-    background-color: #eef1f4;
-    color: #18bc9c;
-  }
-  .accordion-header-btn[aria-expanded="true"] {
-    background-color: #eef1f4;
-    color: #18bc9c;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-  .accordion-header-btn .toggle-icon {
-    transition: transform 0.25s ease;
-  }
-  .accordion-header-btn[aria-expanded="true"] .toggle-icon {
-    transform: rotate(180deg);
-  }
-  .command-item {
-    border-left: 3px solid transparent;
-    transition: all 0.2s;
-  }
-  .command-item:hover {
-    border-left-color: #18bc9c;
-    background-color: #fdfefe !important;
-    transform: translateX(4px);
-  }
-</style>
 
 <div class="container mt-5">
   <div class="row">
@@ -93,15 +40,15 @@
             </div>
 
             <div id="collapse-{{ group.id }}" class="collapse" aria-labelledby="heading-{{ group.id }}" data-parent="#loaderAccordion">
-              <div class="card-body p-0 border-left border-right border-bottom" style="border-color: #e9ecef; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; overflow: hidden;">
+              <div class="card-body p-0 border-left border-right border-bottom" style="overflow: hidden;">
                 <div class="list-group list-group-flush">
                   {% for cmd_name, config in group.commands %}
                     <a href="{% url 'loader_command_form' cmd_name %}" class="list-group-item list-group-item-action py-3 command-item">
                       <div class="d-flex w-100 justify-content-between align-items-start">
-                        <h5 class="mb-1 text-primary" style="font-weight: 500;">{{ config.title }}</h5>
+                        <h5 class="mb-1 text-primary">{{ config.title }}</h5>
                         <small class="text-muted font-weight-bold"><code>python manage.py {{ cmd_name }}</code></small>
                       </div>
-                      <p class="mb-1 text-secondary" style="font-size: 0.95rem;">{{ config.help }}</p>
+                      <p class="mb-1 text-muted small">{{ config.help }}</p>
                     </a>
                   {% endfor %}
                 </div>

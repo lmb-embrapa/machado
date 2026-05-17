@@ -1,0 +1,77 @@
+/* ================================================================
+   MACHADO — Django Admin Overrides
+   Applied on top of django-jazzmin to match our token system.
+   ================================================================ */
+
+/* Import our tokens (admin loads this separately) */
+
+/* Override jazzmin sidebar */
+.main-sidebar,
+.main-sidebar .brand-link {
+  background: var(--color-surface) !important;
+  border-right: 1px solid var(--color-border) !important;
+}
+
+.main-sidebar .nav-link {
+  color: var(--color-text-muted) !important;
+}
+.main-sidebar .nav-link:hover,
+.main-sidebar .nav-link.active {
+  color: var(--color-accent) !important;
+  background: var(--color-accent-subtle) !important;
+}
+
+/* Override jazzmin top navbar */
+.main-header.navbar {
+  background: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* Override content area */
+.content-wrapper {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+/* Override cards */
+.card {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border-light) !important;
+}
+
+/* Override tables */
+.table th, .table td {
+  border-color: var(--color-border-light) !important;
+}
+
+/* Override buttons */
+.btn-primary {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover) !important;
+  border-color: var(--color-accent-hover) !important;
+}
+
+/* Override links */
+a { color: var(--color-accent); }
+
+/* Override footer */
+.main-footer {
+  background: var(--color-surface) !important;
+  border-top: 1px solid var(--color-border) !important;
+  color: var(--color-text-muted) !important;
+}
+
+/* Form controls */
+.form-control, .custom-select, select, input[type="text"], input[type="email"], input[type="password"], textarea {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.form-control:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 2px var(--color-accent-subtle) !important;
+}

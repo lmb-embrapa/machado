@@ -808,7 +808,7 @@ COMMANDS_CONFIG = {
         "help": "Rebuild the PostgreSQL full-text search index for features.",
         "args": [
             {
-                "name": "batch_size",
+                "name": "batch-size",
                 "required": False,
                 "default": 1000,
                 "help": "Number of records per bulk insert",
