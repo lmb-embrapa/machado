@@ -452,7 +452,7 @@ COMMANDS_CONFIG = {
                 "name": "format",
                 "required": True,
                 "default": None,
-                "help": "Format of the input file",
+                "help": "Format of the input file (e.g., blast-xml, interproscan-xml)",
                 "type": "text"
             },
             {
@@ -479,7 +479,7 @@ COMMANDS_CONFIG = {
                 "name": "format",
                 "required": True,
                 "default": None,
-                "help": "Format of the input file (e.g., 'blastxml', 'tabular')",
+                "help": "Format of the input file (allowed: blast-xml, interproscan-xml)",
                 "type": "text"
             },
             {
@@ -947,25 +947,89 @@ COMMANDS_CONFIG = {
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
-        return render(request, "loader/dashboard.html", {"commands": COMMANDS_CONFIG})
+        groups_data = [
+            {
+                "id": "ontology",
+                "name": "Ontology",
+                "icon": "fa-sitemap",
+                "commands": ["load_relations_ontology", "load_sequence_ontology", "load_gene_ontology"]
+            },
+            {
+                "id": "publication",
+                "name": "Publication",
+                "icon": "fa-book-open",
+                "commands": ["load_publication"]
+            },
+            {
+                "id": "organism",
+                "name": "Organism",
+                "icon": "fa-leaf",
+                "commands": ["insert_organism", "load_organism_publication"]
+            },
+            {
+                "id": "feature",
+                "name": "Feature",
+                "icon": "fa-dna",
+                "commands": ["load_fasta", "load_gff", "load_vcf", "load_feature_annotation", "load_feature_dbxrefs", "load_feature_publication", "load_feature_sequence"]
+            },
+            {
+                "id": "analysis",
+                "name": "Analysis",
+                "icon": "fa-chart-line",
+                "commands": ["load_similarity_matches", "load_similarity", "load_orthomcl", "load_rnaseq_info", "load_rnaseq_data", "load_coexpression_clusters", "load_coexpression_pairs"]
+            },
+            {
+                "id": "tools",
+                "name": "Tools",
+                "icon": "fa-wrench",
+                "commands": ["rebuild_search_index", "check_ids"]
+            },
+            {
+                "id": "remove",
+                "name": "Remove",
+                "icon": "fa-trash-alt",
+                "commands": ["remove_analysis", "remove_publication", "remove_ontology", "remove_feature_annotation", "remove_relationship", "remove_file", "remove_organism"]
+            }
+        ]
+
+        structured_groups = []
+        for g in groups_data:
+            cmds = []
+            for cmd_name in g["commands"]:
+                if cmd_name in COMMANDS_CONFIG:
+                    cmds.append((cmd_name, COMMANDS_CONFIG[cmd_name]))
+            structured_groups.append({
+                "id": g["id"],
+                "name": g["name"],
+                "icon": g["icon"],
+                "commands": cmds
+            })
+
+        return render(request, "loader/dashboard.html", {"groups": structured_groups})
 
 class CommandFormView(LoginRequiredMixin, View):
     def get(self, request, command_name):
-        config = COMMANDS_CONFIG.get(command_name)
-        if not config:
+        import copy
+        raw_config = COMMANDS_CONFIG.get(command_name)
+        if not raw_config:
             return redirect("loader_dashboard")
+        
+        config = copy.deepcopy(raw_config)
         
         # Populate dynamic fields
         context = {"command_name": command_name, "config": config}
         for arg in config["args"]:
             if arg["type"] == "organism":
-                context["organisms"] = Organism.objects.exclude(genus="multispecies", species="multispecies")
+                if command_name == "load_similarity" and arg["name"] == "organism_subject":
+                    arg["options"] = Organism.objects.all()
+                else:
+                    arg["options"] = Organism.objects.exclude(genus="multispecies", species="multispecies")
             elif arg["type"] == "ontology":
-                context["ontologies"] = Cv.objects.all().order_by("name")
+                arg["options"] = Cv.objects.all().order_by("name")
             elif arg["type"] == "soterm":
-                context["soterms"] = Cvterm.objects.filter(cv__name="sequence").order_by("name")
+                arg["options"] = Cvterm.objects.filter(cv__name="sequence").order_by("name")
             elif arg["type"] == "uploaded_file":
-                context["uploaded_files"] = Dbxrefprop.objects.filter(
+                arg["options"] = Dbxrefprop.objects.filter(
                     type__name="located in", 
                     type__cv__name="relationship"
                 ).values_list("value", flat=True).distinct().order_by("value")

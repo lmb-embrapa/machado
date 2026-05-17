@@ -41,7 +41,7 @@
               <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
               <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                 <option value="">-- Select Organism --</option>
-                {% for org in organisms %}
+                {% for org in arg.options %}
                   <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }} ({{ org.common_name }})</option>
                 {% endfor %}
               </select>
@@ -49,7 +49,7 @@
               <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
               <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                 <option value="">-- Select Ontology --</option>
-                {% for ont in ontologies %}
+                {% for ont in arg.options %}
                   <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
                 {% endfor %}
               </select>
@@ -57,7 +57,7 @@
               <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
               <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                 <option value="">-- Select SO Term --</option>
-                {% for term in soterms %}
+                {% for term in arg.options %}
                   <option value="{{ term.cvterm_id|unlocalize }}">{{ term.name }}</option>
                 {% endfor %}
               </select>
@@ -65,7 +65,7 @@
               <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
               <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                 <option value="">-- Select File to Remove --</option>
-                {% for filename in uploaded_files %}
+                {% for filename in arg.options %}
                   <option value="{{ filename }}">{{ filename }}</option>
                 {% endfor %}
               </select>
