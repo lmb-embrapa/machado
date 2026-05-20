@@ -4,14 +4,19 @@ import threading
 import subprocess
 import urllib.request
 import tempfile
-from django.core.management import call_command
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from django.urls import reverse
-from machado.models import Organism, Db, Analysis, History, Cv, Cvterm, Dbxrefprop, Dbxref
+from machado.models import (
+    Organism,
+    History,
+    Cv,
+    Cvterm,
+    Dbxrefprop,
+    Dbxref,
+)
 
 # Define the ordered sequence of commands and their parameters
 COMMANDS_CONFIG = {
@@ -23,10 +28,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the relationship OBO file",
-                "type": "file"
+                "type": "file",
             }
         ],
-        "title": "Load Relations Ontology"
+        "title": "Load Relations Ontology",
     },
     "load_sequence_ontology": {
         "help": "Load Sequence Ontology (SO) from an OBO file",
@@ -36,10 +41,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the Sequence Ontology OBO file",
-                "type": "file"
+                "type": "file",
             }
         ],
-        "title": "Load Sequence Ontology"
+        "title": "Load Sequence Ontology",
     },
     "load_gene_ontology": {
         "help": "Load Gene Ontology (GO) terms and definitions from an OBO file",
@@ -49,17 +54,17 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the Gene Ontology OBO file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Gene Ontology"
+        "title": "Load Gene Ontology",
     },
     "load_publication": {
         "help": "Load publication metadata (e.g., title, year, journal) from a file",
@@ -69,17 +74,17 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the publication data file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Publication"
+        "title": "Load Publication",
     },
     "insert_organism": {
         "help": "Manually register a new organism in the database",
@@ -89,45 +94,45 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "Organism abbreviation (e.g., H.sapiens)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "genus",
                 "required": True,
                 "default": None,
                 "help": "Genus name (e.g., Homo)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "species",
                 "required": True,
                 "default": None,
                 "help": "Species name (e.g., sapiens)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "common_name",
                 "required": False,
                 "default": None,
                 "help": "Common name (e.g., human)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "infraspecific_name",
                 "required": False,
                 "default": None,
                 "help": "Infraspecific name (e.g., subspecies, variety)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "comment",
                 "required": False,
                 "default": None,
                 "help": "Additional comments",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Insert Organism"
+        "title": "Insert Organism",
     },
     "load_organism_publication": {
         "help": "Link organisms to publications from a tab-separated file",
@@ -137,17 +142,17 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the tab-separated file (format: genus species\tDOI)",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Organism Publication"
+        "title": "Load Organism Publication",
     },
     "load_fasta": {
         "help": "Load sequences from a FASTA file into the database",
@@ -157,14 +162,14 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the FASTA file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterm",
@@ -172,7 +177,7 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Sequence Ontology (SO) term",
                 "type": "soterm",
-                "label": "SO Term"
+                "label": "SO Term",
             },
             {
                 "name": "nosequence",
@@ -180,38 +185,38 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Register name only",
                 "type": "checkbox",
-                "label": "No Sequence"
+                "label": "No Sequence",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "description",
                 "required": False,
                 "default": None,
                 "help": "Source description",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "url",
                 "required": False,
                 "default": None,
                 "help": "URL of the sequence source",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "doi",
                 "required": False,
                 "default": None,
                 "help": "DOI reference",
-                "type": "doi"
-            }
+                "type": "doi",
+            },
         ],
-        "title": "Load FASTA"
+        "title": "Load FASTA",
     },
     "load_gff": {
         "help": "Load gene annotations from a GFF3 file",
@@ -221,28 +226,28 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the GFF3 file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "index",
                 "required": False,
                 "default": None,
                 "help": "Optional: Tabix index file (.tbi or .csi). Required if GFF is compressed.",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "ignore",
                 "required": False,
                 "default": None,
                 "help": "List of GFF types to ignore (comma-separated)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "qtl",
@@ -250,24 +255,24 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Load features as QTLs",
                 "type": "checkbox",
-                "label": "QTL Mode"
+                "label": "QTL Mode",
             },
             {
                 "name": "doi",
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "doi"
+                "type": "doi",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load GFF3"
+        "title": "Load GFF3",
     },
     "load_feature_annotation": {
         "help": "Load feature annotations (properties) from a result file",
@@ -277,14 +282,14 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the annotation file (format: uniquename\tvalue)",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterm",
@@ -292,28 +297,28 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Sequence Ontology (SO) term of the features",
                 "type": "soterm",
-                "label": "SO Term"
+                "label": "SO Term",
             },
             {
                 "name": "cvterm",
                 "required": True,
                 "default": None,
                 "help": "Name of the feature property term (e.g., 'product', 'alias')",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "doi",
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "doi"
+                "type": "doi",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "ignorenotfound",
@@ -321,10 +326,10 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Continue if feature is not found",
                 "type": "checkbox",
-                "label": "Ignore Not Found"
-            }
+                "label": "Ignore Not Found",
+            },
         ],
-        "title": "Load Feature Annotation"
+        "title": "Load Feature Annotation",
     },
     "load_feature_dbxrefs": {
         "help": "Load database cross-references (DBxRefs) for features",
@@ -334,14 +339,14 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the tab-separated file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterm",
@@ -349,24 +354,24 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Sequence Ontology (SO) term",
                 "type": "soterm",
-                "label": "SO Term"
+                "label": "SO Term",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "ignorenotfound",
                 "required": False,
                 "default": None,
                 "help": "Continue if feature not found",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Feature DBxRefs"
+        "title": "Load Feature DBxRefs",
     },
     "load_feature_publication": {
         "help": "Link features to publications from a tab-separated file",
@@ -376,14 +381,14 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the tab-separated file (format: feature_uniquename\tDOI)",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterm",
@@ -391,17 +396,17 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Sequence Ontology (SO) term of the features",
                 "type": "soterm",
-                "label": "SO Term"
+                "label": "SO Term",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Feature Publication"
+        "title": "Load Feature Publication",
     },
     "load_feature_sequence": {
         "help": "Load sequence residues for existing features from a FASTA file",
@@ -411,7 +416,7 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the FASTA file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "soterm",
@@ -419,24 +424,24 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Sequence Ontology (SO) term of the features",
                 "type": "soterm",
-                "label": "SO Term"
+                "label": "SO Term",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Feature Sequence"
+        "title": "Load Feature Sequence",
     },
     "load_similarity_matches": {
         "help": "Load pre-calculated similarity matches (match/match_part) from a file",
@@ -446,7 +451,7 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the similarity matches file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "format",
@@ -454,17 +459,17 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Format of the input file (e.g., blast-xml, interproscan-xml)",
                 "type": "choice",
-                "choices": ["blast-xml", "interproscan-xml"]
+                "choices": ["blast-xml", "interproscan-xml"],
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Similarity Matches"
+        "title": "Load Similarity Matches",
     },
     "load_similarity": {
         "help": "Load sequence similarity results (e.g., BLAST) into the database",
@@ -474,7 +479,7 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the similarity result file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "format",
@@ -482,7 +487,7 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Format of the input file (allowed: blast-xml, interproscan-xml)",
                 "type": "choice",
-                "choices": ["blast-xml", "interproscan-xml"]
+                "choices": ["blast-xml", "interproscan-xml"],
             },
             {
                 "name": "so_query",
@@ -490,7 +495,7 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "SO term of the query features",
                 "type": "soterm",
-                "label": "Query SO Term"
+                "label": "Query SO Term",
             },
             {
                 "name": "so_subject",
@@ -498,66 +503,66 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "SO term of the subject features",
                 "type": "soterm",
-                "label": "Subject SO Term"
+                "label": "Subject SO Term",
             },
             {
                 "name": "organism_query",
                 "required": True,
                 "default": None,
                 "help": "Organism name of the query features",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "organism_subject",
                 "required": True,
                 "default": None,
                 "help": "Organism name of the subject features",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "program",
                 "required": True,
                 "default": None,
                 "help": "Program used (e.g., 'blastp')",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "programversion",
                 "required": True,
                 "default": None,
                 "help": "Version of the program",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "name",
                 "required": False,
                 "default": None,
                 "help": "Analysis name",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "description",
                 "required": False,
                 "default": None,
                 "help": "Analysis description",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "algorithm",
                 "required": False,
                 "default": None,
                 "help": "Algorithm used",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Similarity"
+        "title": "Load Similarity",
     },
     "load_orthomcl": {
         "help": "Load OrthoMCL 'groups.txt' result file",
@@ -567,17 +572,17 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the 'groups.txt' file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load OrthoMCL"
+        "title": "Load OrthoMCL",
     },
     "load_rnaseq_info": {
         "help": "Load RNA-seq .csv information file",
@@ -587,31 +592,31 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the CSV file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "biomaterialdb",
                 "required": True,
                 "default": None,
                 "help": "Database name for biomaterials",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "assaydb",
                 "required": True,
                 "default": None,
                 "help": "Database name for assays",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load RNA-Seq Info"
+        "title": "Load RNA-Seq Info",
     },
     "load_rnaseq_data": {
         "help": "Load RNA-Seq expression data into the database",
@@ -621,70 +626,70 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the expression data file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "programversion",
                 "required": True,
                 "default": None,
                 "help": "Version of the program used to generate the data",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "name",
                 "required": False,
                 "default": None,
                 "help": "Analysis name",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "description",
                 "required": False,
                 "default": None,
                 "help": "Analysis description",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "algorithm",
                 "required": False,
                 "default": None,
                 "help": "Algorithm used for quantification",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "assaydb",
                 "required": False,
                 "default": None,
                 "help": "Database for assay accessions (e.g., 'SRA')",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "timeexecuted",
                 "required": False,
                 "default": None,
                 "help": "Time of execution (YYYY-MM-DD)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "program",
                 "required": False,
                 "default": "LSTrAP",
                 "help": "Program name (default: LSTrAP)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "norm",
                 "required": False,
                 "default": 1,
                 "help": "Normalization method (1: FPKM, 2: TPM, 3: Counts)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "ignorenotfound",
@@ -692,17 +697,17 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Continue if feature is not found",
                 "type": "checkbox",
-                "label": "Ignore Not Found"
+                "label": "Ignore Not Found",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load RNA-Seq Data"
+        "title": "Load RNA-Seq Data",
     },
     "load_coexpression_clusters": {
         "help": "Load co-expression clusters and their member features",
@@ -712,31 +717,31 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the co-expression clusters file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "soterm",
                 "required": False,
                 "default": "mRNA",
                 "help": "SO term of the features (default: mRNA)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Co-expression Clusters"
+        "title": "Load Co-expression Clusters",
     },
     "load_coexpression_pairs": {
         "help": "Load co-expression gene pairs from a result file",
@@ -746,31 +751,31 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the co-expression pairs file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterm",
                 "required": False,
                 "default": "mRNA",
                 "help": "SO term of the features (default: mRNA)",
-                "type": "text"
+                "type": "text",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load Co-expression Pairs"
+        "title": "Load Co-expression Pairs",
     },
     "load_vcf": {
         "help": "Load genetic variants from a VCF file",
@@ -780,31 +785,31 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the VCF file",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "doi",
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "doi"
+                "type": "doi",
             },
             {
                 "name": "cpu",
                 "required": False,
                 "default": 1,
                 "help": "Number of threads for parallel processing",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Load VCF"
+        "title": "Load VCF",
     },
     "rebuild_search_index": {
         "help": "Rebuild the PostgreSQL full-text search index for features.",
@@ -814,10 +819,10 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": 1000,
                 "help": "Number of records per bulk insert",
-                "type": "text"
+                "type": "text",
             }
         ],
-        "title": "Rebuild Search Index"
+        "title": "Rebuild Search Index",
     },
     "check_ids": {
         "help": "Verify the existence of feature IDs in the database",
@@ -827,14 +832,14 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the file containing IDs",
-                "type": "file"
+                "type": "file",
             },
             {
                 "name": "organism",
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "soterms",
@@ -842,10 +847,10 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "SO terms to check",
                 "type": "soterm",
-                "label": "SO Term"
-            }
+                "label": "SO Term",
+            },
         ],
-        "title": "Check IDs"
+        "title": "Check IDs",
     },
     "remove_organism": {
         "help": "Remove an organism from the database",
@@ -855,10 +860,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Scientific name of the species (e.g., Homo sapiens)",
-                "type": "organism"
+                "type": "organism",
             }
         ],
-        "title": "Remove Organism"
+        "title": "Remove Organism",
     },
     "remove_analysis": {
         "help": "Remove an analysis and all its associated data (CASCADE)",
@@ -868,10 +873,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Name of the analysis to remove",
-                "type": "text"
+                "type": "text",
             }
         ],
-        "title": "Remove Analysis"
+        "title": "Remove Analysis",
     },
     "remove_publication": {
         "help": "Remove a publication and its associated references from the database",
@@ -881,10 +886,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "DOI of the publication to remove",
-                "type": "doi"
+                "type": "doi",
             }
         ],
-        "title": "Remove Publication"
+        "title": "Remove Publication",
     },
     "remove_ontology": {
         "help": "Remove an ontology and all its associated terms (CASCADE)",
@@ -894,10 +899,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Name of the ontology to remove",
-                "type": "ontology"
+                "type": "ontology",
             }
         ],
-        "title": "Remove Ontology"
+        "title": "Remove Ontology",
     },
     "remove_feature_annotation": {
         "help": "Remove feature annotations (properties) of a specific type",
@@ -907,17 +912,17 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "Scientific name of the species (optional)",
-                "type": "organism"
+                "type": "organism",
             },
             {
                 "name": "cvterm",
                 "required": True,
                 "default": None,
                 "help": "Name of the feature property term (e.g., 'product', 'alias')",
-                "type": "text"
-            }
+                "type": "text",
+            },
         ],
-        "title": "Remove Feature Annotation"
+        "title": "Remove Feature Annotation",
     },
     "remove_relationship": {
         "help": "Remove feature relationships associated with a specific file",
@@ -927,10 +932,10 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Path to the file whose relationships should be removed",
-                "type": "file"
+                "type": "file",
             }
         ],
-        "title": "Remove Relationship"
+        "title": "Remove Relationship",
     },
     "remove_file": {
         "help": "Remove records and associated data linked to a specific file (CASCADE)",
@@ -940,58 +945,88 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Select the file to remove all associated records",
-                "type": "uploaded_file"
+                "type": "uploaded_file",
             }
         ],
-        "title": "Remove File"
-    }
+        "title": "Remove File",
+    },
 }
+
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
+        """Display the list of available loader commands grouped by category."""
         groups_data = [
             {
                 "id": "ontology",
                 "name": "Ontology",
                 "icon": "fa-sitemap",
-                "commands": ["load_relations_ontology", "load_sequence_ontology", "load_gene_ontology"]
+                "commands": [
+                    "load_relations_ontology",
+                    "load_sequence_ontology",
+                    "load_gene_ontology",
+                ],
             },
             {
                 "id": "publication",
                 "name": "Publication",
                 "icon": "fa-book-open",
-                "commands": ["load_publication"]
+                "commands": ["load_publication"],
             },
             {
                 "id": "organism",
                 "name": "Organism",
                 "icon": "fa-leaf",
-                "commands": ["insert_organism", "load_organism_publication"]
+                "commands": ["insert_organism", "load_organism_publication"],
             },
             {
                 "id": "feature",
                 "name": "Feature",
                 "icon": "fa-dna",
-                "commands": ["load_fasta", "load_gff", "load_vcf", "load_feature_annotation", "load_feature_dbxrefs", "load_feature_publication", "load_feature_sequence"]
+                "commands": [
+                    "load_fasta",
+                    "load_gff",
+                    "load_vcf",
+                    "load_feature_annotation",
+                    "load_feature_dbxrefs",
+                    "load_feature_publication",
+                    "load_feature_sequence",
+                ],
             },
             {
                 "id": "analysis",
                 "name": "Analysis",
                 "icon": "fa-chart-line",
-                "commands": ["load_similarity_matches", "load_similarity", "load_orthomcl", "load_rnaseq_info", "load_rnaseq_data", "load_coexpression_clusters", "load_coexpression_pairs"]
+                "commands": [
+                    "load_similarity_matches",
+                    "load_similarity",
+                    "load_orthomcl",
+                    "load_rnaseq_info",
+                    "load_rnaseq_data",
+                    "load_coexpression_clusters",
+                    "load_coexpression_pairs",
+                ],
             },
             {
                 "id": "tools",
                 "name": "Tools",
                 "icon": "fa-wrench",
-                "commands": ["rebuild_search_index", "check_ids"]
+                "commands": ["rebuild_search_index", "check_ids"],
             },
             {
                 "id": "remove",
                 "name": "Remove",
                 "icon": "fa-trash-alt",
-                "commands": ["remove_analysis", "remove_publication", "remove_ontology", "remove_feature_annotation", "remove_relationship", "remove_file", "remove_organism"]
-            }
+                "commands": [
+                    "remove_analysis",
+                    "remove_publication",
+                    "remove_ontology",
+                    "remove_feature_annotation",
+                    "remove_relationship",
+                    "remove_file",
+                    "remove_organism",
+                ],
+            },
         ]
 
         structured_groups = []
@@ -1000,49 +1035,67 @@ class DashboardView(LoginRequiredMixin, View):
             for cmd_name in g["commands"]:
                 if cmd_name in COMMANDS_CONFIG:
                     cmds.append((cmd_name, COMMANDS_CONFIG[cmd_name]))
-            structured_groups.append({
-                "id": g["id"],
-                "name": g["name"],
-                "icon": g["icon"],
-                "commands": cmds
-            })
+            structured_groups.append(
+                {"id": g["id"], "name": g["name"], "icon": g["icon"], "commands": cmds}
+            )
 
         return render(request, "loader/dashboard.html", {"groups": structured_groups})
 
+
 class CommandFormView(LoginRequiredMixin, View):
     def get(self, request, command_name):
+        """Render the command parameters input form."""
         import copy
+
         raw_config = COMMANDS_CONFIG.get(command_name)
         if not raw_config:
             return redirect("loader_dashboard")
-        
+
         config = copy.deepcopy(raw_config)
-        
+
         # Populate dynamic fields
         context = {"command_name": command_name, "config": config}
         for arg in config["args"]:
             if arg["type"] == "organism":
-                if command_name == "load_similarity" and arg["name"] == "organism_subject":
+                if (
+                    command_name == "load_similarity"
+                    and arg["name"] == "organism_subject"
+                ):
                     arg["options"] = Organism.objects.all()
                 else:
-                    arg["options"] = Organism.objects.exclude(genus="multispecies", species="multispecies")
+                    arg["options"] = Organism.objects.exclude(
+                        genus="multispecies", species="multispecies"
+                    )
             elif arg["type"] == "ontology":
                 arg["options"] = Cv.objects.all().order_by("name")
             elif arg["type"] == "soterm":
-                arg["options"] = Cvterm.objects.filter(cv__name="sequence").order_by("name")
+                arg["options"] = Cvterm.objects.filter(cv__name="sequence").order_by(
+                    "name"
+                )
             elif arg["type"] == "uploaded_file":
-                arg["options"] = Dbxrefprop.objects.filter(
-                    type__name="located in", 
-                    type__cv__name="relationship"
-                ).values_list("value", flat=True).distinct().order_by("value")
+                arg["options"] = (
+                    Dbxrefprop.objects.filter(
+                        type__name="located in", type__cv__name="relationship"
+                    )
+                    .values_list("value", flat=True)
+                    .distinct()
+                    .order_by("value")
+                )
             elif arg["type"] == "doi":
-                arg["options"] = Dbxref.objects.filter(db__name="DOI").exclude(accession="").values_list("accession", flat=True).distinct().order_by("accession")
+                arg["options"] = (
+                    Dbxref.objects.filter(db__name="DOI")
+                    .exclude(accession="")
+                    .values_list("accession", flat=True)
+                    .distinct()
+                    .order_by("accession")
+                )
             elif arg["type"] == "choice":
                 arg["options"] = arg.get("choices", [])
-        
+
         return render(request, "loader/command_form.html", context)
 
     def post(self, request, command_name):
+        """Handle command form submission and launch the tool background process."""
         config = COMMANDS_CONFIG.get(command_name)
         if not config:
             return redirect("loader_dashboard")
@@ -1069,17 +1122,29 @@ class CommandFormView(LoginRequiredMixin, View):
                         file_path = os.path.join(upload_dir, file_name)
                         # Use a more common User-Agent to avoid blocks/redirect issues
                         req = urllib.request.Request(
-                            file_url, 
-                            headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+                            file_url,
+                            headers={
+                                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                            },
                         )
-                        with urllib.request.urlopen(req) as response, open(file_path, "wb") as out_file:
+                        with (
+                            urllib.request.urlopen(req) as response,
+                            open(file_path, "wb") as out_file,
+                        ):
                             out_file.write(response.read())
                     except Exception as e:
-                        messages.error(request, f"Failed to download remote file: {str(e)}")
-                        return redirect("loader_command_form", command_name=command_name)
-                
+                        messages.error(
+                            request, f"Failed to download remote file: {str(e)}"
+                        )
+                        return redirect(
+                            "loader_command_form", command_name=command_name
+                        )
+
                 if arg["required"] and not file_path:
-                    messages.error(request, f"The file for '{arg['name']}' is required. Please upload a file or provide a URL.")
+                    messages.error(
+                        request,
+                        f"The file for '{arg['name']}' is required. Please upload a file or provide a URL.",
+                    )
                     return redirect("loader_command_form", command_name=command_name)
 
                 if file_path and arg["name"] != "index":
@@ -1118,21 +1183,25 @@ class CommandFormView(LoginRequiredMixin, View):
                     elif str(val).replace(",", "").isdigit():
                         val = int(str(val).replace(",", ""))
                     command_kwargs[arg["name"]] = val
-        
+
         # Create History record
-        history = History.objects.create(command=command_name, params=str(command_kwargs), status="PENDING")
+        history = History.objects.create(
+            command=command_name, params=str(command_kwargs), status="PENDING"
+        )
 
         def run_subprocess():
             # Find manage.py path
             # BASE_DIR is usually the project root in a standard Django setup
             manage_py_path = os.path.join(settings.BASE_DIR, "manage.py")
-            
+
             if not os.path.exists(manage_py_path):
                 # Try project_template subdirectory (common in machado dev environment)
-                manage_py_path = os.path.join(settings.BASE_DIR, "project_template", "manage.py")
-            
+                manage_py_path = os.path.join(
+                    settings.BASE_DIR, "project_template", "manage.py"
+                )
+
             if not os.path.exists(manage_py_path):
-                # Try to find it in the parent of settings.BASE_DIR if needed, 
+                # Try to find it in the parent of settings.BASE_DIR if needed,
                 # but let's stick to abspath fallback
                 manage_py_path = os.path.abspath("manage.py")
 
@@ -1146,7 +1215,7 @@ class CommandFormView(LoginRequiredMixin, View):
                 else:
                     cmd.append(f"--{k}")
                     cmd.append(str(v))
-            
+
             # Ensure verbosity is set to 1 to keep useful output
             if "verbosity" not in command_kwargs:
                 cmd.extend(["--verbosity", "1"])
@@ -1162,29 +1231,31 @@ class CommandFormView(LoginRequiredMixin, View):
                     stderr=subprocess.PIPE,
                     text=True,
                     env=env,
-                    cwd=os.path.dirname(os.path.abspath(manage_py_path))
+                    cwd=os.path.dirname(os.path.abspath(manage_py_path)),
                 )
-                
+
                 history.pid = process.pid
                 history.status = "RUNNING"
                 history.save()
 
                 stdout_data, stderr_data = process.communicate()
-                
+
                 # Filter out tqdm progress bars from output
                 def clean_output(text):
-                    if not text: return text
+                    if not text:
+                        return text
                     import re
+
                     # Split by both \r and \n to handle tqdm updates
-                    lines = text.replace('\r', '\n').split('\n')
+                    lines = text.replace("\r", "\n").split("\n")
                     cleaned_lines = []
                     for line in lines:
                         # tqdm progress bar pattern detection
-                        if re.search(r'\d+%.*?\|.*?\|', line):
+                        if re.search(r"\d+%.*?\|.*?\|", line):
                             continue
                         if line.strip():
                             cleaned_lines.append(line)
-                    return '\n'.join(cleaned_lines).strip()
+                    return "\n".join(cleaned_lines).strip()
 
                 stdout_data = clean_output(stdout_data)
                 stderr_data = clean_output(stderr_data)
@@ -1199,21 +1270,31 @@ class CommandFormView(LoginRequiredMixin, View):
                 if process.returncode == 0:
                     history.success(stdout=stdout_data, stderr=stderr_data)
                 else:
-                    history.failure(stdout=stdout_data, stderr=stderr_data, exit_code=process.returncode)
+                    history.failure(
+                        stdout=stdout_data,
+                        stderr=stderr_data,
+                        exit_code=process.returncode,
+                    )
             except Exception as e:
                 history.failure(stderr=str(e))
 
         threading.Thread(target=run_subprocess).start()
 
-        messages.success(request, f"Command '{config['title']}' submitted successfully. Check its status below.")
+        messages.success(
+            request,
+            f"Command '{config['title']}' submitted successfully. Check its status below.",
+        )
         return redirect("loader_history")
+
 
 class HistoryListView(LoginRequiredMixin, View):
     def get(self, request):
+        """Render the running and historical log lists of data loading actions."""
         histories = History.objects.all().order_by("-created_at")[:50]
-        
+
         # Check for DEAD processes
         import os
+
         for h in histories:
             if h.status == "RUNNING" and h.pid:
                 try:
@@ -1223,6 +1304,10 @@ class HistoryListView(LoginRequiredMixin, View):
                     # Process is not running
                     h.status = "DEAD"
                     h.save()
-                    
+
         any_running = any(h.status == "RUNNING" for h in histories)
-        return render(request, "loader/history.html", {"histories": histories, "any_running": any_running})
+        return render(
+            request,
+            "loader/history.html",
+            {"histories": histories, "any_running": any_running},
+        )

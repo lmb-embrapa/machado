@@ -42,6 +42,7 @@ class Command(HistoryCommandMixin, BaseCommand):
     help = "Rebuild the PostgreSQL full-text search index for features."
 
     def add_arguments(self, parser):
+        """Define the command arguments."""
         parser.add_argument(
             "--batch-size",
             type=int,
@@ -50,6 +51,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Rebuild the full-text search index."""
         verbosity = options.get("verbosity", 1)
         batch_size = int(options.get("batch_size", 1000))
 

@@ -332,6 +332,7 @@ def get_pub_authors(self):
 
 
 def get_pub_doi(self):
+    """Get the DOI of the publication."""
     pub_dbxref = self.PubDbxref_pub_Pub.filter(dbxref__db__name="DOI").first()
     return pub_dbxref.dbxref.accession if pub_dbxref else None
 

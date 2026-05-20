@@ -4330,9 +4330,7 @@ class History(models.Model):
     command = models.CharField(max_length=255)
     params = models.TextField(blank=True, null=True)
     pid = models.IntegerField(null=True, blank=True)
-    status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="PENDING"
-    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
     stdout = models.TextField(blank=True, null=True)
     stderr = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -4360,7 +4358,9 @@ class History(models.Model):
         self.finished_at = timezone.now()
         self.save()
 
-    def failure(self, stdout: str = None, stderr: str = None, exit_code: int = 1) -> None:
+    def failure(
+        self, stdout: str = None, stderr: str = None, exit_code: int = 1
+    ) -> None:
         """Update entry to log the finish."""
         self.stdout = stdout
         self.stderr = stderr
@@ -4422,4 +4422,5 @@ class FeatureSearchIndex(models.Model):
         ]
 
     def __str__(self):
+        """Return a string representation of the search index."""
         return f"SearchIndex({self.uniquename})"

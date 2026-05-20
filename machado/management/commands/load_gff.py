@@ -108,8 +108,10 @@ class Command(HistoryCommandMixin, BaseCommand):
         with open(file) as tbx_file:
             tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
             for i, row in tqdm(
-                enumerate(tbx.fetch(parser=pysam.asGTF())), total=get_num_lines(file)
-            , disable=verbosity == 0):
+                enumerate(tbx.fetch(parser=pysam.asGTF())),
+                total=get_num_lines(file),
+                disable=verbosity == 0,
+            ):
                 if ignore is not None and row.feature in ignore:
                     continue
                 tasks.append(

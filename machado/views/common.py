@@ -21,6 +21,7 @@ class HomeView(TemplateView):
     template_name = "index.html"
 
     def get_context_data(self, **kwargs):
+        """Get the context data for Home page view."""
         context = super().get_context_data(**kwargs)
         context["organism_count"] = Organism.objects.count()
         context["feature_count"] = Feature.objects.count()

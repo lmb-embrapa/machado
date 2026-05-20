@@ -126,7 +126,9 @@ class Command(HistoryCommandMixin, BaseCommand):
                         right_idx=data["right_idx"],
                     )
                 )
-            for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
+            for task in tqdm(
+                as_completed(tasks), total=len(tasks), disable=verbosity == 0
+            ):
                 if task.result():
                     tax_id, phylonode = task.result()
                     self.nodes[tax_id]["phylonode_id"] = phylonode.phylonode_id

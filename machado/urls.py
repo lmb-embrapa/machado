@@ -8,7 +8,6 @@
 
 from django.conf import settings
 from django.urls import re_path, path, include
-from django.views.decorators.cache import cache_page
 
 from machado.views import common
 
@@ -60,6 +59,10 @@ urlpatterns = [
     path("loader/accounts/", include("django.contrib.auth.urls")),
     path("loader/", loader.DashboardView.as_view(), name="loader_dashboard"),
     path("loader/history/", loader.HistoryListView.as_view(), name="loader_history"),
-    path("loader/command/<str:command_name>/", loader.CommandFormView.as_view(), name="loader_command_form"),
+    path(
+        "loader/command/<str:command_name>/",
+        loader.CommandFormView.as_view(),
+        name="loader_command_form",
+    ),
     re_path(r"^$", common.HomeView.as_view(), name="home"),
 ]

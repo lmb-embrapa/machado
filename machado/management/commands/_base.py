@@ -13,12 +13,13 @@ from machado.loaders.exceptions import ImportingError
 
 
 class HistoryCommandMixin:
-    """
-    Mixin to automatically handle History logging for management commands.
+    """Mixin to automatically handle History logging for management commands.
+
     Logs start, success, and data-related failures.
     """
 
     def execute(self, *args, **options):
+        """Execute the command and record history logs."""
         history_id = os.environ.get("MACHADO_HISTORY_ID")
         if history_id:
             try:

@@ -6,32 +6,42 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('machado', '0006_featuresearchindex'),
+        ("machado", "0006_featuresearchindex"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='history',
-            name='description',
+            model_name="history",
+            name="description",
         ),
         migrations.AddField(
-            model_name='history',
-            name='pid',
+            model_name="history",
+            name="pid",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='history',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Waiting'), ('RUNNING', 'Running'), ('SUCCESS', 'Success'), ('FAILURE', 'Failed'), ('DEAD', 'Dead')], default='PENDING', max_length=10),
+            model_name="history",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING", "Waiting"),
+                    ("RUNNING", "Running"),
+                    ("SUCCESS", "Success"),
+                    ("FAILURE", "Failed"),
+                    ("DEAD", "Dead"),
+                ],
+                default="PENDING",
+                max_length=10,
+            ),
         ),
         migrations.AddField(
-            model_name='history',
-            name='stderr',
+            model_name="history",
+            name="stderr",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='history',
-            name='stdout',
+            model_name="history",
+            name="stdout",
             field=models.TextField(blank=True, null=True),
         ),
     ]

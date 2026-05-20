@@ -61,7 +61,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         **options,
     ):
         """Execute the main function."""
-
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))

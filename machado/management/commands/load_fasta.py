@@ -83,7 +83,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         **options,
     ) -> None:
         """Execute the main function."""
-
         if verbosity > 0:
             self.stdout.write("Preprocessing data...")
 

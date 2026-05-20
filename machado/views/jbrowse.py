@@ -13,13 +13,13 @@ except AttributeError:
 
 @cache_page(CACHE_TIMEOUT)
 def jbrowse_global(request):
-    """API endpoint to view JBrowse global settings."""
+    """Provide API endpoint to view JBrowse global settings."""
     return JsonResponse([{"featureDensity": 0.02}], safe=False)
 
 
 @cache_page(CACHE_TIMEOUT)
 def jbrowse_refseqs(request):
-    """API endpoint to JBrowse refSeqs.json."""
+    """Provide API endpoint to JBrowse refSeqs.json."""
     organism = request.GET.get("organism")
     sotype = request.GET.get("soType")
 
@@ -39,7 +39,7 @@ def jbrowse_refseqs(request):
 
 @cache_page(CACHE_TIMEOUT)
 def jbrowse_names(request):
-    """API endpoint to JBrowse names."""
+    """Provide API endpoint to JBrowse names."""
     queryset = (
         Feature.objects.filter(is_obsolete=0)
         .exclude(name=None)
@@ -83,7 +83,7 @@ def jbrowse_names(request):
 
 @cache_page(CACHE_TIMEOUT)
 def jbrowse_features(request, refseq):
-    """API endpoint to view JBrowse features."""
+    """Provide API endpoint to view JBrowse features."""
     organism = request.GET.get("organism")
     org_obj = None
     if organism is not None:
