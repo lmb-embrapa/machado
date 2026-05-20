@@ -94,6 +94,22 @@
                     <input class="form-check-input" type="checkbox" id="{{ arg.name }}" name="{{ arg.name }}" value="true">
                     <label class="form-check-label font-weight-bold small text-muted text-uppercase" for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}</label>
                   </div>
+                {% elif arg.type == "doi" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select DOI --</option>
+                    {% for doi in arg.options %}
+                      <option value="{{ doi }}">{{ doi }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif arg.type == "choice" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select {% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %} --</option>
+                    {% for option in arg.options %}
+                      <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                  </select>
                 {% else %}
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
                   <input type="text" class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %} value="{{ arg.default|default:'' }}">

@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
 from django.urls import reverse
-from machado.models import Organism, Db, Analysis, History, Cv, Cvterm, Dbxrefprop
+from machado.models import Organism, Db, Analysis, History, Cv, Cvterm, Dbxrefprop, Dbxref
 
 # Define the ordered sequence of commands and their parameters
 COMMANDS_CONFIG = {
@@ -208,7 +208,7 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "DOI reference",
-                "type": "text"
+                "type": "doi"
             }
         ],
         "title": "Load FASTA"
@@ -257,7 +257,7 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "text"
+                "type": "doi"
             },
             {
                 "name": "cpu",
@@ -306,7 +306,7 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "text"
+                "type": "doi"
             },
             {
                 "name": "cpu",
@@ -453,7 +453,8 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Format of the input file (e.g., blast-xml, interproscan-xml)",
-                "type": "text"
+                "type": "choice",
+                "choices": ["blast-xml", "interproscan-xml"]
             },
             {
                 "name": "cpu",
@@ -480,7 +481,8 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "Format of the input file (allowed: blast-xml, interproscan-xml)",
-                "type": "text"
+                "type": "choice",
+                "choices": ["blast-xml", "interproscan-xml"]
             },
             {
                 "name": "so_query",
@@ -792,7 +794,7 @@ COMMANDS_CONFIG = {
                 "required": False,
                 "default": None,
                 "help": "DOI of the reference article",
-                "type": "text"
+                "type": "doi"
             },
             {
                 "name": "cpu",
@@ -879,7 +881,7 @@ COMMANDS_CONFIG = {
                 "required": True,
                 "default": None,
                 "help": "DOI of the publication to remove",
-                "type": "text"
+                "type": "doi"
             }
         ],
         "title": "Remove Publication"
@@ -1033,6 +1035,10 @@ class CommandFormView(LoginRequiredMixin, View):
                     type__name="located in", 
                     type__cv__name="relationship"
                 ).values_list("value", flat=True).distinct().order_by("value")
+            elif arg["type"] == "doi":
+                arg["options"] = Dbxref.objects.filter(db__name="DOI").exclude(accession="").values_list("accession", flat=True).distinct().order_by("accession")
+            elif arg["type"] == "choice":
+                arg["options"] = arg.get("choices", [])
         
         return render(request, "loader/command_form.html", context)
 
