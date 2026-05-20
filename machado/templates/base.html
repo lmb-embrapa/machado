@@ -15,14 +15,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="machado — biological data management">
+  <meta name="description" content="Machado Genomics — biological data management">
 
-  <title>machado</title>
+  <title>Machado Genomics</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
   <!-- Icons -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
@@ -37,11 +39,12 @@
 
   <!-- Accent init (blocking — prevents FOUC) -->
   <script>
-    (function(){
+    (function () {
       var a = localStorage.getItem('machado-accent') || 'steel';
       document.documentElement.setAttribute('data-accent', a);
     })();
   </script>
+  {% block extra_css %}{% endblock %}
 </head>
 
 
@@ -49,9 +52,10 @@
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg">
-    <a class="navbar-brand" href="{% url 'home' %}">machado</a>
+    <a class="navbar-brand" href="{% url 'home' %}">Machado Genomics</a>
 
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain" aria-controls="navMain"
+      aria-expanded="false" aria-label="Toggle navigation">
       <i class="fas fa-bars"></i>
     </button>
 
@@ -67,15 +71,16 @@
 
       <ul class="navbar-nav ml-auto" style="gap: 0.25rem;">
         {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'loader_dashboard' %}" style="color: var(--color-accent); font-weight: 600;">
-              <i class="fas fa-database mr-1"></i> Data Tools
-            </a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'loader_dashboard' %}" style="color: var(--color-accent); font-weight: 600;">
+            <i class="fas fa-database mr-1"></i> Data Tools
+          </a>
+        </li>
         {% endif %}
 
 
         <!-- Accent color picker -->
+        {% if user.is_superuser %}
         <li class="nav-item d-flex align-items-center">
           <div class="m-accent-picker" id="accent-picker">
             <button class="m-theme-btn" title="Change accent color">
@@ -97,43 +102,63 @@
               <button class="m-accent-swatch" data-set-accent="graphite">
                 <span class="m-accent-dot m-accent-dot--graphite"></span> Charcoal
               </button>
+              <button class="m-accent-swatch" data-set-accent="ruby">
+                <span class="m-accent-dot m-accent-dot--ruby"></span> Ruby Red
+              </button>
+              <button class="m-accent-swatch" data-set-accent="indigo">
+                <span class="m-accent-dot m-accent-dot--indigo"></span> Indigo Blue
+              </button>
+              <button class="m-accent-swatch" data-set-accent="emerald">
+                <span class="m-accent-dot m-accent-dot--emerald"></span> Emerald Green
+              </button>
+              <button class="m-accent-swatch" data-set-accent="coral">
+                <span class="m-accent-dot m-accent-dot--coral"></span> Coral Pink
+              </button>
+              <button class="m-accent-swatch" data-set-accent="plum">
+                <span class="m-accent-dot m-accent-dot--plum"></span> Plum Purple
+              </button>
             </div>
           </div>
         </li>
+        {% endif %}
 
         {% if user.is_authenticated %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {{ user.username }}
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
-              <div class="dropdown-divider"></div>
-              <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link nav-link text-left w-100 px-4" style="color: var(--color-text);">Logout</button>
-              </form>
-            </div>
-          </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            {{ user.username }}
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
+            <div class="dropdown-divider"></div>
+            <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link nav-link text-left w-100 px-4"
+                style="color: var(--color-text);">Logout</button>
+            </form>
+          </div>
+        </li>
         {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Login</a>
+        </li>
         {% endif %}
       </ul>
     </div>
   </nav>
 
   <!-- Search bar -->
+  {% block search_bar %}
   <div class="m-search-section" name="search-bar">
     <div class="container">
       <div class="row justify-content-center">
-        <div class="col col-sm-5 col-md-4">
+        <div class="col col-sm-6 col-md-5">
           {% include "search_form.html" %}
         </div>
       </div>
     </div>
   </div>
+  {% endblock %}
 
   <!-- Flash messages -->
   <div name="content">
@@ -141,14 +166,14 @@
 
     <div class="container mt-3">
       {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        {% endfor %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endfor %}
       {% endif %}
     </div>
 
@@ -158,8 +183,21 @@
 
   <!-- Footer -->
   <footer class="m-footer">
-    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--color-accent); margin-right:0.5rem; vertical-align:middle;"></span>
-    Powered by <strong><a href="https://github.com/lmb-embrapa/machado">machado</a></strong>
+    <div class="container">
+      <div class="row align-items-center justify-content-between">
+        <div class="col-sm-6 text-left">
+          <p class="mb-0 text-muted small">
+            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">Machado
+                Genomics</a></strong> — Genomics Data Management Portal.
+          </p>
+        </div>
+        <div class="col-sm-6 text-right">
+          <p class="mb-0 text-muted small">
+            &copy; 2026 Embrapa. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- Scripts -->

@@ -8,33 +8,90 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% for item, data in context.items %}
-    <div class="card m-1">
-        <div class="card-header">
-            <h4 class="card-title"><em><a href="{% url 'feature_search' %}?q=&selected_facets=organism:{{ item }}">{{ item }}</a></em></h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm">
-                {% for entry in data.counts %}
-            {{ entry.type__name }}: {{ entry.count }} <br />
-            {% endfor %}
-            </div>
-            <div class="col">
-            <ul class="list-group">
-            {% for pub in data.pubs %}
-            <li class="list-group-item"><small>
-                    {{ pub.get_authors }} <strong>{{ pub.title }}.</strong> <em>{{ pub.series_name }}</em>. {{ pub.pyear }}; {{ pub.volume}} {{ pub.pages }}
-                    {% if pub.get_doi %}
-                    DOI:<a target="_blank" href="http://dx.doi.org/{{ pub.get_doi }}">{{ pub.get_doi }}</a>
-                    {% endif %}
-            </small></li>
-            {% endfor %}
-            </ul>
-            </div>
-        </div>
+<div class="container my-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+    <div>
+      <h2 class="font-weight-bold mb-1">Organism Database Summary</h2>
+      <p class="text-muted mb-0">Browse biological feature statistics and publications grouped by organism.</p>
     </div>
-</div>
-{% endfor %}
+    <div>
+      <a href="{% url 'feature_search' %}?q=" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-search mr-1"></i> Search All Features
+      </a>
+    </div>
+  </div>
 
-{% endblock%}
+  <div class="row">
+    {% for item, data in context.items %}
+      <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-light">
+          <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+            <h4 class="card-title h5 mb-0">
+              <a href="{% url 'feature_search' %}?q=&selected_facets=organism:{{ item }}" class="font-weight-bold text-dark">
+                <i class="fas fa-seedling text-success mr-2"></i><em>{{ item }}</em>
+              </a>
+            </h4>
+          </div>
+          <div class="card-body px-4 pb-4 pt-2">
+            <div class="row">
+              <!-- Feature counts -->
+              <div class="col-sm-5 mb-3 mb-sm-0 border-right-sm">
+                <h5 class="text-muted small font-weight-bold text-uppercase mb-3">Loaded Features</h5>
+                <div class="d-flex flex-column" style="gap: 0.5rem;">
+                  {% for entry in data.counts %}
+                    <div class="d-flex align-items-center justify-content-between">
+                      <span class="text-muted small">{{ entry.type__name }}</span>
+                      <span class="badge badge-light border text-dark font-weight-bold">{{ entry.count }}</span>
+                    </div>
+                  {% empty %}
+                    <span class="text-muted small">No features loaded.</span>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Publications -->
+              <div class="col-sm-7">
+                <h5 class="text-muted small font-weight-bold text-uppercase mb-3">Publications</h5>
+                {% if data.pubs %}
+                  <ul class="list-unstyled mb-0" style="max-height: 220px; overflow-y: auto; gap: 0.75rem; display: flex; flex-direction: column;">
+                    {% for pub in data.pubs %}
+                      <li class="pb-2 border-bottom last-border-0">
+                        <p class="mb-1 text-dark small" style="line-height: 1.4;">
+                          {{ pub.get_authors }} <strong>{{ pub.title }}.</strong> 
+                          <span class="text-muted"><em>{{ pub.series_name }}</em>. {{ pub.pyear }}; {{ pub.volume }} {{ pub.pages }}</span>
+                        </p>
+                        {% if pub.get_doi %}
+                          <a target="_blank" href="http://dx.doi.org/{{ pub.get_doi }}" class="badge badge-light border text-info small">
+                            <i class="fas fa-external-link-alt mr-1" style="font-size: 0.7rem;"></i> DOI: {{ pub.get_doi }}
+                          </a>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <span class="text-muted small">No publications listed.</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col text-center py-5">
+        <p class="text-muted">No organism data currently loaded in the database.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  @media (min-width: 576px) {
+    .border-right-sm {
+      border-right: 1px solid var(--color-border-light);
+    }
+  }
+  .last-border-0:last-child {
+    border-bottom: 0 !important;
+  }
+</style>
+{% endblock %}

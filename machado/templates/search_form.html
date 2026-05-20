@@ -1,6 +1,6 @@
-<form class="form-group" action="{% url 'feature_search' %}" method="get">
+<form class="form-group {% if hero_mode %}m-hero-search-wrapper{% endif %}" action="{% url 'feature_search' %}" method="get">
   <div class="input-group mb-0 position-relative">
-    <input type="text" placeholder="Search" class="form-control" name="q" id="q" 
+    <input type="text" placeholder="{% if hero_mode %}Search genomes, genes, proteins, or publications...{% else %}Search{% endif %}" class="form-control" name="q" id="q" 
            value="{% if query %}{{ query }}{%endif%}"
            hx-get="{% url 'autocomplete_html' %}"
            hx-trigger="keyup changed delay:300ms"
@@ -10,7 +10,9 @@
     <input type="hidden" name="selected_facets" value="{{ facet }}">
     {% endfor %}
     <div class="input-group-append">
-      <button class="btn btn-light" type="submit"><em class="fas fa-search"></em></button>
+      <button class="btn {% if hero_mode %}btn-primary{% else %}btn-light{% endif %}" type="submit">
+        <em class="fas fa-search"></em>{% if hero_mode %}<span class="ml-2 d-none d-sm-inline">Search</span>{% endif %}
+      </button>
     </div>
     <div id="search-results" class="position-absolute w-100" style="top: 100%; left: 0; z-index: 1000;"></div>
   </div>

@@ -1,93 +1,115 @@
 {% extends "base.html" %}
 {% load l10n %}
 {% block content %}
-<div class="container mt-5">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'loader_dashboard' %}">Dashboard</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ config.title }}</li>
-    </ol>
-  </nav>
-  
-  {% if config.help %}
-  <div class="alert alert-info shadow-sm mb-4">
-    <i class="fas fa-info-circle mr-2"></i> {{ config.help|linebreaksbr }}
-  </div>
-  {% endif %}
+<div class="container my-5">
+  <div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm border-light">
+        <a href="{% url 'loader_dashboard' %}" class="list-group-item list-group-item-action active">
+          <i class="fas fa-th-large mr-2"></i>Dashboard
+        </a>
+        <a href="{% url 'loader_history' %}" class="list-group-item list-group-item-action">
+          <i class="fas fa-history mr-2"></i>History Panel
+        </a>
+      </div>
+    </div>
 
-  <div class="card">
-    <div class="card-header">{{ config.title }}</div>
-    <div class="card-body">
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for arg in config.args %}
-          <div class="form-group mb-4">
-            {% if arg.type == "file" %}
-              <label class="font-weight-bold">{{ arg.name|title }} Source {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <div class="card p-3 bg-light">
-                <div class="form-check mb-2">
-                  <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_upload_rad" value="upload" checked onchange="toggleSource('{{ arg.name }}', 'upload')">
-                  <label class="form-check-label" for="{{ arg.name }}_upload_rad">Upload Local File</label>
-                </div>
-                <input type="file" class="form-control-file mb-3" name="{{ arg.name }}_upload" id="{{ arg.name }}_upload_input">
-
-                <div class="form-check mb-2">
-                  <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_url_rad" value="url" onchange="toggleSource('{{ arg.name }}', 'url')">
-                  <label class="form-check-label" for="{{ arg.name }}_url_rad">Provide Remote URL</label>
-                </div>
-                <input type="url" class="form-control" name="{{ arg.name }}_url" id="{{ arg.name }}_url_input" placeholder="http://example.com/file.gff" style="display: none;">
-              </div>
-            {% elif arg.type == "organism" %}
-              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
-                <option value="">-- Select Organism --</option>
-                {% for org in arg.options %}
-                  <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }} ({{ org.common_name }})</option>
-                {% endfor %}
-              </select>
-            {% elif arg.type == "ontology" %}
-              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
-                <option value="">-- Select Ontology --</option>
-                {% for ont in arg.options %}
-                  <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
-                {% endfor %}
-              </select>
-            {% elif arg.type == "soterm" %}
-              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
-                <option value="">-- Select SO Term --</option>
-                {% for term in arg.options %}
-                  <option value="{{ term.cvterm_id|unlocalize }}">{{ term.name }}</option>
-                {% endfor %}
-              </select>
-            {% elif arg.type == "uploaded_file" %}
-              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
-                <option value="">-- Select File to Remove --</option>
-                {% for filename in arg.options %}
-                  <option value="{{ filename }}">{{ filename }}</option>
-                {% endfor %}
-              </select>
-            {% elif arg.type == "checkbox" %}
-              <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="{{ arg.name }}" name="{{ arg.name }}" value="true">
-                <label class="form-check-label font-weight-bold" for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}</label>
-              </div>
-            {% else %}
-              <label for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-              <input type="text" class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %} value="{{ arg.default|default:'' }}">
-            {% endif %}
-            
-            {% if arg.help %}
-              <small class="form-text text-muted">
-                <i class="fas fa-question-circle mr-1"></i> {{ arg.help }}
-              </small>
-            {% endif %}
+    <!-- Form Content -->
+    <div class="col-md-9">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 mb-3 small">
+          <li class="breadcrumb-item"><a href="{% url 'loader_dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ config.title }}</li>
+        </ol>
+      </nav>
+      
+      {% if config.help %}
+        <div class="alert alert-info border-0 shadow-sm mb-4">
+          <div class="d-flex">
+            <i class="fas fa-info-circle mr-2 mt-1"></i>
+            <div>{{ config.help|linebreaksbr }}</div>
           </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Run Command</button>
-      </form>
+        </div>
+      {% endif %}
+
+      <div class="card shadow-sm border-light">
+        <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+          <h3 class="h5 font-weight-bold mb-0">{{ config.title }}</h3>
+        </div>
+        <div class="card-body px-4 pb-4 pt-2">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for arg in config.args %}
+              <div class="form-group mb-4">
+                {% if arg.type == "file" %}
+                  <label class="font-weight-bold small text-muted text-uppercase mb-2">{{ arg.name|title }} Source {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <div class="card p-3 bg-light border-light shadow-sm">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_upload_rad" value="upload" checked onchange="toggleSource('{{ arg.name }}', 'upload')">
+                      <label class="form-check-label small" for="{{ arg.name }}_upload_rad">Upload Local File</label>
+                    </div>
+                    <input type="file" class="form-control-file mb-3 small" name="{{ arg.name }}_upload" id="{{ arg.name }}_upload_input">
+
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_url_rad" value="url" onchange="toggleSource('{{ arg.name }}', 'url')">
+                      <label class="form-check-label small" for="{{ arg.name }}_url_rad">Provide Remote URL</label>
+                    </div>
+                    <input type="url" class="form-control form-control-sm" name="{{ arg.name }}_url" id="{{ arg.name }}_url_input" placeholder="http://example.com/file.gff" style="display: none;">
+                  </div>
+                {% elif arg.type == "organism" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select Organism --</option>
+                    {% for org in arg.options %}
+                      <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }} ({{ org.common_name }})</option>
+                    {% endfor %}
+                  </select>
+                {% elif arg.type == "ontology" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select Ontology --</option>
+                    {% for ont in arg.options %}
+                      <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif arg.type == "soterm" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select SO Term --</option>
+                    {% for term in arg.options %}
+                      <option value="{{ term.cvterm_id|unlocalize }}">{{ term.name }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif arg.type == "uploaded_file" %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                    <option value="">-- Select File to Remove --</option>
+                    {% for filename in arg.options %}
+                      <option value="{{ filename }}">{{ filename }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif arg.type == "checkbox" %}
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="{{ arg.name }}" name="{{ arg.name }}" value="true">
+                    <label class="form-check-label font-weight-bold small text-muted text-uppercase" for="{{ arg.name }}">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}</label>
+                  </div>
+                {% else %}
+                  <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
+                  <input type="text" class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %} value="{{ arg.default|default:'' }}">
+                {% endif %}
+                
+                {% if arg.help %}
+                  <small class="form-text text-muted mt-2">
+                    <i class="fas fa-question-circle mr-1"></i> {{ arg.help }}
+                  </small>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary px-4">Run Command</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -10,105 +10,129 @@
 {% load machado_extras %}
 
 {% block content %}
-
-        <div class="row m-1">
-        <div class="col col-3 py-2 mx-1 rounded bg-light">
-            {% include "search_facet.html" %}
+<div class="container-fluid mt-4 mb-5">
+  <div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="card shadow-sm border-light">
+        <div class="card-body p-3">
+          {% include "search_facet.html" %}
         </div>
-
-        {% if object_list %}
-        <div class="col py-2 mx-1 rounded bg-light" style="overflow-x: auto;">
-            <div class="row">
-                <div class="col">
-                    <h3>Results</h3>
-                </div>
-                <div class="col text-right">
-                    {% if so_term_count == 1 or 'orthologous_group' in selected_facets_fields or 'coexpression_group' in selected_facets_fields %}
-                        <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=tsv" title="Download TSV" onclick="return confirm('Download results in TSV format')">TSV</a> 
-                        <a class="fas fa-download" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')">FASTA</a> 
-                    {% endif %}
-                </div>
-            </div>
-            <table class="table table-hover table-sm">
-            <tr>
-				<th><a href="?{% param_replace order_by='organism' %}">Organism</a></th>
-				<th><a href="?{% param_replace order_by='so_term' %}">Feature Type</a></th>
-				<th><a href="?{% param_replace order_by='uniquename' %}">Feature ID</a></th>
-		                <th><a href="?{% param_replace order_by='name' %}">Info</a></th>
-                                <th>Relationship</th>
-				<th><a href="?{% param_replace order_by='display' %}">Display</a></th>
-                {% if orthologs %}<th><a href="?{% param_replace order_by='orthologous_group' %}">Orthologous Group</a></th>{% endif %}
-				{% if coexp_groups %}<th><a href="?{% param_replace order_by='coexpression_group' %}">Coexpression Group</a></th>{% endif %}
-            </tr>
-            {% for result in page_obj.object_list %}
-            <tr>
-		<td><em>{{ result.organism }}</em></td>
-                <td>{{ result.so_term }}</td>
-                <td>
-                    <a href="{% url 'feature' %}?feature_id={{ result.pk|safe }}">{{ result.uniquename }}</a>
-                </td>
-		<td>{{ result.name|default_if_none:'' }}</td>
-                <td>
-					{% for relationship in result.relationships %}
-					  {% with relationship|split:" " as r_list %}
-					    <a href="{% url 'feature' %}?feature_id={{ r_list.0 }}">{{ r_list.1 }}</a>
-					  {% endwith %}
-					{% endfor %}
-                </td>
-                <td>{{ result.display|default_if_none:'' }}</td>
-                {% if orthologs %}
-                    <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.orthologous_group }}">{{ result.orthologous_group|default_if_none:'' }}</a></td>
-                {% endif%}
-                {% if coexp_groups %}
-                    <td><a href="{% url 'feature_search' %}?selected_facets=coexpression_group:{{ result.coexpression_group }}">{{ result.coexpression_group|default_if_none:'' }}</a></td>
-                {% endif%}
-            </tr>
-                {% empty %}
-                <p>No results found.</p>
-                {% endfor %}
-                </table>
-
-                <br />
-
-
-
-            {% if page_obj.has_previous or page_obj.has_next %}
-            <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-left">
-                <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
-                    <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
-                </li>
-
-                {% for l in page_obj.paginator.page_range %}
-                    {% if l <= page_obj.number|add:4 and l >= page_obj.number|add:-4 %}
-                    <li class="page-item {% if page_obj.number == forloop.counter %}disabled{% endif %}">
-                        <a class="page-link" href="?{% param_replace page=forloop.counter %}">{{ forloop.counter }}</a>
-                    </li>
-                    {% endif %}
-                {% endfor %}
-
-                <li class="page-item {% if page_obj.has_next == False %}disabled{% endif %}">
-                    <a class="page-link" href="{% if page_obj.has_next %}?{% param_replace page=page_obj.next_page_number %}{% endif %}">Next</a>
-                </li>
-            </ul>
-            </nav>
-
-			Number of records:
-			<a href="?{% param_replace records=10 %}">10</a>
-			<a href="?{% param_replace records=50 %}">50</a>
-			<a href="?{% param_replace records=100 %}">100</a>
-			<a href="?{% param_replace records=500 %}">500</a>
-			<a href="?{% param_replace records=1000 %}">1000</a>
-
-            {% endif %}
-
-        </div>
-     </div>
-    {% else %}
-    <div class="col py-2 mx-1 rounded bg-light">
-        <h3>Results</h3>
-            Not found.
+      </div>
     </div>
-    {% endif %}
 
+    <!-- Results Panel -->
+    <div class="col-lg-9 col-md-8">
+      {% if object_list %}
+        <div class="card shadow-sm border-light p-4" style="overflow-x: auto;">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
+            <div>
+              <h3 class="mb-0 h4 font-weight-bold">Search Results</h3>
+              <span class="text-muted small">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </div>
+            
+            <div class="mt-2 mt-sm-0">
+              {% if so_term_count == 1 or 'orthologous_group' in selected_facets_fields or 'coexpression_group' in selected_facets_fields %}
+                <a class="btn btn-sm btn-outline-secondary mr-2" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=tsv" title="Download TSV" onclick="return confirm('Download results in TSV format')">
+                  <i class="fas fa-download mr-1"></i> TSV
+                </a> 
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'feature_search_export' %}?{{ request.GET.urlencode }}&export=fasta" title="Download FASTA" onclick="return confirm('Download results in FASTA format')">
+                  <i class="fas fa-download mr-1"></i> FASTA
+                </a> 
+              {% endif %}
+            </div>
+          </div>
+
+          <table class="table table-hover table-sm border-bottom">
+            <thead class="thead-light">
+              <tr>
+                <th class="border-top-0"><a href="?{% param_replace order_by='organism' %}">Organism{% if request.GET.order_by == 'organism' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-organism' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>
+                <th class="border-top-0"><a href="?{% param_replace order_by='so_term' %}">Feature Type{% if request.GET.order_by == 'so_term' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-so_term' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>
+                <th class="border-top-0"><a href="?{% param_replace order_by='uniquename' %}">Feature ID{% if request.GET.order_by == 'uniquename' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-uniquename' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>
+                <th class="border-top-0"><a href="?{% param_replace order_by='name' %}">Info{% if request.GET.order_by == 'name' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-name' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>
+                <th class="border-top-0">Relationship</th>
+                <th class="border-top-0"><a href="?{% param_replace order_by='display' %}">Display{% if request.GET.order_by == 'display' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-display' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>
+                {% if orthologs %}<th class="border-top-0"><a href="?{% param_replace order_by='orthologous_group' %}">Orthologous Group{% if request.GET.order_by == 'orthologous_group' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-orthologous_group' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>{% endif %}
+                {% if coexp_groups %}<th class="border-top-0"><a href="?{% param_replace order_by='coexpression_group' %}">Coexpression Group{% if request.GET.order_by == 'coexpression_group' %} <i class="fas fa-sort-down"></i>{% elif request.GET.order_by == '-coexpression_group' %} <i class="fas fa-sort-up"></i>{% endif %}</a></th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in page_obj.object_list %}
+                <tr>
+                  <td><em>{{ result.organism }}</em></td>
+                  <td><span class="badge badge-light border text-dark">{{ result.so_term }}</span></td>
+                  <td>
+                    <a href="{% url 'feature' %}?feature_id={{ result.pk|safe }}" class="font-weight-bold">{{ result.uniquename }}</a>
+                  </td>
+                  <td><span class="text-muted small">{{ result.name|default_if_none:'' }}</span></td>
+                  <td>
+                    {% for relationship in result.relationships %}
+                      {% with relationship|split:" " as r_list %}
+                        <a href="{% url 'feature' %}?feature_id={{ r_list.0 }}" class="badge badge-secondary mr-1">{{ r_list.1 }}</a>
+                      {% endwith %}
+                    {% endfor %}
+                  </td>
+                  <td><small class="text-muted">{{ result.display|default_if_none:'' }}</small></td>
+                  {% if orthologs %}
+                    <td><a href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ result.orthologous_group }}" class="text-info">{{ result.orthologous_group|default_if_none:'' }}</a></td>
+                  {% endif %}
+                  {% if coexp_groups %}
+                    <td><a href="{% url 'feature_search' %}?selected_facets=coexpression_group:{{ result.coexpression_group }}" class="text-info">{{ result.coexpression_group|default_if_none:'' }}</a></td>
+                  {% endif %}
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">No results found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% if page_obj.has_previous or page_obj.has_next %}
+            <div class="d-flex align-items-center justify-content-between mt-4 flex-wrap">
+              <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item {% if page_obj.has_previous == False %}disabled{% endif %}">
+                    <a class="page-link" href="{% if page_obj.has_previous %}?{% param_replace page=page_obj.previous_page_number %}{% endif %}">Previous</a>
+                  </li>
+
+                  {% for l in page_obj.paginator.page_range %}
+                    {% if l <= page_obj.number|add:4 and l >= page_obj.number|add:-4 %}
+                      <li class="page-item {% if page_obj.number == forloop.counter %}active{% endif %}">
+                        <a class="page-link" href="?{% param_replace page=forloop.counter %}">{{ forloop.counter }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+
+                  <li class="page-item {% if page_obj.has_next == False %}disabled{% endif %}">
+                    <a class="page-link" href="{% if page_obj.has_next %}?{% param_replace page=page_obj.next_page_number %}{% endif %}">Next</a>
+                  </li>
+                </ul>
+              </nav>
+
+              <div class="text-muted small mt-2 mt-sm-0">
+                Show records:
+                <div class="btn-group btn-group-sm ml-1" role="group">
+                  <a class="btn btn-outline-secondary {% if request.GET.records == '10' or not request.GET.records %}active{% endif %}" href="?{% param_replace records=10 %}">10</a>
+                  <a class="btn btn-outline-secondary {% if request.GET.records == '50' %}active{% endif %}" href="?{% param_replace records=50 %}">50</a>
+                  <a class="btn btn-outline-secondary {% if request.GET.records == '100' %}active{% endif %}" href="?{% param_replace records=100 %}">100</a>
+                  <a class="btn btn-outline-secondary {% if request.GET.records == '500' %}active{% endif %}" href="?{% param_replace records=500 %}">500</a>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="card shadow-sm border-light p-4 text-center py-5">
+          <div class="text-muted mb-3"><i class="fas fa-search fa-2x"></i></div>
+          <h3 class="h5 font-weight-bold">No Results Found</h3>
+          <p class="text-muted small">We couldn't find any feature matching your search criteria. Try removing some filters or query terms.</p>
+          {% if query or selected_facets %}
+            <a href="?q=" class="btn btn-sm btn-primary align-self-center mt-2">Clear All Filters</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

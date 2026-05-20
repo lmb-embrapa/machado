@@ -1,14 +1,22 @@
-<!--
- Copyright 2018 by Embrapa.  All rights reserved.
-
- This code is part of the machado distribution and governed by its
- license. Please see the LICENSE.txt and README.md files that should
- have been included as part of this package for licensing information.
--->
 {% extends 'base.html' %}
 
 {% block content %}
-
-{{ context.error }}
-
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 text-center py-5">
+      <div class="text-danger mb-4">
+        <i class="fas fa-exclamation-triangle fa-3x"></i>
+      </div>
+      <h2 class="font-weight-bold mb-3">An Error Occurred</h2>
+      <div class="alert alert-danger shadow-sm mb-4 text-left">
+        {{ context.error|default:"An unexpected system error has occurred. Please try again." }}
+      </div>
+      <div>
+        <a href="{% url 'home' %}" class="btn btn-primary px-4">
+          <i class="fas fa-home mr-2"></i> Go to Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

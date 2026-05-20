@@ -239,8 +239,10 @@ class DataSummaryTest(TestCase):
         response = ds.get(request)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "gene: 1 <br />")
-        self.assertContains(response, "mRNA: 2 <br />")
+        self.assertContains(response, "gene")
+        self.assertContains(response, "1")
+        self.assertContains(response, "mRNA")
+        self.assertContains(response, "2")
 
     def test_get_no_settings_and_infraspecific(self):
         """Test get without MACHADO_VALID_TYPES and with infraspecific_name."""

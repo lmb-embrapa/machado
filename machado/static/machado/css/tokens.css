@@ -36,6 +36,36 @@
   --accent-l: 35%;
 }
 
+[data-accent="ruby"] {
+  --accent-h: 345;
+  --accent-s: 60%;
+  --accent-l: 45%;
+}
+
+[data-accent="indigo"] {
+  --accent-h: 260;
+  --accent-s: 50%;
+  --accent-l: 50%;
+}
+
+[data-accent="emerald"] {
+  --accent-h: 160;
+  --accent-s: 60%;
+  --accent-l: 40%;
+}
+
+[data-accent="coral"] {
+  --accent-h: 15;
+  --accent-s: 70%;
+  --accent-l: 55%;
+}
+
+[data-accent="plum"] {
+  --accent-h: 300;
+  --accent-s: 40%;
+  --accent-l: 40%;
+}
+
 /* --- Light Mode (default) --- */
 
 :root {
@@ -91,4 +121,12 @@
 
   --container-max: 1200px;
   --navbar-height: 48px;
+
+  /* --- Landing Page Tokens --- */
+  --hero-height: 40vh;
+  --hero-min-height: 320px;
+  --section-spacing: 5rem;
+  --card-hover-translate: -4px;
+  --stats-counter-size: 2.5rem;
+  --step-indicator-size: 2.25rem;
 }

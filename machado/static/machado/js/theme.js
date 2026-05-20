@@ -43,4 +43,31 @@ document.addEventListener('DOMContentLoaded', function () {
   var activeBtn = document.querySelector('[data-set-accent="' + currentAccent + '"]');
   if (activeBtn) activeBtn.classList.add('active');
 
+  // --- Scroll Entrance Animations ---
+  var animatedElements = document.querySelectorAll('.m-fade-up');
+  if (animatedElements.length > 0) {
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      animatedElements.forEach(function (el) {
+        el.classList.add('visible');
+      });
+    } else {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      animatedElements.forEach(function (el) {
+        observer.observe(el);
+      });
+    }
+  }
+
 });

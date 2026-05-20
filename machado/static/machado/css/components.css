@@ -176,6 +176,11 @@
 .m-accent-dot--sage { background: hsl(150, 30%, 38%); }
 .m-accent-dot--amber { background: hsl(35, 65%, 48%); }
 .m-accent-dot--graphite { background: hsl(220, 10%, 35%); }
+.m-accent-dot--ruby { background: hsl(345, 60%, 45%); }
+.m-accent-dot--indigo { background: hsl(260, 50%, 50%); }
+.m-accent-dot--emerald { background: hsl(160, 60%, 40%); }
+.m-accent-dot--coral { background: hsl(15, 70%, 55%); }
+.m-accent-dot--plum { background: hsl(300, 40%, 40%); }
 
 /* --- Buttons --- */
 
