@@ -108,7 +108,9 @@ class Command(HistoryCommandMixin, BaseCommand):
         with open(file) as tbx_file:
             tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
             for i, row in tqdm(
-                enumerate(tbx.fetch(parser=pysam.asGTF())), total=get_num_lines(file)
+                enumerate(tbx.fetch(parser=pysam.asGTF())),
+                total=get_num_lines(file),
+                disable=verbosity == 0,
             ):
                 if ignore is not None and row.feature in ignore:
                     continue
@@ -144,7 +146,7 @@ class Command(HistoryCommandMixin, BaseCommand):
                 )
             )
 
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             task.result()
         pool.shutdown()
 

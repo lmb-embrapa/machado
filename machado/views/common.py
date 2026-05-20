@@ -12,13 +12,20 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
 
-from machado.models import Feature, Pub
+from machado.models import Feature, Pub, Organism
 
 
 class HomeView(TemplateView):
     """Home view."""
 
     template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        """Get the context data for Home page view."""
+        context = super().get_context_data(**kwargs)
+        context["organism_count"] = Organism.objects.count()
+        context["feature_count"] = Feature.objects.count()
+        return context
 
 
 class DataSummaryView(View):

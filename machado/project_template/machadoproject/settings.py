@@ -79,7 +79,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 # ── Static files ─────────────────────────────────────────────────────────────
-STATIC_URL = "/static/"
+STATIC_URL = env("STATIC_URL", default="/static/")
 STATIC_ROOT = env("STATIC_ROOT", default=str(BASE_DIR / "staticfiles"))
 STORAGES = {
     "staticfiles": {
@@ -109,3 +109,14 @@ if env("MACHADO_JBROWSE_OFFSET", default=None):
 
 if env("MACHADO_JBROWSE_TRACKS", default=None):
     MACHADO_JBROWSE_TRACKS = env("MACHADO_JBROWSE_TRACKS")
+
+# ── Email configuration ──────────────────────────────────────────────────────
+if env("EMAIL_URL", default=None):
+    email_config = env.email_url("EMAIL_URL")
+    EMAIL_BACKEND = email_config.get("EMAIL_BACKEND")
+    EMAIL_HOST = email_config.get("EMAIL_HOST")
+    EMAIL_PORT = email_config.get("EMAIL_PORT")
+    EMAIL_HOST_USER = email_config.get("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = email_config.get("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = email_config.get("EMAIL_USE_TLS")
+    EMAIL_USE_SSL = email_config.get("EMAIL_USE_SSL")

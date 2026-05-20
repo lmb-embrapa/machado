@@ -9,13 +9,13 @@
 
 {% load static l10n %}
 {% block content %}
-
+<div class="container my-4">
 
 {% if feature.error == None %}
 
 {% if data %}
 <input type="hidden" value="{{ feature.feature_id|safe }}" id="feature_id" name="feature_id"></input>
-<div class="card m-1">
+<div class="card mb-4 shadow-sm border-light">
   <div class="card-header">
     <small><em>
         {{ feature.organism.genus }}
@@ -67,7 +67,7 @@
 {% endif %}
 
 {% if feature.get_annotation %}
-<div class="card m-1" id="cardAnnotation">
+<div class="card mb-4 shadow-sm border-light" id="cardAnnotation">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'annotation' %}&load={{ l }}{% endif %}{% endfor %}{% if 'annotation' not in load_list %}&load=annotation{% endif %}#collapseAnnotation"
@@ -93,7 +93,7 @@
 {% endif %}
 
 {% if feature.get_location %}
-<div class="card m-1">
+<div class="card mb-4 shadow-sm border-light">
   <div class="card-header">
     <h4 class="card-title">
       Location
@@ -113,7 +113,7 @@
 {% endif %}
 
 {% if data.has_cvterm or data.has_protein_matches %}
-<div class="card m-1" id="cardFunctional">
+<div class="card mb-4 shadow-sm border-light" id="cardFunctional">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'functional' %}&load={{ l }}{% endif %}{% endfor %}{% if 'functional' not in load_list %}&load=functional{% endif %}#collapseFunctional"
@@ -175,7 +175,7 @@
 {% endif %}
 
 {% if data.has_similarity %}
-<div class="card m-1" id="cardSimilarity">
+<div class="card mb-4 shadow-sm border-light" id="cardSimilarity">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'similarity' %}&load={{ l }}{% endif %}{% endfor %}{% if 'similarity' not in load_list %}&load=similarity{% endif %}#collapseSimilarity"
@@ -229,7 +229,7 @@
 {% endif %}
 
 {% if data.has_expression %}
-<div class="card m-1" id="cardExpression">
+<div class="card mb-4 shadow-sm border-light" id="cardExpression">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'expression' %}&load={{ l }}{% endif %}{% endfor %}{% if 'expression' not in load_list %}&load=expression{% endif %}#collapseExpression"
@@ -278,7 +278,7 @@
 {% endif %}
 
 {% if data.has_orthologs %}
-<div class="card m-1" id="cardOrthologs">
+<div class="card mb-4 shadow-sm border-light" id="cardOrthologs">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'orthologs' %}&load={{ l }}{% endif %}{% endfor %}{% if 'orthologs' not in load_list %}&load=orthologs{% endif %}#collapseOrthologs"
@@ -313,7 +313,7 @@
 {% endif %}
 
 {% if data.has_sequence %}
-<div class="card m-1" id="cardSequence">
+<div class="card mb-4 shadow-sm border-light" id="cardSequence">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'sequence' %}&load={{ l }}{% endif %}{% endfor %}{% if 'sequence' not in load_list %}&load=sequence{% endif %}#collapseSeq"
@@ -325,7 +325,7 @@
     </h4>
   </div>
   <div class="card-body collapse {% if 'sequence' in load_list %}show{% endif %}" id="collapseSeq">
-    <div class="card-text text-monospace">
+    <div class="card-text text-monospace" style="word-wrap: break-word; word-break: break-all;">
       {% if 'sequence' in load_list %}
       <small>{{ data.sequence_data }}</small>
       {% else %}
@@ -337,7 +337,7 @@
 {% endif %}
 
 {% if data.has_pubs %}
-<div class="card m-1" id="cardPubs">
+<div class="card mb-4 shadow-sm border-light" id="cardPubs">
   <div class="card-header">
     <h4 class="card-title">
       <a href="?feature_id={{ feature.feature_id|unlocalize }}{% for l in load_list %}{% if l != 'pubs' %}&load={{ l }}{% endif %}{% endfor %}{% if 'pubs' not in load_list %}&load=pubs{% endif %}#collapsePub"
@@ -377,6 +377,7 @@
 {% else %}
 {{ feature.error }}
 {% endif %}
+</div>
 <style>
   .collapse:not(.show) {
     display: none;

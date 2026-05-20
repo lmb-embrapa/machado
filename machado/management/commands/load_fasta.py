@@ -83,7 +83,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         **options,
     ) -> None:
         """Execute the main function."""
-
         if verbosity > 0:
             self.stdout.write("Preprocessing data...")
 
@@ -110,7 +109,7 @@ class Command(HistoryCommandMixin, BaseCommand):
             )
         if verbosity > 0:
             self.stdout.write("Loading data...")
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             if task.result():
                 raise (task.result())
         pool.shutdown()

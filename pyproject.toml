@@ -16,21 +16,22 @@ classifiers = [
     "Environment :: Console",
     "Framework :: Django :: 5.2",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "django~=5.2",
     "django-environ~=0.12.0",
     "whitenoise~=6.9.0",
-    "psycopg2-binary~=2.9.12",
+    "psycopg[binary]~=3.3.4",
     "networkx~=3.6",
     "obonet~=1.1.1",
     "biopython~=1.87",
     "tqdm~=4.67.3",
     "bibtexparser~=1.4.4",
     "pysam~=0.24.0",
+    "numpy~=2.2.3",
 ]
 
 [project.scripts]

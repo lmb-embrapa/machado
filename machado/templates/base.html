@@ -10,75 +10,205 @@
 
 {% load static %}
 
-<html lang="">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Machado Genomics — biological data management">
 
-  <title>machado</title>
-  <link rel="stylesheet" href="https://bootswatch.com/4/flatly/bootstrap.min.css">
+  <title>Machado Genomics</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.min.css">
+
+  <!-- Machado Design System -->
+  <link rel="stylesheet" href="{% static 'machado/css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'machado/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'machado/css/components.css' %}">
+
+  <!-- DataTables (used by some pages) -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+  <!-- Accent init (blocking — prevents FOUC) -->
+  <script>
+    (function () {
+      var a = localStorage.getItem('machado-accent') || 'steel';
+      document.documentElement.setAttribute('data-accent', a);
+    })();
+  </script>
+  {% block extra_css %}{% endblock %}
 </head>
 
 
-  <body>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="{% url 'home' %}">Machado Genomics</a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain" aria-controls="navMain"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'data_numbers' %}">Data summary</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/lmb-embrapa/machado" target="_blank">About</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ml-auto" style="gap: 0.25rem;">
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'loader_dashboard' %}" style="color: var(--color-accent); font-weight: 600;">
+            <i class="fas fa-database mr-1"></i> Data Tools
+          </a>
+        </li>
+        {% endif %}
+
+
+        <!-- Accent color picker -->
+        {% if user.is_superuser %}
+        <li class="nav-item d-flex align-items-center">
+          <div class="m-accent-picker" id="accent-picker">
+            <button class="m-theme-btn" title="Change accent color">
+              <i class="fas fa-palette"></i>
+            </button>
+            <div class="m-accent-menu">
+              <button class="m-accent-swatch" data-set-accent="steel">
+                <span class="m-accent-dot m-accent-dot--steel"></span> Steel Blue
+              </button>
+              <button class="m-accent-swatch" data-set-accent="teal">
+                <span class="m-accent-dot m-accent-dot--teal"></span> Deep Teal
+              </button>
+              <button class="m-accent-swatch" data-set-accent="sage">
+                <span class="m-accent-dot m-accent-dot--sage"></span> Slate Green
+              </button>
+              <button class="m-accent-swatch" data-set-accent="amber">
+                <span class="m-accent-dot m-accent-dot--amber"></span> Warm Amber
+              </button>
+              <button class="m-accent-swatch" data-set-accent="graphite">
+                <span class="m-accent-dot m-accent-dot--graphite"></span> Charcoal
+              </button>
+              <button class="m-accent-swatch" data-set-accent="ruby">
+                <span class="m-accent-dot m-accent-dot--ruby"></span> Ruby Red
+              </button>
+              <button class="m-accent-swatch" data-set-accent="indigo">
+                <span class="m-accent-dot m-accent-dot--indigo"></span> Indigo Blue
+              </button>
+              <button class="m-accent-swatch" data-set-accent="emerald">
+                <span class="m-accent-dot m-accent-dot--emerald"></span> Emerald Green
+              </button>
+              <button class="m-accent-swatch" data-set-accent="coral">
+                <span class="m-accent-dot m-accent-dot--coral"></span> Coral Pink
+              </button>
+              <button class="m-accent-swatch" data-set-accent="plum">
+                <span class="m-accent-dot m-accent-dot--plum"></span> Plum Purple
+              </button>
+            </div>
+          </div>
+        </li>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            {{ user.username }}
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
+            <div class="dropdown-divider"></div>
+            <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link nav-link text-left w-100 px-4"
+                style="color: var(--color-text);">Logout</button>
+            </form>
+          </div>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Login</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Search bar -->
+  {% block search_bar %}
+  <div class="m-search-section" name="search-bar">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col col-sm-6 col-md-5">
+          {% include "search_form.html" %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+  <!-- Flash messages -->
+  <div name="content">
+    <input type="hidden" value="{% url 'home' %}" id="home_url" name="home_url">
+
+    <div class="container mt-3">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <!-- Footer -->
+  <footer class="m-footer">
+    <div class="container">
+      <div class="row align-items-center justify-content-between">
+        <div class="col-sm-6 text-left">
+          <p class="mb-0 text-muted small">
+            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">Machado
+                Genomics</a></strong> — Genomics Data Management Portal.
+          </p>
+        </div>
+        <div class="col-sm-6 text-right">
+          <p class="mb-0 text-muted small">
+            &copy; 2026 Embrapa. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
   <script src="https://unpkg.com/htmx.org@2.0.0"></script>
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script src="https://unpkg.com/@popperjs/core@2.4.0/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+  <script src="{% static 'machado/js/theme.js' %}"></script>
 
-
-  <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-
-      <a class="navbar-brand" href="{% url 'home' %}"><h3>machado</h3></a>
-
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="fas fa-bars"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'data_numbers' %}">Data summary</a>
-          </li>
-
-          <li>
-            <a class="nav-link" href="https://github.com/lmb-embrapa/machado" target="_blank">About</a>
-		      </li>
-        </ul>
-      </div>
-    </nav>
-	<div class="container-fluid bg-secondary" name="search-bar">
-      <div class="row justify-content-center">
-		<div class="col col-sm-4 mt-3">
-            {% include "search_form.html" %}
-	    </div>
-      </div>
-	</div>
-  </header>
-
-  <div name="content">
-    <input type="hidden" value="{% url 'home' %}" id="home_url" name="home_url"></input>
-    {% block content %}
-    {% endblock %}
-  </div>
 </body>
-
-<footer class="page-footer font-small bg-secondary">
-      <div class="text-center pt-4">
-        <h5 class="text-uppercase font-weight-bold">Machado</h5>
-        <p>Demonstration website</p>
-      </div>
-
-      <div class="footer-copyright text-center py-3 bg-primary text-white">Powered by <strong><a class="" href="https://github.com/lmb-embrapa/machado">machado</a></strong>
-      </div>
-
-</footer>
 
 </html>

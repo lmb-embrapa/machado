@@ -59,7 +59,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         **options,
     ) -> None:
         """Execute the main function."""
-
         insert_organism(
             genus=genus,
             species=species,

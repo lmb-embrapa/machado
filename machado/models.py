@@ -4318,35 +4318,54 @@ class Treatment(models.Model):
 
 
 class History(models.Model):
+    STATUS_CHOICES = [
+        ("PENDING", "Waiting"),
+        ("RUNNING", "Running"),
+        ("SUCCESS", "Success"),
+        ("FAILURE", "Failed"),
+        ("DEAD", "Dead"),
+    ]
+
     history_id = models.AutoField(primary_key=True)
     command = models.CharField(max_length=255)
     params = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    pid = models.IntegerField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
+    stdout = models.TextField(blank=True, null=True)
+    stderr = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(blank=True, null=True)
-    exit_code = models.IntegerField(null=True, blank=True)  # 0 = success, 1 = error
+    exit_code = models.IntegerField(null=True, blank=True)
 
     class Meta:
         db_table = "history"
 
-    def start(self, command: str, params: str) -> None:
-        """Create new entry."""
+    def start(self, command: str, params: str, pid: int = None) -> None:
+        """Create or update entry to log the start."""
         self.command = command
         self.params = params
+        self.pid = pid
+        self.status = "RUNNING"
         self.created_at = timezone.now()
         self.save()
 
-    def success(self, description: str = None) -> None:
+    def success(self, stdout: str = None, stderr: str = None) -> None:
         """Update entry to log the finish."""
-        self.description = description
+        self.stdout = stdout
+        self.stderr = stderr
+        self.status = "SUCCESS"
         self.exit_code = 0
         self.finished_at = timezone.now()
         self.save()
 
-    def failure(self, description: str = None) -> None:
+    def failure(
+        self, stdout: str = None, stderr: str = None, exit_code: int = 1
+    ) -> None:
         """Update entry to log the finish."""
-        self.description = description
-        self.exit_code = 1
+        self.stdout = stdout
+        self.stderr = stderr
+        self.status = "FAILURE"
+        self.exit_code = exit_code
         self.finished_at = timezone.now()
         self.save()
 
@@ -4403,4 +4422,5 @@ class FeatureSearchIndex(models.Model):
         ]
 
     def __str__(self):
+        """Return a string representation of the search index."""
         return f"SearchIndex({self.uniquename})"

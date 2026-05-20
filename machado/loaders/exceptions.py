@@ -11,6 +11,7 @@ class ImportingError(Exception):
     """Handles importing errors with contextual metadata."""
 
     def __init__(self, message, file=None, line=None, field=None, context=None):
+        """Initialize ImportingError with contextual details."""
         self.message = message
         self.file = file
         self.line = line
@@ -19,6 +20,7 @@ class ImportingError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
+        """Return string representation of the importing error."""
         msg = self.message
         if self.file:
             msg = f"File: {self.file} - {msg}"

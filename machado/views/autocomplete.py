@@ -6,6 +6,7 @@ from re import escape, search, IGNORECASE
 
 class AutocompleteView(View):
     def get(self, request):
+        """Handle HTTP GET request for autocomplete suggestions."""
         query = request.GET.get("q", "").strip()
         if not query or len(query) < 2:
             return HttpResponse("")

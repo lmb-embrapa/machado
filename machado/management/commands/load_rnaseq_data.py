@@ -176,7 +176,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         if verbosity > 0:
             self.stdout.write("Loading data...")
 
-        for task in tqdm(as_completed(tasks), total=len(tasks)):
+        for task in tqdm(as_completed(tasks), total=len(tasks), disable=verbosity == 0):
             try:
                 task.result()
             except ObjectDoesNotExist as e:

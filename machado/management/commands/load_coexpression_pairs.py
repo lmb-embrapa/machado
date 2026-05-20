@@ -61,7 +61,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         **options,
     ):
         """Execute the main function."""
-
         filename = os.path.basename(file)
         if verbosity > 0:
             self.stdout.write("Processing file: {}".format(filename))
@@ -84,7 +83,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         chunk = cpu * 5
         with ThreadPoolExecutor(max_workers=cpu) as pool:
             tasks = list()
-            for line in tqdm(pairs, total=size):
+            for line in tqdm(pairs, total=size, disable=verbosity == 0):
                 nfields = 3
                 fields = re.split(r"\s+", line.rstrip())
                 FieldsValidator().validate(nfields, fields)

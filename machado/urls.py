@@ -7,8 +7,7 @@
 """URLs."""
 
 from django.conf import settings
-from django.urls import re_path
-from django.views.decorators.cache import cache_page
+from django.urls import re_path, path, include
 
 from machado.views import common
 
@@ -17,11 +16,11 @@ try:
 except AttributeError:
     CACHE_TIMEOUT = 60 * 60
 
-from machado.views import feature, search, autocomplete, jbrowse
+from machado.views import feature, search, autocomplete, jbrowse, loader
 
 urlpatterns = [
     re_path(
-        r"autocomplete/",
+        r"^autocomplete/$",
         autocomplete.AutocompleteView.as_view(),
         name="autocomplete_html",
     ),
@@ -38,24 +37,32 @@ urlpatterns = [
         name="jbrowse_features",
     ),
     re_path(
-        r"feature/",
-        cache_page(CACHE_TIMEOUT)(feature.FeatureView.as_view()),
+        r"^feature/$",
+        feature.FeatureView.as_view(),
         name="feature",
     ),
     re_path(
-        r"data/",
-        cache_page(CACHE_TIMEOUT)(common.DataSummaryView.as_view()),
+        r"^data/$",
+        common.DataSummaryView.as_view(),
         name="data_numbers",
     ),
     re_path(
-        r"find/",
-        cache_page(CACHE_TIMEOUT)(search.FeatureSearchView.as_view()),
+        r"^find/$",
+        search.FeatureSearchView.as_view(),
         name="feature_search",
     ),
     re_path(
-        r"export/",
-        cache_page(CACHE_TIMEOUT)(search.FeatureSearchExportView.as_view()),
+        r"^export/$",
+        search.FeatureSearchExportView.as_view(),
         name="feature_search_export",
     ),
-    re_path(r"^$", cache_page(CACHE_TIMEOUT)(common.HomeView.as_view()), name="home"),
+    path("loader/accounts/", include("django.contrib.auth.urls")),
+    path("loader/", loader.DashboardView.as_view(), name="loader_dashboard"),
+    path("loader/history/", loader.HistoryListView.as_view(), name="loader_history"),
+    path(
+        "loader/command/<str:command_name>/",
+        loader.CommandFormView.as_view(),
+        name="loader_command_form",
+    ),
+    re_path(r"^$", common.HomeView.as_view(), name="home"),
 ]

@@ -24,6 +24,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # ── Django ───────────────────────────────────────────────────────────────────
 # DEBUG=True
 # ALLOWED_HOSTS=localhost,127.0.0.1
+# STATIC_URL=/static/
 # STATIC_ROOT=staticfiles
 
 
@@ -36,7 +37,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # ── Feature types for search indexing (optional) ─────────────────────────────
 # MACHADO_VALID_TYPES=gene,mRNA,polypeptide
 
-
+# EMAIL_URL=smtp://user:password@smtp.example.com:587/?tls=True
 """
 
 

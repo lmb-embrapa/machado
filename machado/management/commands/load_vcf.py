@@ -92,7 +92,9 @@ class Command(HistoryCommandMixin, BaseCommand):
         with open(file) as tbx_file:
             tbx = pysam.TabixFile(filename=tbx_file.name, index=index_file)
             for i, row in tqdm(
-                enumerate(tbx.fetch(parser=pysam.asVCF())), total=get_num_lines(file)
+                enumerate(tbx.fetch(parser=pysam.asVCF())),
+                total=get_num_lines(file),
+                disable=verbosity == 0,
             ):
                 tasks.append(
                     pool.submit(feature_file.store_tabix_VCF_feature, row, line=i + 1)
