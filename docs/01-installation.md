@@ -95,6 +95,12 @@ python manage.py migrate
 
 Just ignore warnings about unapplied migrations.
 
+Collect the static files:
+
+```bash
+python manage.py collectstatic --no-input
+```
+
 Run the tests to verify the installation:
 
 ```bash
