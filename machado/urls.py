@@ -64,5 +64,10 @@ urlpatterns = [
         loader.CommandFormView.as_view(),
         name="loader_command_form",
     ),
+    path(
+        "loader/permissions/",
+        loader.OrganismPermissionsView.as_view(),
+        name="loader_permissions",
+    ),
     re_path(r"^$", common.HomeView.as_view(), name="home"),
 ]

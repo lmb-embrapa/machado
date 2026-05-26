@@ -175,6 +175,12 @@ class FeatureView(View):
             error = {"error": "Feature not found."}
             return render(request, "error.html", {"context": error})
 
+        user = getattr(request, "user", None)
+        is_authenticated = user.is_authenticated if user else False
+        if not is_authenticated and not feature_obj.organism.is_public:
+            error = {"error": "Feature not found."}
+            return render(request, "error.html", {"context": error}, status=404)
+
         data = self.retrieve_feature_data(feature_obj=feature_obj, load_list=load_list)
 
         return render(

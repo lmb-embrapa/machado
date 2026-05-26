@@ -21,6 +21,7 @@ class SearchViewsTest(TestCase):
 
         mock_qs = MagicMock()
         mock_form.search.return_value = mock_qs
+        mock_qs.exclude.return_value = mock_qs
         mock_qs.order_by.return_value = mock_qs
 
         request = self.factory.get("/find/?q=test&order_by=name&records=10")
@@ -44,6 +45,7 @@ class SearchViewsTest(TestCase):
 
         mock_qs = MagicMock()
         mock_form.search.return_value = mock_qs
+        mock_qs.exclude.return_value = mock_qs
         mock_qs.order_by.return_value = mock_qs
 
         request = self.factory.get("/find/")
