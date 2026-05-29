@@ -181,6 +181,13 @@ class FeatureView(View):
             error = {"error": "Feature not found."}
             return render(request, "error.html", {"context": error}, status=404)
 
+        if (
+            feature_obj.organism.genus == "multispecies"
+            and feature_obj.organism.species == "multispecies"
+        ):
+            error = {"error": "Feature not found."}
+            return render(request, "error.html", {"context": error}, status=404)
+
         data = self.retrieve_feature_data(feature_obj=feature_obj, load_list=load_list)
 
         return render(

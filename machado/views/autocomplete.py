@@ -25,6 +25,11 @@ class AutocompleteView(View):
             )
             queryset = queryset.exclude(feature__organism__in=private_orgs)
 
+        queryset = queryset.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
+
         queryset = queryset.filter(autocomplete_text__icontains=query)[: max_items * 10]
 
         result = set()

@@ -30,15 +30,25 @@ class HomeView(TemplateView):
                 Organismprop_organism_Organism__type__cv__name="organism_property",
                 Organismprop_organism_Organism__value="false",
             )
+            context["organism_count"] = (
+                Organism.objects.exclude(pk__in=private_orgs)
+                .exclude(genus="multispecies", species="multispecies")
+                .count()
+            )
+            context["feature_count"] = (
+                Feature.objects.exclude(organism__in=private_orgs)
+                .exclude(
+                    organism__genus="multispecies", organism__species="multispecies"
+                )
+                .count()
+            )
+        else:
             context["organism_count"] = Organism.objects.exclude(
-                pk__in=private_orgs
+                genus="multispecies", species="multispecies"
             ).count()
             context["feature_count"] = Feature.objects.exclude(
-                organism__in=private_orgs
+                organism__genus="multispecies", organism__species="multispecies"
             ).count()
-        else:
-            context["organism_count"] = Organism.objects.count()
-            context["feature_count"] = Feature.objects.count()
         return context
 
 
@@ -65,6 +75,10 @@ class DataSummaryView(View):
                 Organismprop_organism_Organism__value="false",
             )
             features_qs = features_qs.exclude(organism__in=private_orgs)
+
+        features_qs = features_qs.exclude(
+            organism__genus="multispecies", organism__species="multispecies"
+        )
 
         counts = (
             features_qs.values(

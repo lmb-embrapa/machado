@@ -69,6 +69,11 @@ class FeatureSearchView(ListView):
             )
             qs = qs.exclude(feature__organism__in=private_orgs)
 
+        qs = qs.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
+
         # Ordering
         order_by = self.request.GET.get("order_by", "uniquename")
         q = self.request.GET.get("q", "").strip()
@@ -191,6 +196,11 @@ class FeatureSearchExportView(ListView):
                 Organismprop_organism_Organism__value="false",
             )
             qs = qs.exclude(feature__organism__in=private_orgs)
+
+        qs = qs.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
 
         order_by = self.request.GET.get("order_by", "uniquename")
         return qs.order_by(order_by)

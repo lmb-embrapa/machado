@@ -1318,7 +1318,9 @@ class HistoryListView(LoginRequiredMixin, View):
 class OrganismPermissionsView(LoginRequiredMixin, View):
     def get(self, request):
         """Render permissions panel containing all organisms and their current visibility status."""
-        organisms = Organism.objects.all().order_by("genus", "species")
+        organisms = Organism.objects.exclude(
+            genus="multispecies", species="multispecies"
+        ).order_by("genus", "species")
         return render(request, "loader/permissions.html", {"organisms": organisms})
 
     def post(self, request):

@@ -191,9 +191,9 @@ class OrganismPermissionsTest(TestCase):
         home_url = reverse("home")
         response = self.anonymous_client.get(home_url)
         self.assertEqual(response.status_code, 200)
-        # Should count 2 organisms (pre-existing public default and self.public_org)
+        # Should count 1 organism (self.public_org, as pre-existing public 'multispecies' is excluded)
         # and 1 feature (excluding private ones)
-        self.assertEqual(response.context["organism_count"], 2)
+        self.assertEqual(response.context["organism_count"], 1)
         self.assertEqual(response.context["feature_count"], 1)
 
         summary_url = reverse("data_numbers")
@@ -207,8 +207,8 @@ class OrganismPermissionsTest(TestCase):
         self.client.force_login(self.admin)
         response = self.client.get(home_url)
         self.assertEqual(response.status_code, 200)
-        # Should count all 3 organisms (default + public + private) and 3 features
-        self.assertEqual(response.context["organism_count"], 3)
+        # Should count all 2 organisms (public + private, default 'multispecies' excluded) and 3 features
+        self.assertEqual(response.context["organism_count"], 2)
         self.assertEqual(response.context["feature_count"], 3)
 
         response = self.client.get(summary_url)
