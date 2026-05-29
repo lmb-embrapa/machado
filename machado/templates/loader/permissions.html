@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container my-5">
+  <div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm border-light">
+        <a href="{% url 'loader_dashboard' %}" class="list-group-item list-group-item-action">
+          <i class="fas fa-th-large mr-2"></i>Dashboard
+        </a>
+        <a href="{% url 'loader_history' %}" class="list-group-item list-group-item-action">
+          <i class="fas fa-history mr-2"></i>History Panel
+        </a>
+        <a href="{% url 'loader_permissions' %}" class="list-group-item list-group-item-action active">
+          <i class="fas fa-user-lock mr-2"></i>Permissions
+        </a>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="col-md-9">
+      <div class="card shadow-sm border-light p-4 position-relative" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 12px;">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between mb-4 pb-3 border-bottom">
+          <div class="mb-3 mb-sm-0">
+            <h2 class="h4 font-weight-bold mb-1 text-dark">
+              <i class="fas fa-user-shield text-primary mr-2"></i>Organism Visibility Permissions
+            </h2>
+            <p class="text-muted small mb-0">Control which organisms and their genomic features are visible to public (anonymous) users.</p>
+          </div>
+          <!-- Search input -->
+          <div class="search-box">
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
+              </div>
+              <input type="text" id="organismSearch" class="form-control border-left-0" placeholder="Search organisms..." style="max-width: 220px; border-radius: 0 4px 4px 0;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive" style="overflow-x: auto;">
+          <table class="table table-hover align-middle mb-0" id="organismsTable">
+            <thead class="thead-light">
+              <tr>
+                <th class="border-top-0 py-3">Organism Details</th>
+                <th class="border-top-0 py-3">Taxonomy</th>
+                <th class="border-top-0 py-3 text-center" style="width: 150px;">Visibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for org in organisms %}
+                <tr class="organism-row">
+                  <td class="py-3">
+                    <div class="d-flex align-items-center">
+                      <div class="icon-avatar mr-3 bg-light-primary text-primary d-flex align-items-center justify-content-center">
+                        <i class="fas fa-leaf"></i>
+                      </div>
+                      <div>
+                        <span class="font-weight-bold text-dark h6 mb-0 d-block">{{ org.genus }} {{ org.species }}</span>
+                        {% if org.infraspecific_name %}
+                          <span class="badge badge-light border text-muted small mt-1">{{ org.infraspecific_name }}</span>
+                        {% endif %}
+                        {% if org.common_name %}
+                          <small class="text-muted d-block mt-1"><i class="far fa-comment-dots mr-1"></i>{{ org.common_name }}</small>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 text-muted">
+                    <div class="small">Genus: <strong>{{ org.genus }}</strong></div>
+                    <div class="small">Species: <strong>{{ org.species }}</strong></div>
+                    {% if org.abbreviation %}
+                      <div class="small">Abbr: <code>{{ org.abbreviation }}</code></div>
+                    {% endif %}
+                  </td>
+                  <td class="py-3 text-center align-middle">
+                    <div class="d-inline-flex flex-column align-items-center">
+                      <!-- Custom Premium Toggle Switch -->
+                      <label class="premium-switch">
+                        <input type="checkbox" class="visibility-toggle" data-organism-id="{{ org.organism_id }}" {% if org.is_public %}checked{% endif %}>
+                        <span class="slider round"></span>
+                      </label>
+                      <span class="status-label mt-2 small font-weight-bold {% if org.is_public %}text-success{% else %}text-danger{% endif %}">
+                        {% if org.is_public %}Public{% else %}Private{% endif %}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center py-5 text-muted">
+                    <i class="fas fa-folder-open fa-2x mb-3 text-muted"></i>
+                    <p class="mb-0">No organisms registered in the database.</p>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Toasts Container -->
+<div id="toastContainer" class="position-fixed" style="top: 20px; right: 20px; z-index: 9999; pointer-events: none;"></div>
+
+<!-- Styling -->
+<style>
+  /* Glassmorphic card styling overrides */
+  .bg-light-primary {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+  .icon-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+  }
+  .organism-row:hover .icon-avatar {
+    transform: scale(1.1);
+  }
+
+  /* Premium Switch Styling */
+  .premium-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    margin-bottom: 0;
+  }
+  .premium-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  input:checked + .slider {
+    background-color: #28a745;
+  }
+  input:focus + .slider {
+    box-shadow: 0 0 1px #28a745;
+  }
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  .slider.round {
+    border-radius: 34px;
+  }
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  /* Status label spacing */
+  .status-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 60px;
+    display: inline-block;
+    transition: color 0.3s ease;
+  }
+
+  /* Toast notification design */
+  .custom-toast {
+    pointer-events: auto;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-left: 4px solid #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
+  }
+  .custom-toast.success {
+    border-left-color: #28a745;
+  }
+  .custom-toast.error {
+    border-left-color: #dc3545;
+  }
+  @keyframes slideIn {
+    from {
+      transform: translateX(120%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes fadeOut {
+    to {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+  }
+</style>
+
+<!-- Interaction Logic -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // ── Search Filtering ───────────────────────────────────────────────────
+    const searchInput = document.getElementById('organismSearch');
+    const tableRows = document.querySelectorAll('.organism-row');
+
+    searchInput.addEventListener('input', function() {
+      const term = this.value.toLowerCase().trim();
+      tableRows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(term)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+
+    // ── AJAX Toggle Request ────────────────────────────────────────────────
+    const toggles = document.querySelectorAll('.visibility-toggle');
+
+    toggles.forEach(toggle => {
+      toggle.addEventListener('change', function() {
+        const orgId = this.dataset.organismId;
+        const isPublic = this.checked;
+        const statusLabel = this.closest('div').querySelector('.status-label');
+        const self = this;
+
+        // Temporarily disable toggle to prevent spamming
+        self.disabled = true;
+
+        fetch('{% url "loader_permissions" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            organism_id: orgId,
+            is_public: isPublic
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          self.disabled = false;
+          if (data.success) {
+            // Update UI status label and color
+            if (data.is_public) {
+              statusLabel.textContent = 'Public';
+              statusLabel.className = 'status-label mt-2 small font-weight-bold text-success';
+              showToast('Success', 'Organism is now Public.', 'success');
+            } else {
+              statusLabel.textContent = 'Private';
+              statusLabel.className = 'status-label mt-2 small font-weight-bold text-danger';
+              showToast('Success', 'Organism is now Private.', 'success');
+            }
+          } else {
+            // Revert state
+            self.checked = !isPublic;
+            showToast('Error', data.error || 'Failed to update visibility.', 'error');
+          }
+        })
+        .catch(error => {
+          self.disabled = false;
+          self.checked = !isPublic;
+          showToast('Error', 'An error occurred. Please try again.', 'error');
+        });
+      });
+    });
+
+    // ── Toast Notification Builder ──────────────────────────────────────────
+    function showToast(title, message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `custom-toast ${type} p-3 d-flex align-items-start`;
+
+      const icon = type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger';
+
+      toast.innerHTML = `
+        <div class="mr-3 mt-1">
+          <i class="fas ${icon} fa-lg"></i>
+        </div>
+        <div class="flex-grow-1">
+          <strong class="text-dark d-block">${title}</strong>
+          <small class="text-muted">${message}</small>
+        </div>
+        <button type="button" class="close ml-2" style="font-size: 1.2rem; line-height: 1;" onclick="this.closest('.custom-toast').remove()">
+          <span>&times;</span>
+        </button>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto-remove after 4 seconds
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.4s ease forwards';
+        setTimeout(() => toast.remove(), 400);
+      }, 4000);
+    }
+  });
+</script>
+
+{% endblock %}

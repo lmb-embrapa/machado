@@ -58,6 +58,22 @@ class FeatureSearchView(ListView):
         else:
             qs = FeatureSearchIndex.objects.none()
 
+        user = getattr(self.request, "user", None)
+        if not user or not user.is_authenticated:
+            from machado.models import Organism
+
+            private_orgs = Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+            qs = qs.exclude(feature__organism__in=private_orgs)
+
+        qs = qs.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
+
         # Ordering
         order_by = self.request.GET.get("order_by", "uniquename")
         q = self.request.GET.get("q", "").strip()
@@ -169,6 +185,22 @@ class FeatureSearchExportView(ListView):
             qs = form.search(selected_facets=selected_facets)
         else:
             qs = FeatureSearchIndex.objects.none()
+
+        user = getattr(self.request, "user", None)
+        if not user or not user.is_authenticated:
+            from machado.models import Organism
+
+            private_orgs = Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+            qs = qs.exclude(feature__organism__in=private_orgs)
+
+        qs = qs.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
 
         order_by = self.request.GET.get("order_by", "uniquename")
         return qs.order_by(order_by)

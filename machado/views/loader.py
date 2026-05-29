@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import threading
@@ -7,6 +8,7 @@ import tempfile
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from machado.models import (
@@ -1311,3 +1313,33 @@ class HistoryListView(LoginRequiredMixin, View):
             "loader/history.html",
             {"histories": histories, "any_running": any_running},
         )
+
+
+class OrganismPermissionsView(LoginRequiredMixin, View):
+    def get(self, request):
+        """Render permissions panel containing all organisms and their current visibility status."""
+        organisms = Organism.objects.exclude(
+            genus="multispecies", species="multispecies"
+        ).order_by("genus", "species")
+        return render(request, "loader/permissions.html", {"organisms": organisms})
+
+    def post(self, request):
+        """Handle AJAX POST request to toggle organism visibility."""
+        try:
+            data = json.loads(request.body)
+            organism_id = data.get("organism_id")
+            is_public = data.get("is_public")
+            if organism_id is None or is_public is None:
+                return JsonResponse(
+                    {"success": False, "error": "Missing parameters"}, status=400
+                )
+
+            organism = Organism.objects.get(pk=int(organism_id))
+            organism.set_public(bool(is_public))
+            return JsonResponse({"success": True, "is_public": organism.is_public})
+        except Organism.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "error": "Organism not found"}, status=404
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)

@@ -346,3 +346,52 @@ def machado_pub_methods():
         return cls
 
     return wrapper
+
+
+def get_organism_is_public(self):
+    """Check if organism is public."""
+    prop = self.Organismprop_organism_Organism.filter(
+        type__name="is_public", type__cv__name="organism_property"
+    ).first()
+    if prop:
+        return prop.value != "false"
+    return True
+
+
+def set_organism_public(self, is_public: bool):
+    """Set the public/private status of an organism."""
+    from machado.models import Cv, Cvterm, Db, Dbxref, Organismprop
+
+    db_local, _ = Db.objects.get_or_create(name="local")
+    dbxref_is_public, _ = Dbxref.objects.get_or_create(
+        db=db_local, accession="is_public"
+    )
+    cv_org_prop, _ = Cv.objects.get_or_create(name="organism_property")
+    cvterm_is_public, _ = Cvterm.objects.get_or_create(
+        cv=cv_org_prop,
+        name="is_public",
+        is_obsolete=0,
+        is_relationshiptype=0,
+        dbxref_id=dbxref_is_public.dbxref_id,
+    )
+
+    prop, created = Organismprop.objects.get_or_create(
+        organism=self,
+        type=cvterm_is_public,
+        rank=0,
+        defaults={"value": "true" if is_public else "false"},
+    )
+    if not created:
+        prop.value = "true" if is_public else "false"
+        prop.save()
+
+
+def machado_organism_methods():
+    """Add methods to machado.models.Organism."""
+
+    def wrapper(cls):
+        setattr(cls, "is_public", property(get_organism_is_public))
+        setattr(cls, "set_public", set_organism_public)
+        return cls
+
+    return wrapper

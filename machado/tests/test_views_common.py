@@ -291,3 +291,76 @@ class DataSummaryTest(TestCase):
             settings.MACHADO_VALID_TYPES = original_valid_types
 
         self.assertEqual(response.status_code, 200)
+
+    def test_data_summary_excludes_multispecies(self):
+        """Test that DataSummaryView excludes features belonging to the 'multispecies' organism."""
+        self.factory = RequestFactory()
+
+        so_db = Db.objects.create(name="SO")
+        so_cv = Cv.objects.create(name="sequence")
+        gene_dbxref = Dbxref.objects.create(accession="gene", db=so_db)
+        gene_cvterm = Cvterm.objects.create(
+            name="gene",
+            cv=so_cv,
+            dbxref=gene_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
+        org = Organism.objects.create(genus="Mus", species="musculus")
+        multispecies_org = Organism.objects.create(
+            genus="multispecies", species="multispecies"
+        )
+
+        Feature.objects.create(
+            organism=org,
+            uniquename="feat_standard",
+            is_analysis=False,
+            type=gene_cvterm,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc),
+        )
+
+        Feature.objects.create(
+            organism=multispecies_org,
+            uniquename="feat_multi",
+            is_analysis=False,
+            type=gene_cvterm,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc),
+        )
+
+        request = self.factory.get("/data/")
+        ds = common.DataSummaryView()
+        try:
+            response = ds.get(request)
+        except NoReverseMatch:
+            return
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mus musculus")
+        self.assertNotContains(response, "multispecies multispecies")
+
+
+class HomeViewTest(TestCase):
+    """Tests Home View."""
+
+    def test_get_home_excludes_multispecies(self):
+        """Test that HomeView excludes the 'multispecies' organism and its features from statistics."""
+        self.factory = RequestFactory()
+
+        # Create standard organism and a feature
+        Organism.objects.create(genus="Mus", species="musculus")
+        # Create multispecies organism
+        Organism.objects.create(genus="multispecies", species="multispecies")
+
+        # Let's count them through HomeView
+        request = self.factory.get("/")
+        hv = common.HomeView()
+        hv.request = request
+        context = hv.get_context_data()
+
+        # Since only Mus musculus should be counted (1 standard, 1 multispecies excluded)
+        self.assertEqual(context["organism_count"], 1)

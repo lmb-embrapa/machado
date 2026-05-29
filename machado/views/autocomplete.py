@@ -12,9 +12,25 @@ class AutocompleteView(View):
             return HttpResponse("")
 
         max_items = 10
-        queryset = FeatureSearchIndex.objects.filter(
-            autocomplete_text__icontains=query
-        )[: max_items * 10]
+        queryset = FeatureSearchIndex.objects.all()
+
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            from machado.models import Organism
+
+            private_orgs = Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+            queryset = queryset.exclude(feature__organism__in=private_orgs)
+
+        queryset = queryset.exclude(
+            feature__organism__genus="multispecies",
+            feature__organism__species="multispecies",
+        )
+
+        queryset = queryset.filter(autocomplete_text__icontains=query)[: max_items * 10]
 
         result = set()
         for item in queryset:

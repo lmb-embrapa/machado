@@ -24,6 +24,10 @@ class MachadoConfig(AppConfig):
         """Ready."""
         try:
             dt_settings.patch_all()
+            from machado.models import Organism
+            from machado.decorators import machado_organism_methods
+
+            machado_organism_methods()(Organism)
         except ProgrammingError as e:
             if str(e).startswith('relation "cvterm" does not exist'):
                 warnings.warn("You need to run: 'python manage.py migrate'")

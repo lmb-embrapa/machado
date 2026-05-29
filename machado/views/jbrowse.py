@@ -23,9 +23,29 @@ def jbrowse_refseqs(request):
     organism = request.GET.get("organism")
     sotype = request.GET.get("soType")
 
+    if organism is not None:
+        org_obj = retrieve_organism(organism)
+        user = getattr(request, "user", None)
+        is_authenticated = user.is_authenticated if user else False
+        if not is_authenticated and not org_obj.is_public:
+            return JsonResponse([], safe=False)
+    else:
+        org_obj = None
+
     queryset = Feature.objects.filter(is_obsolete=0)
     if organism is not None:
-        queryset = queryset.filter(organism=retrieve_organism(organism))
+        queryset = queryset.filter(organism=org_obj)
+
+    user = getattr(request, "user", None)
+    if not user or not user.is_authenticated:
+        from machado.models import Organism
+
+        private_orgs = Organism.objects.filter(
+            Organismprop_organism_Organism__type__name="is_public",
+            Organismprop_organism_Organism__type__cv__name="organism_property",
+            Organismprop_organism_Organism__value="false",
+        )
+        queryset = queryset.exclude(organism__in=private_orgs)
     if sotype is not None:
         queryset = queryset.filter(type__cv__name="sequence", type__name=sotype)
 
@@ -48,7 +68,23 @@ def jbrowse_names(request):
 
     organism = request.GET.get("organism")
     if organism is not None:
-        queryset = queryset.filter(organism=retrieve_organism(organism))
+        org_obj = retrieve_organism(organism)
+        user = getattr(request, "user", None)
+        is_authenticated = user.is_authenticated if user else False
+        if not is_authenticated and not org_obj.is_public:
+            return JsonResponse([], safe=False)
+        queryset = queryset.filter(organism=org_obj)
+
+    user = getattr(request, "user", None)
+    if not user or not user.is_authenticated:
+        from machado.models import Organism
+
+        private_orgs = Organism.objects.filter(
+            Organismprop_organism_Organism__type__name="is_public",
+            Organismprop_organism_Organism__type__cv__name="organism_property",
+            Organismprop_organism_Organism__value="false",
+        )
+        queryset = queryset.exclude(organism__in=private_orgs)
 
     equals = request.GET.get("equals")
     startswith = request.GET.get("startswith")
@@ -88,11 +124,20 @@ def jbrowse_features(request, refseq):
     org_obj = None
     if organism is not None:
         org_obj = retrieve_organism(organism)
+        user = getattr(request, "user", None)
+        is_authenticated = user.is_authenticated if user else False
+        if not is_authenticated and not org_obj.is_public:
+            return JsonResponse({"features": []})
 
     refseq_feature_obj = Feature.objects.filter(
         uniquename=refseq, organism=org_obj
     ).first()
     if not refseq_feature_obj:
+        return JsonResponse({"features": []})
+
+    user = getattr(request, "user", None)
+    is_authenticated = user.is_authenticated if user else False
+    if not is_authenticated and not refseq_feature_obj.organism.is_public:
         return JsonResponse({"features": []})
 
     soType = request.GET.get("soType")

@@ -375,3 +375,15 @@ class FeatureTest(TestCase):
             self.assertContains(response, "Feature not found.")
         except NoReverseMatch:
             pass
+
+    def test_get_multispecies_feature_404(self):
+        """Tests that requesting a feature belonging to 'multispecies' returns 404."""
+        f = Feature.objects.get(uniquename="PF0001")
+        request = self.factory.get("/feature/?feature_id={}".format(f.feature_id))
+        fv = feature.FeatureView()
+        try:
+            response = fv.get(request)
+            self.assertEqual(response.status_code, 404)
+            self.assertContains(response, "Feature not found.", status_code=404)
+        except NoReverseMatch:
+            pass

@@ -23,8 +23,32 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         """Get the context data for Home page view."""
         context = super().get_context_data(**kwargs)
-        context["organism_count"] = Organism.objects.count()
-        context["feature_count"] = Feature.objects.count()
+        user = getattr(self.request, "user", None)
+        if not user or not user.is_authenticated:
+            private_orgs = Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+            context["organism_count"] = (
+                Organism.objects.exclude(pk__in=private_orgs)
+                .exclude(genus="multispecies", species="multispecies")
+                .count()
+            )
+            context["feature_count"] = (
+                Feature.objects.exclude(organism__in=private_orgs)
+                .exclude(
+                    organism__genus="multispecies", organism__species="multispecies"
+                )
+                .count()
+            )
+        else:
+            context["organism_count"] = Organism.objects.exclude(
+                genus="multispecies", species="multispecies"
+            ).count()
+            context["feature_count"] = Feature.objects.exclude(
+                organism__genus="multispecies", organism__species="multispecies"
+            ).count()
         return context
 
 
@@ -36,40 +60,40 @@ class DataSummaryView(View):
         data = dict()
 
         if hasattr(settings, "MACHADO_VALID_TYPES"):
-            counts = (
-                Feature.objects.filter(
-                    type__name__in=settings.MACHADO_VALID_TYPES,
-                    type__cv__name="sequence",
-                )
-                .values(
-                    "organism__genus",
-                    "organism__species",
-                    "organism__infraspecific_name",
-                    "type__name",
-                )
-                .annotate(count=Count("type__name"))
-                .order_by(
-                    "organism__genus",
-                    "organism__species",
-                    "organism__infraspecific_name",
-                )
+            features_qs = Feature.objects.filter(
+                type__name__in=settings.MACHADO_VALID_TYPES,
+                type__cv__name="sequence",
             )
         else:
-            counts = (
-                Feature.objects.filter(type__cv__name="sequence")
-                .values(
-                    "organism__genus",
-                    "organism__species",
-                    "organism__infraspecific_name",
-                    "type__name",
-                )
-                .annotate(count=Count("type__name"))
-                .order_by(
-                    "organism__genus",
-                    "organism__species",
-                    "organism__infraspecific_name",
-                )
+            features_qs = Feature.objects.filter(type__cv__name="sequence")
+
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            private_orgs = Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
             )
+            features_qs = features_qs.exclude(organism__in=private_orgs)
+
+        features_qs = features_qs.exclude(
+            organism__genus="multispecies", organism__species="multispecies"
+        )
+
+        counts = (
+            features_qs.values(
+                "organism__genus",
+                "organism__species",
+                "organism__infraspecific_name",
+                "type__name",
+            )
+            .annotate(count=Count("type__name"))
+            .order_by(
+                "organism__genus",
+                "organism__species",
+                "organism__infraspecific_name",
+            )
+        )
 
         for item in counts:
             organism_name = "{} {} {}".format(
