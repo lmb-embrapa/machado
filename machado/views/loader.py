@@ -29,6 +29,7 @@ COMMANDS_CONFIG = {
                 "name": "file",
                 "required": True,
                 "default": None,
+                "default_url": "https://raw.githubusercontent.com/oborel/obo-relations/refs/heads/master/ro.obo",
                 "help": "Path to the relationship OBO file",
                 "type": "file",
             }
@@ -42,6 +43,7 @@ COMMANDS_CONFIG = {
                 "name": "file",
                 "required": True,
                 "default": None,
+                "default_url": "https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/refs/heads/master/Ontology_Files/so.obo",
                 "help": "Path to the Sequence Ontology OBO file",
                 "type": "file",
             }
@@ -55,6 +57,7 @@ COMMANDS_CONFIG = {
                 "name": "file",
                 "required": True,
                 "default": None,
+                "default_url": "http://current.geneontology.org/ontology/go.obo",
                 "help": "Path to the Gene Ontology OBO file",
                 "type": "file",
             },
@@ -902,6 +905,7 @@ COMMANDS_CONFIG = {
                 "default": None,
                 "help": "Name of the ontology to remove",
                 "type": "ontology",
+                "multiple": True,
             }
         ],
         "title": "Remove Ontology",
@@ -1031,12 +1035,47 @@ class DashboardView(LoginRequiredMixin, View):
             },
         ]
 
+        ontology_status = {}
+        for cmd_name, cv_name in [
+            ("load_relations_ontology", "relationship"),
+            ("load_sequence_ontology", "sequence"),
+            ("load_gene_ontology", "gene_ontology"),
+        ]:
+            loaded = Cv.objects.filter(name=cv_name).exists()
+            info = {}
+            if loaded:
+                cv = Cv.objects.get(name=cv_name)
+                info["version"] = cv.definition or "unknown"
+                history = (
+                    History.objects.filter(command=cmd_name, status="SUCCESS")
+                    .order_by("-finished_at")
+                    .first()
+                )
+                info["date_loaded"] = history.finished_at if history else None
+                if cmd_name == "load_relations_ontology":
+                    info["remove_params"] = "?name=relationship"
+                elif cmd_name == "load_sequence_ontology":
+                    info["remove_params"] = "?name=sequence"
+                elif cmd_name == "load_gene_ontology":
+                    info["remove_params"] = (
+                        "?name=biological_process&name=molecular_function&name=cellular_component&name=external&name=gene_ontology"
+                    )
+
+            ontology_status[cmd_name] = {"loaded": loaded, "info": info}
+
         structured_groups = []
         for g in groups_data:
             cmds = []
             for cmd_name in g["commands"]:
                 if cmd_name in COMMANDS_CONFIG:
-                    cmds.append((cmd_name, COMMANDS_CONFIG[cmd_name]))
+                    status = ontology_status.get(cmd_name)
+                    cmds.append(
+                        {
+                            "name": cmd_name,
+                            "config": COMMANDS_CONFIG[cmd_name],
+                            "status": status,
+                        }
+                    )
             structured_groups.append(
                 {"id": g["id"], "name": g["name"], "icon": g["icon"], "commands": cmds}
             )
@@ -1057,6 +1096,9 @@ class CommandFormView(LoginRequiredMixin, View):
 
         # Populate dynamic fields
         context = {"command_name": command_name, "config": config}
+        if command_name == "remove_ontology":
+            context["selected_names"] = request.GET.getlist("name")
+
         for arg in config["args"]:
             if arg["type"] == "organism":
                 if (
@@ -1152,22 +1194,49 @@ class CommandFormView(LoginRequiredMixin, View):
                 if file_path and arg["name"] != "index":
                     command_kwargs[arg["name"]] = file_path
             else:
-                val = request.POST.get(arg["name"])
-                if arg["required"] and not val:
-                    messages.error(request, f"Argument '{arg['name']}' is required.")
-                    return redirect("loader_command_form", command_name=command_name)
-
-                if val:
-                    val = val.strip()
-                    if arg["type"] == "organism":
-                        try:
-                            org = Organism.objects.get(pk=int(val))
-                            if org.infraspecific_name:
-                                val = f"{org.genus} {org.species} {org.infraspecific_name}"
+                if arg.get("multiple"):
+                    val_list = request.POST.getlist(arg["name"])
+                    if arg["required"] and not val_list:
+                        messages.error(
+                            request, f"Argument '{arg['name']}' is required."
+                        )
+                        return redirect(
+                            "loader_command_form", command_name=command_name
+                        )
+                    processed_vals = []
+                    for val in val_list:
+                        if val:
+                            val = val.strip()
+                            if arg["type"] == "ontology":
+                                try:
+                                    cv = Cv.objects.get(pk=int(val))
+                                    processed_vals.append(cv.name)
+                                except (Cv.DoesNotExist, ValueError):
+                                    processed_vals.append(val)
                             else:
-                                val = f"{org.genus} {org.species}"
-                        except Organism.DoesNotExist:
-                            pass
+                                processed_vals.append(val)
+                    command_kwargs[arg["name"]] = processed_vals
+                else:
+                    val = request.POST.get(arg["name"])
+                    if arg["required"] and not val:
+                        messages.error(
+                            request, f"Argument '{arg['name']}' is required."
+                        )
+                        return redirect(
+                            "loader_command_form", command_name=command_name
+                        )
+
+                    if val:
+                        val = val.strip()
+                        if arg["type"] == "organism":
+                            try:
+                                org = Organism.objects.get(pk=int(val))
+                                if org.infraspecific_name:
+                                    val = f"{org.genus} {org.species} {org.infraspecific_name}"
+                                else:
+                                    val = f"{org.genus} {org.species}"
+                            except Organism.DoesNotExist:
+                                pass
                     elif arg["type"] == "ontology":
                         try:
                             cv = Cv.objects.get(pk=int(val))
@@ -1214,6 +1283,10 @@ class CommandFormView(LoginRequiredMixin, View):
                 if isinstance(v, bool):
                     if v:
                         cmd.append(f"--{k}")
+                elif isinstance(v, list):
+                    for val_item in v:
+                        cmd.append(f"--{k}")
+                        cmd.append(str(val_item))
                 else:
                     cmd.append(f"--{k}")
                     cmd.append(str(v))
