@@ -11,3 +11,4 @@ cov.txt
 .coverage
 .agent
 .geminiignore
+graphify-out

@@ -32,50 +32,53 @@ class Command(HistoryCommandMixin, BaseCommand):
             "--name",
             help="Name of the ontology (cv.name) to remove",
             required=True,
-            type=str,
+            action="append",
         )
 
-    def handle(self, name: str, verbosity: int = 1, **options):
+    def handle(self, name: list, verbosity: int = 1, **options):
         """Execute the main function."""
-        try:
-            cv = Cv.objects.get(name=name)
-            if verbosity > 0:
-                self.stdout.write(
-                    "Deleting ontology '{}' and all associated terms...".format(name)
+        for n in name:
+            try:
+                cv = Cv.objects.get(name=n)
+                if verbosity > 0:
+                    self.stdout.write(
+                        "Deleting ontology '{}' and all associated terms...".format(n)
+                    )
+                cvterm_ids = list(
+                    Cvterm.objects.filter(cv=cv).values_list("cvterm_id", flat=True)
                 )
-            cvterm_ids = list(
-                Cvterm.objects.filter(cv=cv).values_list("cvterm_id", flat=True)
-            )
-            dbxref_ids = list(
-                CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).values_list(
-                    "dbxref_id", flat=True
+                dbxref_ids = list(
+                    CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).values_list(
+                        "dbxref_id", flat=True
+                    )
                 )
-            )
-            CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).delete()
-            Cvtermsynonym.objects.filter(cvterm_id__in=cvterm_ids).delete()
-            Cvtermprop.objects.filter(cvterm_id__in=cvterm_ids).delete()
-            CvtermRelationship.objects.filter(object_id__in=cvterm_ids).delete()
-            CvtermRelationship.objects.filter(subject_id__in=cvterm_ids).delete()
-            Cvterm.objects.filter(cvterm_id__in=cvterm_ids).delete()
-            Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+                CvtermDbxref.objects.filter(cvterm_id__in=cvterm_ids).delete()
+                Cvtermsynonym.objects.filter(cvterm_id__in=cvterm_ids).delete()
+                Cvtermprop.objects.filter(cvterm_id__in=cvterm_ids).delete()
+                CvtermRelationship.objects.filter(object_id__in=cvterm_ids).delete()
+                CvtermRelationship.objects.filter(subject_id__in=cvterm_ids).delete()
+                Cvterm.objects.filter(cvterm_id__in=cvterm_ids).delete()
+                Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
 
-            dbxref_ids = list(
-                Cvterm.objects.filter(cv=cv).values_list("dbxref_id", flat=True)
-            )
-            Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
-
-            cv.delete()
-
-            if verbosity > 0:
-                self.stdout.write(
-                    self.style.SUCCESS("Operation completed successfully.")
+                dbxref_ids = list(
+                    Cvterm.objects.filter(cv=cv).values_list("dbxref_id", flat=True)
                 )
-        except IntegrityError as e:
-            raise CommandError(
-                "Unable to delete records. Please ensure that any ontologies "
-                "dependent on '{}' are removed first. Error: {}".format(name, e)
-            )
-        except ObjectDoesNotExist:
-            raise CommandError(
-                "Cannot remove '{}' (not found in database).".format(name)
-            )
+                Dbxref.objects.filter(dbxref_id__in=dbxref_ids).delete()
+
+                cv.delete()
+
+                if verbosity > 0:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "Operation completed successfully for '{}'.".format(n)
+                        )
+                    )
+            except IntegrityError as e:
+                raise CommandError(
+                    "Unable to delete records. Please ensure that any ontologies "
+                    "dependent on '{}' are removed first. Error: {}".format(n, e)
+                )
+            except ObjectDoesNotExist:
+                raise CommandError(
+                    "Cannot remove '{}' (not found in database).".format(n)
+                )

@@ -46,16 +46,16 @@
                   <label class="font-weight-bold small text-muted text-uppercase mb-2">{{ arg.name|title }} Source {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
                   <div class="card p-3 bg-light border-light shadow-sm">
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_upload_rad" value="upload" checked onchange="toggleSource('{{ arg.name }}', 'upload')">
+                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_upload_rad" value="upload" {% if not arg.default_url %}checked{% endif %} onchange="toggleSource('{{ arg.name }}', 'upload')">
                       <label class="form-check-label small" for="{{ arg.name }}_upload_rad">Upload Local File</label>
                     </div>
-                    <input type="file" class="form-control-file mb-3 small" name="{{ arg.name }}_upload" id="{{ arg.name }}_upload_input">
+                    <input type="file" class="form-control-file mb-3 small" name="{{ arg.name }}_upload" id="{{ arg.name }}_upload_input" {% if arg.default_url %}style="display: none;"{% endif %}>
 
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_url_rad" value="url" onchange="toggleSource('{{ arg.name }}', 'url')">
+                      <input class="form-check-input" type="radio" name="{{ arg.name }}_source" id="{{ arg.name }}_url_rad" value="url" {% if arg.default_url %}checked{% endif %} onchange="toggleSource('{{ arg.name }}', 'url')">
                       <label class="form-check-label small" for="{{ arg.name }}_url_rad">Provide Remote URL</label>
                     </div>
-                    <input type="url" class="form-control form-control-sm" name="{{ arg.name }}_url" id="{{ arg.name }}_url_input" placeholder="http://example.com/file.gff" style="display: none;">
+                    <input type="url" class="form-control form-control-sm" name="{{ arg.name }}_url" id="{{ arg.name }}_url_input" placeholder="http://example.com/file.gff" {% if arg.default_url %}style="display: block;" value="{{ arg.default_url }}"{% else %}style="display: none;"{% endif %}>
                   </div>
                 {% elif arg.type == "organism" %}
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
@@ -67,12 +67,23 @@
                   </select>
                 {% elif arg.type == "ontology" %}
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
-                  <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
-                    <option value="">-- Select Ontology --</option>
-                    {% for ont in arg.options %}
-                      <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
-                    {% endfor %}
-                  </select>
+                  {% if arg.multiple %}
+                    <div class="card p-3 bg-light border-light shadow-sm" style="max-height: 250px; overflow-y: auto;">
+                      {% for ont in arg.options %}
+                        <div class="form-check mb-2">
+                          <input class="form-check-input ontology-checkbox" type="checkbox" name="{{ arg.name }}" id="ont_{{ ont.cv_id }}" value="{{ ont.cv_id|unlocalize }}" {% if ont.name in selected_names %}checked{% endif %}>
+                          <label class="form-check-label small" for="ont_{{ ont.cv_id }}">{{ ont.name }}</label>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
+                      <option value="">-- Select Ontology --</option>
+                      {% for ont in arg.options %}
+                        <option value="{{ ont.cv_id|unlocalize }}">{{ ont.name }}</option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
                 {% elif arg.type == "soterm" %}
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
                   <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
