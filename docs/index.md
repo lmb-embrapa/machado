@@ -26,6 +26,7 @@ It is powered by [Django](https://www.djangoproject.com/) and contains tools to 
 3. [Visualization](16-visualization.md)
    - [Index and Search](17-index-search.md)
    - [Web Server](18-webserver.md)
+   - [Customization](23-customization.md)
    - [JBrowse](19-jbrowse.md)
    - [Cache](20-cache.md)
 4. [Diagrams](21-diagrams.md)

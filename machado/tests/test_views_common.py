@@ -8,7 +8,7 @@
 
 from datetime import datetime, timezone
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, override_settings
 from django.urls.exceptions import NoReverseMatch
 
 from machado.models import Db, Dbxref, Cv, Cvterm
@@ -364,3 +364,72 @@ class HomeViewTest(TestCase):
 
         # Since only Mus musculus should be counted (1 standard, 1 multispecies excluded)
         self.assertEqual(context["organism_count"], 1)
+
+    @override_settings(MACHADO_SITE_TITLE="Soybean Portal")
+    def test_custom_site_title_in_context(self):
+        """Homeview context should contain the overridden MACHADO_SITE_TITLE when the machado_site context processor is active."""
+        from machado.context_processors import machado_site
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        ctx = machado_site(request)
+        self.assertEqual(ctx["machado_site_title"], "Soybean Portal")
+
+    def test_default_site_title_in_context(self):
+        """When no override is set, the default title should be used."""
+        from machado.context_processors import machado_site
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        ctx = machado_site(request)
+        self.assertEqual(ctx["machado_site_title"], "Machado Genomics")
+
+    @override_settings(MACHADO_FEATURE1_TITLE="")
+    def test_empty_feature_title_hides_card(self):
+        """Setting a feature title to empty string should result in an empty context value (template uses {% if %} to hide it)."""
+        from machado.context_processors import machado_site
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        ctx = machado_site(request)
+        self.assertEqual(ctx["machado_feature1_title"], "")
+
+    def test_release_notes_not_in_context_when_no_file(self):
+        """machado_release_notes should be an empty list when no file exists."""
+        from machado import context_processors
+        from machado.context_processors import machado_site
+
+        import tempfile
+        from pathlib import Path
+
+        context_processors._release_notes_cache = None
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with override_settings(BASE_DIR=Path(tmpdir)):
+                context_processors._release_notes_cache = None
+                factory = RequestFactory()
+                request = factory.get("/")
+                ctx = machado_site(request)
+                self.assertEqual(ctx["machado_release_notes"], [])
+        context_processors._release_notes_cache = None
+
+    def test_release_notes_in_context_when_file_exists(self):
+        """machado_release_notes should contain data when file exists."""
+        import json
+        import tempfile
+        from pathlib import Path
+        from machado import context_processors
+        from machado.context_processors import machado_site
+
+        notes = [{"version": "1.0", "date": "2026-01-01", "description": "Test."}]
+        context_processors._release_notes_cache = None
+        with tempfile.TemporaryDirectory() as tmpdir:
+            release_file = Path(tmpdir) / "release_notes.json"
+            release_file.write_text(json.dumps(notes), encoding="utf-8")
+            with override_settings(BASE_DIR=Path(tmpdir)):
+                context_processors._release_notes_cache = None
+                factory = RequestFactory()
+                request = factory.get("/")
+                ctx = machado_site(request)
+                self.assertEqual(len(ctx["machado_release_notes"]), 1)
+                self.assertEqual(ctx["machado_release_notes"][0]["version"], "1.0")
+        context_processors._release_notes_cache = None

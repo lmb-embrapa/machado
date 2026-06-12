@@ -15,9 +15,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Machado Genomics — biological data management">
+  <meta name="description" content="{{ machado_site_description }}">
 
-  <title>Machado Genomics</title>
+  <title>{{ machado_site_title }}</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,7 +52,7 @@
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg">
-    <a class="navbar-brand" href="{% url 'home' %}">Machado Genomics</a>
+    <a class="navbar-brand" href="{% url 'home' %}">{{ machado_site_title }}</a>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMain" aria-controls="navMain"
       aria-expanded="false" aria-label="Toggle navigation">
@@ -187,8 +187,7 @@
       <div class="row align-items-center justify-content-between">
         <div class="col-sm-6 text-left">
           <p class="mb-0 text-muted small">
-            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">Machado
-                Genomics</a></strong> — Genomics Data Management Portal.
+            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">{{ machado_site_title }}</a></strong> — {{ machado_hero_title }}.
           </p>
         </div>
         <div class="col-sm-6 text-right">

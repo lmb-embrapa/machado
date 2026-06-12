@@ -12,6 +12,7 @@ Detailed documentation can be found in the [docs](docs/index.md) directory or in
 - There are data loaders for the major bioinformatics formats: fasta, gff, obo, bibtex, blast, interproscan, orthomcl
 - The Machado Genomics API delivers data directly to the JBrowse genome browser
 - Full-text search powered by PostgreSQL (no external search service needed)
+- Fully customizable landing page layout and integrated release notes section (see the [customization guide](docs/23-customization.md))
 
 ## Installation
 Please refer to the [installation guide](docs/01-installation.md).

@@ -14,9 +14,9 @@
 <!-- Hero Section -->
 <div class="m-hero">
   <div class="m-hero-content m-fade-up">
-    <h1 class="m-hero-title">Genomics Data Management Portal</h1>
+    <h1 class="m-hero-title">{{ machado_hero_title }}</h1>
     <p class="m-hero-subtitle">
-      Explore, search, and visualize genomics sequences, annotations, and publications stored in the Chado database.
+      {{ machado_hero_subtitle }}
     </p>
 
     <!-- Hero Search -->
@@ -34,20 +34,20 @@
   <!-- Features Section -->
   <section class="m-landing-section m-fade-up">
     <div class="m-section-header">
-      <h2>Key Features & capabilities</h2>
+      <h2>Key Features &amp; capabilities</h2>
       <p>A comprehensive ecosystem designed for biological database curation and research.</p>
     </div>
 
     <div class="m-features-grid">
+      {% if machado_feature1_title %}
       <!-- Feature 1 -->
       <div class="m-feature-card">
         <div class="m-feature-icon">
-          <i class="fas fa-file-import"></i>
+          <i class="{{ machado_feature1_icon }}"></i>
         </div>
-        <h3>Multi-Format Data Loaders</h3>
+        <h3>{{ machado_feature1_title }}</h3>
         <p>
-          Ingest data seamlessly from standard bioinformatics formats including FASTA, GFF3, OBO, BibTeX, BLAST,
-          InterProScan, and OrthoMCL directly into the Chado relational schema.
+          {{ machado_feature1_text }}
         </p>
         {% if user.is_authenticated %}
         <a href="{% url 'loader_dashboard' %}" class="m-feature-link">Access Data Tools <i
@@ -58,34 +58,37 @@
           Documentation <i class="fas fa-arrow-right"></i></a>
         {% endif %}
       </div>
+      {% endif %}
 
+      {% if machado_feature2_title %}
       <!-- Feature 2 -->
       <div class="m-feature-card">
         <div class="m-feature-icon">
-          <i class="fas fa-search"></i>
+          <i class="{{ machado_feature2_icon }}"></i>
         </div>
-        <h3>PostgreSQL Faceted Search</h3>
+        <h3>{{ machado_feature2_title }}</h3>
         <p>
-          Execute complex queries powered by PostgreSQL full-text search. Filter features by organism, sequence ontology
-          terms, orthology, coexpression groups, and related publications.
+          {{ machado_feature2_text }}
         </p>
         <a href="{% url 'feature_search' %}?q=" class="m-feature-link">Start Searching <i
             class="fas fa-arrow-right"></i></a>
       </div>
+      {% endif %}
 
+      {% if machado_feature3_title %}
       <!-- Feature 3 -->
       <div class="m-feature-card">
         <div class="m-feature-icon">
-          <i class="fas fa-align-left"></i>
+          <i class="{{ machado_feature3_icon }}"></i>
         </div>
-        <h3>Genome Browser Integration</h3>
+        <h3>{{ machado_feature3_title }}</h3>
         <p>
-          Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse
-          genome browser for sequence and annotation alignments.
+          {{ machado_feature3_text }}
         </p>
         <a href="{% url 'data_numbers' %}" class="m-feature-link">Browse Organisms <i
             class="fas fa-arrow-right"></i></a>
       </div>
+      {% endif %}
     </div>
   </section>
 
@@ -112,35 +115,79 @@
     </div>
   </section>
 
+  {% if machado_release_notes %}
+  <!-- Release Notes Section -->
+  <section class="m-landing-section m-release-notes m-fade-up">
+    <div class="m-section-header">
+      <h2>Release Notes</h2>
+      <p>Latest updates, improvements, and changes.</p>
+    </div>
+
+    <div id="releaseNotesAccordion" class="m-release-accordion">
+      {% for note in machado_release_notes %}
+      <div class="m-release-card">
+        <div class="m-release-header" id="releaseHeading{{ forloop.counter }}">
+          <button class="m-release-toggle {% if not forloop.first %}collapsed{% endif %}"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#releaseBody{{ forloop.counter }}"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-controls="releaseBody{{ forloop.counter }}">
+            <span class="m-release-title-row">
+              <span class="m-release-version">v{{ note.version }}</span>
+              <span class="m-release-date">{{ note.date }}</span>
+            </span>
+            <i class="fas fa-chevron-down m-release-chevron"></i>
+          </button>
+        </div>
+        <div id="releaseBody{{ forloop.counter }}"
+             class="collapse {% if forloop.first %}show{% endif %}"
+             aria-labelledby="releaseHeading{{ forloop.counter }}"
+             data-parent="#releaseNotesAccordion">
+          <div class="m-release-body">
+            {{ note.description }}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <!-- How It Works Section -->
   <section class="m-landing-section m-fade-up">
     <div class="m-section-header">
-      <h2>How Machado Genomics Operates</h2>
+      <h2>How {{ machado_site_title }} Operates</h2>
       <p>From raw genomic files to interactive database search and visualization.</p>
     </div>
 
     <div class="m-steps-flow">
+      {% if machado_step1_title %}
       <!-- Step 1 -->
       <div class="m-step-card">
         <div class="m-step-indicator">1</div>
-        <h3>Load Data</h3>
-        <p>Administrators run commands or use data tools to load genomic files into the database.</p>
+        <h3>{{ machado_step1_title }}</h3>
+        <p>{{ machado_step1_text }}</p>
       </div>
+      {% endif %}
 
+      {% if machado_step2_title %}
       <!-- Step 2 -->
       <div class="m-step-card">
         <div class="m-step-indicator">2</div>
-        <h3>Index & Query</h3>
-        <p>PostgreSQL full-text index updates automatically, enabling fast, multi-faceted searches across millions of
-          features.</p>
+        <h3>{{ machado_step2_title }}</h3>
+        <p>{{ machado_step2_text }}</p>
       </div>
+      {% endif %}
 
+      {% if machado_step3_title %}
       <!-- Step 3 -->
       <div class="m-step-card">
         <div class="m-step-indicator">3</div>
-        <h3>Discover</h3>
-        <p>Users inspect features, view analysis results, download bulk data, and browse via JBrowse.</p>
+        <h3>{{ machado_step3_title }}</h3>
+        <p>{{ machado_step3_text }}</p>
       </div>
+      {% endif %}
     </div>
   </section>
 

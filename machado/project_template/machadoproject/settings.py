@@ -65,6 +65,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "machado.context_processors.machado_site",
             ],
         },
     },
@@ -109,6 +110,90 @@ if env("MACHADO_JBROWSE_OFFSET", default=None):
 
 if env("MACHADO_JBROWSE_TRACKS", default=None):
     MACHADO_JBROWSE_TRACKS = env("MACHADO_JBROWSE_TRACKS")
+
+# ── Landing page customization ──────────────────────────────────────────────
+# All values have sensible defaults — override only what you need.
+MACHADO_SITE_TITLE = env("MACHADO_SITE_TITLE", default="Machado Genomics")
+MACHADO_SITE_DESCRIPTION = env(
+    "MACHADO_SITE_DESCRIPTION",
+    default="Machado Genomics \u2014 biological data management",
+)
+MACHADO_HERO_TITLE = env(
+    "MACHADO_HERO_TITLE", default="Genomics Data Management Portal"
+)
+MACHADO_HERO_SUBTITLE = env(
+    "MACHADO_HERO_SUBTITLE",
+    default=(
+        "Explore, search, and visualize genomics sequences, annotations, "
+        "and publications stored in the Chado database."
+    ),
+)
+
+# Feature cards (set title to empty string to hide a card)
+MACHADO_FEATURE1_TITLE = env(
+    "MACHADO_FEATURE1_TITLE", default="Multi-Format Data Loaders"
+)
+MACHADO_FEATURE1_TEXT = env(
+    "MACHADO_FEATURE1_TEXT",
+    default=(
+        "Ingest data seamlessly from standard bioinformatics formats "
+        "including FASTA, GFF3, OBO, BibTeX, BLAST, InterProScan, and "
+        "OrthoMCL directly into the Chado relational schema."
+    ),
+)
+MACHADO_FEATURE1_ICON = env("MACHADO_FEATURE1_ICON", default="fas fa-file-import")
+
+MACHADO_FEATURE2_TITLE = env(
+    "MACHADO_FEATURE2_TITLE", default="PostgreSQL Faceted Search"
+)
+MACHADO_FEATURE2_TEXT = env(
+    "MACHADO_FEATURE2_TEXT",
+    default=(
+        "Execute complex queries powered by PostgreSQL full-text search. "
+        "Filter features by organism, sequence ontology terms, orthology, "
+        "coexpression groups, and related publications."
+    ),
+)
+MACHADO_FEATURE2_ICON = env("MACHADO_FEATURE2_ICON", default="fas fa-search")
+
+MACHADO_FEATURE3_TITLE = env(
+    "MACHADO_FEATURE3_TITLE", default="Genome Browser Integration"
+)
+MACHADO_FEATURE3_TEXT = env(
+    "MACHADO_FEATURE3_TEXT",
+    default=(
+        "Interactive visual analysis of features. Machado Genomics API "
+        "delivers data directly to the embedded JBrowse genome browser "
+        "for sequence and annotation alignments."
+    ),
+)
+MACHADO_FEATURE3_ICON = env("MACHADO_FEATURE3_ICON", default="fas fa-align-left")
+
+# How-it-works steps (set title to empty string to hide a step)
+MACHADO_STEP1_TITLE = env("MACHADO_STEP1_TITLE", default="Load Data")
+MACHADO_STEP1_TEXT = env(
+    "MACHADO_STEP1_TEXT",
+    default=(
+        "Administrators run commands or use data tools to load genomic "
+        "files into the database."
+    ),
+)
+MACHADO_STEP2_TITLE = env("MACHADO_STEP2_TITLE", default="Index & Query")
+MACHADO_STEP2_TEXT = env(
+    "MACHADO_STEP2_TEXT",
+    default=(
+        "PostgreSQL full-text index updates automatically, enabling fast, "
+        "multi-faceted searches across millions of features."
+    ),
+)
+MACHADO_STEP3_TITLE = env("MACHADO_STEP3_TITLE", default="Discover")
+MACHADO_STEP3_TEXT = env(
+    "MACHADO_STEP3_TEXT",
+    default=(
+        "Users inspect features, view analysis results, download bulk "
+        "data, and browse via JBrowse."
+    ),
+)
 
 # ── Email configuration ──────────────────────────────────────────────────────
 if env("EMAIL_URL", default=None):
