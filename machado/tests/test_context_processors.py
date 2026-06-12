@@ -99,10 +99,14 @@ class MachadoSiteContextProcessorTest(TestCase):
             release_file.write_text("NOT VALID JSON {{{", encoding="utf-8")
             with override_settings(BASE_DIR=Path(tmpdir)):
                 context_processors._release_notes_cache = None
-                with self.assertLogs("machado.context_processors", level="WARNING") as cm:
+                with self.assertLogs(
+                    "machado.context_processors", level="WARNING"
+                ) as cm:
                     ctx = context_processors.machado_site(self.request)
                 self.assertEqual(ctx["machado_release_notes"], [])
-                self.assertTrue(any("Failed to load release_notes.json" in log for log in cm.output))
+                self.assertTrue(
+                    any("Failed to load release_notes.json" in log for log in cm.output)
+                )
 
     def test_json_not_array_returns_empty_list(self):
         """If the JSON is valid but not an array, return empty list."""
@@ -111,10 +115,14 @@ class MachadoSiteContextProcessorTest(TestCase):
             release_file.write_text('{"not": "an array"}', encoding="utf-8")
             with override_settings(BASE_DIR=Path(tmpdir)):
                 context_processors._release_notes_cache = None
-                with self.assertLogs("machado.context_processors", level="WARNING") as cm:
+                with self.assertLogs(
+                    "machado.context_processors", level="WARNING"
+                ) as cm:
                     ctx = context_processors.machado_site(self.request)
                 self.assertEqual(ctx["machado_release_notes"], [])
-                self.assertTrue(any("expected a JSON array" in log for log in cm.output))
+                self.assertTrue(
+                    any("expected a JSON array" in log for log in cm.output)
+                )
 
     def test_release_notes_empty_when_no_base_dir(self):
         """When BASE_DIR is not set, release notes should be empty."""
