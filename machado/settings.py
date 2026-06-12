@@ -58,6 +58,13 @@ def patch_templates():
             }
         )
 
+    # Ensure the machado site context processor is registered
+    cp_path = "machado.context_processors.machado_site"
+    for tpl in settings.TEMPLATES:
+        processors = tpl.setdefault("OPTIONS", {}).setdefault("context_processors", [])
+        if cp_path not in processors:
+            processors.append(cp_path)
+
 
 def patch_proxy_headers():
     """Include encrypted proxy headers."""
