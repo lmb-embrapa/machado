@@ -1237,6 +1237,8 @@ class CommandFormView(LoginRequiredMixin, View):
                                     val = f"{org.genus} {org.species}"
                             except Organism.DoesNotExist:
                                 pass
+                        elif val.replace(",", "").isdigit():
+                            val = int(val.replace(",", ""))
                     elif arg["type"] == "ontology":
                         try:
                             cv = Cv.objects.get(pk=int(val))
@@ -1251,9 +1253,8 @@ class CommandFormView(LoginRequiredMixin, View):
                             val = term.name
                         except Cvterm.DoesNotExist:
                             pass
-                    elif str(val).replace(",", "").isdigit():
-                        val = int(str(val).replace(",", ""))
-                    command_kwargs[arg["name"]] = val
+                    if val:
+                        command_kwargs[arg["name"]] = val
 
         # Create History record
         history = History.objects.create(
