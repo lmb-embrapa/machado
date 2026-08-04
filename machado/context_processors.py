@@ -131,4 +131,8 @@ def machado_site(request):
     # Release notes
     context["machado_release_notes"] = _get_release_notes()
 
+    # Mount-path prefix, used to namespace client-side storage keys when
+    # multiple instances share a domain.
+    context["machado_url_prefix"] = getattr(settings, "URL_PREFIX", "")
+
     return context

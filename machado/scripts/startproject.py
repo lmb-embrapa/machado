@@ -24,10 +24,15 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # ── Django ───────────────────────────────────────────────────────────────────
 # DEBUG=True
 # ALLOWED_HOSTS=localhost,127.0.0.1
+# CSRF_TRUSTED_ORIGINS=https://example.com
 # STATIC_URL=/static/
 # STATIC_ROOT=staticfiles
 
-
+# ── Multi-instance deployment (optional) ─────────────────────────────────────
+# Set this instance's mount path when running more than one machado instance
+# on the same domain (e.g. different Apache subpaths on the same machine), so
+# session/CSRF cookies and browser storage don't collide between instances.
+# URL_PREFIX=/demo
 
 # ── JBrowse integration (optional) ───────────────────────────────────────────
 # MACHADO_JBROWSE_URL=http://localhost/jbrowse

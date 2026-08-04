@@ -61,8 +61,20 @@ In the `.env` file, ensure the following variables are set for production:
 ```bash
 DEBUG=False
 ALLOWED_HOSTS=*
+CSRF_TRUSTED_ORIGINS=https://yourdomain.com
 
 MACHADO_VALID_TYPES=gene,mRNA,polypeptide
+```
+
+If you are running more than one machado instance on the same machine — for
+example, several instances mounted at different Apache subpaths on the same
+domain — set `URL_PREFIX` in each instance's `.env` to that instance's mount
+path (e.g. `URL_PREFIX=/demo`). Without it, session/CSRF cookies and the
+browser-stored accent color are not scoped per instance, so signing in or
+picking a color in one instance can interfere with the others:
+
+```bash
+URL_PREFIX=/demo
 ```
 
 Now, run `collectstatic` to gather the static files from all libraries to the `staticfiles` directory:

@@ -25,6 +25,15 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
+# When running multiple machado instances on the same domain (e.g. mounted at
+# different Apache subpaths), set URL_PREFIX to this instance's mount path so
+# session/CSRF cookies and client-side storage don't collide between instances.
+URL_PREFIX = env("URL_PREFIX", default="")
+if URL_PREFIX:
+    SESSION_COOKIE_PATH = URL_PREFIX
+    CSRF_COOKIE_PATH = URL_PREFIX
 
 # ── Applications ─────────────────────────────────────────────────────────────
 INSTALLED_APPS = [

@@ -5,6 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  var accentKey = 'machado-accent' + (window.MACHADO_URL_PREFIX || '');
+
   // --- Accent Picker Toggle ---
   var accentPicker = document.getElementById('accent-picker');
   if (accentPicker) {
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     btn.addEventListener('click', function () {
       var accent = this.getAttribute('data-set-accent');
       document.documentElement.setAttribute('data-accent', accent);
-      localStorage.setItem('machado-accent', accent);
+      localStorage.setItem(accentKey, accent);
 
       // Update active state
       swatches.forEach(function (b) { b.classList.remove('active'); });
