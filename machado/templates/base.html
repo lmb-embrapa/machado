@@ -39,8 +39,9 @@
 
   <!-- Accent init (blocking — prevents FOUC) -->
   <script>
+    window.MACHADO_URL_PREFIX = "{{ machado_url_prefix|escapejs }}";
     (function () {
-      var a = localStorage.getItem('machado-accent') || 'steel';
+      var a = localStorage.getItem('machado-accent' + window.MACHADO_URL_PREFIX) || 'steel';
       document.documentElement.setAttribute('data-accent', a);
     })();
   </script>
