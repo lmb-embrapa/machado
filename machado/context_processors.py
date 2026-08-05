@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULTS = {
     # Site-wide
+    "MACHADO_ACCENT_COLOR": "steel",
     "MACHADO_SITE_TITLE": "Machado Genomics",
     "MACHADO_SITE_DESCRIPTION": ("Machado Genomics \u2014 biological data management"),
     # Hero section

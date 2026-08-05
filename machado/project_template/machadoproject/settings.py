@@ -122,6 +122,7 @@ if env("MACHADO_JBROWSE_TRACKS", default=None):
 
 # ── Landing page customization ──────────────────────────────────────────────
 # All values have sensible defaults — override only what you need.
+MACHADO_ACCENT_COLOR = env("MACHADO_ACCENT_COLOR", default="steel")
 MACHADO_SITE_TITLE = env("MACHADO_SITE_TITLE", default="Machado Genomics")
 MACHADO_SITE_DESCRIPTION = env(
     "MACHADO_SITE_DESCRIPTION",
