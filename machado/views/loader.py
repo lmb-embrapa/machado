@@ -1216,9 +1216,10 @@ class CommandFormView(LoginRequiredMixin, View):
                     and file_path.lower().endswith(".gz")
                 ):
                     decompressed_path = file_path[: -len(".gz")]
-                    with gzip.open(file_path, "rb") as gz_file, open(
-                        decompressed_path, "wb"
-                    ) as out_file:
+                    with (
+                        gzip.open(file_path, "rb") as gz_file,
+                        open(decompressed_path, "wb") as out_file,
+                    ):
                         shutil.copyfileobj(gz_file, out_file)
                     file_path = decompressed_path
 
