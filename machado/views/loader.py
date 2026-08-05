@@ -1,5 +1,7 @@
+import gzip
 import json
 import os
+import shutil
 import sys
 import threading
 import subprocess
@@ -166,7 +168,7 @@ COMMANDS_CONFIG = {
                 "name": "file",
                 "required": True,
                 "default": None,
-                "help": "Path to the FASTA file",
+                "help": "Path to the FASTA file (.gz gzipped files are accepted)",
                 "type": "file",
             },
             {
@@ -1206,6 +1208,19 @@ class CommandFormView(LoginRequiredMixin, View):
                         f"The file for '{arg['name']}' is required. Please upload a file or provide a URL.",
                     )
                     return redirect("loader_command_form", command_name=command_name)
+
+                if (
+                    file_path
+                    and command_name == "load_fasta"
+                    and arg["name"] == "file"
+                    and file_path.lower().endswith(".gz")
+                ):
+                    decompressed_path = file_path[: -len(".gz")]
+                    with gzip.open(file_path, "rb") as gz_file, open(
+                        decompressed_path, "wb"
+                    ) as out_file:
+                        shutil.copyfileobj(gz_file, out_file)
+                    file_path = decompressed_path
 
                 if file_path and arg["name"] != "index":
                     command_kwargs[arg["name"]] = file_path
