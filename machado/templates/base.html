@@ -41,7 +41,7 @@
   <script>
     window.MACHADO_URL_PREFIX = "{{ machado_url_prefix|escapejs }}";
     (function () {
-      var a = localStorage.getItem('machado-accent' + window.MACHADO_URL_PREFIX) || 'steel';
+      var a = localStorage.getItem('machado-accent' + window.MACHADO_URL_PREFIX) || '{{ machado_accent_color|escapejs }}';
       document.documentElement.setAttribute('data-accent', a);
     })();
   </script>
