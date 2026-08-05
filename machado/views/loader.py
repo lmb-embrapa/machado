@@ -1258,7 +1258,9 @@ class CommandFormView(LoginRequiredMixin, View):
                             "loader_command_form", command_name=command_name
                         )
 
-                    if val:
+                    if arg["type"] == "checkbox":
+                        val = True if val else False
+                    elif val:
                         val = val.strip()
                         if arg["type"] == "organism":
                             try:
@@ -1277,8 +1279,6 @@ class CommandFormView(LoginRequiredMixin, View):
                             val = cv.name
                         except Cv.DoesNotExist:
                             pass
-                    elif arg["type"] == "checkbox":
-                        val = True if val else False
                     elif arg["type"] == "soterm":
                         try:
                             term = Cvterm.objects.get(pk=int(val))
