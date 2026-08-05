@@ -130,6 +130,10 @@
             {{ user.username }}
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            {% if user.is_superuser %}
+            <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-user-shield mr-1"></i> Django Admin</a>
+            <div class="dropdown-divider"></div>
+            {% endif %}
             <a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a>
             <div class="dropdown-divider"></div>
             <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
