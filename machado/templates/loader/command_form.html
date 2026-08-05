@@ -62,7 +62,7 @@
                   <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                     <option value="">-- Select Organism --</option>
                     {% for org in arg.options %}
-                      <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }} ({{ org.common_name }})</option>
+                      <option value="{{ org.organism_id|unlocalize }}">{{ org.genus }} {{ org.species }}{% if org.infraspecific_name %} {{ org.infraspecific_name }}{% endif %}{% if org.common_name %} ({{ org.common_name }}){% endif %}</option>
                     {% endfor %}
                   </select>
                 {% elif arg.type == "ontology" %}
@@ -88,9 +88,22 @@
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>
                   <select class="form-control" id="{{ arg.name }}" name="{{ arg.name }}" {% if arg.required %}required{% endif %}>
                     <option value="">-- Select SO Term --</option>
-                    {% for term in arg.options %}
-                      <option value="{{ term.name }}">{{ term.name }}</option>
-                    {% endfor %}
+                    {% if arg.priority_options %}
+                      <optgroup label="Common Types">
+                        {% for term in arg.priority_options %}
+                          <option value="{{ term.name }}" {% if term.name == arg.default %}selected{% endif %}>{{ term.name }}</option>
+                        {% endfor %}
+                      </optgroup>
+                      <optgroup label="All SO Terms">
+                        {% for term in arg.options %}
+                          <option value="{{ term.name }}" {% if term.name == arg.default %}selected{% endif %}>{{ term.name }}</option>
+                        {% endfor %}
+                      </optgroup>
+                    {% else %}
+                      {% for term in arg.options %}
+                        <option value="{{ term.name }}" {% if term.name == arg.default %}selected{% endif %}>{{ term.name }}</option>
+                      {% endfor %}
+                    {% endif %}
                   </select>
                 {% elif arg.type == "uploaded_file" %}
                   <label for="{{ arg.name }}" class="font-weight-bold small text-muted text-uppercase mb-2">{% if arg.label %}{{ arg.label }}{% else %}{{ arg.name|title }}{% endif %}: {% if arg.required %}<span class="text-danger">*</span>{% endif %}</label>

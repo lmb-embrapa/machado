@@ -179,7 +179,7 @@ COMMANDS_CONFIG = {
             {
                 "name": "soterm",
                 "required": True,
-                "default": None,
+                "default": "chromosome",
                 "help": "Sequence Ontology (SO) term",
                 "type": "soterm",
                 "label": "SO Term",
@@ -1113,9 +1113,25 @@ class CommandFormView(LoginRequiredMixin, View):
             elif arg["type"] == "ontology":
                 arg["options"] = Cv.objects.all().order_by("name")
             elif arg["type"] == "soterm":
-                arg["options"] = Cvterm.objects.filter(cv__name="sequence").order_by(
-                    "name"
+                terms = list(
+                    Cvterm.objects.filter(cv__name="sequence").order_by("name")
                 )
+                priority_names = ["assembly", "chromosome"] + list(
+                    settings.MACHADO_VALID_TYPES
+                )
+                seen = set()
+                priority_names = [
+                    name
+                    for name in priority_names
+                    if not (name in seen or seen.add(name))
+                ]
+                term_by_name = {term.name: term for term in terms}
+                arg["priority_options"] = [
+                    term_by_name[name]
+                    for name in priority_names
+                    if name in term_by_name
+                ]
+                arg["options"] = terms
             elif arg["type"] == "uploaded_file":
                 arg["options"] = (
                     Dbxrefprop.objects.filter(
