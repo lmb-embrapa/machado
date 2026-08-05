@@ -4,10 +4,11 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
+import tempfile
 from unittest.mock import patch, MagicMock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 from machado.models import Db, Dbxref
@@ -72,6 +73,7 @@ class LoaderViewsTest(TestCase):
             return MagicMock()
 
         with (
+            override_settings(BASE_DIR=tempfile.gettempdir()),
             patch("machado.views.loader.threading.Thread", side_effect=run_target_now),
             patch("machado.views.loader.subprocess.Popen") as mock_popen,
         ):
