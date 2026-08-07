@@ -62,9 +62,12 @@ In the `.env` file, ensure the following variables are set for production:
 DEBUG=False
 ALLOWED_HOSTS=*
 CSRF_TRUSTED_ORIGINS=https://yourdomain.com
+TIME_ZONE=America/Sao_Paulo
 
 MACHADO_VALID_TYPES=gene,mRNA,polypeptide
 ```
+
+Set `TIME_ZONE` to the server's actual timezone (defaults to `UTC` if unset). Django applies it at process startup, so it also determines what wall-clock time is recorded for timestamps such as the loader's command history — a mismatch here makes those timestamps look off relative to the server's local clock.
 
 If you are running more than one machado instance on the same machine — for
 example, several instances mounted at different Apache subpaths on the same

@@ -85,7 +85,7 @@ DATABASES = {"default": env.db()}
 
 # ── Internationalization ─────────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = env("TIME_ZONE", default="UTC")
 USE_I18N = True
 
 # ── Static files ─────────────────────────────────────────────────────────────

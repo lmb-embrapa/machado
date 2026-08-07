@@ -38,6 +38,7 @@
                 <th class="border-top-0">Command</th>
                 <th class="border-top-0">PID</th>
                 <th class="border-top-0">Started At</th>
+                <th class="border-top-0">Finished At</th>
                 <th class="border-top-0">Status</th>
                 <th class="border-top-0 text-right">Logs</th>
               </tr>
@@ -49,6 +50,7 @@
                   <td><code class="text-primary font-weight-bold">{{ h.command }}</code></td>
                   <td><small class="text-muted">{% if h.pid %}{{ h.pid|stringformat:"d" }}{% else %}-{% endif %}</small></td>
                   <td><small class="text-muted">{{ h.created_at|date:"Y-m-d H:i:s" }}</small></td>
+                  <td><small class="text-muted">{% if h.finished_at %}{{ h.finished_at|date:"Y-m-d H:i:s" }}{% else %}-{% endif %}</small></td>
                   <td>
                     {% if h.status == "PENDING" %}
                       <span class="badge badge-secondary">Waiting</span>
@@ -104,7 +106,7 @@
                 </tr>
               {% empty %}
                 <tr>
-                  <td colspan="6" class="text-center py-4 text-muted">No loader history records found.</td>
+                  <td colspan="7" class="text-center py-4 text-muted">No loader history records found.</td>
                 </tr>
               {% endfor %}
             </tbody>
