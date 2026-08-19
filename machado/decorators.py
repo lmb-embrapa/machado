@@ -15,7 +15,9 @@ from django.db.models.functions import Concat
 def get_feature_dbxrefs(self):
     """Get the feature dbxrefs."""
     result = list()
-    for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
+    for feature_dbxref in self.FeatureDbxref_feature_Feature.select_related(
+        "dbxref__db"
+    ).all():
         if feature_dbxref.dbxref.db.url:
             result.append(
                 "<a href='{}://{}{}' target='_blank'>{}:{}</a>".format(
@@ -145,7 +147,9 @@ def get_feature_properties(self):
 def get_feature_synonyms(self):
     """Get all the feature synonyms."""
     result = list()
-    for feature_synonym in self.FeatureSynonym_feature_Feature.all():
+    for feature_synonym in self.FeatureSynonym_feature_Feature.select_related(
+        "synonym"
+    ).all():
         result.append("{}".format(feature_synonym.synonym.name))
     return result
 
@@ -221,7 +225,9 @@ def get_feature_relationship(self):
         raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
     result = list()
-    feature_relationships = self.FeatureRelationship_object_Feature.filter(
+    feature_relationships = self.FeatureRelationship_object_Feature.select_related(
+        "subject__type"
+    ).filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
@@ -229,7 +235,9 @@ def get_feature_relationship(self):
         if feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.subject)
 
-    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
+    feature_relationships = self.FeatureRelationship_subject_Feature.select_related(
+        "object__type"
+    ).filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
@@ -254,7 +262,9 @@ def get_feature_cvterm(self):
 def get_feature_location(self):
     """Get the feature location."""
     result = list()
-    for location in self.Featureloc_feature_Feature.all():
+    for location in self.Featureloc_feature_Feature.select_related(
+        "srcfeature__organism"
+    ).all():
         jbrowse_url = None
         if hasattr(settings, "MACHADO_JBROWSE_URL"):
             if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
@@ -333,7 +343,11 @@ def get_pub_authors(self):
 
 def get_pub_doi(self):
     """Get the DOI of the publication."""
-    pub_dbxref = self.PubDbxref_pub_Pub.filter(dbxref__db__name="DOI").first()
+    pub_dbxref = (
+        self.PubDbxref_pub_Pub.select_related("dbxref")
+        .filter(dbxref__db__name="DOI")
+        .first()
+    )
     return pub_dbxref.dbxref.accession if pub_dbxref else None
 
 

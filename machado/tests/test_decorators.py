@@ -10,7 +10,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from unittest.mock import MagicMock
 
-from machado.tests.decorators_fixture import add_annotations, build_decorator_fixture
+from machado.models import Feature, FeatureRelationship, Pub
+from machado.tests.decorators_fixture import (
+    _feature,
+    add_annotations,
+    add_dbxrefs,
+    add_locations,
+    add_synonyms,
+    build_decorator_fixture,
+)
 
 from machado.decorators import (
     get_feature_product,
@@ -349,3 +357,64 @@ class DecoratorDisplayAndDoiTest(TestCase):
     def test_get_doi_is_empty_without_any_doi(self):
         """A feature with no DOI'd pubs yields no DOIs."""
         self.assertEqual(set(self.fx.polypeptide.get_doi()), set())
+
+
+class DecoratorQueryCountTest(TestCase):
+    """Query counts must be invariant to row count, not merely small.
+
+    A fixed low number proves nothing on its own -- the fixture might simply
+    have few rows. Each test here asserts the SAME count at two different row
+    counts, which is what actually demonstrates the N+1 is gone.
+    """
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_dbxrefs_is_one_query_regardless_of_count(self):
+        """Fetching dbxrefs costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_dbxrefs()
+        add_dbxrefs(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_dbxrefs()), 22)
+
+    def test_get_synonyms_is_one_query_regardless_of_count(self):
+        """Fetching synonyms costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_synonyms()
+        add_synonyms(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_synonyms()), 22)
+
+    def test_get_relationship_is_two_queries_regardless_of_count(self):
+        """One query per direction, independent of how many rows match."""
+        with self.assertNumQueries(2):
+            self.fx.gene.get_relationship()
+        for i in range(20):
+            extra = _feature(
+                self.fx.organism, self.fx.t_mrna, "EXTRA_MRNA_{}".format(i)
+            )
+            FeatureRelationship.objects.create(
+                subject=extra, object=self.fx.gene, type=self.fx.t_part_of, rank=0
+            )
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(2):
+            self.assertEqual(len(gene.get_relationship()), 22)
+
+    def test_get_location_is_one_query_regardless_of_count(self):
+        """Fetching locations costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_location()
+        add_locations(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_location()), 21)
+
+    def test_get_pub_doi_is_one_query(self):
+        """Resolving a pub's DOI costs one query, not two."""
+        pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(pub.get_doi(), "10.1234/one")
