@@ -10,15 +10,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from unittest.mock import MagicMock
 
-from machado.tests.decorators_fixture import build_decorator_fixture
+from machado.tests.decorators_fixture import add_annotations, build_decorator_fixture
 
 from machado.decorators import (
     get_feature_product,
     get_feature_description,
     get_feature_note,
-    get_feature_annotation,
-    get_feature_doi,
-    get_feature_display,
     get_feature_properties,
     get_feature_orthologous_group,
     get_feature_coexpression_group,
@@ -73,140 +70,6 @@ class GetFeaturePropTest(TestCase):
         mock_self = MagicMock()
         mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
         result = get_feature_note(mock_self)
-        self.assertIsNone(result)
-
-
-class GetFeatureAnnotationTest(TestCase):
-    """Tests for get_feature_annotation."""
-
-    def test_annotation_with_doi(self):
-        """Test annotation with doi."""
-        mock_fp = MagicMock()
-        mock_fp.value = "Annotation text"
-        mock_fppub = MagicMock()
-        mock_fppub.pub.get_doi.return_value = "10.1234/test"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = [mock_fppub]
-
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_annotation(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("DOI:10.1234/test", result[0])
-
-    def test_annotation_without_doi(self):
-        """Test annotation without doi."""
-        mock_fp = MagicMock()
-        mock_fp.value = "Annotation text"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = []
-
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_annotation(mock_self)
-        self.assertEqual(result, ["Annotation text"])
-
-    def test_annotation_not_found(self):
-        """Test annotation not found."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
-
-        result = get_feature_annotation(mock_self)
-        self.assertIsNone(result)
-
-
-class GetFeatureDoiTest(TestCase):
-    """Tests for get_feature_doi."""
-
-    def test_doi_from_pubs_and_annotations(self):
-        """Test doi from pubs and annotations."""
-        mock_featurepub = MagicMock()
-        mock_featurepub.pub.get_doi.return_value = "10.1234/pub"
-
-        mock_fp = MagicMock()
-        mock_fppub = MagicMock()
-        mock_fppub.pub.get_doi.return_value = "10.1234/annot"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = [mock_fppub]
-
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = [mock_featurepub]
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_doi(mock_self)
-        self.assertIn("10.1234/pub", result)
-        self.assertIn("10.1234/annot", result)
-
-    def test_doi_annotation_no_doi(self):
-        """Test doi annotation no doi."""
-        mock_featurepub = MagicMock()
-        mock_featurepub.pub.get_doi.return_value = "10.1234/pub"
-
-        mock_fp = MagicMock()
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = []
-
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = [mock_featurepub]
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_doi(mock_self)
-        self.assertIn("10.1234/pub", result)
-        self.assertEqual(len(result), 1)
-
-    def test_doi_filter_raises(self):
-        """Test doi filter raises."""
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = []
-        mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
-
-        result = get_feature_doi(mock_self)
-        self.assertIsNone(result)
-
-
-class GetFeatureDisplayTest(TestCase):
-    """Tests for get_feature_display."""
-
-    def test_display_found(self):
-        """Test display found."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "display text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "display text")
-
-    def test_display_fallback_product(self):
-        """Test display fallback product."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = "product text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "product text")
-
-    def test_display_fallback_description(self):
-        """Test display fallback description."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = "desc text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "desc text")
-
-    def test_display_fallback_note(self):
-        """Test display fallback note."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = None
-        mock_self.get_note.return_value = "note text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "note text")
-
-    def test_display_fallback_none(self):
-        """Test display fallback none."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = None
-        mock_self.get_note.return_value = None
-        result = get_feature_display(mock_self)
         self.assertIsNone(result)
 
 
@@ -434,3 +297,48 @@ class DecoratorRealDataTest(TestCase):
     def test_get_pub_doi_returns_none_without_doi(self):
         """A pub with no DOI dbxref returns None."""
         self.assertIsNone(self.fx.pub_without_doi.get_doi())
+
+
+class DecoratorDisplayAndDoiTest(TestCase):
+    """Characterization tests for the display chain and annotation/DOI walk."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_display_prefers_the_display_prop(self):
+        """An explicit display prop wins."""
+        self.assertEqual(self.fx.gene.get_display(), "alpha kinase")
+
+    def test_get_display_falls_back_to_product(self):
+        """With no display prop, the product prop is used."""
+        self.assertEqual(self.fx.mrna.get_display(), "the product")
+
+    def test_get_display_returns_none_when_nothing_set(self):
+        """A feature with none of the four props returns None."""
+        self.assertIsNone(self.fx.chromosome.get_display())
+
+    def test_get_annotation_appends_dois(self):
+        """Each annotation carries its pubs' DOIs in parentheses."""
+        result = self.fx.gene.get_annotation()
+        self.assertEqual(len(result), 2)
+        for value in result:
+            self.assertIn("(DOI:", value)
+            self.assertIn("10.1234/one", value)
+            self.assertIn("10.1234/two", value)
+        self.assertTrue(any(v.startswith("annotation 0") for v in result))
+
+    def test_get_annotation_without_dois_is_the_bare_value(self):
+        """An annotation with no DOI'd pubs is returned verbatim."""
+        add_annotations(self.fx, self.fx.polypeptide, 1, with_doi=False)
+        result = self.fx.polypeptide.get_annotation()
+        self.assertEqual(result, ["annotation 0"])
+
+    def test_get_doi_unions_featurepub_and_annotation_sources(self):
+        """Each DOI comes from both FeaturePub pubs and annotation prop pubs."""
+        result = self.fx.gene.get_doi()
+        self.assertEqual(set(result), {"10.1234/one", "10.1234/two"})
+
+    def test_get_doi_is_empty_without_any_doi(self):
+        """A feature with no DOI'd pubs yields no DOIs."""
+        self.assertEqual(set(self.fx.polypeptide.get_doi()), set())
