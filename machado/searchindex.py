@@ -28,7 +28,11 @@ from machado.models import FeatureSearchIndex
 #: Analysis programs surfaced as facets by ``_prepare_analyses``.
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
 
-#: Featureprop type names read from the ``feature_property`` CV.
+#: Featureprop type names read from the ``feature_property`` CV. Consumed by
+#: ``prefetch_chunk`` (added in Task 5), which fetches all of these in a single
+#: query and splits them by type -- replacing what were previously several
+#: separate per-feature lookups. Defined here so the contract lives beside
+#: ``resolve_display``, which depends on the fallback subset.
 PROP_TYPES = (
     "display",
     "product",
@@ -146,7 +150,11 @@ def resolve_display(props):
 
 
 def build_organism(feature):
-    """Build the organism display string for a feature."""
+    """Build the organism display string for a feature.
+
+    Traverses the ``organism`` FK, so the caller's queryset must have used
+    ``.select_related("organism")`` for this to stay query-free.
+    """
     organism = "{} {}".format(feature.organism.genus, feature.organism.species)
     if feature.organism.infraspecific_name:
         organism += " {}".format(feature.organism.infraspecific_name)
@@ -215,7 +223,18 @@ def build_analyses(feature, ctx, config):
 
 
 def build_entries(features, ctx, config):
-    """Assemble FeatureSearchIndex rows for a chunk. Issues no queries."""
+    """Assemble FeatureSearchIndex rows for a chunk.
+
+    Issues no queries -- but only if the caller holds up its end of the
+    bargain. This function reads ``feature.organism.*`` and
+    ``feature.type.name``, which are foreign-key traversals: on a real
+    ``Feature`` instance they lazily hit the database unless the queryset that
+    produced it used ``.select_related("organism", "type")``. Callers MUST do
+    so. Forgetting it silently reintroduces exactly the per-feature N+1 this
+    whole module exists to eliminate, and no unit test using stand-in objects
+    can detect it -- see ``test_build_entries_issues_no_queries``, which
+    asserts zero queries against real, select_related model instances.
+    """
     entries = []
     for feature in features:
         fid = feature.feature_id
