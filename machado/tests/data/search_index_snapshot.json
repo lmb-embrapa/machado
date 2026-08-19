@@ -49,6 +49,26 @@
     "treatment": [],
     "uniquename": "GENE_B"
   },
+  "GENE_C": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana GENE_C GeneGamma",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [],
+    "name": "GeneGamma",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": [],
+    "orthology": false,
+    "relationships": [],
+    "so_term": "gene",
+    "treatment": [],
+    "uniquename": "GENE_C"
+  },
   "MRNA_A": {
     "analyses": [
       "no blast matches"

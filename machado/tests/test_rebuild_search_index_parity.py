@@ -63,6 +63,7 @@ class RebuildSearchIndexParityTest(TestCase):
         indexed = set(FeatureSearchIndex.objects.values_list("uniquename", flat=True))
         self.assertIn("GENE_A", indexed)
         self.assertIn("GENE_B", indexed)
+        self.assertIn("GENE_C", indexed)
         self.assertIn("MRNA_A", indexed)
         self.assertNotIn("CHR1", indexed)
         self.assertNotIn("SNV_1", indexed)

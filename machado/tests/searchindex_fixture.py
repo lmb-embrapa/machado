@@ -237,6 +237,26 @@ def build_search_index_fixture():
     # ── feature B: the sparse case (no props, no relations) ──────────────
     features["gene_b"] = _feature(organism, t_gene, "GENE_B", None)
 
+    # ── feature C: located, but with NO overlapping neighbour ────────────
+    # This exists to exercise the overlap inner-join returning EMPTY.
+    # Without it, GENE_A is the only feature whose outer Featureloc loop runs
+    # at all, and it always finds a match -- so a rewrite that made the
+    # coordinate bounds too broad (dropping fmin__lte/fmax__gte, or the
+    # ~Q(feature__type__name=...) exclusion) could still pass. GENE_C sits far
+    # from SNV_1 on the same srcfeature, so the query must run and find nothing.
+    gene_c = _feature(organism, t_gene, "GENE_C", "GeneGamma")
+    features["gene_c"] = gene_c
+    Featureloc.objects.create(
+        feature=gene_c,
+        srcfeature=chrom,
+        fmin=5000,
+        fmax=5100,
+        is_fmin_partial=False,
+        is_fmax_partial=False,
+        locgroup=0,
+        rank=0,
+    )
+
     return features
 
 
@@ -267,7 +287,7 @@ def snapshot_index():
     Multi-value JSON fields are sorted so the comparison is order-insensitive,
     since only ``autocomplete_text`` has a guaranteed order.
     """
-    from machado.models import Feature, FeatureSearchIndex
+    from machado.models import FeatureSearchIndex
 
     id_to_uniquename = dict(Feature.objects.values_list("feature_id", "uniquename"))
 
