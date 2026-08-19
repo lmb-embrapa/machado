@@ -4381,10 +4381,17 @@ class FeatureSearchIndex(models.Model):
     )
 
     # ── Full-text search ─────────────────────────────────────────────────
-    # Maintained by PostgreSQL as a STORED generated column. Never assign to
-    # this field: writes raise django.db.utils.DatabaseError. SearchVector
-    # emits to_tsvector('english', ...) with a literal config, which Postgres
-    # accepts as IMMUTABLE and therefore allows in a generated expression.
+    # Maintained by PostgreSQL as a STORED generated column.
+    #
+    # Never assign to this field. Be aware that doing so fails QUIETLY: the
+    # Django ORM strips generated fields out of .save(), .update(), and
+    # .bulk_create() before they reach the database, so a write here is a
+    # silent no-op rather than an error. Only raw cursor SQL would surface
+    # Postgres's own rejection.
+    #
+    # SearchVector emits to_tsvector('english', ...) with a literal config,
+    # which Postgres accepts as IMMUTABLE and therefore permits in a
+    # generated expression.
     search_vector = models.GeneratedField(
         expression=SearchVector("autocomplete_text", config="english"),
         output_field=SearchVectorField(null=True),

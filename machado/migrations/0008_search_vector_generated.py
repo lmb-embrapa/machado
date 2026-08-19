@@ -14,9 +14,12 @@ noise, so only the one real schema change is expressed here.
 PostgreSQL cannot attach a generation expression to an existing column, so
 the column is dropped and re-added. The dependent GIN index is recreated
 afterwards -- without it every search degrades to a sequential scan.
+
+This migration is schema-reversible but not data-reversible: rolling back
+re-adds a plain column, but the values dropped along with the old column are
+gone, so every search_vector comes back NULL until reindexed.
 """
 
-import django.contrib.postgres.indexes
 import django.contrib.postgres.search
 from django.db import migrations, models
 
