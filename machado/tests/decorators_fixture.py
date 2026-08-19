@@ -116,6 +116,11 @@ def build_decorator_fixture():
     fx.pub_without_doi = Pub.objects.create(
         uniquename="PUB:3", type=fx.t_journal, title="NoDoi"
     )
+    # A DOI reachable ONLY through a direct FeaturePub, never through an
+    # annotation. Without it, get_doi's union of its two sources cannot be
+    # tested: if both sources carried the same accessions, dropping one
+    # entirely would leave the result unchanged and the test would still pass.
+    fx.pub_featurepub_only_doi = _pub_with_doi(fx, "PUB:4", "10.1234/three")
 
     # ── dbxrefs: one on a URL db, one on a plain db ──────────────────────
     d1 = Dbxref.objects.create(db=fx.db_with_url, accession="12345", version="1")
@@ -168,8 +173,11 @@ def build_decorator_fixture():
     )
 
     # ── annotations with DOIs, plus direct FeaturePub DOIs ──────────────
+    # add_annotations attaches pub_with_doi + pub_second_doi, i.e. {one, two}.
+    # The direct FeaturePub deliberately uses a THIRD accession so that
+    # get_doi's union of its two sources is actually observable.
     add_annotations(fx, fx.gene, 2)
-    FeaturePub.objects.create(feature=fx.gene, pub=fx.pub_second_doi)
+    FeaturePub.objects.create(feature=fx.gene, pub=fx.pub_featurepub_only_doi)
     FeaturePub.objects.create(feature=fx.gene, pub=fx.pub_without_doi)
 
     # ── organism visibility prop ────────────────────────────────────────

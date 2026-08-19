@@ -335,9 +335,16 @@ class DecoratorDisplayAndDoiTest(TestCase):
         self.assertEqual(result, ["annotation 0"])
 
     def test_get_doi_unions_featurepub_and_annotation_sources(self):
-        """Each DOI comes from both FeaturePub pubs and annotation prop pubs."""
+        """Both FeaturePub pubs and annotation prop pubs contribute DOIs.
+
+        10.1234/three is reachable only via the direct FeaturePub, and
+        10.1234/one only via the annotation props, so dropping either source
+        fails this assertion. Do not reword the first line to start with
+        "DOIs" -- flake8's D403 rejects it, because pydocstyle compares the
+        first word against .capitalize(), which lowercases the trailing "Is".
+        """
         result = self.fx.gene.get_doi()
-        self.assertEqual(set(result), {"10.1234/one", "10.1234/two"})
+        self.assertEqual(set(result), {"10.1234/one", "10.1234/two", "10.1234/three"})
 
     def test_get_doi_is_empty_without_any_doi(self):
         """A feature with no DOI'd pubs yields no DOIs."""
