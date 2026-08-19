@@ -6,6 +6,8 @@
 
 """Resume and restart behaviour for rebuild_search_index."""
 
+import io
+
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
@@ -55,12 +57,41 @@ class ResumeTest(TestCase):
         call_command("rebuild_search_index", resume=True, verbosity=0)
         self.assertEqual(snapshot_index(), expected)
 
-    def test_no_duplicate_rows_after_resume(self):
-        """feature_id is the PK, so resume can never duplicate a row."""
+    def test_resume_reindexes_only_the_missing_features(self):
+        """--resume must skip already-indexed rows, not re-process them.
+
+        Asserting on the final index state cannot catch a broken watermark:
+        because bulk_create uses ignore_conflicts=True, re-processing an
+        already-indexed feature is silently absorbed and the end result still
+        looks correct. So assert on the COUNT the command reports it will
+        index. That is what distinguishes the correct MAX + __gt from a MIN,
+        or from an off-by-one __gte.
+
+        (Do not assert PK uniqueness here -- feature_id IS the primary key, so
+        uniqueness is a schema guarantee and such a test is tautological.)
+        """
         call_command("rebuild_search_index", verbosity=0)
-        call_command("rebuild_search_index", resume=True, verbosity=0)
-        ids = list(FeatureSearchIndex.objects.values_list("feature_id", flat=True))
-        self.assertEqual(len(ids), len(set(ids)))
+        total = FeatureSearchIndex.objects.count()
+
+        ids = list(
+            FeatureSearchIndex.objects.order_by("feature_id").values_list(
+                "feature_id", flat=True
+            )
+        )
+        # Truncate at the midpoint rather than after the first row, so this
+        # exercises a realistic resume point instead of a corner case.
+        midpoint = ids[len(ids) // 2]
+        FeatureSearchIndex.objects.filter(feature_id__gt=midpoint).delete()
+        already_done = FeatureSearchIndex.objects.count()
+
+        out = io.StringIO()
+        call_command("rebuild_search_index", resume=True, stdout=out)
+        self.assertIn(
+            "Indexing {} features...".format(total - already_done),
+            out.getvalue(),
+            "resume must plan to index only the missing features",
+        )
+        self.assertEqual(FeatureSearchIndex.objects.count(), total)
 
     def test_default_rebuild_clears_the_index(self):
         """Without --resume the index is cleared first."""
