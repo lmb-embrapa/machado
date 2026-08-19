@@ -21,12 +21,18 @@ rebuild practical.
 """
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 from django.db.models import Max
 from tqdm import tqdm
 
 from machado.management.commands._base import HistoryCommandMixin
 from machado.models import Feature, FeatureSearchIndex
-from machado.searchindex import IndexConfig, build_entries, prefetch_chunk
+from machado.searchindex import (
+    IndexConfig,
+    IndexRunCache,
+    build_entries,
+    prefetch_chunk,
+)
 
 
 class Command(HistoryCommandMixin, BaseCommand):
@@ -90,9 +96,7 @@ class Command(HistoryCommandMixin, BaseCommand):
             if start_after:
                 self.stdout.write(f"Resuming after feature_id {start_after}.")
         else:
-            deleted, _ = FeatureSearchIndex.objects.all().delete()
-            if deleted:
-                self.stdout.write(f"  Cleared {deleted} stale index entries.")
+            self.clear_index()
 
         total = self.count_remaining(config, start_after)
         if limit is not None:
@@ -102,10 +106,13 @@ class Command(HistoryCommandMixin, BaseCommand):
         progress = tqdm(total=total, disable=verbosity == 0, desc="Building index")
         indexed = 0
         last_id = start_after
+        # Created here, and only here, so the memoised chunk-independent
+        # lookups live exactly as long as this run.
+        cache = IndexRunCache()
         try:
             for chunk in self.iter_chunks(config, batch_size, start_after, limit):
                 ids = [feature.feature_id for feature in chunk]
-                ctx = prefetch_chunk(ids, config)
+                ctx = prefetch_chunk(ids, config, cache=cache)
                 entries = build_entries(chunk, ctx, config)
                 FeatureSearchIndex.objects.bulk_create(
                     entries, batch_size=batch_size, ignore_conflicts=True
@@ -137,6 +144,32 @@ class Command(HistoryCommandMixin, BaseCommand):
                 "Indexed {} features.".format(indexed)
             )
         )
+
+    def clear_index(self):
+        """Empty the index table before a full rebuild.
+
+        TRUNCATE rather than a queryset ``delete()``: on the multi-million-row
+        production table, DELETE means one long transaction, gigabytes of WAL,
+        and as many dead tuples as rows, which the immediately following
+        re-insert then has to work around in a bloated ``fsi_search_gin``.
+        Nothing references ``FeatureSearchIndex``, so there is no cascade to
+        honour and TRUNCATE is safe here. The count is taken first, purely for
+        the operator-facing message.
+        """
+        stale = FeatureSearchIndex.objects.count()
+        # Postgres refuses to TRUNCATE a table with pending deferred FK
+        # trigger events, which is the normal state inside a transaction that
+        # has already written to it (Django declares FKs DEFERRABLE INITIALLY
+        # DEFERRED). Flushing the checks first -- and restoring deferral --
+        # makes TRUNCATE legal there. Under the command's real autocommit
+        # execution there is nothing pending and this is a no-op.
+        connection.check_constraints()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'TRUNCATE TABLE "{}"'.format(FeatureSearchIndex._meta.db_table)
+            )
+        if stale:
+            self.stdout.write(f"  Cleared {stale} stale index entries.")
 
     def base_queryset(self, config):
         """Return the queryset of features eligible for indexing."""

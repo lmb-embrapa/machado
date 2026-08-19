@@ -284,8 +284,29 @@ def _stable_relationships(raw_relationships, id_to_uniquename):
 def snapshot_index():
     """Return uniquename -> normalized field dict for every index row.
 
-    Multi-value JSON fields are sorted so the comparison is order-insensitive,
-    since only ``autocomplete_text`` has a guaranteed order.
+    READ THIS BEFORE TRUSTING A PASSING SNAPSHOT COMPARISON.
+
+    ``analyses``, ``doi``, ``biomaterial``, ``treatment``, ``relationships``
+    and ``orthologs_coexpression`` are sorted here, so for those six fields
+    this proves *set* equality only -- NOT that the stored list order is
+    byte-identical to the pre-batching implementation. Every list in the
+    recorded snapshot happens to have at most one element, which hides the
+    difference further.
+
+    That is deliberate, not an oversight. The batched builder legitimately
+    changed the order of those lists: ``analyses`` now follows
+    ``order_by("program")``, ``relationships`` are ordered by counterpart id,
+    ``orthologs_coexpression`` is grouped by orthologous-group member, and
+    ``biomaterial``/``treatment`` follow whatever order the single batched
+    six-table join returns (plan-dependent, where before it was
+    plan-dependent per feature). Each of those is at least as deterministic as
+    what it replaced, and consumers only ever use JSONField ``__contains``
+    lookups and plain iteration -- never indexing or slicing -- so order
+    carries no meaning. ``autocomplete_text``, the one field whose order IS
+    part of the contract, is compared verbatim.
+
+    If you need to lock list order down, add a separate assertion; do not read
+    it into this one.
     """
     from machado.models import FeatureSearchIndex
 

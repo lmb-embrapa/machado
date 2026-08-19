@@ -18,22 +18,25 @@ Keeping the assembler pure is what makes the query count independent of the
 number of features being indexed.
 """
 
+import bisect
 import dataclasses
+from functools import reduce
+from operator import or_
 
 from django.conf import settings
 from django.core.management.base import CommandError
 from django.db.models import F, Q
 
-from machado.models import Feature, FeatureSearchIndex
+from machado.models import FeatureSearchIndex
 
 #: Analysis programs surfaced as facets by ``_prepare_analyses``.
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
 
-#: Featureprop type names read from the ``feature_property`` CV. Consumed by
-#: ``prefetch_chunk`` (added in Task 5), which fetches all of these in a single
-#: query and splits them by type -- replacing what were previously several
-#: separate per-feature lookups. Defined here so the contract lives beside
-#: ``resolve_display``, which depends on the fallback subset.
+#: Featureprop type names read from the ``feature_property`` CV.
+#: ``prefetch_chunk`` fetches all of these in a single query and splits them by
+#: type, instead of issuing one lookup per property per feature. Defined here
+#: so the contract lives beside ``resolve_display``, which depends on the
+#: fallback subset.
 PROP_TYPES = (
     "display",
     "product",
@@ -105,6 +108,21 @@ class IndexConfig:
             valid_programs=list(valid_programs),
             has_overlapping=has_overlapping,
         )
+
+
+@dataclasses.dataclass
+class IndexRunCache:
+    """Memoised, chunk-independent lookups shared across one index run.
+
+    Deliberately an object the caller creates per run rather than a
+    module-level dict: a global would survive between management-command
+    invocations and between tests, so a group whose membership changed (or a
+    test that rolled its fixture back) would be served stale flags.
+    """
+
+    #: orthologous group value -> coexpression flag list, see
+    #: ``_prefetch_orthologs_coexpression``.
+    ortholog_flags: dict = dataclasses.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -295,11 +313,15 @@ def _group(rows, key, value):
     return grouped
 
 
-def prefetch_chunk(feature_ids, config):
+def prefetch_chunk(feature_ids, config, cache=None):
     """Fetch all related data for a chunk of features.
 
     Issues a fixed number of queries regardless of how many features are in
     the chunk. Returns a :class:`ChunkContext`.
+
+    ``cache`` is an optional :class:`IndexRunCache` shared by every chunk of
+    one run; pass one to skip re-deriving the chunk-independent
+    orthologs-coexpression facet for groups already seen.
     """
     from machado.models import (
         Analysisfeature,
@@ -474,42 +496,43 @@ def prefetch_chunk(feature_ids, config):
         lambda r: r,
     )
 
-    # 9-10. match_part programs for the analyses facet
-    match_part_rows = list(
+    # 9. match_part programs for the analyses facet.
+    #
+    # One query joining featureloc -> match_part feature -> analysisfeature ->
+    # analysis and returning DISTINCT (srcfeature_id, program). The earlier
+    # shape round-tripped one match_part feature_id per featureloc back
+    # through Python into an `IN` list -- unbounded (tens of thousands of ids
+    # per chunk once InterProScan/diamond data is loaded, with no dedup) and
+    # only survivable because psycopg binds parameters client-side by default;
+    # under `server_side_binding` it would hit libpq's 65535-parameter ceiling
+    # and fail on the same chunk forever under --resume. This shape is bounded
+    # by chunk_size x programs.
+    #
+    # `feature__organism_id=F("srcfeature__organism_id")` is the original
+    # same-organism restriction, pushed into SQL; it also removes the separate
+    # lookup of the source features' organism_ids.
+    analysis_programs = {}
+    for src, program in (
         Featureloc.objects.filter(
             srcfeature_id__in=ids,
             feature__type__name="match_part",
             feature__type__cv__name="sequence",
-        ).values("srcfeature_id", "feature_id", "feature__organism_id")
-    )
-    src_organism = dict(
-        (f_id, org_id)
-        for f_id, org_id in Feature.objects.filter(feature_id__in=ids).values_list(
-            "feature_id", "organism_id"
+            feature__organism_id=F("srcfeature__organism_id"),
         )
-    )
-    match_part_ids = [r["feature_id"] for r in match_part_rows]
-    program_by_match_part = {}
-    if match_part_ids:
-        for row in Analysisfeature.objects.filter(feature_id__in=match_part_ids).values(
-            "feature_id", "analysis__program"
-        ):
-            program_by_match_part.setdefault(row["feature_id"], set()).add(
-                row["analysis__program"]
-            )
-
-    analysis_programs = {}
-    for row in match_part_rows:
-        src = row["srcfeature_id"]
-        # preserve the original same-organism restriction
-        if row["feature__organism_id"] != src_organism.get(src):
+        .values_list(
+            "srcfeature_id",
+            "feature__Analysisfeature_feature_Feature__analysis__program",
+        )
+        .distinct()
+    ):
+        if program is None:
+            # match_part with no analysisfeature row: contributes no program,
+            # and build_analyses treats a missing key as "no matches".
             continue
-        analysis_programs.setdefault(src, set()).update(
-            program_by_match_part.get(row["feature_id"], ())
-        )
+        analysis_programs.setdefault(src, set()).add(program)
     ctx.analysis_programs = analysis_programs
 
-    # 11. relationships (both directions), filtered to valid types
+    # 10-11. relationships (both directions), filtered to valid types
     relationships = {}
     rel_filter = Q(type__name="part_of") | Q(type__name="translation_of")
     for row in (
@@ -536,20 +559,27 @@ def prefetch_chunk(feature_ids, config):
             )
     ctx.relationships = relationships
 
-    # 12. orthologs coexpression
-    ctx.orthologs_coexpression = _prefetch_orthologs_coexpression(ids, props)
+    # 12-14. orthologs coexpression
+    ctx.orthologs_coexpression = _prefetch_orthologs_coexpression(
+        ids, props, ortholog_flags=None if cache is None else cache.ortholog_flags
+    )
 
-    # 13. overlapping features
+    # 15-16. overlapping features
     if config.has_overlapping:
         ctx.overlaps = _prefetch_overlaps(ids, config)
 
     return ctx
 
 
-def _prefetch_orthologs_coexpression(ids, props):
-    """Build the orthologs-coexpression facet for a chunk."""
-    from machado.models import FeatureRelationship, Featureprop
+def _prefetch_orthologs_coexpression(ids, props, ortholog_flags=None):
+    """Build the orthologs-coexpression facet for a chunk.
 
+    The facet value depends only on the feature's orthologous group, never on
+    the chunk, so ``ortholog_flags`` (see :class:`IndexRunCache`) memoises it
+    per group for the lifetime of one run. Without it, a group with 500k
+    members is re-expanded -- plus two ``__in`` queries over all its members
+    -- once per chunk that happens to contain any of them.
+    """
     groups = {}
     for fid in ids:
         values = (props.get(fid) or {}).get("orthologous group") or []
@@ -558,14 +588,39 @@ def _prefetch_orthologs_coexpression(ids, props):
     if not groups:
         return {}
 
-    distinct_groups = set(groups.values())
-    members_by_group = {}
-    for row in Featureprop.objects.filter(
-        type__cv__name="feature_property",
-        type__name="orthologous group",
-        value__in=distinct_groups,
-    ).values("feature_id", "value"):
-        members_by_group.setdefault(row["value"], []).append(row["feature_id"])
+    if ortholog_flags is None:
+        ortholog_flags = {}
+    missing = {group for group in groups.values() if group not in ortholog_flags}
+    if missing:
+        ortholog_flags.update(_compute_ortholog_flags(missing))
+
+    # Copy: each entry becomes a distinct FeatureSearchIndex.orthologs_coexpression
+    # value and must not alias the cached list.
+    return {fid: list(ortholog_flags[group]) for fid, group in groups.items()}
+
+
+def _compute_ortholog_flags(distinct_groups):
+    """Return ``{orthologous group: [coexpression flag, ...]}`` for the groups.
+
+    One flag per (group member, ``translation_of`` subject of that member)
+    pair, True when the subject carries a coexpression group.
+    """
+    from machado.models import FeatureRelationship, Featureprop
+
+    # Ordered so a group's flag list comes out identical no matter which chunk
+    # happened to populate the cache entry.
+    member_rows = (
+        Featureprop.objects.filter(
+            type__cv__name="feature_property",
+            type__name="orthologous group",
+            value__in=distinct_groups,
+        )
+        .order_by("value", "feature_id")
+        .values("feature_id", "value")
+    )
+    members_by_group = {group: [] for group in distinct_groups}
+    for row in member_rows:
+        members_by_group[row["value"]].append(row["feature_id"])
 
     all_members = [m for ms in members_by_group.values() for m in ms]
     subjects_by_object = {}
@@ -592,22 +647,32 @@ def _prefetch_orthologs_coexpression(ids, props):
             ).values_list("feature_id", flat=True)
         )
 
-    result = {}
-    for fid, group in groups.items():
+    flags_by_group = {}
+    for group, members in members_by_group.items():
         flags = []
-        for member in members_by_group.get(group, ()):
+        for member in members:
             for subject in subjects_by_object.get(member, ()):
                 flags.append(subject in coexpressed)
-        result[fid] = flags
-    return result
+        flags_by_group[group] = flags
+    return flags_by_group
 
 
 def _prefetch_overlaps(ids, config):
     """Build the overlapping-feature keywords for a chunk.
 
-    The overlap query is bounded by the coordinate window actually spanned by
-    this chunk, not by the whole source feature, so memory stays proportional
-    to the chunk rather than to chromosome size.
+    The coordinate window is pushed into SQL: one
+    ``srcfeature_id = s AND fmin <= hi AND fmax >= lo`` predicate per
+    srcfeature the chunk touches, OR-ed together (a chunk spans only one to a
+    few srcfeatures, so the OR-chain stays short). That shape is what lets
+    Postgres use ``featureloc_idx3 (srcfeature_id, fmin, fmax)``; filtering on
+    ``srcfeature_id`` alone and applying the window in Python instead would
+    pull every SNV/QTL/CNV featureloc on the whole chromosome into memory --
+    millions of rows on a resequencing project -- and could not use the index.
+
+    Candidates are then matched against the individual featurelocs of the
+    chunk through a per-srcfeature list sorted by ``fmin`` plus a bisect, so
+    the cost is O(m log m + matches) rather than a nested scan over every
+    (own location, candidate) pair.
     """
     from machado.models import Featureloc
 
@@ -616,6 +681,13 @@ def _prefetch_overlaps(ids, config):
             feature_id__in=ids,
             feature__type__name__in=config.valid_types,
             srcfeature__isnull=False,
+            # NULL coordinates can never satisfy the original per-feature
+            # `fmin__lte=loc.fmax, fmax__gte=loc.fmin` predicate (SQL
+            # comparisons against NULL are never true), so such locations
+            # contributed no keywords. Excluding them here keeps that
+            # behaviour and keeps the arithmetic below NULL-free.
+            fmin__isnull=False,
+            fmax__isnull=False,
         ).values("feature_id", "srcfeature_id", "fmin", "fmax", "feature__type__name")
     )
     if not own_locs:
@@ -627,32 +699,64 @@ def _prefetch_overlaps(ids, config):
         lo, hi = windows.get(src, (loc["fmin"], loc["fmax"]))
         windows[src] = (min(lo, loc["fmin"]), max(hi, loc["fmax"]))
 
-    candidates = {}
-    for src, (lo, hi) in windows.items():
-        candidates[src] = []
-    rows = Featureloc.objects.filter(
-        srcfeature_id__in=list(windows),
-        feature__type__name__in=config.overlapping_features,
-    ).values(
-        "srcfeature_id",
-        "fmin",
-        "fmax",
-        "feature__uniquename",
-        "feature__name",
-        "feature__type__name",
+    window_q = reduce(
+        or_,
+        (
+            Q(srcfeature_id=src, fmin__lte=hi, fmax__gte=lo)
+            for src, (lo, hi) in windows.items()
+        ),
     )
+    rows = (
+        Featureloc.objects.filter(
+            window_q, feature__type__name__in=config.overlapping_features
+        )
+        .values(
+            "srcfeature_id",
+            "fmin",
+            "fmax",
+            "feature__uniquename",
+            "feature__name",
+            "feature__type__name",
+        )
+        .iterator()
+    )
+
+    candidates = {}
     for row in rows:
-        lo, hi = windows[row["srcfeature_id"]]
-        if row["fmax"] >= lo and row["fmin"] <= hi:
-            candidates[row["srcfeature_id"]].append(row)
+        candidates.setdefault(row["srcfeature_id"], []).append(row)
+
+    # Per srcfeature: candidates sorted by fmin, the parallel fmin list that
+    # bisect searches, and the widest candidate span. A candidate can only
+    # satisfy `fmax >= qlo` if `fmin >= qlo - widest`, so the bisect range
+    # [qlo - widest, qhi] is a superset of the true matches and the exact
+    # `fmax >= qlo` test inside the loop finishes the job.
+    index = {}
+    for src, cands in candidates.items():
+        cands.sort(key=lambda row: row["fmin"])
+        index[src] = (
+            cands,
+            [row["fmin"] for row in cands],
+            max(row["fmax"] - row["fmin"] for row in cands),
+        )
 
     overlaps = {}
     for loc in own_locs:
-        for cand in candidates.get(loc["srcfeature_id"], ()):
-            if cand["feature__type__name"] == loc["feature__type__name"]:
+        entry = index.get(loc["srcfeature_id"])
+        if entry is None:
+            continue
+        cands, fmins, widest = entry
+        qlo, qhi = loc["fmin"], loc["fmax"]
+        own_type = loc["feature__type__name"]
+        for pos in range(
+            bisect.bisect_left(fmins, qlo - widest),
+            bisect.bisect_right(fmins, qhi),
+        ):
+            cand = cands[pos]
+            if cand["fmax"] < qlo:
                 continue
-            if cand["fmax"] >= loc["fmin"] and cand["fmin"] <= loc["fmax"]:
-                overlaps.setdefault(loc["feature_id"], []).append(
-                    (cand["feature__uniquename"], cand["feature__name"])
-                )
+            if cand["feature__type__name"] == own_type:
+                continue
+            overlaps.setdefault(loc["feature_id"], []).append(
+                (cand["feature__uniquename"], cand["feature__name"])
+            )
     return overlaps

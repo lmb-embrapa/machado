@@ -54,11 +54,11 @@ class RebuildSearchIndexParityTest(TestCase):
 
     def test_every_valid_feature_is_indexed(self):
         """Only sequence-CV features of a valid type are indexed."""
-        # NOTE: the brief's verbatim version of this test omitted this call,
-        # which left it checking an always-empty table (each test method
-        # gets its own isolated transaction, so nothing from
-        # test_index_matches_snapshot carries over). Added so the
-        # assertions below actually exercise the command.
+        # The command must run inside this test method: each method gets its
+        # own isolated transaction, so the index built by
+        # test_index_matches_snapshot is rolled back and does not carry over.
+        # Without this call the assertions below would inspect an empty table
+        # and pass for the wrong reason.
         call_command("rebuild_search_index", batch_size=2, verbosity=0)
         indexed = set(FeatureSearchIndex.objects.values_list("uniquename", flat=True))
         self.assertIn("GENE_A", indexed)
