@@ -67,3 +67,30 @@ class RebuildSearchIndexParityTest(TestCase):
         self.assertIn("MRNA_A", indexed)
         self.assertNotIn("CHR1", indexed)
         self.assertNotIn("SNV_1", indexed)
+
+
+class RebuildSearchIndexQueryCountTest(TestCase):
+    """The command's query count must not scale with feature count."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        build_search_index_fixture()
+
+    def test_query_count_is_independent_of_batch_size(self):
+        """Halving the batch size must not multiply per-feature queries."""
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        with CaptureQueriesContext(connection) as big:
+            call_command("rebuild_search_index", batch_size=1000, verbosity=0)
+        with CaptureQueriesContext(connection) as small:
+            call_command("rebuild_search_index", batch_size=2, verbosity=0)
+
+        # Smaller batches mean more chunks, so more queries - but the growth
+        # must be proportional to chunk count, never to feature count.
+        self.assertLess(
+            len(big.captured_queries),
+            40,
+            "a single-chunk rebuild should cost a bounded number of queries",
+        )
+        self.assertLess(len(small.captured_queries), len(big.captured_queries) * 6)
