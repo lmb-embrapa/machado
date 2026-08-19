@@ -229,7 +229,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         keywords.add(obj.uniquename)
         keywords.discard(None)
 
-        return " ".join(keywords)
+        return " ".join(sorted(keywords))
 
     @staticmethod
     def _prepare_analyses(obj, valid_programs):

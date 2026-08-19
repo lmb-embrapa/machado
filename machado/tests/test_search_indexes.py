@@ -222,6 +222,40 @@ class RebuildSearchIndexHelpersTest(TestCase):
         self.assertEqual(self.cmd._prepare_orthologs_coexpression(self.feature), [])
 
 
+class PrepareTextDeterminismTest(TestCase):
+    """autocomplete_text word order must be reproducible."""
+
+    def test_keywords_are_sorted(self):
+        """_prepare_text emits keywords in sorted order."""
+        cmd = Command()
+        feature = MagicMock()
+        feature.uniquename = "zzz_last"
+        feature.name = "aaa_first"
+        feature.get_display.return_value = "mmm_middle"
+        feature.get_annotation.return_value = []
+        feature.get_doi.return_value = []
+        feature.get_expression_samples.return_value = []
+        with (
+            patch(
+                "machado.management.commands.rebuild_search_index."
+                "FeatureDbxref.objects.filter",
+                return_value=[],
+            ),
+            patch(
+                "machado.management.commands.rebuild_search_index."
+                "FeatureCvterm.objects.filter",
+                return_value=[],
+            ),
+            patch(
+                "machado.management.commands.rebuild_search_index."
+                "FeatureRelationship.objects.filter",
+                return_value=[],
+            ),
+        ):
+            text = cmd._prepare_text(feature, False, ["gene"], ["SNV"])
+        self.assertEqual(text, "aaa_first mmm_middle zzz_last")
+
+
 class SearchVectorGeneratedColumnTest(TestCase):
     """The search_vector column is maintained by PostgreSQL, not by Python."""
 
