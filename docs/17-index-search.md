@@ -29,6 +29,31 @@ Rebuilding the index queries the underlying database tables and batch-inserts th
 python manage.py rebuild_search_index --batch-size 5000
 ```
 
+### Resuming an interrupted rebuild
+
+A full rebuild over millions of features takes hours. If it is interrupted,
+re-run with `--resume` to continue from where it stopped:
+
+```bash
+python manage.py rebuild_search_index --resume
+```
+
+`--resume` skips features already present in the index and does not clear it.
+It assumes `MACHADO_VALID_TYPES` has not changed since the interrupted run; if
+you changed that setting, use `--restart` to rebuild from scratch.
+
+| Flag | Effect |
+|---|---|
+| *(none)* | Clear the index and rebuild everything (default) |
+| `--restart` | Same as the default, stated explicitly |
+| `--resume` | Continue an interrupted run |
+| `--batch-size N` | Features per chunk (default 2000) |
+| `--max-features N` | Stop after N features, for benchmarking |
+
+`search_vector` is a PostgreSQL generated column, so no separate tsvector
+update step runs after indexing: it is maintained by the database itself and
+must not be assigned directly.
+
 ## Search Features
 
 The PostgreSQL search backend supports advanced search queries natively using "websearch" syntax:
