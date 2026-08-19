@@ -1,0 +1,119 @@
+{
+  "GENE_A": {
+    "analyses": [
+      "blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana 10.1234/parity ACC_A GENE_A GO:0055085 GeneAlpha PMATCH_A PfamHit SNV_1 alpha kinase assay_alpha bio_alpha catalytic activity (DOI:10.1234/parity) drought leaf rs123 sample stress tissue transmembrane transport",
+    "biomaterial": [
+      "leaf tissue sample"
+    ],
+    "coexpression": true,
+    "coexpression_group": "CG_1",
+    "display": "alpha kinase",
+    "doi": [
+      "10.1234/parity"
+    ],
+    "name": "GeneAlpha",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": "OG_1",
+    "orthologs_coexpression": [
+      true
+    ],
+    "orthology": true,
+    "relationships": [
+      "MRNA_A mRNA"
+    ],
+    "so_term": "gene",
+    "treatment": [
+      "drought stress"
+    ],
+    "uniquename": "GENE_A"
+  },
+  "GENE_B": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana GENE_B",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [],
+    "name": null,
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": [],
+    "orthology": false,
+    "relationships": [],
+    "so_term": "gene",
+    "treatment": [],
+    "uniquename": "GENE_B"
+  },
+  "GENE_C": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana GENE_C GeneGamma",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [],
+    "name": "GeneGamma",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": [],
+    "orthology": false,
+    "relationships": [],
+    "so_term": "gene",
+    "treatment": [],
+    "uniquename": "GENE_C"
+  },
+  "MRNA_A": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana MRNA_A mRnaAlpha",
+    "biomaterial": [],
+    "coexpression": true,
+    "coexpression_group": "CG_1",
+    "display": null,
+    "doi": [],
+    "name": "mRnaAlpha",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": [],
+    "orthology": false,
+    "relationships": [
+      "GENE_A gene",
+      "POLY_A polypeptide"
+    ],
+    "so_term": "mRNA",
+    "treatment": [],
+    "uniquename": "MRNA_A"
+  },
+  "POLY_A": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana POLY_A PolyAlpha",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [],
+    "name": "PolyAlpha",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": "OG_1",
+    "orthologs_coexpression": [
+      true
+    ],
+    "orthology": true,
+    "relationships": [
+      "MRNA_A mRNA"
+    ],
+    "so_term": "polypeptide",
+    "treatment": [],
+    "uniquename": "POLY_A"
+  }
+}

@@ -22,12 +22,58 @@ python manage.py rebuild_search_index
 
 > **Note:** It is necessary to run `rebuild_search_index` whenever additional data is loaded into the database or when you wish to refresh the search facets.
 
-Rebuilding the index queries the underlying database tables and batch-inserts the records into the search index. You can control the batch size to tune performance:
+Rebuilding the index walks the features in chunks: for each chunk it issues a
+fixed, small number of queries for all the related data the chunk needs, then
+bulk-inserts that chunk's rows. `--batch-size` sets the size of that chunk, so
+it controls both how many rows are inserted at once *and* how many features
+each prefetch query covers — every `IN` list in the prefetch grows with it.
+
+The default of 2000 is a deliberate compromise: larger chunks mean fewer
+round-trips but bigger `IN` lists and more memory held per chunk, so raise it
+only if you have measured a benefit on your data.
 
 ```bash
-# Process 5,000 records at a time
-python manage.py rebuild_search_index --batch-size 5000
+# Smaller chunks: more round-trips, less memory per chunk
+python manage.py rebuild_search_index --batch-size 500
 ```
+
+### Resuming an interrupted rebuild
+
+A full rebuild over millions of features takes hours. If it is interrupted,
+re-run with `--resume` to continue from where it stopped:
+
+```bash
+python manage.py rebuild_search_index --resume
+```
+
+`--resume` skips features already present in the index and does not clear it.
+It assumes `MACHADO_VALID_TYPES` has not changed since the interrupted run; if
+you changed that setting, use `--restart` to rebuild from scratch.
+
+> **`--resume` is additive only.** It indexes only features whose `feature_id`
+> is **above the highest `feature_id` already in the index**. That makes it the
+> right tool for continuing an interrupted run, and the wrong tool for
+> everything else:
+>
+> * It will **not** refresh data attached to features that are already indexed.
+>   Loaders such as `load_similarity`, `load_feature_annotation`,
+>   `load_orthology` and `load_coexpression` attach new data to *pre-existing*
+>   features, whose `feature_id`s are below the watermark; `--resume` skips
+>   them and their index rows stay stale. Use `--restart` after any such load.
+> * It will **not** remove index rows for features that have since been deleted
+>   or marked obsolete. Only `--restart` clears those.
+
+| Flag | Effect |
+|---|---|
+| *(none)* | Clear the index and rebuild everything (default) |
+| `--restart` | Same as the default, stated explicitly |
+| `--resume` | Continue an interrupted run (additive only, see above) |
+| `--batch-size N` | Features per chunk (default 2000) |
+| `--max-features N` | Stop after N features, for benchmarking |
+
+`search_vector` is a PostgreSQL generated column, so no separate tsvector
+update step runs after indexing: it is maintained by the database itself and
+must not be assigned directly.
 
 ## Search Features
 
