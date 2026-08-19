@@ -7,11 +7,12 @@
 """Tests for machado.decorators."""
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from unittest.mock import MagicMock
 
+from machado.tests.decorators_fixture import build_decorator_fixture
+
 from machado.decorators import (
-    get_feature_dbxrefs,
     get_feature_product,
     get_feature_description,
     get_feature_note,
@@ -19,60 +20,14 @@ from machado.decorators import (
     get_feature_doi,
     get_feature_display,
     get_feature_properties,
-    get_feature_synonyms,
     get_feature_orthologous_group,
     get_feature_coexpression_group,
     get_feature_expression_samples,
-    get_feature_relationship,
     get_feature_cvterm,
-    get_feature_location,
     machado_feature_methods,
     get_pub_authors,
-    get_pub_doi,
     machado_pub_methods,
 )
-
-
-class GetFeatureDbxrefsTest(TestCase):
-    """Tests for get_feature_dbxrefs."""
-
-    def test_with_url(self):
-        """Test with url."""
-        mock_dbxref = MagicMock()
-        mock_dbxref.dbxref.db.url = "www.example.com/"
-        mock_dbxref.dbxref.db.urlprefix = "https"
-        mock_dbxref.dbxref.accession = "12345"
-        mock_dbxref.dbxref.db.name = "TestDB"
-
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = [mock_dbxref]
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("TestDB:12345", result[0])
-        self.assertIn("href='https://www.example.com/12345'", result[0])
-
-    def test_without_url(self):
-        """Test without url."""
-        mock_dbxref = MagicMock()
-        mock_dbxref.dbxref.db.url = None
-        mock_dbxref.dbxref.db.name = "LocalDB"
-        mock_dbxref.dbxref.accession = "67890"
-
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = [mock_dbxref]
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], "LocalDB:67890")
-
-    def test_empty(self):
-        """Test empty."""
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = []
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(result, [])
 
 
 class GetFeaturePropTest(TestCase):
@@ -280,29 +235,6 @@ class GetFeaturePropertiesTest(TestCase):
         self.assertEqual(result, [])
 
 
-class GetFeatureSynonymsTest(TestCase):
-    """Tests for get_feature_synonyms."""
-
-    def test_synonyms(self):
-        """Test synonyms."""
-        mock_syn = MagicMock()
-        mock_syn.synonym.name = "SynonymA"
-
-        mock_self = MagicMock()
-        mock_self.FeatureSynonym_feature_Feature.all.return_value = [mock_syn]
-
-        result = get_feature_synonyms(mock_self)
-        self.assertEqual(result, ["SynonymA"])
-
-    def test_no_synonyms(self):
-        """Test no synonyms."""
-        mock_self = MagicMock()
-        mock_self.FeatureSynonym_feature_Feature.all.return_value = []
-
-        result = get_feature_synonyms(mock_self)
-        self.assertEqual(result, [])
-
-
 class GetFeatureOrthologousGroupTest(TestCase):
     """Tests for get_feature_orthologous_group."""
 
@@ -368,68 +300,6 @@ class GetFeatureExpressionSamplesTest(TestCase):
         self.assertIsNone(result)
 
 
-class GetFeatureRelationshipTest(TestCase):
-    """Tests for get_feature_relationship."""
-
-    @override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
-    def test_relationship_object_side(self):
-        """Test relationship object side."""
-        mock_subject = MagicMock()
-        mock_subject.type.name = "gene"
-        mock_rel = MagicMock()
-        mock_rel.subject = mock_subject
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = [mock_rel]
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = []
-
-        result = get_feature_relationship(mock_self)
-        self.assertIn(mock_subject, result)
-
-    @override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
-    def test_relationship_subject_side(self):
-        """Test relationship subject side."""
-        mock_object = MagicMock()
-        mock_object.type.name = "mRNA"
-        mock_rel = MagicMock()
-        mock_rel.object = mock_object
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = []
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = [mock_rel]
-
-        result = get_feature_relationship(mock_self)
-        self.assertIn(mock_object, result)
-
-    @override_settings(MACHADO_VALID_TYPES=["gene"])
-    def test_relationship_filtered_by_valid_types(self):
-        """Test relationship filtered by valid types."""
-        mock_subject = MagicMock()
-        mock_subject.type.name = "CDS"  # Not in MACHADO_VALID_TYPES
-
-        mock_rel = MagicMock()
-        mock_rel.subject = mock_subject
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = [mock_rel]
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = []
-
-        result = get_feature_relationship(mock_self)
-        self.assertEqual(result, [])
-
-    def test_relationship_no_valid_types_setting(self):
-        """Test relationship no valid types setting."""
-        mock_self = MagicMock()
-        with self.settings():
-            # Remove MACHADO_VALID_TYPES from settings
-            from django.conf import settings
-
-            if hasattr(settings, "MACHADO_VALID_TYPES"):
-                delattr(settings, "MACHADO_VALID_TYPES")
-            with self.assertRaises(AttributeError):
-                get_feature_relationship(mock_self)
-
-
 class GetFeatureCvtermTest(TestCase):
     """Tests for get_feature_cvterm."""
 
@@ -443,124 +313,6 @@ class GetFeatureCvtermTest(TestCase):
 
         result = get_feature_cvterm(mock_self)
         self.assertIsNotNone(result)
-
-
-class GetFeatureLocationTest(TestCase):
-    """Tests for get_feature_location."""
-
-    @override_settings(
-        MACHADO_JBROWSE_URL="http://localhost/jbrowse",
-        MACHADO_JBROWSE_OFFSET=500,
-        MACHADO_JBROWSE_TRACKS="ref_seq,gene",
-    )
-    def test_location_with_jbrowse_full_settings(self):
-        """Test location with jbrowse full settings."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = None
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["start"], 1000)
-        self.assertEqual(result[0]["end"], 2000)
-        self.assertEqual(result[0]["strand"], 1)
-        self.assertEqual(result[0]["ref"], "chr1")
-        self.assertIn("jbrowse", result[0]["jbrowse_url"])
-        self.assertIn("ref_seq,gene", result[0]["jbrowse_url"])
-
-    @override_settings(
-        MACHADO_JBROWSE_URL="http://localhost/jbrowse",
-        MACHADO_JBROWSE_OFFSET=500,
-        MACHADO_JBROWSE_TRACKS="ref_seq,gene",
-    )
-    def test_location_with_infraspecific_name(self):
-        """Test location with infraspecific name."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = "Wm82"
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("Wm82", result[0]["jbrowse_url"])
-
-    @override_settings(MACHADO_JBROWSE_URL="http://localhost/jbrowse")
-    def test_location_default_tracks_and_offset(self):
-        """Test defaults when jbrowse tracks and offset are not set."""
-        from django.conf import settings
-
-        if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
-            delattr(settings, "MACHADO_JBROWSE_TRACKS")
-        if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
-            delattr(settings, "MACHADO_JBROWSE_OFFSET")
-
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = None
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        # Default tracks
-        self.assertIn("ref_seq,gene,transcripts,CDS", result[0]["jbrowse_url"])
-        # Default offset=1000: fmin-1000=0, fmax+1000=3000
-        self.assertIn("0..3000", result[0]["jbrowse_url"])
-
-    def test_location_no_jbrowse_url(self):
-        """When MACHADO_JBROWSE_URL is not set, jbrowse_url should be None."""
-        from django.conf import settings
-
-        if hasattr(settings, "MACHADO_JBROWSE_URL"):
-            delattr(settings, "MACHADO_JBROWSE_URL")
-
-        mock_loc = MagicMock()
-        mock_loc.srcfeature = None  # srcfeature is None
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
-
-    def test_location_srcfeature_none(self):
-        """When srcfeature is None, the location should be skipped."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature = None
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
-
-    def test_location_empty(self):
-        """Test location empty."""
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = []
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
 
 
 class MachadoFeatureMethodsTest(TestCase):
@@ -610,23 +362,6 @@ class GetPubAuthorsTest(TestCase):
         self.assertEqual(result, "Smith John, Doe Jane")
 
 
-class GetPubDoiTest(TestCase):
-    """Tests for get_pub_doi."""
-
-    def test_doi(self):
-        """Test doi."""
-        mock_pub_dbxref = MagicMock()
-        mock_pub_dbxref.dbxref.accession = "10.1234/test"
-
-        mock_self = MagicMock()
-        mock_self.PubDbxref_pub_Pub.filter.return_value.first.return_value = (
-            mock_pub_dbxref
-        )
-
-        result = get_pub_doi(mock_self)
-        self.assertEqual(result, "10.1234/test")
-
-
 class MachadoPubMethodsTest(TestCase):
     """Tests for the machado_pub_methods decorator."""
 
@@ -641,3 +376,61 @@ class MachadoPubMethodsTest(TestCase):
 
         self.assertTrue(hasattr(DummyPub, "get_authors"))
         self.assertTrue(hasattr(DummyPub, "get_doi"))
+
+
+class DecoratorRealDataTest(TestCase):
+    """Characterization tests for the methods Phase 1b optimizes.
+
+    These pin the CURRENT return values so the Phase 1b query changes can be
+    shown not to alter behavior. They deliberately use real rows rather than
+    mocks: a mock queryset has no query count, so it cannot detect an N+1.
+    """
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_dbxrefs_renders_url_and_plain_forms(self):
+        """A dbxref on a db with a url becomes a link; otherwise plain text."""
+        result = self.fx.gene.get_dbxrefs()
+        self.assertEqual(len(result), 2)
+        self.assertIn(
+            "<a href='https://www.example.com/12345' target='_blank'>"
+            "URLDB:12345</a>",
+            result,
+        )
+        self.assertIn("PlainDB:67890", result)
+
+    def test_get_synonyms(self):
+        """Synonym names are returned."""
+        self.assertEqual(sorted(self.fx.gene.get_synonyms()), ["syn_0", "syn_1"])
+
+    def test_get_relationship_filters_to_valid_types(self):
+        """Only counterparts whose SO type is in MACHADO_VALID_TYPES appear."""
+        result = self.fx.gene.get_relationship()
+        names = sorted(feature.uniquename for feature in result)
+        # MRNA_A (object side) and POLY_A (subject side) qualify.
+        # CHR1 is a chromosome, which is not in MACHADO_VALID_TYPES.
+        self.assertEqual(names, ["MRNA_A", "POLY_A"])
+
+    def test_get_location_skips_null_srcfeature(self):
+        """A Featureloc with no srcfeature produces no entry."""
+        result = self.fx.gene.get_location()
+        self.assertEqual(len(result), 1)
+        entry = result[0]
+        self.assertEqual(entry["start"], 100)
+        self.assertEqual(entry["end"], 200)
+        self.assertEqual(entry["ref"], "CHR1")
+        self.assertIn("http://localhost/jbrowse", entry["jbrowse_url"])
+        self.assertIn("Arabidopsis thaliana", entry["jbrowse_url"])
+        # MACHADO_JBROWSE_OFFSET is 1200 in test settings.
+        self.assertIn("CHR1:-1100..1400", entry["jbrowse_url"])
+        self.assertIn("tracks=ref_seq,gene,transcripts,CDS", entry["jbrowse_url"])
+
+    def test_get_pub_doi_returns_accession(self):
+        """A pub with a DOI dbxref returns its accession."""
+        self.assertEqual(self.fx.pub_with_doi.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_returns_none_without_doi(self):
+        """A pub with no DOI dbxref returns None."""
+        self.assertIsNone(self.fx.pub_without_doi.get_doi())
