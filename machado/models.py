@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 from django.utils import timezone
 
@@ -4381,7 +4381,15 @@ class FeatureSearchIndex(models.Model):
     )
 
     # ── Full-text search ─────────────────────────────────────────────────
-    search_vector = SearchVectorField(null=True)
+    # Maintained by PostgreSQL as a STORED generated column. Never assign to
+    # this field: writes raise django.db.utils.DatabaseError. SearchVector
+    # emits to_tsvector('english', ...) with a literal config, which Postgres
+    # accepts as IMMUTABLE and therefore allows in a generated expression.
+    search_vector = models.GeneratedField(
+        expression=SearchVector("autocomplete_text", config="english"),
+        output_field=SearchVectorField(null=True),
+        db_persist=True,
+    )
     autocomplete_text = models.TextField(default="")
 
     # ── Scalar facet fields (denormalized for fast filtering) ────────────

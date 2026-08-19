@@ -16,7 +16,6 @@ search.
 """
 
 from django.conf import settings
-from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from machado.management.commands._base import HistoryCommandMixin
@@ -119,12 +118,6 @@ class Command(HistoryCommandMixin, BaseCommand):
         # flush remaining
         if batch:
             FeatureSearchIndex.objects.bulk_create(batch, batch_size=batch_size)
-
-        # ── Update the tsvector column ───────────────────────────────────
-        self.stdout.write("  Updating search vectors...")
-        FeatureSearchIndex.objects.update(
-            search_vector=SearchVector("autocomplete_text", config="english")
-        )
 
         self.stdout.write(
             self.style.SUCCESS(
