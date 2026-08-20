@@ -495,3 +495,65 @@ class HomeViewTest(TestCase):
         response = client.get("/")
         self.assertContains(response, "Credits")
         self.assertNotContains(response, "Acknowledgements")
+
+    def test_footer_powered_by_line_is_hardcoded(self):
+        """The 'Powered by' line is a fixed literal, not settings-driven.
+
+        This is a deliberate design decision, not an oversight: overriding
+        MACHADO_SITE_TITLE/MACHADO_HERO_TITLE must NOT change this line. A
+        MACHADO_FOOTER_GITHUB_URL setting does not exist and must not be
+        added -- if a future change reintroduces settings-driving here, this
+        test should fail rather than silently pass.
+        """
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Powered by")
+        self.assertContains(response, "Machado Genomics")
+        self.assertContains(response, "https://github.com/lmb-embrapa/machado")
+
+    @override_settings(
+        MACHADO_SITE_TITLE="Soybean Portal", MACHADO_HERO_TITLE="Custom Hero"
+    )
+    def test_footer_powered_by_line_ignores_site_title_override(self):
+        """Overriding site/hero title must not change the footer's wording."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Powered by")
+        self.assertContains(response, "Machado Genomics")
+        # Scoped to the footer's own anchor markup: MACHADO_SITE_TITLE is
+        # legitimately rendered elsewhere on the page (<title>, navbar
+        # brand, index.html's "How ... Operates" heading), so a page-wide
+        # assertNotContains(response, "Soybean Portal") would fail on those
+        # unrelated, correct renderings regardless of the footer's content.
+        self.assertNotContains(
+            response,
+            '<a href="https://github.com/lmb-embrapa/machado" '
+            'target="_blank">Soybean Portal</a>',
+        )
+
+    def test_footer_copyright_renders_default(self):
+        """The footer shows the default copyright text."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "2026 Embrapa. All rights reserved.")
+
+    @override_settings(MACHADO_FOOTER_COPYRIGHT="© 2030 Example Org.")
+    def test_footer_copyright_is_overridable(self):
+        """The footer shows an overridden copyright value."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "2030 Example Org.")
+        self.assertNotContains(response, "2026 Embrapa")
+
+    def test_footer_extra_text_absent_by_default(self):
+        """The extra footer text block is absent when its setting is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Hosted on Example Cloud")
+
+    @override_settings(MACHADO_FOOTER_TEXT="Hosted on Example Cloud")
+    def test_footer_extra_text_shown_when_set(self):
+        """The extra footer text block renders when its setting is non-empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Hosted on Example Cloud")
