@@ -550,6 +550,7 @@ class HomeViewTest(TestCase):
         client = Client()
         response = client.get("/")
         self.assertNotContains(response, "Hosted on Example Cloud")
+        self.assertNotContains(response, "col-12 text-center small text-muted mb-2")
 
     @override_settings(MACHADO_FOOTER_TEXT="Hosted on Example Cloud")
     def test_footer_extra_text_shown_when_set(self):
