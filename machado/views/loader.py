@@ -842,11 +842,13 @@ COMMANDS_CONFIG = {
                     "features already indexed. Only indexes features newer "
                     "than the highest already in the index -- it is NOT a way "
                     "to refresh data loaded onto features that are already "
-                    "indexed (after load_similarity, load_feature_annotation, "
-                    "load_orthology or load_coexpression, run a normal full "
-                    "rebuild instead, or this will report success having "
-                    "indexed almost nothing). Assumes MACHADO_VALID_TYPES has "
-                    "not changed since the interrupted run."
+                    "indexed. After a loader that attaches data to existing "
+                    "features -- load_similarity, load_feature_annotation, "
+                    "load_orthomcl, or either load_coexpression_* command -- "
+                    "run a normal full rebuild instead, or this will report "
+                    "success having indexed almost nothing. Assumes "
+                    "MACHADO_VALID_TYPES has not changed since the "
+                    "interrupted run."
                 ),
                 "type": "checkbox",
             },

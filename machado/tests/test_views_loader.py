@@ -101,6 +101,12 @@ class RebuildSearchIndexFormOptionsTest(TestCase):
     can drift silently: it advertised batch-size default 1000 long after the
     command's default became 2000. These tests read the command's own parser
     instead of hardcoding numbers, so the next divergence fails here.
+
+    Not every test below is a drift guard: test_unchecked_resume_sends_no_flag
+    passes vacuously both before and after the registry gains a resume entry,
+    so it has no power to catch registry drift specifically. It guards a
+    different regression -- the shared checkbox marshalling turning an absent
+    POST field into a truthy flag -- which none of the other tests cover.
     """
 
     def setUp(self):
