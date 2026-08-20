@@ -122,6 +122,8 @@ if env("MACHADO_JBROWSE_TRACKS", default=None):
 
 # ── Landing page customization ──────────────────────────────────────────────
 # All values have sensible defaults — override only what you need.
+# Available values: steel, teal, sage, amber, graphite, ruby, indigo,
+# emerald, coral, plum (see the accent-picker swatches in base.html).
 MACHADO_ACCENT_COLOR = env("MACHADO_ACCENT_COLOR", default="steel")
 MACHADO_SITE_TITLE = env("MACHADO_SITE_TITLE", default="Machado Genomics")
 MACHADO_SITE_DESCRIPTION = env(
@@ -179,6 +181,17 @@ MACHADO_FEATURE3_TEXT = env(
 )
 MACHADO_FEATURE3_ICON = env("MACHADO_FEATURE3_ICON", default="fas fa-align-left")
 
+# How It Works heading (set title to empty string to hide the heading, not the steps)
+MACHADO_HOWITWORKS_TITLE = env(
+    "MACHADO_HOWITWORKS_TITLE", default="How Machado Genomics Operates"
+)
+MACHADO_HOWITWORKS_SUBTITLE = env(
+    "MACHADO_HOWITWORKS_SUBTITLE",
+    default=(
+        "From raw genomic files to interactive database search and " "visualization."
+    ),
+)
+
 # How-it-works steps (set title to empty string to hide a step)
 MACHADO_STEP1_TITLE = env("MACHADO_STEP1_TITLE", default="Load Data")
 MACHADO_STEP1_TEXT = env(
@@ -204,6 +217,30 @@ MACHADO_STEP3_TEXT = env(
         "data, and browse via JBrowse."
     ),
 )
+
+# Key features section (set title to empty string to hide the section)
+MACHADO_FEATURES_TITLE = env(
+    "MACHADO_FEATURES_TITLE", default="Key Features & Capabilities"
+)
+MACHADO_FEATURES_SUBTITLE = env(
+    "MACHADO_FEATURES_SUBTITLE",
+    default=(
+        "A comprehensive ecosystem designed for biological database "
+        "curation and research."
+    ),
+)
+
+# Acknowledgements (optional; set text to empty string to hide the section)
+MACHADO_ACKNOWLEDGEMENTS_TITLE = env(
+    "MACHADO_ACKNOWLEDGEMENTS_TITLE", default="Acknowledgements"
+)
+MACHADO_ACKNOWLEDGEMENTS_TEXT = env("MACHADO_ACKNOWLEDGEMENTS_TEXT", default="")
+
+# Footer
+MACHADO_FOOTER_COPYRIGHT = env(
+    "MACHADO_FOOTER_COPYRIGHT", default="\u00a9 2026 Embrapa. All rights reserved."
+)
+MACHADO_FOOTER_TEXT = env("MACHADO_FOOTER_TEXT", default="")
 
 # ── Email configuration ──────────────────────────────────────────────────────
 if env("EMAIL_URL", default=None):

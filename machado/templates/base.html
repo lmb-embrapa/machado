@@ -192,15 +192,20 @@
   <!-- Footer -->
   <footer class="m-footer">
     <div class="container">
+      {% if machado_footer_text %}
+      <div class="row">
+        <div class="col-12 text-center small text-muted mb-2">{{ machado_footer_text }}</div>
+      </div>
+      {% endif %}
       <div class="row align-items-center justify-content-between">
         <div class="col-sm-6 text-left">
           <p class="mb-0 text-muted small">
-            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">{{ machado_site_title }}</a></strong> — {{ machado_hero_title }}.
+            Powered by <strong><a href="https://github.com/lmb-embrapa/machado" target="_blank">Machado Genomics</a></strong>
           </p>
         </div>
         <div class="col-sm-6 text-right">
           <p class="mb-0 text-muted small">
-            &copy; 2026 Embrapa. All rights reserved.
+            {{ machado_footer_copyright }}
           </p>
         </div>
       </div>

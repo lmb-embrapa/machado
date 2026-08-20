@@ -8,9 +8,11 @@
 
 from datetime import datetime, timezone
 
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import Client, TestCase, RequestFactory, override_settings
 from django.urls.exceptions import NoReverseMatch
+from django.utils.html import escape
 
+from machado.context_processors import DEFAULTS
 from machado.models import Db, Dbxref, Cv, Cvterm
 from machado.models import Organism, OrganismPub, Pub, PubDbxref
 from machado.models import Feature
@@ -375,6 +377,7 @@ class HomeViewTest(TestCase):
         ctx = machado_site(request)
         self.assertEqual(ctx["machado_site_title"], "Soybean Portal")
 
+    @override_settings(MACHADO_SITE_TITLE=DEFAULTS["MACHADO_SITE_TITLE"])
     def test_default_site_title_in_context(self):
         """When no override is set, the default title should be used."""
         from machado.context_processors import machado_site
@@ -382,7 +385,7 @@ class HomeViewTest(TestCase):
         factory = RequestFactory()
         request = factory.get("/")
         ctx = machado_site(request)
-        self.assertEqual(ctx["machado_site_title"], "Machado Genomics")
+        self.assertEqual(ctx["machado_site_title"], DEFAULTS["MACHADO_SITE_TITLE"])
 
     @override_settings(MACHADO_FEATURE1_TITLE="")
     def test_empty_feature_title_hides_card(self):
@@ -433,3 +436,168 @@ class HomeViewTest(TestCase):
                 self.assertEqual(len(ctx["machado_release_notes"]), 1)
                 self.assertEqual(ctx["machado_release_notes"][0]["version"], "1.0")
         context_processors._release_notes_cache = None
+
+    @override_settings(
+        MACHADO_FEATURES_TITLE=DEFAULTS["MACHADO_FEATURES_TITLE"],
+        MACHADO_FEATURES_SUBTITLE=DEFAULTS["MACHADO_FEATURES_SUBTITLE"],
+    )
+    def test_features_heading_renders_default_text(self):
+        """The Features heading and subtitle render their default text."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, escape(DEFAULTS["MACHADO_FEATURES_TITLE"]))
+        self.assertContains(response, DEFAULTS["MACHADO_FEATURES_SUBTITLE"])
+
+    @override_settings(
+        MACHADO_FEATURES_TITLE="Custom Heading",
+        MACHADO_FEATURES_SUBTITLE="Custom subtitle text.",
+    )
+    def test_features_heading_renders_overridden_text(self):
+        """The Features heading renders an overridden title and subtitle."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Custom Heading")
+        self.assertContains(response, "Custom subtitle text.")
+        self.assertNotContains(response, "Key Features &amp; Capabilities")
+
+    @override_settings(MACHADO_FEATURES_TITLE="")
+    def test_features_heading_hidden_when_title_empty(self):
+        """The whole Features heading is absent when its title is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Key Features &amp; Capabilities")
+        self.assertNotContains(
+            response,
+            "A comprehensive ecosystem designed for biological database "
+            "curation and research.",
+        )
+
+    @override_settings(
+        MACHADO_HOWITWORKS_TITLE=DEFAULTS["MACHADO_HOWITWORKS_TITLE"],
+        MACHADO_HOWITWORKS_SUBTITLE=DEFAULTS["MACHADO_HOWITWORKS_SUBTITLE"],
+    )
+    def test_howitworks_heading_renders_default_text(self):
+        """The How It Works heading and subtitle render their default text."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, DEFAULTS["MACHADO_HOWITWORKS_TITLE"])
+        self.assertContains(response, DEFAULTS["MACHADO_HOWITWORKS_SUBTITLE"])
+
+    @override_settings(
+        MACHADO_HOWITWORKS_TITLE="Custom Process Heading",
+        MACHADO_HOWITWORKS_SUBTITLE="Custom process subtitle text.",
+    )
+    def test_howitworks_heading_renders_overridden_text(self):
+        """The How It Works heading renders an overridden title and subtitle."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Custom Process Heading")
+        self.assertContains(response, "Custom process subtitle text.")
+        self.assertNotContains(response, "How Machado Genomics Operates")
+
+    @override_settings(MACHADO_HOWITWORKS_TITLE="")
+    def test_howitworks_heading_hidden_when_title_empty(self):
+        """The whole How It Works heading is absent when its title is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "How Machado Genomics Operates")
+        self.assertNotContains(
+            response,
+            "From raw genomic files to interactive database search and "
+            "visualization.",
+        )
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TEXT=DEFAULTS["MACHADO_ACKNOWLEDGEMENTS_TEXT"]
+    )
+    def test_acknowledgements_absent_by_default(self):
+        """The Acknowledgements section is absent when its text is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Acknowledgements")
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation."
+    )
+    def test_acknowledgements_shown_when_text_set(self):
+        """The Acknowledgements section renders its title and text when set."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Acknowledgements")
+        self.assertContains(response, "Funded by the Example Grant Foundation.")
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TITLE="Credits",
+        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation.",
+    )
+    def test_acknowledgements_title_is_overridable(self):
+        """The Acknowledgements heading uses an overridden title."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Credits")
+        self.assertNotContains(response, "Acknowledgements")
+
+    def test_footer_powered_by_line_is_hardcoded(self):
+        """The 'Powered by' line is a fixed literal, not settings-driven.
+
+        This is a deliberate design decision, not an oversight: overriding
+        MACHADO_SITE_TITLE/MACHADO_HERO_TITLE must NOT change this line. A
+        MACHADO_FOOTER_GITHUB_URL setting does not exist and must not be
+        added -- if a future change reintroduces settings-driving here, this
+        test should fail rather than silently pass.
+        """
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Powered by")
+        self.assertContains(response, "Machado Genomics")
+        self.assertContains(response, "https://github.com/lmb-embrapa/machado")
+
+    @override_settings(
+        MACHADO_SITE_TITLE="Soybean Portal", MACHADO_HERO_TITLE="Custom Hero"
+    )
+    def test_footer_powered_by_line_ignores_site_title_override(self):
+        """Overriding site/hero title must not change the footer's wording."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Powered by")
+        self.assertContains(response, "Machado Genomics")
+        # Scoped to the footer's own anchor markup: MACHADO_SITE_TITLE is
+        # legitimately rendered elsewhere on the page (<title>, navbar
+        # brand, index.html's "How ... Operates" heading), so a page-wide
+        # assertNotContains(response, "Soybean Portal") would fail on those
+        # unrelated, correct renderings regardless of the footer's content.
+        self.assertNotContains(
+            response,
+            '<a href="https://github.com/lmb-embrapa/machado" '
+            'target="_blank">Soybean Portal</a>',
+        )
+
+    @override_settings(MACHADO_FOOTER_COPYRIGHT=DEFAULTS["MACHADO_FOOTER_COPYRIGHT"])
+    def test_footer_copyright_renders_default(self):
+        """The footer shows the default copyright text."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, DEFAULTS["MACHADO_FOOTER_COPYRIGHT"])
+
+    @override_settings(MACHADO_FOOTER_COPYRIGHT="© 2030 Example Org.")
+    def test_footer_copyright_is_overridable(self):
+        """The footer shows an overridden copyright value."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "2030 Example Org.")
+        self.assertNotContains(response, "2026 Embrapa")
+
+    @override_settings(MACHADO_FOOTER_TEXT=DEFAULTS["MACHADO_FOOTER_TEXT"])
+    def test_footer_extra_text_absent_by_default(self):
+        """The extra footer text block is absent when its setting is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Hosted on Example Cloud")
+        self.assertNotContains(response, "col-12 text-center small text-muted mb-2")
+
+    @override_settings(MACHADO_FOOTER_TEXT="Hosted on Example Cloud")
+    def test_footer_extra_text_shown_when_set(self):
+        """The extra footer text block renders when its setting is non-empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Hosted on Example Cloud")

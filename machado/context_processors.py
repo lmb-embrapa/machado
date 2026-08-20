@@ -53,6 +53,11 @@ DEFAULTS = {
         "for sequence and annotation alignments."
     ),
     "MACHADO_FEATURE3_ICON": "fas fa-align-left",
+    # How It Works heading (empty title hides the whole heading, not the steps)
+    "MACHADO_HOWITWORKS_TITLE": "How Machado Genomics Operates",
+    "MACHADO_HOWITWORKS_SUBTITLE": (
+        "From raw genomic files to interactive database search and " "visualization."
+    ),
     # How-it-works step 1
     "MACHADO_STEP1_TITLE": "Load Data",
     "MACHADO_STEP1_TEXT": (
@@ -71,6 +76,18 @@ DEFAULTS = {
         "Users inspect features, view analysis results, download bulk "
         "data, and browse via JBrowse."
     ),
+    # Key features section (empty title hides the whole section)
+    "MACHADO_FEATURES_TITLE": "Key Features & Capabilities",
+    "MACHADO_FEATURES_SUBTITLE": (
+        "A comprehensive ecosystem designed for biological database "
+        "curation and research."
+    ),
+    # Acknowledgements (optional; empty text hides the section)
+    "MACHADO_ACKNOWLEDGEMENTS_TITLE": "Acknowledgements",
+    "MACHADO_ACKNOWLEDGEMENTS_TEXT": "",
+    # Footer
+    "MACHADO_FOOTER_COPYRIGHT": "\u00a9 2026 Embrapa. All rights reserved.",
+    "MACHADO_FOOTER_TEXT": "",
 }
 
 

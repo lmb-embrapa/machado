@@ -12,6 +12,10 @@ from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 from machado.models import Db, Dbxref
+from machado.management.commands.rebuild_search_index import (
+    Command as RebuildCommand,
+)
+from machado.views.loader import COMMANDS_CONFIG
 
 
 class LoaderViewsTest(TestCase):
@@ -88,3 +92,146 @@ class LoaderViewsTest(TestCase):
         idx = cmd.index("--nosequence")
         next_token = cmd[idx + 1] if idx + 1 < len(cmd) else None
         self.assertNotEqual(next_token, "true")
+
+
+class RebuildSearchIndexFormOptionsTest(TestCase):
+    """The registry entry for rebuild_search_index must match the command.
+
+    The registry duplicates the command's argument names and defaults, so it
+    can drift silently: it advertised batch-size default 1000 long after the
+    command's default became 2000. These tests read the command's own parser
+    instead of hardcoding numbers, so the next divergence fails here.
+
+    Not every test below is a drift guard: test_unchecked_resume_sends_no_flag
+    passes vacuously both before and after the registry gains a resume entry,
+    so it has no power to catch registry drift specifically. It guards a
+    different regression -- the shared checkbox marshalling turning an absent
+    POST field into a truthy flag -- which none of the other tests cover.
+    """
+
+    def setUp(self):
+        """Log in a superuser and resolve the command's argument entries."""
+        self.client = Client()
+        self.user = User.objects.create_superuser(
+            username="rsi_admin", password="password", email="rsi@example.com"
+        )
+        self.client.force_login(self.user)
+        self.args = COMMANDS_CONFIG["rebuild_search_index"]["args"]
+
+    def _entry(self, name):
+        """Return the registry entry for one argument name."""
+        return next(arg for arg in self.args if arg["name"] == name)
+
+    def test_batch_size_default_matches_the_command(self):
+        """The registry's batch-size default is the command's own default.
+
+        Read from the parser rather than hardcoded: hardcoding the number would
+        move the drift from the registry into this test and defeat the point.
+        """
+        parser = RebuildCommand().create_parser("manage.py", "rebuild_search_index")
+        actions = {action.dest: action for action in parser._actions}
+        command_default = actions["batch_size"].default
+
+        self.assertEqual(self._entry("batch-size")["default"], command_default)
+
+    def test_registry_arg_names_exist_on_the_command(self):
+        """Every arg name in the registry must be a real flag on the command.
+
+        The other tests in this class pin batch-size's default and resume's
+        marshalling, but neither would catch a renamed or removed flag: the
+        argv tests mock subprocess.Popen, so nothing here ever reaches a real
+        argparse parser. This test closes that gap by checking each
+        registry-declared name against the command's own parser destinations.
+        """
+        parser = RebuildCommand().create_parser("manage.py", "rebuild_search_index")
+        dests = {action.dest for action in parser._actions}
+        for arg in self.args:
+            expected_dest = arg["name"].replace("-", "_")
+            self.assertIn(
+                expected_dest,
+                dests,
+                f"registry declares '{arg['name']}' but the command has no "
+                f"matching --{arg['name']} flag",
+            )
+
+    def test_resume_is_declared_as_a_checkbox(self):
+        """Resume must be a checkbox so it marshals to a bare flag.
+
+        Any other type produces `--resume <value>`, which argparse rejects for
+        a store_true argument.
+        """
+        self.assertEqual(self._entry("resume")["type"], "checkbox")
+
+    def test_form_renders_the_resume_checkbox(self):
+        """The rendered form actually shows the control.
+
+        The other tests assert on the registry and the argv; this one closes
+        the gap between "declared" and "a user can see it", which is the only
+        thing that would catch the template failing to render this arg type.
+        """
+        url = reverse(
+            "loader_command_form",
+            kwargs={"command_name": "rebuild_search_index"},
+        )
+        response = self.client.get(url)
+        self.assertContains(response, 'name="resume"')
+        self.assertContains(response, "Resume interrupted run")
+
+    def test_checked_resume_becomes_a_bare_flag(self):
+        """A checked resume box sends `--resume` with no following value."""
+        url = reverse(
+            "loader_command_form",
+            kwargs={"command_name": "rebuild_search_index"},
+        )
+
+        def run_target_now(target=None, **kwargs):
+            target()
+            return MagicMock()
+
+        with (
+            override_settings(BASE_DIR=tempfile.gettempdir()),
+            patch(
+                "machado.views.loader.threading.Thread",
+                side_effect=run_target_now,
+            ),
+            patch("machado.views.loader.subprocess.Popen") as mock_popen,
+        ):
+            mock_popen.return_value.pid = 1234
+            mock_popen.return_value.returncode = 0
+            mock_popen.return_value.communicate.return_value = ("", "")
+
+            self.client.post(url, {"resume": "true"})
+
+        cmd = mock_popen.call_args[0][0]
+        self.assertIn("--resume", cmd)
+        index = cmd.index("--resume")
+        following = cmd[index + 1] if index + 1 < len(cmd) else None
+        self.assertNotEqual(following, "true")
+
+    def test_unchecked_resume_sends_no_flag(self):
+        """An unchecked resume box must not put --resume on the command line."""
+        url = reverse(
+            "loader_command_form",
+            kwargs={"command_name": "rebuild_search_index"},
+        )
+
+        def run_target_now(target=None, **kwargs):
+            target()
+            return MagicMock()
+
+        with (
+            override_settings(BASE_DIR=tempfile.gettempdir()),
+            patch(
+                "machado.views.loader.threading.Thread",
+                side_effect=run_target_now,
+            ),
+            patch("machado.views.loader.subprocess.Popen") as mock_popen,
+        ):
+            mock_popen.return_value.pid = 1234
+            mock_popen.return_value.returncode = 0
+            mock_popen.return_value.communicate.return_value = ("", "")
+
+            self.client.post(url, {})
+
+        cmd = mock_popen.call_args[0][0]
+        self.assertNotIn("--resume", cmd)
