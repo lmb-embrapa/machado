@@ -13,8 +13,10 @@ from unittest.mock import MagicMock
 from machado.models import (
     Dbxref,
     Feature,
+    FeaturePub,
     FeatureRelationship,
     Featureprop,
+    FeaturepropPub,
     Organism,
     Pub,
     PubDbxref,
@@ -366,6 +368,63 @@ class DecoratorDisplayAndDoiTest(TestCase):
         """A feature with no DOI'd pubs yields no DOIs."""
         self.assertEqual(set(self.fx.polypeptide.get_doi()), set())
 
+    def test_empty_doi_accession_is_treated_as_absent(self):
+        """An empty accession renders the bare annotation, not "(DOI:)".
+
+        Dbxref.accession is a non-null CharField but may legitimately be ''.
+        The pre-batching code gated both the annotation branch and the direct-pub
+        branch on `if doi:`, so both sources must test truthiness rather than
+        mere presence of the pub in the DOI map.
+        """
+        pub = Pub.objects.create(
+            uniquename="PUB:EMPTY", type=self.fx.t_journal, title="Empty"
+        )
+        blank = Dbxref.objects.create(db=self.fx.db_doi, accession="", version="1")
+        PubDbxref.objects.create(pub=pub, dbxref=blank, is_current=True)
+        prop = Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_annotation,
+            value="lone annotation",
+            rank=0,
+        )
+        FeaturepropPub.objects.create(featureprop=prop, pub=pub)
+        FeaturePub.objects.create(feature=self.fx.polypeptide, pub=pub)
+
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_annotation(), ["lone annotation"])
+        self.assertEqual(set(polypeptide.get_doi()), set())
+
+    def test_get_display_stops_at_a_null_valued_prop(self):
+        """A prop present with a NULL value stops the chain and yields None.
+
+        This test pins a DELIBERATELY CHANGED behaviour, unlike every other
+        characterization test in this class. Featureprop.value is
+        TextField(null=True) and Feature is managed = False, so other GMOD
+        tooling can write a prop row whose value is NULL. The pre-batching
+        get_display() called get_product(), got None, failed its `is not None`
+        test and fell through to description -- rendering "a real description"
+        here. The batched version sees a truthy [None] list for `product` and
+        returns None, so the page renders blank.
+
+        The new behaviour is kept because searchindex.resolve_display has always
+        behaved this way, so page and index now agree for the first time.
+        Restoring the fall-through would re-open that divergence.
+        """
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide, type=self.fx.p_product, value=None, rank=0
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_description,
+            value="a real description",
+            rank=0,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertIsNone(polypeptide.get_display())
+        # The description really is present and reachable -- the chain stopped
+        # early, it did not simply run out of props.
+        self.assertEqual(polypeptide.get_description(), "a real description")
+
 
 class DecoratorQueryCountTest(TestCase):
     """Query counts must be invariant to row count, not merely small.
@@ -426,6 +485,26 @@ class DecoratorQueryCountTest(TestCase):
         pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
         with self.assertNumQueries(1):
             self.assertEqual(pub.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_is_memoized(self):
+        """Three reads cost one query, not three.
+
+        feature.html and data-numbers.html each mention pub.get_doi three times
+        inside a per-pub loop, and Django does not cache template method calls.
+        """
+        pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_memoizes_the_absent_case(self):
+        """A pub with no DOI caches None instead of re-querying."""
+        pub = Pub.objects.get(pk=self.fx.pub_without_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertIsNone(pub.get_doi())
+            self.assertIsNone(pub.get_doi())
+            self.assertIsNone(pub.get_doi())
 
 
 class DecoratorDisplayQueryTest(TestCase):

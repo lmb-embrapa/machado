@@ -13,7 +13,37 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 
-#: Order of the display fallback chain.
+# DUPLICATED LOGIC -- KEEP IN LOCKSTEP WITH machado/searchindex.py.
+#
+# This module and ``machado.searchindex`` resolve the same three things by the
+# same rules, in two separate copies:
+#
+#   * ``DISPLAY_FALLBACK`` below      <-> ``searchindex.DISPLAY_FALLBACK``
+#   * ``get_feature_display``         <-> ``searchindex.resolve_display``
+#   * ``get_feature_annotation_data`` <-> the batching block in
+#                                        ``searchindex.prefetch_chunk``
+#
+# ``searchindex.PROP_TYPES`` is a third place that must move with them: it is
+# the prop-name superset the index prefetches, and it must contain every
+# DISPLAY_FALLBACK name or the index silently loses a fallback step. Change one
+# site, change all of them -- the feature page and the search index are supposed
+# to agree about a feature's display value and DOIs, and only these copies
+# enforce that.
+#
+# This is not hypothetical drift: commit 1b4ecac added the deterministic
+# ``order_by("pub_dbxref_id")`` DOI tie-break below and missed the identical
+# query in ``searchindex.prefetch_chunk``, so the page and the index disagreed
+# nondeterministically about multi-DOI pubs until that was fixed separately.
+#
+# The obvious fix -- extracting the shared logic into a third module both
+# import -- is not available: ``machado.models`` imports this module at import
+# time (for the method-patching decorators below) and ``machado.searchindex``
+# imports ``machado.models``, so this module cannot import from searchindex
+# without a circular import. Until that cycle is broken, duplication plus this
+# warning is the arrangement.
+
+#: Order of the display fallback chain. Twin of
+#: ``machado.searchindex.DISPLAY_FALLBACK``; see the lockstep warning above.
 DISPLAY_FALLBACK = ("display", "product", "description", "note")
 
 
@@ -155,10 +185,17 @@ def get_feature_annotation_data(self):
     annotations = []
     dois = set()
     for prop_id, value in prop_rows:
+        # Truthiness, not membership. Dbxref.accession is a non-null CharField
+        # but may legitimately be ''; the pre-batching code gated both this
+        # branch and the direct-pub branch below on `if doi:`, so an empty
+        # accession rendered the bare annotation. Testing `pub_id in doi_by_pub`
+        # instead would render "my annotation (DOI:)".
         prop_dois = [
-            doi_by_pub[pub_id]
-            for pub_id in pubs_by_prop.get(prop_id, ())
-            if pub_id in doi_by_pub
+            doi
+            for doi in (
+                doi_by_pub.get(pub_id) for pub_id in pubs_by_prop.get(prop_id, ())
+            )
+            if doi
         ]
         if prop_dois:
             annotations.append("{} (DOI:{})".format(value, ", ".join(prop_dois)))
@@ -190,6 +227,13 @@ def get_feature_display_prop_map(self):
     One query serves the whole display -> product -> description -> note chain,
     which previously cost a separate .get() per step. Memoized because
     templates commonly evaluate get_display more than once per render.
+
+    Staleness caveat: because this is a cached_property, a caller that creates a
+    new Featureprop and then re-reads get_display() on this same in-memory
+    Feature instance will see stale data -- the cache is never invalidated on
+    write. Re-fetch the Feature instance instead of relying on this cache
+    surviving a write. (Same caveat as _annotation_data and Organism.is_public;
+    unlike is_public there is no set_* helper here to invalidate it.)
     """
     result = {}
     rows = self.Featureprop_feature_Feature.filter(
@@ -201,7 +245,30 @@ def get_feature_display_prop_map(self):
 
 
 def get_feature_display(self):
-    """Get the display feature prop, falling back through the chain."""
+    """Get the display feature prop, falling back through the chain.
+
+    Twin of ``machado.searchindex.resolve_display`` -- see the lockstep warning
+    at the top of this module. Both must change together.
+
+    NULL-valued props stop the chain. Featureprop.value is TextField(null=True)
+    and Feature is managed = False, so other GMOD tooling can write a prop row
+    whose value is NULL. Such a row lands in _display_prop_map as [None], which
+    is a truthy list, so the `if values` test below matches and this returns
+    None. A feature with a NULL-valued `product` prop and a real `description`
+    therefore renders blank rather than showing the description.
+
+    That DIFFERS from the pre-batching behaviour: get_product() returned None
+    for such a row, the old `is not None` test was False, and the chain fell
+    through to description and then note. The new behaviour is kept
+    deliberately, because searchindex.resolve_display has always worked this way
+    -- so for the first time the feature page and the search index agree on the
+    display value of such a feature. Restoring the fall-through here would
+    re-open that divergence and would have to be done in both places at once.
+    Pinned by DecoratorDisplayAndDoiTest.
+    test_get_display_stops_at_a_null_valued_prop.
+
+    Staleness caveat: see _display_prop_map, whose cache backs this.
+    """
     props = self._display_prop_map
     for prop_name in DISPLAY_FALLBACK:
         values = props.get(prop_name)
@@ -423,8 +490,24 @@ def get_pub_authors(self):
     )
 
 
-def get_pub_doi(self):
-    """Get the DOI of the publication."""
+def get_pub_doi_value(self):
+    """Resolve this publication's DOI accession, or None.
+
+    Memoized per instance because templates re-query on every mention: Django
+    does not cache template method calls, and both feature.html (~line 361) and
+    data-numbers.html (~line 63) mention pub.get_doi three times inside a
+    per-pub loop -- data-numbers.html nests that inside a per-organism loop, so
+    40 organisms x 5 pubs cost 600 queries for DOIs alone without this cache.
+
+    .first() on an unordered queryset makes Django auto-add order_by(pk), so a
+    pub carrying two DOI dbxrefs resolves to the lowest-pk one. That is the
+    contract -- see the tie-break note in get_feature_annotation_data. Any
+    restructuring of this query must pin the ordering explicitly.
+
+    Staleness caveat: as with _display_prop_map and _annotation_data, the cache
+    is never invalidated. A caller that adds a PubDbxref and re-reads get_doi()
+    on the same in-memory Pub sees the old value; re-fetch the Pub instead.
+    """
     pub_dbxref = (
         self.PubDbxref_pub_Pub.select_related("dbxref")
         .filter(dbxref__db__name="DOI")
@@ -433,12 +516,18 @@ def get_pub_doi(self):
     return pub_dbxref.dbxref.accession if pub_dbxref else None
 
 
+def get_pub_doi(self):
+    """Get the DOI of the publication."""
+    return self._doi_value
+
+
 def machado_pub_methods():
     """Add methods to machado.models.Pub."""
 
     def wrapper(cls):
         setattr(cls, "get_authors", get_pub_authors)
         setattr(cls, "get_doi", get_pub_doi)
+        _attach_cached_property(cls, "_doi_value", get_pub_doi_value)
         return cls
 
     return wrapper
@@ -450,6 +539,13 @@ def get_organism_is_public(self):
     Cached per instance. After changing visibility, call set_public (which
     invalidates the cache) or re-fetch the organism -- do not mutate the
     Organismprop row directly and expect this to notice.
+
+    Do not annotate or assign this name. A plain property without a setter
+    raises AttributeError on `organism.is_public = x`; a cached_property accepts
+    it silently, and an `Organism.objects.annotate(is_public=...)` would land in
+    the instance __dict__ and shadow this lookup for that instance's lifetime.
+    No caller does either today -- all five filter on
+    Organismprop_organism_Organism__value="false" instead.
     """
     prop = self.Organismprop_organism_Organism.filter(
         type__name="is_public", type__cv__name="organism_property"

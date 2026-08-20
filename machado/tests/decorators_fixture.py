@@ -189,10 +189,16 @@ def build_decorator_fixture():
 
 
 def add_dbxrefs(fx, feature, n):
-    """Attach n extra dbxrefs on the plain db, for invariance testing."""
+    """Attach n extra dbxrefs on the plain db, for invariance testing.
+
+    The counter is offset by the rows already attached, as in add_synonyms and
+    add_locations: without it a second call would regenerate "extra_0" and
+    violate Dbxref's (db, accession, version) uniqueness.
+    """
+    base = FeatureDbxref.objects.filter(feature=feature).count()
     for i in range(n):
         dbxref = Dbxref.objects.create(
-            db=fx.db_plain, accession="extra_{}".format(i), version="1"
+            db=fx.db_plain, accession="extra_{}".format(base + i), version="1"
         )
         FeatureDbxref.objects.create(feature=feature, dbxref=dbxref, is_current=True)
 
