@@ -71,6 +71,18 @@ DEFAULTS = {
         "Users inspect features, view analysis results, download bulk "
         "data, and browse via JBrowse."
     ),
+    # Key features section (empty title hides the whole section)
+    "MACHADO_FEATURES_TITLE": "Key Features & Capabilities",
+    "MACHADO_FEATURES_SUBTITLE": (
+        "A comprehensive ecosystem designed for biological database "
+        "curation and research."
+    ),
+    # Acknowledgements (optional; empty text hides the section)
+    "MACHADO_ACKNOWLEDGEMENTS_TITLE": "Acknowledgements",
+    "MACHADO_ACKNOWLEDGEMENTS_TEXT": "",
+    # Footer
+    "MACHADO_FOOTER_COPYRIGHT": "\u00a9 2026 Embrapa. All rights reserved.",
+    "MACHADO_FOOTER_TEXT": "",
 }
 
 
