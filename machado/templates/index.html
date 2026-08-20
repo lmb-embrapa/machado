@@ -158,10 +158,12 @@
 
   <!-- How It Works Section -->
   <section class="m-landing-section m-fade-up">
+    {% if machado_howitworks_title %}
     <div class="m-section-header">
-      <h2>How {{ machado_site_title }} Operates</h2>
-      <p>From raw genomic files to interactive database search and visualization.</p>
+      <h2>{{ machado_howitworks_title }}</h2>
+      <p>{{ machado_howitworks_subtitle }}</p>
     </div>
+    {% endif %}
 
     <div class="m-steps-flow">
       {% if machado_step1_title %}

@@ -53,6 +53,11 @@ DEFAULTS = {
         "for sequence and annotation alignments."
     ),
     "MACHADO_FEATURE3_ICON": "fas fa-align-left",
+    # How It Works heading (empty title hides the whole heading, not the steps)
+    "MACHADO_HOWITWORKS_TITLE": "How Machado Genomics Operates",
+    "MACHADO_HOWITWORKS_SUBTITLE": (
+        "From raw genomic files to interactive database search and " "visualization."
+    ),
     # How-it-works step 1
     "MACHADO_STEP1_TITLE": "Load Data",
     "MACHADO_STEP1_TEXT": (

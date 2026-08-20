@@ -14,12 +14,13 @@ If your installation does not require all feature cards or all "How it works" st
 The same pattern applies to several whole sections, which are hidden automatically when their controlling setting is empty:
 
 - The "Key Features & Capabilities" heading and subtitle are hidden when `MACHADO_FEATURES_TITLE` is set to an empty string.
+- The "How It Works" heading and subtitle are hidden when `MACHADO_HOWITWORKS_TITLE` is set to an empty string — the three step cards below it (`MACHADO_STEP1_TITLE` etc.) are unaffected and keep their own individual hide rule.
 - The Acknowledgements section is hidden unless `MACHADO_ACKNOWLEDGEMENTS_TEXT` is set — it is **empty by default**, so this section does not appear at all until you configure it.
 - The footer's extra text block is hidden unless `MACHADO_FOOTER_TEXT` is set — it is also **empty by default**.
 
 ### Settings Reference
 
-Below is a complete reference of the 26 customizable settings, their corresponding environment variables, and their default values:
+Below is a complete reference of the 28 customizable settings, their corresponding environment variables, and their default values:
 
 | Environment Variable | Description | Default Value |
 | :--- | :--- | :--- |
@@ -45,6 +46,9 @@ Below is a complete reference of the 26 customizable settings, their correspondi
 | `MACHADO_FEATURE3_TITLE` | Title of the third feature card. | `"Genome Browser Integration"` |
 | `MACHADO_FEATURE3_TEXT` | Description of the third feature. | `"Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments."` |
 | `MACHADO_FEATURE3_ICON` | FontAwesome 5 CSS class name for the card icon. | `"fas fa-align-left"` |
+| **How It Works Heading** | | |
+| `MACHADO_HOWITWORKS_TITLE` | Heading above the "How It Works" step cards. Setting this to an empty string hides the whole heading and subtitle, but not the step cards below it. | `"How Machado Genomics Operates"` |
+| `MACHADO_HOWITWORKS_SUBTITLE` | Subtitle text shown below the How It Works heading. | `"From raw genomic files to interactive database search and visualization."` |
 | **Step 1 (How It Works)** | | |
 | `MACHADO_STEP1_TITLE` | Title for step 1 of the platform overview. | `"Load Data"` |
 | `MACHADO_STEP1_TEXT` | Explanation of how data loading works. | `"Administrators run commands or use data tools to load genomic files into the database."` |
@@ -63,7 +67,9 @@ Below is a complete reference of the 26 customizable settings, their correspondi
 
 The footer's "Powered by Machado Genomics" line is a hardcoded literal and is **not** configurable via any setting — it deliberately does not reflect `MACHADO_SITE_TITLE` or any other setting, so renaming a site instance never rewords it.
 
-> **Upgrading an existing project:** the six settings `MACHADO_FEATURES_TITLE`, `MACHADO_FEATURES_SUBTITLE`, `MACHADO_ACKNOWLEDGEMENTS_TITLE`, `MACHADO_ACKNOWLEDGEMENTS_TEXT`, `MACHADO_FOOTER_COPYRIGHT`, and `MACHADO_FOOTER_TEXT` were added to the project template after some existing projects were generated (and `MACHADO_ACCENT_COLOR` may be missing too, if your project predates that setting). If your `machadoproject/settings.py` predates one of these settings, setting the corresponding environment variable in your `.env` is a **silent no-op**: nothing reads it into a Django setting, so the page just falls back to the built-in default, with no error or warning. To use these settings in an existing project, add the matching `env(...)` lines to your own `machadoproject/settings.py` by hand, copying them from the "Landing page customization" section of `machado/project_template/machadoproject/settings.py` in the machado package. Regenerating the project from the template is **not** a safe shortcut — using `--overwrite` would clobber any customizations you have already made to that file.
+Note also that `MACHADO_HOWITWORKS_TITLE` is a plain static setting, not linked to `MACHADO_SITE_TITLE` — overriding `MACHADO_SITE_TITLE` alone no longer changes the "How It Works" heading; set `MACHADO_HOWITWORKS_TITLE` explicitly if you want it to match.
+
+> **Upgrading an existing project:** the eight settings `MACHADO_FEATURES_TITLE`, `MACHADO_FEATURES_SUBTITLE`, `MACHADO_HOWITWORKS_TITLE`, `MACHADO_HOWITWORKS_SUBTITLE`, `MACHADO_ACKNOWLEDGEMENTS_TITLE`, `MACHADO_ACKNOWLEDGEMENTS_TEXT`, `MACHADO_FOOTER_COPYRIGHT`, and `MACHADO_FOOTER_TEXT` were added to the project template after some existing projects were generated (and `MACHADO_ACCENT_COLOR` may be missing too, if your project predates that setting). If your `machadoproject/settings.py` predates one of these settings, setting the corresponding environment variable in your `.env` is a **silent no-op**: nothing reads it into a Django setting, so the page just falls back to the built-in default, with no error or warning. To use these settings in an existing project, add the matching `env(...)` lines to your own `machadoproject/settings.py` by hand, copying them from the "Landing page customization" section of `machado/project_template/machadoproject/settings.py` in the machado package. Regenerating the project from the template is **not** a safe shortcut — using `--overwrite` would clobber any customizations you have already made to that file.
 
 ---
 

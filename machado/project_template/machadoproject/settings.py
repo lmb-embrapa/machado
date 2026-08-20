@@ -181,6 +181,17 @@ MACHADO_FEATURE3_TEXT = env(
 )
 MACHADO_FEATURE3_ICON = env("MACHADO_FEATURE3_ICON", default="fas fa-align-left")
 
+# How It Works heading (set title to empty string to hide the heading, not the steps)
+MACHADO_HOWITWORKS_TITLE = env(
+    "MACHADO_HOWITWORKS_TITLE", default="How Machado Genomics Operates"
+)
+MACHADO_HOWITWORKS_SUBTITLE = env(
+    "MACHADO_HOWITWORKS_SUBTITLE",
+    default=(
+        "From raw genomic files to interactive database search and " "visualization."
+    ),
+)
+
 # How-it-works steps (set title to empty string to hide a step)
 MACHADO_STEP1_TITLE = env("MACHADO_STEP1_TITLE", default="Load Data")
 MACHADO_STEP1_TEXT = env(

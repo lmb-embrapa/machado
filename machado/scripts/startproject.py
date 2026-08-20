@@ -45,9 +45,10 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 
 # ── Landing page customization (optional) ────────────────────────────────────
 # All values below have sensible defaults; override only what you need.
-# A feature-card, how-it-works-step, features-section, or Acknowledgements
-# title/text set to an empty string hides that section. Acknowledgements is
-# empty (hidden) by default; set MACHADO_ACKNOWLEDGEMENTS_TEXT to show it.
+# A feature-card, how-it-works-heading, how-it-works-step, features-section,
+# or Acknowledgements title/text set to an empty string hides that section.
+# Acknowledgements is empty (hidden) by default; set
+# MACHADO_ACKNOWLEDGEMENTS_TEXT to show it.
 #
 # MACHADO_ACCENT_COLOR values: steel, teal, sage, amber, graphite, ruby,
 # indigo, emerald, coral, plum
@@ -67,6 +68,8 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # MACHADO_FEATURE3_TITLE=Genome Browser Integration
 # MACHADO_FEATURE3_TEXT=Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments.
 # MACHADO_FEATURE3_ICON=fas fa-align-left
+# MACHADO_HOWITWORKS_TITLE=How Machado Genomics Operates
+# MACHADO_HOWITWORKS_SUBTITLE=From raw genomic files to interactive database search and visualization.
 # MACHADO_STEP1_TITLE=Load Data
 # MACHADO_STEP1_TEXT=Administrators run commands or use data tools to load genomic files into the database.
 # MACHADO_STEP2_TITLE=Index & Query
