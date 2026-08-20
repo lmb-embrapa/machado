@@ -7,7 +7,7 @@
 """Tests for machado.decorators."""
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest.mock import MagicMock
 
 from machado.models import (
@@ -43,6 +43,18 @@ from machado.decorators import (
     get_pub_authors,
     machado_pub_methods,
 )
+
+#: get_feature_location wraps its whole body in
+#: `if hasattr(settings, "MACHADO_JBROWSE_URL")`, so with that setting absent it
+#: returns []. machado/tests/settings.py defines it but machadoproject.settings
+#: does not, so any test touching get_location must declare the dependency
+#: itself rather than inheriting it from whichever settings module happens to be
+#: in use -- otherwise it passes under `--settings machado.tests.settings` and
+#: fails under `manage.py test`.
+JBROWSE_SETTINGS = {
+    "MACHADO_JBROWSE_URL": "http://localhost/jbrowse",
+    "MACHADO_JBROWSE_OFFSET": 1200,
+}
 
 
 class GetFeaturePropTest(TestCase):
@@ -294,6 +306,7 @@ class DecoratorRealDataTest(TestCase):
         # CHR1 is a chromosome, which is not in MACHADO_VALID_TYPES.
         self.assertEqual(names, ["MRNA_A", "POLY_A"])
 
+    @override_settings(**JBROWSE_SETTINGS)
     def test_get_location_skips_null_srcfeature(self):
         """A Featureloc with no srcfeature produces no entry."""
         result = self.fx.gene.get_location()
@@ -471,6 +484,7 @@ class DecoratorQueryCountTest(TestCase):
         with self.assertNumQueries(2):
             self.assertEqual(len(gene.get_relationship()), 22)
 
+    @override_settings(**JBROWSE_SETTINGS)
     def test_get_location_is_one_query_regardless_of_count(self):
         """Fetching locations costs one query at 2 rows and at 22."""
         with self.assertNumQueries(1):

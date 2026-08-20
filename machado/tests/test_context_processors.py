@@ -10,6 +10,7 @@ import json
 import tempfile
 from pathlib import Path
 
+from django.conf import settings
 from django.test import TestCase, RequestFactory, override_settings
 
 from machado import context_processors
@@ -23,8 +24,19 @@ class MachadoSiteContextProcessorTest(TestCase):
         self.factory = RequestFactory()
         self.request = self.factory.get("/")
 
-    def test_returns_all_expected_keys_with_defaults(self):
-        """All DEFAULTS entries must be present in the returned context."""
+    def test_returns_all_expected_keys(self):
+        """Every DEFAULTS entry appears, carrying its effective setting value.
+
+        machado_site resolves each key with getattr(settings, name, default),
+        so the context holds whatever the active settings module defines and
+        falls back to DEFAULTS only for keys it does not define. Asserting the
+        DEFAULTS value directly would therefore only pass under a settings
+        module that happens to define none of them: it passes under
+        `--settings machado.tests.settings` and fails under `manage.py test`,
+        where machadoproject.settings sets MACHADO_ACCENT_COLOR. Assert against
+        the effective value so this holds under any settings module; the
+        defaults themselves are covered by the test below.
+        """
         # Reset the release notes cache for a clean test
         context_processors._release_notes_cache = None
 
@@ -33,7 +45,22 @@ class MachadoSiteContextProcessorTest(TestCase):
         for setting_name, default_value in context_processors.DEFAULTS.items():
             context_key = setting_name.lower()
             self.assertIn(context_key, ctx)
-            self.assertEqual(ctx[context_key], default_value)
+            self.assertEqual(
+                ctx[context_key], getattr(settings, setting_name, default_value)
+            )
+
+    def test_falls_back_to_defaults_when_settings_absent(self):
+        """With no MACHADO_* setting defined, every DEFAULTS value is used."""
+        context_processors._release_notes_cache = None
+
+        with override_settings():
+            for setting_name in context_processors.DEFAULTS:
+                if hasattr(settings, setting_name):
+                    delattr(settings, setting_name)
+            ctx = context_processors.machado_site(self.request)
+
+            for setting_name, default_value in context_processors.DEFAULTS.items():
+                self.assertEqual(ctx[setting_name.lower()], default_value)
 
     @override_settings(MACHADO_SITE_TITLE="Soybean Portal")
     def test_reads_overridden_settings(self):

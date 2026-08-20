@@ -40,6 +40,10 @@ class Command(HistoryCommandMixin, BaseCommand):
 
     help = "Rebuild the PostgreSQL full-text search index for features."
 
+    #: Set from --verbosity in handle(). Declared here so report() is safe if a
+    #: caller instantiates Command() and reaches a helper without handle().
+    verbosity = 1
+
     def add_arguments(self, parser):
         """Define the command arguments."""
         parser.add_argument(
@@ -70,9 +74,22 @@ class Command(HistoryCommandMixin, BaseCommand):
             help="Stop after N features. For benchmarking.",
         )
 
+    def report(self, message):
+        """Write an informational message unless --verbosity 0 was given.
+
+        Django's convention is that verbosity 0 means silent. Writing to
+        self.stdout unconditionally ignores that, which makes the test suite
+        noisy (the progress dots get interleaved with per-run chatter) and
+        makes `--verbosity 0` useless in cron. Route every informational
+        message through here; errors still go straight to self.stderr.
+        """
+        if self.verbosity:
+            self.stdout.write(message)
+
     def handle(self, *args, **options):
         """Rebuild the full-text search index."""
         verbosity = options.get("verbosity", 1)
+        self.verbosity = verbosity
         batch_size = int(options.get("batch_size") or 2000)
         resume = bool(options.get("resume"))
         restart = bool(options.get("restart"))
@@ -94,16 +111,23 @@ class Command(HistoryCommandMixin, BaseCommand):
                 or 0
             )
             if start_after:
-                self.stdout.write(f"Resuming after feature_id {start_after}.")
+                self.report(f"Resuming after feature_id {start_after}.")
         else:
             self.clear_index()
 
         total = self.count_remaining(config, start_after)
         if limit is not None:
             total = min(total, limit)
-        self.stdout.write(f"Indexing {total} features...")
+        self.report(f"Indexing {total} features...")
 
-        progress = tqdm(total=total, disable=verbosity == 0, desc="Building index")
+        # disable=None means "auto-disable when the stream is not a TTY", so a
+        # real terminal still gets a bar while a test run or a piped/cron run
+        # does not. verbosity 0 disables it outright.
+        progress = tqdm(
+            total=total,
+            disable=True if verbosity == 0 else None,
+            desc="Building index",
+        )
         indexed = 0
         last_id = start_after
         # Created here, and only here, so the memoised chunk-independent
@@ -138,7 +162,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         finally:
             progress.close()
 
-        self.stdout.write(
+        self.report(
             self.style.SUCCESS(
                 "Search index rebuild completed. "
                 "Indexed {} features.".format(indexed)
@@ -169,7 +193,7 @@ class Command(HistoryCommandMixin, BaseCommand):
                 'TRUNCATE TABLE "{}"'.format(FeatureSearchIndex._meta.db_table)
             )
         if stale:
-            self.stdout.write(f"  Cleared {stale} stale index entries.")
+            self.report(f"  Cleared {stale} stale index entries.")
 
     def base_queryset(self, config):
         """Return the queryset of features eligible for indexing."""
