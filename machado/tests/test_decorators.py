@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from unittest.mock import MagicMock
 
-from machado.models import Feature, FeatureRelationship, Pub
+from machado.models import Feature, FeatureRelationship, Featureprop, Pub
 from machado.tests.decorators_fixture import (
     _feature,
     add_annotations,
@@ -418,3 +418,54 @@ class DecoratorQueryCountTest(TestCase):
         pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
         with self.assertNumQueries(1):
             self.assertEqual(pub.get_doi(), "10.1234/one")
+
+
+class DecoratorDisplayQueryTest(TestCase):
+    """The display fallback chain must not cost one query per fallback step."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_display_hit_is_one_query(self):
+        """A feature with a display prop resolves in one query."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(gene.get_display(), "alpha kinase")
+
+    def test_display_miss_is_still_one_query(self):
+        """Falling through to product must not cost four queries."""
+        mrna = Feature.objects.get(pk=self.fx.mrna.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(mrna.get_display(), "the product")
+
+    def test_display_none_is_still_one_query(self):
+        """A feature with none of the four props costs one query."""
+        chromosome = Feature.objects.get(pk=self.fx.chromosome.pk)
+        with self.assertNumQueries(1):
+            self.assertIsNone(chromosome.get_display())
+
+    def test_display_is_memoized(self):
+        """Repeated access re-uses the cached map."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            gene.get_display()
+            gene.get_display()
+            gene.get_display()
+
+    def test_display_takes_first_by_rank_when_duplicated(self):
+        """Two product props no longer raise MultipleObjectsReturned."""
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="first",
+            rank=0,
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="second",
+            rank=1,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_display(), "first")

@@ -6,10 +6,28 @@
 
 """Decorators."""
 
+import functools
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
+
+#: Order of the display fallback chain.
+DISPLAY_FALLBACK = ("display", "product", "description", "note")
+
+
+def _attach_cached_property(cls, name, func):
+    """Attach a cached_property to a class after class creation.
+
+    functools.cached_property learns its attribute name via __set_name__, which
+    Python calls only while executing a class body. This module patches methods
+    on with setattr() afterwards, so __set_name__ must be invoked by hand or the
+    first attribute access raises TypeError.
+    """
+    prop = functools.cached_property(func)
+    prop.__set_name__(cls, name)
+    setattr(cls, name, prop)
 
 
 def get_feature_dbxrefs(self):
@@ -113,21 +131,30 @@ def get_feature_doi(self):
         return None
 
 
+def get_feature_display_prop_map(self):
+    """Return {type_name: [values by rank]} for the display fallback props.
+
+    One query serves the whole display -> product -> description -> note chain,
+    which previously cost a separate .get() per step. Memoized because
+    templates commonly evaluate get_display more than once per render.
+    """
+    result = {}
+    rows = self.Featureprop_feature_Feature.filter(
+        type__cv__name="feature_property", type__name__in=DISPLAY_FALLBACK
+    ).order_by("type__name", "rank")
+    for type_name, value in rows.values_list("type__name", "value"):
+        result.setdefault(type_name, []).append(value)
+    return result
+
+
 def get_feature_display(self):
-    """Get the display feature prop."""
-    try:
-        return self.Featureprop_feature_Feature.get(
-            type__name="display", type__cv__name="feature_property"
-        ).value
-    except ObjectDoesNotExist:
-        if self.get_product() is not None:
-            return self.get_product()
-        elif self.get_description() is not None:
-            return self.get_description()
-        elif self.get_note() is not None:
-            return self.get_note()
-        else:
-            return None
+    """Get the display feature prop, falling back through the chain."""
+    props = self._display_prop_map
+    for prop_name in DISPLAY_FALLBACK:
+        values = props.get(prop_name)
+        if values:
+            return values[0]
+    return None
 
 
 def get_feature_properties(self):
@@ -327,6 +354,7 @@ def machado_feature_methods():
         setattr(cls, "get_location", get_feature_location)
         setattr(cls, "get_properties", get_feature_properties)
         setattr(cls, "get_synonyms", get_feature_synonyms)
+        _attach_cached_property(cls, "_display_prop_map", get_feature_display_prop_map)
         return cls
 
     return wrapper
