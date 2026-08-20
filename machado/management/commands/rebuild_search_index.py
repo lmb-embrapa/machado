@@ -120,11 +120,22 @@ class Command(HistoryCommandMixin, BaseCommand):
             total = min(total, limit)
         self.report(f"Indexing {total} features...")
 
-        # disable=None means "auto-disable when the stream is not a TTY", so a
-        # real terminal still gets a bar while a test run or a piped/cron run
-        # does not. verbosity 0 disables it outright.
+        # tqdm defaults to sys.stderr, which a caller redirecting this command's
+        # stdout does not capture -- so a test passing stdout=StringIO() still
+        # got a progress bar on the terminal. Point the bar at the command's own
+        # stream instead, and let disable=None auto-disable it when that stream
+        # is not a terminal (test capture, a pipe, cron). verbosity 0 disables
+        # it outright.
+        #
+        # The stream is unwrapped from Django's OutputWrapper deliberately:
+        # OutputWrapper.isatty() inherits TextIOBase's hardcoded False, so
+        # tqdm would never see a terminal, and its write() appends a newline to
+        # every chunk, which would turn the \r-redrawn bar into one line per
+        # update.
+        stream = getattr(self.stdout, "_out", self.stdout)
         progress = tqdm(
             total=total,
+            file=stream,
             disable=True if verbosity == 0 else None,
             desc="Building index",
         )
