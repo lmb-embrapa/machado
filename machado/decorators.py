@@ -445,7 +445,12 @@ def machado_pub_methods():
 
 
 def get_organism_is_public(self):
-    """Check if organism is public."""
+    """Check if organism is public.
+
+    Cached per instance. After changing visibility, call set_public (which
+    invalidates the cache) or re-fetch the organism -- do not mutate the
+    Organismprop row directly and expect this to notice.
+    """
     prop = self.Organismprop_organism_Organism.filter(
         type__name="is_public", type__cv__name="organism_property"
     ).first()
@@ -481,12 +486,17 @@ def set_organism_public(self, is_public: bool):
         prop.value = "true" if is_public else "false"
         prop.save()
 
+    # Invalidate the cached is_public value. views/loader.py sets visibility
+    # and then reads organism.is_public in the same request to build its JSON
+    # response; without this the response would report the pre-change value.
+    self.__dict__.pop("is_public", None)
+
 
 def machado_organism_methods():
     """Add methods to machado.models.Organism."""
 
     def wrapper(cls):
-        setattr(cls, "is_public", property(get_organism_is_public))
+        _attach_cached_property(cls, "is_public", get_organism_is_public)
         setattr(cls, "set_public", set_organism_public)
         return cls
 

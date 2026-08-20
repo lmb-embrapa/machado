@@ -15,6 +15,7 @@ from machado.models import (
     Feature,
     FeatureRelationship,
     Featureprop,
+    Organism,
     Pub,
     PubDbxref,
 )
@@ -530,3 +531,42 @@ class DecoratorAnnotationQueryTest(TestCase):
         gene = Feature.objects.get(pk=self.fx.gene.pk)
         self.assertIn("10.1234/three", gene.get_doi())
         self.assertNotIn("10.9999/later", gene.get_doi())
+
+
+class OrganismIsPublicCacheTest(TestCase):
+    """is_public is read repeatedly per page and must not query every time."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_repeated_access_is_one_query(self):
+        """Three reads cost one query, not three.
+
+        templates/loader/permissions.html reads org.is_public three times
+        inside its {% for org in organisms %} loop.
+        """
+        organism = Organism.objects.get(pk=self.fx.organism.pk)
+        with self.assertNumQueries(1):
+            organism.is_public
+            organism.is_public
+            organism.is_public
+
+    def test_set_public_invalidates_the_cache(self):
+        """After set_public the next read reports the new value.
+
+        views/loader.py's visibility toggle does exactly this sequence and
+        returns organism.is_public in its JSON response, so a stale cache here
+        would make the UI show the pre-change value.
+        """
+        organism = Organism.objects.get(pk=self.fx.organism.pk)
+        self.assertTrue(organism.is_public)
+        organism.set_public(False)
+        self.assertFalse(organism.is_public)
+        organism.set_public(True)
+        self.assertTrue(organism.is_public)
+
+    def test_default_is_public_without_a_prop(self):
+        """An organism with no is_public prop defaults to public."""
+        other = Organism.objects.create(genus="Zea", species="mays")
+        self.assertTrue(other.is_public)
