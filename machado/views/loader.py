@@ -824,10 +824,32 @@ COMMANDS_CONFIG = {
             {
                 "name": "batch-size",
                 "required": False,
-                "default": 1000,
-                "help": "Number of records per bulk insert",
+                "default": 2000,
+                "help": (
+                    "Features per chunk. Sizes both the bulk insert and the "
+                    "batched prefetch, so raising it increases memory use per "
+                    "chunk. Leave blank to use the default (2000)."
+                ),
                 "type": "text",
-            }
+            },
+            {
+                "name": "resume",
+                "required": False,
+                "default": False,
+                "label": "Resume interrupted run",
+                "help": (
+                    "Continue a rebuild that was interrupted, skipping "
+                    "features already indexed. Only indexes features newer "
+                    "than the highest already in the index -- it is NOT a way "
+                    "to refresh data loaded onto features that are already "
+                    "indexed (after load_similarity, load_feature_annotation, "
+                    "load_orthology or load_coexpression, run a normal full "
+                    "rebuild instead, or this will report success having "
+                    "indexed almost nothing). Assumes MACHADO_VALID_TYPES has "
+                    "not changed since the interrupted run."
+                ),
+                "type": "checkbox",
+            },
         ],
         "title": "Rebuild Search Index",
     },
