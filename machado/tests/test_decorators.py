@@ -469,3 +469,40 @@ class DecoratorDisplayQueryTest(TestCase):
         )
         polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
         self.assertEqual(polypeptide.get_display(), "first")
+
+
+class DecoratorAnnotationQueryTest(TestCase):
+    """The annotation/DOI walk must be flat and shared between both methods."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_annotation_query_count_is_invariant(self):
+        """Four queries at 2 annotations and at 12."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            self.assertEqual(len(gene.get_annotation()), 2)
+        add_annotations(self.fx, self.fx.gene, 10)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            self.assertEqual(len(gene.get_annotation()), 12)
+
+    def test_doi_query_count_is_invariant(self):
+        """Four queries at 2 annotations and at 12."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_doi()
+        add_annotations(self.fx, self.fx.gene, 10)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_doi()
+
+    def test_annotation_and_doi_share_one_traversal(self):
+        """Calling both, twice each, still costs four queries total."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_annotation()
+            gene.get_doi()
+            gene.get_annotation()
+            gene.get_doi()

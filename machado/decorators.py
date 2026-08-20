@@ -85,50 +85,92 @@ def get_feature_note(self):
         return None
 
 
-def get_feature_annotation(self):
-    """Get the annotation feature prop."""
-    try:
-        fps = self.Featureprop_feature_Feature.filter(
+def get_feature_annotation_data(self):
+    """Build annotations and DOIs for this feature in a fixed four queries.
+
+    get_annotation and get_doi both walk
+    Featureprop(annotation) -> FeaturepropPub -> pub DOI. Computing them
+    together once removes the duplicate traversal and the per-row queries that
+    the previous per-pub get_doi() calls incurred. Memoized per instance.
+
+    Staleness caveat: because this is a cached_property, a caller that creates
+    a new Featureprop or FeaturePub and then re-reads get_annotation()/get_doi()
+    on this same in-memory Feature instance will see stale data -- the cache is
+    never invalidated on write. No current caller does this (the loaders in
+    machado/loaders/ operate on feature_id integers and never hold a live
+    Feature across a write), but a future caller that does must re-fetch the
+    Feature instance instead of relying on this cache surviving a write.
+    """
+    from machado.models import FeaturepropPub, PubDbxref
+
+    # 1. DOIs attached directly to the feature via FeaturePub.
+    direct_pub_ids = list(
+        self.FeaturePub_feature_Feature.values_list("pub_id", flat=True)
+    )
+
+    # 2. Annotation props, in rank order so the output order is stable.
+    prop_rows = list(
+        self.Featureprop_feature_Feature.filter(
             type__name="annotation", type__cv__name="feature_property"
         )
-        annotations = list()
-        for fp in fps:
-            fppubs = fp.FeaturepropPub_featureprop_Featureprop.all()
-            dois = []
-            for fppub in fppubs:
-                doi = fppub.pub.get_doi()
-                if doi:
-                    dois.append(doi)
+        .order_by("rank", "featureprop_id")
+        .values_list("featureprop_id", "value")
+    )
+    prop_ids = [prop_id for prop_id, _ in prop_rows]
 
-            if dois:
-                annotations.append("{} (DOI:{})".format(fp.value, ", ".join(dois)))
-            else:
-                annotations.append(fp.value)
-        return annotations
-    except ObjectDoesNotExist:
-        return None
+    # 3. The pubs backing each annotation prop.
+    pubs_by_prop = {}
+    proppub_pub_ids = []
+    if prop_ids:
+        for prop_id, pub_id in (
+            FeaturepropPub.objects.filter(featureprop_id__in=prop_ids)
+            .order_by("featureprop_pub_id")
+            .values_list("featureprop_id", "pub_id")
+        ):
+            pubs_by_prop.setdefault(prop_id, []).append(pub_id)
+            proppub_pub_ids.append(pub_id)
+
+    # 4. One DOI lookup covering both sources.
+    doi_by_pub = {}
+    all_pub_ids = set(direct_pub_ids) | set(proppub_pub_ids)
+    if all_pub_ids:
+        for pub_id, accession in (
+            PubDbxref.objects.filter(pub_id__in=all_pub_ids, dbxref__db__name="DOI")
+            .select_related("dbxref")
+            .values_list("pub_id", "dbxref__accession")
+        ):
+            doi_by_pub.setdefault(pub_id, accession)
+
+    annotations = []
+    dois = set()
+    for prop_id, value in prop_rows:
+        prop_dois = [
+            doi_by_pub[pub_id]
+            for pub_id in pubs_by_prop.get(prop_id, ())
+            if pub_id in doi_by_pub
+        ]
+        if prop_dois:
+            annotations.append("{} (DOI:{})".format(value, ", ".join(prop_dois)))
+        else:
+            annotations.append(value)
+        dois.update(prop_dois)
+
+    for pub_id in direct_pub_ids:
+        doi = doi_by_pub.get(pub_id)
+        if doi:
+            dois.add(doi)
+
+    return {"annotations": annotations, "dois": dois}
+
+
+def get_feature_annotation(self):
+    """Get the annotation feature props, each with its DOIs appended."""
+    return list(self._annotation_data["annotations"])
 
 
 def get_feature_doi(self):
-    """Get the DOI feature."""
-    dois = set()
-    pubs = self.FeaturePub_feature_Feature.filter()
-    for featurepub in pubs:
-        doi = featurepub.pub.get_doi()
-        if doi:
-            dois.add(doi)
-    try:
-        fps = self.Featureprop_feature_Feature.filter(
-            type__name="annotation", type__cv__name="feature_property"
-        )
-        for fp in fps:
-            for fppub in fp.FeaturepropPub_featureprop_Featureprop.all():
-                doi = fppub.pub.get_doi()
-                if doi:
-                    dois.add(doi)
-        return dois
-    except ObjectDoesNotExist:
-        return None
+    """Get the DOIs for this feature, from its pubs and its annotations."""
+    return set(self._annotation_data["dois"])
 
 
 def get_feature_display_prop_map(self):
@@ -355,6 +397,7 @@ def machado_feature_methods():
         setattr(cls, "get_properties", get_feature_properties)
         setattr(cls, "get_synonyms", get_feature_synonyms)
         _attach_cached_property(cls, "_display_prop_map", get_feature_display_prop_map)
+        _attach_cached_property(cls, "_annotation_data", get_feature_annotation_data)
         return cls
 
     return wrapper
