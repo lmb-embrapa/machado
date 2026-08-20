@@ -136,6 +136,28 @@ class PrefetchChunkTest(TestCase):
         for flags in warm.orthologs_coexpression.values():
             self.assertNotIn(id(flags), {id(v) for v in cache.ortholog_flags.values()})
 
+    def test_multi_doi_pub_picks_the_lowest_pk_dbxref(self):
+        """A pub with two DOI dbxrefs resolves to the lowest-pk one.
+
+        Twin of DecoratorAnnotationQueryTest.
+        test_multi_doi_pub_picks_the_lowest_pk_dbxref. Without an explicit
+        ORDER BY, the setdefault below keeps whichever row the query plan
+        returned first, so FeatureSearchIndex.doi could flip between rebuilds
+        and disagree with what feature.html shows for the same feature.
+        """
+        from machado.models import Db, Dbxref, Pub, PubDbxref
+
+        pub = Pub.objects.get(uniquename="PUB:1")
+        later = Dbxref.objects.create(
+            db=Db.objects.get(name="DOI"), accession="10.9999/later", version="1"
+        )
+        PubDbxref.objects.create(pub=pub, dbxref=later, is_current=True)
+
+        ctx = prefetch_chunk([f.feature_id for f in self._chunk()], self.config)
+        gene_a = self.features["gene_a"].feature_id
+        self.assertIn("10.1234/parity", ctx.dois[gene_a])
+        self.assertNotIn("10.9999/later", ctx.dois[gene_a])
+
     def test_empty_chunk_issues_no_queries(self):
         """An empty chunk short-circuits."""
         with self.assertNumQueries(0):

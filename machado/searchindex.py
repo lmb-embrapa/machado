@@ -32,11 +32,39 @@ from machado.models import FeatureSearchIndex
 #: Analysis programs surfaced as facets by ``_prepare_analyses``.
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
 
+# DUPLICATED LOGIC -- KEEP IN LOCKSTEP WITH machado/decorators.py.
+#
+# This module and ``machado.decorators`` resolve the same three things by the
+# same rules, in two separate copies:
+#
+#   * ``DISPLAY_FALLBACK`` below            <-> ``decorators.DISPLAY_FALLBACK``
+#   * ``resolve_display``                   <-> ``decorators.get_feature_display``
+#   * the batching block in ``prefetch_chunk`` (steps 4-7)
+#                                 <-> ``decorators.get_feature_annotation_data``
+#
+# ``PROP_TYPES`` is a third place that must move with them: it is the superset
+# ``prefetch_chunk`` fetches, and it must contain every DISPLAY_FALLBACK name or
+# ``resolve_display`` silently loses a fallback step. Change one site, change
+# all of them -- the search index and the feature page are supposed to agree
+# about a feature's display value and DOIs, and only these copies enforce that.
+#
+# This is not hypothetical drift: commit 1b4ecac added a deterministic
+# ``order_by("pub_dbxref_id")`` to the DOI tie-break in ``decorators.py`` and
+# missed the identical query here, so the page and the index disagreed
+# nondeterministically about multi-DOI pubs until it was fixed separately.
+#
+# The obvious fix -- extracting the shared logic into a third module both
+# import -- is not available: ``machado.models`` imports ``decorators`` at
+# import time (for the method-patching decorators) and this module imports
+# ``machado.models``, so ``decorators`` cannot import from here without a
+# circular import. Until that cycle is broken, duplication plus this warning is
+# the arrangement.
+
 #: Featureprop type names read from the ``feature_property`` CV.
 #: ``prefetch_chunk`` fetches all of these in a single query and splits them by
 #: type, instead of issuing one lookup per property per feature. Defined here
 #: so the contract lives beside ``resolve_display``, which depends on the
-#: fallback subset.
+#: fallback subset. Must remain a superset of DISPLAY_FALLBACK.
 PROP_TYPES = (
     "display",
     "product",
@@ -47,7 +75,8 @@ PROP_TYPES = (
     "coexpression group",
 )
 
-#: Order of the display fallback chain.
+#: Order of the display fallback chain. Twin of
+#: ``machado.decorators.DISPLAY_FALLBACK``; see the lockstep warning above.
 DISPLAY_FALLBACK = ("display", "product", "description", "note")
 
 
@@ -160,7 +189,18 @@ class ChunkContext:
 
 
 def resolve_display(props):
-    """Return the display value, following the display fallback chain."""
+    """Return the display value, following the display fallback chain.
+
+    Character-for-character twin of ``machado.decorators.get_feature_display``
+    (which reads the same map off a per-instance cache instead of a chunk
+    context). Change both or the feature page and the search index will report
+    different display values for the same feature; see the lockstep warning at
+    the top of this module for why they cannot share one implementation.
+
+    Note the ``if values`` test: a prop that is present but whose ``value`` is
+    NULL yields ``[None]``, a truthy list, so the chain STOPS there and returns
+    ``None`` rather than falling through to the next prop.
+    """
     for prop_name in DISPLAY_FALLBACK:
         values = props.get(prop_name)
         if values:
@@ -419,9 +459,20 @@ def prefetch_chunk(feature_ids, config, cache=None):
     pub_ids.update(r["pub_id"] for r in featurepub_rows)
     pub_doi = {}
     if pub_ids:
-        for row in PubDbxref.objects.filter(
-            pub_id__in=pub_ids, dbxref__db__name="DOI"
-        ).values("pub_id", "dbxref__accession"):
+        # order_by is REQUIRED for determinism, not decoration. A pub may carry
+        # more than one DOI dbxref, and setdefault keeps whichever row arrives
+        # first -- unordered, that is whatever the query plan happens to return,
+        # so FeatureSearchIndex.doi (and search_vector) could flip between index
+        # rebuilds and disagree with the feature page. Ordering by the PK picks
+        # the lowest-pk row, matching decorators.py's get_feature_annotation_data
+        # and get_pub_doi (whose .first() auto-orders by pk). See the twin-site
+        # warning on DISPLAY_FALLBACK above: this query is exactly the drift that
+        # warning is about -- it was missed when decorators.py was fixed.
+        for row in (
+            PubDbxref.objects.filter(pub_id__in=pub_ids, dbxref__db__name="DOI")
+            .order_by("pub_dbxref_id")
+            .values("pub_id", "dbxref__accession")
+        ):
             pub_doi.setdefault(row["pub_id"], row["dbxref__accession"])
 
     proppub_by_prop = {}

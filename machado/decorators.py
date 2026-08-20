@@ -6,16 +6,66 @@
 
 """Decorators."""
 
+import functools
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 
+# DUPLICATED LOGIC -- KEEP IN LOCKSTEP WITH machado/searchindex.py.
+#
+# This module and ``machado.searchindex`` resolve the same three things by the
+# same rules, in two separate copies:
+#
+#   * ``DISPLAY_FALLBACK`` below      <-> ``searchindex.DISPLAY_FALLBACK``
+#   * ``get_feature_display``         <-> ``searchindex.resolve_display``
+#   * ``get_feature_annotation_data`` <-> the batching block in
+#                                        ``searchindex.prefetch_chunk``
+#
+# ``searchindex.PROP_TYPES`` is a third place that must move with them: it is
+# the prop-name superset the index prefetches, and it must contain every
+# DISPLAY_FALLBACK name or the index silently loses a fallback step. Change one
+# site, change all of them -- the feature page and the search index are supposed
+# to agree about a feature's display value and DOIs, and only these copies
+# enforce that.
+#
+# This is not hypothetical drift: commit 1b4ecac added the deterministic
+# ``order_by("pub_dbxref_id")`` DOI tie-break below and missed the identical
+# query in ``searchindex.prefetch_chunk``, so the page and the index disagreed
+# nondeterministically about multi-DOI pubs until that was fixed separately.
+#
+# The obvious fix -- extracting the shared logic into a third module both
+# import -- is not available: ``machado.models`` imports this module at import
+# time (for the method-patching decorators below) and ``machado.searchindex``
+# imports ``machado.models``, so this module cannot import from searchindex
+# without a circular import. Until that cycle is broken, duplication plus this
+# warning is the arrangement.
+
+#: Order of the display fallback chain. Twin of
+#: ``machado.searchindex.DISPLAY_FALLBACK``; see the lockstep warning above.
+DISPLAY_FALLBACK = ("display", "product", "description", "note")
+
+
+def _attach_cached_property(cls, name, func):
+    """Attach a cached_property to a class after class creation.
+
+    functools.cached_property learns its attribute name via __set_name__, which
+    Python calls only while executing a class body. This module patches methods
+    on with setattr() afterwards, so __set_name__ must be invoked by hand or the
+    first attribute access raises TypeError.
+    """
+    prop = functools.cached_property(func)
+    prop.__set_name__(cls, name)
+    setattr(cls, name, prop)
+
 
 def get_feature_dbxrefs(self):
     """Get the feature dbxrefs."""
     result = list()
-    for feature_dbxref in self.FeatureDbxref_feature_Feature.all():
+    for feature_dbxref in self.FeatureDbxref_feature_Feature.select_related(
+        "dbxref__db"
+    ).all():
         if feature_dbxref.dbxref.db.url:
             result.append(
                 "<a href='{}://{}{}' target='_blank'>{}:{}</a>".format(
@@ -65,67 +115,166 @@ def get_feature_note(self):
         return None
 
 
-def get_feature_annotation(self):
-    """Get the annotation feature prop."""
-    try:
-        fps = self.Featureprop_feature_Feature.filter(
+def get_feature_annotation_data(self):
+    """Build annotations and DOIs for this feature in a fixed four queries.
+
+    get_annotation and get_doi both walk
+    Featureprop(annotation) -> FeaturepropPub -> pub DOI. Computing them
+    together once removes the duplicate traversal and the per-row queries that
+    the previous per-pub get_doi() calls incurred. Memoized per instance.
+
+    Staleness caveat: because this is a cached_property, a caller that creates
+    a new Featureprop or FeaturePub and then re-reads get_annotation()/get_doi()
+    on this same in-memory Feature instance will see stale data -- the cache is
+    never invalidated on write. No current caller does this (the loaders in
+    machado/loaders/ operate on feature_id integers and never hold a live
+    Feature across a write), but a future caller that does must re-fetch the
+    Feature instance instead of relying on this cache surviving a write.
+    """
+    from machado.models import FeaturepropPub, PubDbxref
+
+    # 1. DOIs attached directly to the feature via FeaturePub.
+    direct_pub_ids = list(
+        self.FeaturePub_feature_Feature.values_list("pub_id", flat=True)
+    )
+
+    # 2. Annotation props, in rank order so the output order is stable.
+    prop_rows = list(
+        self.Featureprop_feature_Feature.filter(
             type__name="annotation", type__cv__name="feature_property"
         )
-        annotations = list()
-        for fp in fps:
-            fppubs = fp.FeaturepropPub_featureprop_Featureprop.all()
-            dois = []
-            for fppub in fppubs:
-                doi = fppub.pub.get_doi()
-                if doi:
-                    dois.append(doi)
+        .order_by("rank", "featureprop_id")
+        .values_list("featureprop_id", "value")
+    )
+    prop_ids = [prop_id for prop_id, _ in prop_rows]
 
-            if dois:
-                annotations.append("{} (DOI:{})".format(fp.value, ", ".join(dois)))
-            else:
-                annotations.append(fp.value)
-        return annotations
-    except ObjectDoesNotExist:
-        return None
+    # 3. The pubs backing each annotation prop.
+    pubs_by_prop = {}
+    proppub_pub_ids = []
+    if prop_ids:
+        for prop_id, pub_id in (
+            FeaturepropPub.objects.filter(featureprop_id__in=prop_ids)
+            .order_by("featureprop_pub_id")
+            .values_list("featureprop_id", "pub_id")
+        ):
+            pubs_by_prop.setdefault(prop_id, []).append(pub_id)
+            proppub_pub_ids.append(pub_id)
+
+    # 4. One DOI lookup covering both sources.
+    #
+    # order_by is REQUIRED for parity, not decoration. The old per-pub
+    # Pub.get_doi() ended in .first(), and Django auto-adds order_by(pk) to an
+    # unordered queryset for first()/last() -- so it deterministically returned
+    # the lowest-pk PubDbxref. Iterating unordered here and taking the first
+    # row via setdefault would instead let the query plan decide which
+    # accession wins for a pub carrying two DOI dbxrefs. Ordering by the PK
+    # reproduces the old choice exactly.
+    #
+    # No select_related: values_list() with a spanning lookup performs the join
+    # itself, so select_related("dbxref") would be a no-op here.
+    doi_by_pub = {}
+    all_pub_ids = set(direct_pub_ids) | set(proppub_pub_ids)
+    if all_pub_ids:
+        for pub_id, accession in (
+            PubDbxref.objects.filter(pub_id__in=all_pub_ids, dbxref__db__name="DOI")
+            .order_by("pub_dbxref_id")
+            .values_list("pub_id", "dbxref__accession")
+        ):
+            doi_by_pub.setdefault(pub_id, accession)
+
+    annotations = []
+    dois = set()
+    for prop_id, value in prop_rows:
+        # Truthiness, not membership. Dbxref.accession is a non-null CharField
+        # but may legitimately be ''; the pre-batching code gated both this
+        # branch and the direct-pub branch below on `if doi:`, so an empty
+        # accession rendered the bare annotation. Testing `pub_id in doi_by_pub`
+        # instead would render "my annotation (DOI:)".
+        prop_dois = [
+            doi
+            for doi in (
+                doi_by_pub.get(pub_id) for pub_id in pubs_by_prop.get(prop_id, ())
+            )
+            if doi
+        ]
+        if prop_dois:
+            annotations.append("{} (DOI:{})".format(value, ", ".join(prop_dois)))
+        else:
+            annotations.append(value)
+        dois.update(prop_dois)
+
+    for pub_id in direct_pub_ids:
+        doi = doi_by_pub.get(pub_id)
+        if doi:
+            dois.add(doi)
+
+    return {"annotations": annotations, "dois": dois}
+
+
+def get_feature_annotation(self):
+    """Get the annotation feature props, each with its DOIs appended."""
+    return list(self._annotation_data["annotations"])
 
 
 def get_feature_doi(self):
-    """Get the DOI feature."""
-    dois = set()
-    pubs = self.FeaturePub_feature_Feature.filter()
-    for featurepub in pubs:
-        doi = featurepub.pub.get_doi()
-        if doi:
-            dois.add(doi)
-    try:
-        fps = self.Featureprop_feature_Feature.filter(
-            type__name="annotation", type__cv__name="feature_property"
-        )
-        for fp in fps:
-            for fppub in fp.FeaturepropPub_featureprop_Featureprop.all():
-                doi = fppub.pub.get_doi()
-                if doi:
-                    dois.add(doi)
-        return dois
-    except ObjectDoesNotExist:
-        return None
+    """Get the DOIs for this feature, from its pubs and its annotations."""
+    return set(self._annotation_data["dois"])
+
+
+def get_feature_display_prop_map(self):
+    """Return {type_name: [values by rank]} for the display fallback props.
+
+    One query serves the whole display -> product -> description -> note chain,
+    which previously cost a separate .get() per step. Memoized because
+    templates commonly evaluate get_display more than once per render.
+
+    Staleness caveat: because this is a cached_property, a caller that creates a
+    new Featureprop and then re-reads get_display() on this same in-memory
+    Feature instance will see stale data -- the cache is never invalidated on
+    write. Re-fetch the Feature instance instead of relying on this cache
+    surviving a write. (Same caveat as _annotation_data and Organism.is_public;
+    unlike is_public there is no set_* helper here to invalidate it.)
+    """
+    result = {}
+    rows = self.Featureprop_feature_Feature.filter(
+        type__cv__name="feature_property", type__name__in=DISPLAY_FALLBACK
+    ).order_by("type__name", "rank")
+    for type_name, value in rows.values_list("type__name", "value"):
+        result.setdefault(type_name, []).append(value)
+    return result
 
 
 def get_feature_display(self):
-    """Get the display feature prop."""
-    try:
-        return self.Featureprop_feature_Feature.get(
-            type__name="display", type__cv__name="feature_property"
-        ).value
-    except ObjectDoesNotExist:
-        if self.get_product() is not None:
-            return self.get_product()
-        elif self.get_description() is not None:
-            return self.get_description()
-        elif self.get_note() is not None:
-            return self.get_note()
-        else:
-            return None
+    """Get the display feature prop, falling back through the chain.
+
+    Twin of ``machado.searchindex.resolve_display`` -- see the lockstep warning
+    at the top of this module. Both must change together.
+
+    NULL-valued props stop the chain. Featureprop.value is TextField(null=True)
+    and Feature is managed = False, so other GMOD tooling can write a prop row
+    whose value is NULL. Such a row lands in _display_prop_map as [None], which
+    is a truthy list, so the `if values` test below matches and this returns
+    None. A feature with a NULL-valued `product` prop and a real `description`
+    therefore renders blank rather than showing the description.
+
+    That DIFFERS from the pre-batching behaviour: get_product() returned None
+    for such a row, the old `is not None` test was False, and the chain fell
+    through to description and then note. The new behaviour is kept
+    deliberately, because searchindex.resolve_display has always worked this way
+    -- so for the first time the feature page and the search index agree on the
+    display value of such a feature. Restoring the fall-through here would
+    re-open that divergence and would have to be done in both places at once.
+    Pinned by DecoratorDisplayAndDoiTest.
+    test_get_display_stops_at_a_null_valued_prop.
+
+    Staleness caveat: see _display_prop_map, whose cache backs this.
+    """
+    props = self._display_prop_map
+    for prop_name in DISPLAY_FALLBACK:
+        values = props.get(prop_name)
+        if values:
+            return values[0]
+    return None
 
 
 def get_feature_properties(self):
@@ -145,7 +294,9 @@ def get_feature_properties(self):
 def get_feature_synonyms(self):
     """Get all the feature synonyms."""
     result = list()
-    for feature_synonym in self.FeatureSynonym_feature_Feature.all():
+    for feature_synonym in self.FeatureSynonym_feature_Feature.select_related(
+        "synonym"
+    ).all():
         result.append("{}".format(feature_synonym.synonym.name))
     return result
 
@@ -221,7 +372,9 @@ def get_feature_relationship(self):
         raise AttributeError("The setting of MACHADO_VALID_TYPES is required.")
 
     result = list()
-    feature_relationships = self.FeatureRelationship_object_Feature.filter(
+    feature_relationships = self.FeatureRelationship_object_Feature.select_related(
+        "subject__type"
+    ).filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
@@ -229,7 +382,9 @@ def get_feature_relationship(self):
         if feature_relationship.subject.type.name in settings.MACHADO_VALID_TYPES:
             result.append(feature_relationship.subject)
 
-    feature_relationships = self.FeatureRelationship_subject_Feature.filter(
+    feature_relationships = self.FeatureRelationship_subject_Feature.select_related(
+        "object__type"
+    ).filter(
         Q(type__name="part_of") | Q(type__name="translation_of"),
         type__cv__name="sequence",
     )
@@ -254,7 +409,9 @@ def get_feature_cvterm(self):
 def get_feature_location(self):
     """Get the feature location."""
     result = list()
-    for location in self.Featureloc_feature_Feature.all():
+    for location in self.Featureloc_feature_Feature.select_related(
+        "srcfeature__organism"
+    ).all():
         jbrowse_url = None
         if hasattr(settings, "MACHADO_JBROWSE_URL"):
             if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
@@ -317,6 +474,8 @@ def machado_feature_methods():
         setattr(cls, "get_location", get_feature_location)
         setattr(cls, "get_properties", get_feature_properties)
         setattr(cls, "get_synonyms", get_feature_synonyms)
+        _attach_cached_property(cls, "_display_prop_map", get_feature_display_prop_map)
+        _attach_cached_property(cls, "_annotation_data", get_feature_annotation_data)
         return cls
 
     return wrapper
@@ -331,10 +490,35 @@ def get_pub_authors(self):
     )
 
 
+def get_pub_doi_value(self):
+    """Resolve this publication's DOI accession, or None.
+
+    Memoized per instance because templates re-query on every mention: Django
+    does not cache template method calls, and both feature.html (~line 361) and
+    data-numbers.html (~line 63) mention pub.get_doi three times inside a
+    per-pub loop -- data-numbers.html nests that inside a per-organism loop, so
+    40 organisms x 5 pubs cost 600 queries for DOIs alone without this cache.
+
+    .first() on an unordered queryset makes Django auto-add order_by(pk), so a
+    pub carrying two DOI dbxrefs resolves to the lowest-pk one. That is the
+    contract -- see the tie-break note in get_feature_annotation_data. Any
+    restructuring of this query must pin the ordering explicitly.
+
+    Staleness caveat: as with _display_prop_map and _annotation_data, the cache
+    is never invalidated. A caller that adds a PubDbxref and re-reads get_doi()
+    on the same in-memory Pub sees the old value; re-fetch the Pub instead.
+    """
+    pub_dbxref = (
+        self.PubDbxref_pub_Pub.select_related("dbxref")
+        .filter(dbxref__db__name="DOI")
+        .first()
+    )
+    return pub_dbxref.dbxref.accession if pub_dbxref else None
+
+
 def get_pub_doi(self):
     """Get the DOI of the publication."""
-    pub_dbxref = self.PubDbxref_pub_Pub.filter(dbxref__db__name="DOI").first()
-    return pub_dbxref.dbxref.accession if pub_dbxref else None
+    return self._doi_value
 
 
 def machado_pub_methods():
@@ -343,13 +527,26 @@ def machado_pub_methods():
     def wrapper(cls):
         setattr(cls, "get_authors", get_pub_authors)
         setattr(cls, "get_doi", get_pub_doi)
+        _attach_cached_property(cls, "_doi_value", get_pub_doi_value)
         return cls
 
     return wrapper
 
 
 def get_organism_is_public(self):
-    """Check if organism is public."""
+    """Check if organism is public.
+
+    Cached per instance. After changing visibility, call set_public (which
+    invalidates the cache) or re-fetch the organism -- do not mutate the
+    Organismprop row directly and expect this to notice.
+
+    Do not annotate or assign this name. A plain property without a setter
+    raises AttributeError on `organism.is_public = x`; a cached_property accepts
+    it silently, and an `Organism.objects.annotate(is_public=...)` would land in
+    the instance __dict__ and shadow this lookup for that instance's lifetime.
+    No caller does either today -- all five filter on
+    Organismprop_organism_Organism__value="false" instead.
+    """
     prop = self.Organismprop_organism_Organism.filter(
         type__name="is_public", type__cv__name="organism_property"
     ).first()
@@ -385,12 +582,17 @@ def set_organism_public(self, is_public: bool):
         prop.value = "true" if is_public else "false"
         prop.save()
 
+    # Invalidate the cached is_public value. views/loader.py sets visibility
+    # and then reads organism.is_public in the same request to build its JSON
+    # response; without this the response would report the pre-change value.
+    self.__dict__.pop("is_public", None)
+
 
 def machado_organism_methods():
     """Add methods to machado.models.Organism."""
 
     def wrapper(cls):
-        setattr(cls, "is_public", property(get_organism_is_public))
+        _attach_cached_property(cls, "is_public", get_organism_is_public)
         setattr(cls, "set_public", set_organism_public)
         return cls
 

@@ -10,69 +10,51 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase, override_settings
 from unittest.mock import MagicMock
 
+from machado.models import (
+    Dbxref,
+    Feature,
+    FeaturePub,
+    FeatureRelationship,
+    Featureprop,
+    FeaturepropPub,
+    Organism,
+    Pub,
+    PubDbxref,
+)
+from machado.tests.decorators_fixture import (
+    _feature,
+    add_annotations,
+    add_dbxrefs,
+    add_locations,
+    add_synonyms,
+    build_decorator_fixture,
+)
+
 from machado.decorators import (
-    get_feature_dbxrefs,
     get_feature_product,
     get_feature_description,
     get_feature_note,
-    get_feature_annotation,
-    get_feature_doi,
-    get_feature_display,
     get_feature_properties,
-    get_feature_synonyms,
     get_feature_orthologous_group,
     get_feature_coexpression_group,
     get_feature_expression_samples,
-    get_feature_relationship,
     get_feature_cvterm,
-    get_feature_location,
     machado_feature_methods,
     get_pub_authors,
-    get_pub_doi,
     machado_pub_methods,
 )
 
-
-class GetFeatureDbxrefsTest(TestCase):
-    """Tests for get_feature_dbxrefs."""
-
-    def test_with_url(self):
-        """Test with url."""
-        mock_dbxref = MagicMock()
-        mock_dbxref.dbxref.db.url = "www.example.com/"
-        mock_dbxref.dbxref.db.urlprefix = "https"
-        mock_dbxref.dbxref.accession = "12345"
-        mock_dbxref.dbxref.db.name = "TestDB"
-
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = [mock_dbxref]
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("TestDB:12345", result[0])
-        self.assertIn("href='https://www.example.com/12345'", result[0])
-
-    def test_without_url(self):
-        """Test without url."""
-        mock_dbxref = MagicMock()
-        mock_dbxref.dbxref.db.url = None
-        mock_dbxref.dbxref.db.name = "LocalDB"
-        mock_dbxref.dbxref.accession = "67890"
-
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = [mock_dbxref]
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], "LocalDB:67890")
-
-    def test_empty(self):
-        """Test empty."""
-        mock_self = MagicMock()
-        mock_self.FeatureDbxref_feature_Feature.all.return_value = []
-
-        result = get_feature_dbxrefs(mock_self)
-        self.assertEqual(result, [])
+#: get_feature_location wraps its whole body in
+#: `if hasattr(settings, "MACHADO_JBROWSE_URL")`, so with that setting absent it
+#: returns []. machado/tests/settings.py defines it but machadoproject.settings
+#: does not, so any test touching get_location must declare the dependency
+#: itself rather than inheriting it from whichever settings module happens to be
+#: in use -- otherwise it passes under `--settings machado.tests.settings` and
+#: fails under `manage.py test`.
+JBROWSE_SETTINGS = {
+    "MACHADO_JBROWSE_URL": "http://localhost/jbrowse",
+    "MACHADO_JBROWSE_OFFSET": 1200,
+}
 
 
 class GetFeaturePropTest(TestCase):
@@ -121,140 +103,6 @@ class GetFeaturePropTest(TestCase):
         self.assertIsNone(result)
 
 
-class GetFeatureAnnotationTest(TestCase):
-    """Tests for get_feature_annotation."""
-
-    def test_annotation_with_doi(self):
-        """Test annotation with doi."""
-        mock_fp = MagicMock()
-        mock_fp.value = "Annotation text"
-        mock_fppub = MagicMock()
-        mock_fppub.pub.get_doi.return_value = "10.1234/test"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = [mock_fppub]
-
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_annotation(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("DOI:10.1234/test", result[0])
-
-    def test_annotation_without_doi(self):
-        """Test annotation without doi."""
-        mock_fp = MagicMock()
-        mock_fp.value = "Annotation text"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = []
-
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_annotation(mock_self)
-        self.assertEqual(result, ["Annotation text"])
-
-    def test_annotation_not_found(self):
-        """Test annotation not found."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
-
-        result = get_feature_annotation(mock_self)
-        self.assertIsNone(result)
-
-
-class GetFeatureDoiTest(TestCase):
-    """Tests for get_feature_doi."""
-
-    def test_doi_from_pubs_and_annotations(self):
-        """Test doi from pubs and annotations."""
-        mock_featurepub = MagicMock()
-        mock_featurepub.pub.get_doi.return_value = "10.1234/pub"
-
-        mock_fp = MagicMock()
-        mock_fppub = MagicMock()
-        mock_fppub.pub.get_doi.return_value = "10.1234/annot"
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = [mock_fppub]
-
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = [mock_featurepub]
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_doi(mock_self)
-        self.assertIn("10.1234/pub", result)
-        self.assertIn("10.1234/annot", result)
-
-    def test_doi_annotation_no_doi(self):
-        """Test doi annotation no doi."""
-        mock_featurepub = MagicMock()
-        mock_featurepub.pub.get_doi.return_value = "10.1234/pub"
-
-        mock_fp = MagicMock()
-        mock_fp.FeaturepropPub_featureprop_Featureprop.all.return_value = []
-
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = [mock_featurepub]
-        mock_self.Featureprop_feature_Feature.filter.return_value = [mock_fp]
-
-        result = get_feature_doi(mock_self)
-        self.assertIn("10.1234/pub", result)
-        self.assertEqual(len(result), 1)
-
-    def test_doi_filter_raises(self):
-        """Test doi filter raises."""
-        mock_self = MagicMock()
-        mock_self.FeaturePub_feature_Feature.filter.return_value = []
-        mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
-
-        result = get_feature_doi(mock_self)
-        self.assertIsNone(result)
-
-
-class GetFeatureDisplayTest(TestCase):
-    """Tests for get_feature_display."""
-
-    def test_display_found(self):
-        """Test display found."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "display text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "display text")
-
-    def test_display_fallback_product(self):
-        """Test display fallback product."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = "product text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "product text")
-
-    def test_display_fallback_description(self):
-        """Test display fallback description."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = "desc text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "desc text")
-
-    def test_display_fallback_note(self):
-        """Test display fallback note."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = None
-        mock_self.get_note.return_value = "note text"
-        result = get_feature_display(mock_self)
-        self.assertEqual(result, "note text")
-
-    def test_display_fallback_none(self):
-        """Test display fallback none."""
-        mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        mock_self.get_product.return_value = None
-        mock_self.get_description.return_value = None
-        mock_self.get_note.return_value = None
-        result = get_feature_display(mock_self)
-        self.assertIsNone(result)
-
-
 class GetFeaturePropertiesTest(TestCase):
     """Tests for get_feature_properties."""
 
@@ -277,29 +125,6 @@ class GetFeaturePropertiesTest(TestCase):
         mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
 
         result = get_feature_properties(mock_self)
-        self.assertEqual(result, [])
-
-
-class GetFeatureSynonymsTest(TestCase):
-    """Tests for get_feature_synonyms."""
-
-    def test_synonyms(self):
-        """Test synonyms."""
-        mock_syn = MagicMock()
-        mock_syn.synonym.name = "SynonymA"
-
-        mock_self = MagicMock()
-        mock_self.FeatureSynonym_feature_Feature.all.return_value = [mock_syn]
-
-        result = get_feature_synonyms(mock_self)
-        self.assertEqual(result, ["SynonymA"])
-
-    def test_no_synonyms(self):
-        """Test no synonyms."""
-        mock_self = MagicMock()
-        mock_self.FeatureSynonym_feature_Feature.all.return_value = []
-
-        result = get_feature_synonyms(mock_self)
         self.assertEqual(result, [])
 
 
@@ -368,68 +193,6 @@ class GetFeatureExpressionSamplesTest(TestCase):
         self.assertIsNone(result)
 
 
-class GetFeatureRelationshipTest(TestCase):
-    """Tests for get_feature_relationship."""
-
-    @override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
-    def test_relationship_object_side(self):
-        """Test relationship object side."""
-        mock_subject = MagicMock()
-        mock_subject.type.name = "gene"
-        mock_rel = MagicMock()
-        mock_rel.subject = mock_subject
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = [mock_rel]
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = []
-
-        result = get_feature_relationship(mock_self)
-        self.assertIn(mock_subject, result)
-
-    @override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
-    def test_relationship_subject_side(self):
-        """Test relationship subject side."""
-        mock_object = MagicMock()
-        mock_object.type.name = "mRNA"
-        mock_rel = MagicMock()
-        mock_rel.object = mock_object
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = []
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = [mock_rel]
-
-        result = get_feature_relationship(mock_self)
-        self.assertIn(mock_object, result)
-
-    @override_settings(MACHADO_VALID_TYPES=["gene"])
-    def test_relationship_filtered_by_valid_types(self):
-        """Test relationship filtered by valid types."""
-        mock_subject = MagicMock()
-        mock_subject.type.name = "CDS"  # Not in MACHADO_VALID_TYPES
-
-        mock_rel = MagicMock()
-        mock_rel.subject = mock_subject
-
-        mock_self = MagicMock()
-        mock_self.FeatureRelationship_object_Feature.filter.return_value = [mock_rel]
-        mock_self.FeatureRelationship_subject_Feature.filter.return_value = []
-
-        result = get_feature_relationship(mock_self)
-        self.assertEqual(result, [])
-
-    def test_relationship_no_valid_types_setting(self):
-        """Test relationship no valid types setting."""
-        mock_self = MagicMock()
-        with self.settings():
-            # Remove MACHADO_VALID_TYPES from settings
-            from django.conf import settings
-
-            if hasattr(settings, "MACHADO_VALID_TYPES"):
-                delattr(settings, "MACHADO_VALID_TYPES")
-            with self.assertRaises(AttributeError):
-                get_feature_relationship(mock_self)
-
-
 class GetFeatureCvtermTest(TestCase):
     """Tests for get_feature_cvterm."""
 
@@ -443,124 +206,6 @@ class GetFeatureCvtermTest(TestCase):
 
         result = get_feature_cvterm(mock_self)
         self.assertIsNotNone(result)
-
-
-class GetFeatureLocationTest(TestCase):
-    """Tests for get_feature_location."""
-
-    @override_settings(
-        MACHADO_JBROWSE_URL="http://localhost/jbrowse",
-        MACHADO_JBROWSE_OFFSET=500,
-        MACHADO_JBROWSE_TRACKS="ref_seq,gene",
-    )
-    def test_location_with_jbrowse_full_settings(self):
-        """Test location with jbrowse full settings."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = None
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["start"], 1000)
-        self.assertEqual(result[0]["end"], 2000)
-        self.assertEqual(result[0]["strand"], 1)
-        self.assertEqual(result[0]["ref"], "chr1")
-        self.assertIn("jbrowse", result[0]["jbrowse_url"])
-        self.assertIn("ref_seq,gene", result[0]["jbrowse_url"])
-
-    @override_settings(
-        MACHADO_JBROWSE_URL="http://localhost/jbrowse",
-        MACHADO_JBROWSE_OFFSET=500,
-        MACHADO_JBROWSE_TRACKS="ref_seq,gene",
-    )
-    def test_location_with_infraspecific_name(self):
-        """Test location with infraspecific name."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = "Wm82"
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        self.assertIn("Wm82", result[0]["jbrowse_url"])
-
-    @override_settings(MACHADO_JBROWSE_URL="http://localhost/jbrowse")
-    def test_location_default_tracks_and_offset(self):
-        """Test defaults when jbrowse tracks and offset are not set."""
-        from django.conf import settings
-
-        if hasattr(settings, "MACHADO_JBROWSE_TRACKS"):
-            delattr(settings, "MACHADO_JBROWSE_TRACKS")
-        if hasattr(settings, "MACHADO_JBROWSE_OFFSET"):
-            delattr(settings, "MACHADO_JBROWSE_OFFSET")
-
-        mock_loc = MagicMock()
-        mock_loc.srcfeature.uniquename = "chr1"
-        mock_loc.srcfeature.organism.genus = "Glycine"
-        mock_loc.srcfeature.organism.species = "max"
-        mock_loc.srcfeature.organism.infraspecific_name = None
-        mock_loc.fmin = 1000
-        mock_loc.fmax = 2000
-        mock_loc.strand = 1
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(len(result), 1)
-        # Default tracks
-        self.assertIn("ref_seq,gene,transcripts,CDS", result[0]["jbrowse_url"])
-        # Default offset=1000: fmin-1000=0, fmax+1000=3000
-        self.assertIn("0..3000", result[0]["jbrowse_url"])
-
-    def test_location_no_jbrowse_url(self):
-        """When MACHADO_JBROWSE_URL is not set, jbrowse_url should be None."""
-        from django.conf import settings
-
-        if hasattr(settings, "MACHADO_JBROWSE_URL"):
-            delattr(settings, "MACHADO_JBROWSE_URL")
-
-        mock_loc = MagicMock()
-        mock_loc.srcfeature = None  # srcfeature is None
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
-
-    def test_location_srcfeature_none(self):
-        """When srcfeature is None, the location should be skipped."""
-        mock_loc = MagicMock()
-        mock_loc.srcfeature = None
-
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = [mock_loc]
-
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
-
-    def test_location_empty(self):
-        """Test location empty."""
-        mock_self = MagicMock()
-        mock_self.Featureloc_feature_Feature.all.return_value = []
-        result = get_feature_location(mock_self)
-        self.assertEqual(result, [])
 
 
 class MachadoFeatureMethodsTest(TestCase):
@@ -610,23 +255,6 @@ class GetPubAuthorsTest(TestCase):
         self.assertEqual(result, "Smith John, Doe Jane")
 
 
-class GetPubDoiTest(TestCase):
-    """Tests for get_pub_doi."""
-
-    def test_doi(self):
-        """Test doi."""
-        mock_pub_dbxref = MagicMock()
-        mock_pub_dbxref.dbxref.accession = "10.1234/test"
-
-        mock_self = MagicMock()
-        mock_self.PubDbxref_pub_Pub.filter.return_value.first.return_value = (
-            mock_pub_dbxref
-        )
-
-        result = get_pub_doi(mock_self)
-        self.assertEqual(result, "10.1234/test")
-
-
 class MachadoPubMethodsTest(TestCase):
     """Tests for the machado_pub_methods decorator."""
 
@@ -641,3 +269,397 @@ class MachadoPubMethodsTest(TestCase):
 
         self.assertTrue(hasattr(DummyPub, "get_authors"))
         self.assertTrue(hasattr(DummyPub, "get_doi"))
+
+
+class DecoratorRealDataTest(TestCase):
+    """Characterization tests for the methods Phase 1b optimizes.
+
+    These pin the CURRENT return values so the Phase 1b query changes can be
+    shown not to alter behavior. They deliberately use real rows rather than
+    mocks: a mock queryset has no query count, so it cannot detect an N+1.
+    """
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_dbxrefs_renders_url_and_plain_forms(self):
+        """A dbxref on a db with a url becomes a link; otherwise plain text."""
+        result = self.fx.gene.get_dbxrefs()
+        self.assertEqual(len(result), 2)
+        self.assertIn(
+            "<a href='https://www.example.com/12345' target='_blank'>"
+            "URLDB:12345</a>",
+            result,
+        )
+        self.assertIn("PlainDB:67890", result)
+
+    def test_get_synonyms(self):
+        """Synonym names are returned."""
+        self.assertEqual(sorted(self.fx.gene.get_synonyms()), ["syn_0", "syn_1"])
+
+    def test_get_relationship_filters_to_valid_types(self):
+        """Only counterparts whose SO type is in MACHADO_VALID_TYPES appear."""
+        result = self.fx.gene.get_relationship()
+        names = sorted(feature.uniquename for feature in result)
+        # MRNA_A (object side) and POLY_A (subject side) qualify.
+        # CHR1 is a chromosome, which is not in MACHADO_VALID_TYPES.
+        self.assertEqual(names, ["MRNA_A", "POLY_A"])
+
+    @override_settings(**JBROWSE_SETTINGS)
+    def test_get_location_skips_null_srcfeature(self):
+        """A Featureloc with no srcfeature produces no entry."""
+        result = self.fx.gene.get_location()
+        self.assertEqual(len(result), 1)
+        entry = result[0]
+        self.assertEqual(entry["start"], 100)
+        self.assertEqual(entry["end"], 200)
+        self.assertEqual(entry["ref"], "CHR1")
+        self.assertIn("http://localhost/jbrowse", entry["jbrowse_url"])
+        self.assertIn("Arabidopsis thaliana", entry["jbrowse_url"])
+        # MACHADO_JBROWSE_OFFSET is 1200 in test settings.
+        self.assertIn("CHR1:-1100..1400", entry["jbrowse_url"])
+        self.assertIn("tracks=ref_seq,gene,transcripts,CDS", entry["jbrowse_url"])
+
+    def test_get_pub_doi_returns_accession(self):
+        """A pub with a DOI dbxref returns its accession."""
+        self.assertEqual(self.fx.pub_with_doi.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_returns_none_without_doi(self):
+        """A pub with no DOI dbxref returns None."""
+        self.assertIsNone(self.fx.pub_without_doi.get_doi())
+
+
+class DecoratorDisplayAndDoiTest(TestCase):
+    """Characterization tests for the display chain and annotation/DOI walk."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_display_prefers_the_display_prop(self):
+        """An explicit display prop wins."""
+        self.assertEqual(self.fx.gene.get_display(), "alpha kinase")
+
+    def test_get_display_falls_back_to_product(self):
+        """With no display prop, the product prop is used."""
+        self.assertEqual(self.fx.mrna.get_display(), "the product")
+
+    def test_get_display_returns_none_when_nothing_set(self):
+        """A feature with none of the four props returns None."""
+        self.assertIsNone(self.fx.chromosome.get_display())
+
+    def test_get_annotation_appends_dois(self):
+        """Each annotation carries its pubs' DOIs in parentheses."""
+        result = self.fx.gene.get_annotation()
+        self.assertEqual(len(result), 2)
+        for value in result:
+            self.assertIn("(DOI:", value)
+            self.assertIn("10.1234/one", value)
+            self.assertIn("10.1234/two", value)
+        self.assertTrue(any(v.startswith("annotation 0") for v in result))
+
+    def test_get_annotation_without_dois_is_the_bare_value(self):
+        """An annotation with no DOI'd pubs is returned verbatim."""
+        add_annotations(self.fx, self.fx.polypeptide, 1, with_doi=False)
+        result = self.fx.polypeptide.get_annotation()
+        self.assertEqual(result, ["annotation 0"])
+
+    def test_get_doi_unions_featurepub_and_annotation_sources(self):
+        """Both FeaturePub pubs and annotation prop pubs contribute DOIs.
+
+        10.1234/three is reachable only via the direct FeaturePub, and
+        10.1234/one only via the annotation props, so dropping either source
+        fails this assertion. Do not reword the first line to start with
+        "DOIs" -- flake8's D403 rejects it, because pydocstyle compares the
+        first word against .capitalize(), which lowercases the trailing "Is".
+        """
+        result = self.fx.gene.get_doi()
+        self.assertEqual(set(result), {"10.1234/one", "10.1234/two", "10.1234/three"})
+
+    def test_get_doi_is_empty_without_any_doi(self):
+        """A feature with no DOI'd pubs yields no DOIs."""
+        self.assertEqual(set(self.fx.polypeptide.get_doi()), set())
+
+    def test_empty_doi_accession_is_treated_as_absent(self):
+        """An empty accession renders the bare annotation, not "(DOI:)".
+
+        Dbxref.accession is a non-null CharField but may legitimately be ''.
+        The pre-batching code gated both the annotation branch and the direct-pub
+        branch on `if doi:`, so both sources must test truthiness rather than
+        mere presence of the pub in the DOI map.
+        """
+        pub = Pub.objects.create(
+            uniquename="PUB:EMPTY", type=self.fx.t_journal, title="Empty"
+        )
+        blank = Dbxref.objects.create(db=self.fx.db_doi, accession="", version="1")
+        PubDbxref.objects.create(pub=pub, dbxref=blank, is_current=True)
+        prop = Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_annotation,
+            value="lone annotation",
+            rank=0,
+        )
+        FeaturepropPub.objects.create(featureprop=prop, pub=pub)
+        FeaturePub.objects.create(feature=self.fx.polypeptide, pub=pub)
+
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_annotation(), ["lone annotation"])
+        self.assertEqual(set(polypeptide.get_doi()), set())
+
+    def test_get_display_stops_at_a_null_valued_prop(self):
+        """A prop present with a NULL value stops the chain and yields None.
+
+        This test pins a DELIBERATELY CHANGED behaviour, unlike every other
+        characterization test in this class. Featureprop.value is
+        TextField(null=True) and Feature is managed = False, so other GMOD
+        tooling can write a prop row whose value is NULL. The pre-batching
+        get_display() called get_product(), got None, failed its `is not None`
+        test and fell through to description -- rendering "a real description"
+        here. The batched version sees a truthy [None] list for `product` and
+        returns None, so the page renders blank.
+
+        The new behaviour is kept because searchindex.resolve_display has always
+        behaved this way, so page and index now agree for the first time.
+        Restoring the fall-through would re-open that divergence.
+        """
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide, type=self.fx.p_product, value=None, rank=0
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_description,
+            value="a real description",
+            rank=0,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertIsNone(polypeptide.get_display())
+        # The description really is present and reachable -- the chain stopped
+        # early, it did not simply run out of props.
+        self.assertEqual(polypeptide.get_description(), "a real description")
+
+
+class DecoratorQueryCountTest(TestCase):
+    """Query counts must be invariant to row count, not merely small.
+
+    A fixed low number proves nothing on its own -- the fixture might simply
+    have few rows. Each test here asserts the SAME count at two different row
+    counts, which is what actually demonstrates the N+1 is gone.
+    """
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_get_dbxrefs_is_one_query_regardless_of_count(self):
+        """Fetching dbxrefs costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_dbxrefs()
+        add_dbxrefs(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_dbxrefs()), 22)
+
+    def test_get_synonyms_is_one_query_regardless_of_count(self):
+        """Fetching synonyms costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_synonyms()
+        add_synonyms(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_synonyms()), 22)
+
+    def test_get_relationship_is_two_queries_regardless_of_count(self):
+        """One query per direction, independent of how many rows match."""
+        with self.assertNumQueries(2):
+            self.fx.gene.get_relationship()
+        for i in range(20):
+            extra = _feature(
+                self.fx.organism, self.fx.t_mrna, "EXTRA_MRNA_{}".format(i)
+            )
+            FeatureRelationship.objects.create(
+                subject=extra, object=self.fx.gene, type=self.fx.t_part_of, rank=0
+            )
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(2):
+            self.assertEqual(len(gene.get_relationship()), 22)
+
+    @override_settings(**JBROWSE_SETTINGS)
+    def test_get_location_is_one_query_regardless_of_count(self):
+        """Fetching locations costs one query at 2 rows and at 22."""
+        with self.assertNumQueries(1):
+            self.fx.gene.get_location()
+        add_locations(self.fx, self.fx.gene, 20)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(len(gene.get_location()), 21)
+
+    def test_get_pub_doi_is_one_query(self):
+        """Resolving a pub's DOI costs one query, not two."""
+        pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_is_memoized(self):
+        """Three reads cost one query, not three.
+
+        feature.html and data-numbers.html each mention pub.get_doi three times
+        inside a per-pub loop, and Django does not cache template method calls.
+        """
+        pub = Pub.objects.get(pk=self.fx.pub_with_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+            self.assertEqual(pub.get_doi(), "10.1234/one")
+
+    def test_get_pub_doi_memoizes_the_absent_case(self):
+        """A pub with no DOI caches None instead of re-querying."""
+        pub = Pub.objects.get(pk=self.fx.pub_without_doi.pk)
+        with self.assertNumQueries(1):
+            self.assertIsNone(pub.get_doi())
+            self.assertIsNone(pub.get_doi())
+            self.assertIsNone(pub.get_doi())
+
+
+class DecoratorDisplayQueryTest(TestCase):
+    """The display fallback chain must not cost one query per fallback step."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_display_hit_is_one_query(self):
+        """A feature with a display prop resolves in one query."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(gene.get_display(), "alpha kinase")
+
+    def test_display_miss_is_still_one_query(self):
+        """Falling through to product must not cost four queries."""
+        mrna = Feature.objects.get(pk=self.fx.mrna.pk)
+        with self.assertNumQueries(1):
+            self.assertEqual(mrna.get_display(), "the product")
+
+    def test_display_none_is_still_one_query(self):
+        """A feature with none of the four props costs one query."""
+        chromosome = Feature.objects.get(pk=self.fx.chromosome.pk)
+        with self.assertNumQueries(1):
+            self.assertIsNone(chromosome.get_display())
+
+    def test_display_is_memoized(self):
+        """Repeated access re-uses the cached map."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            gene.get_display()
+            gene.get_display()
+            gene.get_display()
+
+    def test_display_takes_first_by_rank_when_duplicated(self):
+        """Two product props no longer raise MultipleObjectsReturned."""
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="first",
+            rank=0,
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="second",
+            rank=1,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_display(), "first")
+
+
+class DecoratorAnnotationQueryTest(TestCase):
+    """The annotation/DOI walk must be flat and shared between both methods."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_annotation_query_count_is_invariant(self):
+        """Four queries at 2 annotations and at 12."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            self.assertEqual(len(gene.get_annotation()), 2)
+        add_annotations(self.fx, self.fx.gene, 10)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            self.assertEqual(len(gene.get_annotation()), 12)
+
+    def test_doi_query_count_is_invariant(self):
+        """Four queries at 2 annotations and at 12."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_doi()
+        add_annotations(self.fx, self.fx.gene, 10)
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_doi()
+
+    def test_annotation_and_doi_share_one_traversal(self):
+        """Calling both, twice each, still costs four queries total."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(4):
+            gene.get_annotation()
+            gene.get_doi()
+            gene.get_annotation()
+            gene.get_doi()
+
+    def test_multi_doi_pub_picks_the_lowest_pk_dbxref(self):
+        """A pub with two DOI dbxrefs resolves to the lowest-pk one.
+
+        The pre-batching code ended in .first(), which Django resolves on an
+        unordered queryset by auto-adding order_by(pk). The batched lookup must
+        reproduce that choice rather than letting the query plan decide.
+        """
+        second = Dbxref.objects.create(
+            db=self.fx.db_doi, accession="10.9999/later", version="1"
+        )
+        PubDbxref.objects.create(
+            pub=self.fx.pub_featurepub_only_doi, dbxref=second, is_current=True
+        )
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        self.assertIn("10.1234/three", gene.get_doi())
+        self.assertNotIn("10.9999/later", gene.get_doi())
+
+
+class OrganismIsPublicCacheTest(TestCase):
+    """is_public is read repeatedly per page and must not query every time."""
+
+    def setUp(self):
+        """Build the shared fixture corpus."""
+        self.fx = build_decorator_fixture()
+
+    def test_repeated_access_is_one_query(self):
+        """Three reads cost one query, not three.
+
+        templates/loader/permissions.html reads org.is_public three times
+        inside its {% for org in organisms %} loop.
+        """
+        organism = Organism.objects.get(pk=self.fx.organism.pk)
+        with self.assertNumQueries(1):
+            organism.is_public
+            organism.is_public
+            organism.is_public
+
+    def test_set_public_invalidates_the_cache(self):
+        """After set_public the next read reports the new value.
+
+        views/loader.py's visibility toggle does exactly this sequence and
+        returns organism.is_public in its JSON response, so a stale cache here
+        would make the UI show the pre-change value.
+        """
+        organism = Organism.objects.get(pk=self.fx.organism.pk)
+        self.assertTrue(organism.is_public)
+        organism.set_public(False)
+        self.assertFalse(organism.is_public)
+        organism.set_public(True)
+        self.assertTrue(organism.is_public)
+
+    def test_default_is_public_without_a_prop(self):
+        """An organism with no is_public prop defaults to public."""
+        other = Organism.objects.create(genus="Zea", species="mays")
+        self.assertTrue(other.is_public)

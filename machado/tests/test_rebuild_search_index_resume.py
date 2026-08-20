@@ -102,9 +102,21 @@ class ResumeTest(TestCase):
         self.assertNotEqual(row.organism, "STALE")
 
     def test_restart_and_resume_are_mutually_exclusive(self):
-        """Passing both flags is an error."""
+        """Passing both flags is an error.
+
+        stdout is captured because HistoryCommandMixin echoes the failure with
+        self.stdout.write before re-raising, and that echo is not gated on
+        verbosity -- left uncaptured it prints mid-run and breaks up the test
+        runner's progress dots.
+        """
         with self.assertRaises(CommandError):
-            call_command("rebuild_search_index", resume=True, restart=True, verbosity=0)
+            call_command(
+                "rebuild_search_index",
+                resume=True,
+                restart=True,
+                verbosity=0,
+                stdout=io.StringIO(),
+            )
 
     def test_max_features_caps_the_run(self):
         """--max-features stops early, for benchmarking."""
