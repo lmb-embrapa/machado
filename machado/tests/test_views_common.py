@@ -8,7 +8,7 @@
 
 from datetime import datetime, timezone
 
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import Client, TestCase, RequestFactory, override_settings
 from django.urls.exceptions import NoReverseMatch
 
 from machado.models import Db, Dbxref, Cv, Cvterm
@@ -433,3 +433,65 @@ class HomeViewTest(TestCase):
                 self.assertEqual(len(ctx["machado_release_notes"]), 1)
                 self.assertEqual(ctx["machado_release_notes"][0]["version"], "1.0")
         context_processors._release_notes_cache = None
+
+    def test_features_heading_renders_default_text(self):
+        """The Features heading and subtitle render their default text."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Key Features &amp; Capabilities")
+        self.assertContains(
+            response,
+            "A comprehensive ecosystem designed for biological database "
+            "curation and research.",
+        )
+
+    @override_settings(
+        MACHADO_FEATURES_TITLE="Custom Heading",
+        MACHADO_FEATURES_SUBTITLE="Custom subtitle text.",
+    )
+    def test_features_heading_renders_overridden_text(self):
+        """The Features heading renders an overridden title and subtitle."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Custom Heading")
+        self.assertContains(response, "Custom subtitle text.")
+        self.assertNotContains(response, "Key Features &amp; Capabilities")
+
+    @override_settings(MACHADO_FEATURES_TITLE="")
+    def test_features_heading_hidden_when_title_empty(self):
+        """The whole Features heading is absent when its title is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Key Features &amp; Capabilities")
+        self.assertNotContains(
+            response,
+            "A comprehensive ecosystem designed for biological database "
+            "curation and research.",
+        )
+
+    def test_acknowledgements_absent_by_default(self):
+        """The Acknowledgements section is absent when its text is empty."""
+        client = Client()
+        response = client.get("/")
+        self.assertNotContains(response, "Acknowledgements")
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation."
+    )
+    def test_acknowledgements_shown_when_text_set(self):
+        """The Acknowledgements section renders its title and text when set."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Acknowledgements")
+        self.assertContains(response, "Funded by the Example Grant Foundation.")
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TITLE="Credits",
+        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation.",
+    )
+    def test_acknowledgements_title_is_overridable(self):
+        """The Acknowledgements heading uses an overridden title."""
+        client = Client()
+        response = client.get("/")
+        self.assertContains(response, "Credits")
+        self.assertNotContains(response, "Acknowledgements")
