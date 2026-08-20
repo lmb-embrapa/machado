@@ -131,12 +131,23 @@ def get_feature_annotation_data(self):
             proppub_pub_ids.append(pub_id)
 
     # 4. One DOI lookup covering both sources.
+    #
+    # order_by is REQUIRED for parity, not decoration. The old per-pub
+    # Pub.get_doi() ended in .first(), and Django auto-adds order_by(pk) to an
+    # unordered queryset for first()/last() -- so it deterministically returned
+    # the lowest-pk PubDbxref. Iterating unordered here and taking the first
+    # row via setdefault would instead let the query plan decide which
+    # accession wins for a pub carrying two DOI dbxrefs. Ordering by the PK
+    # reproduces the old choice exactly.
+    #
+    # No select_related: values_list() with a spanning lookup performs the join
+    # itself, so select_related("dbxref") would be a no-op here.
     doi_by_pub = {}
     all_pub_ids = set(direct_pub_ids) | set(proppub_pub_ids)
     if all_pub_ids:
         for pub_id, accession in (
             PubDbxref.objects.filter(pub_id__in=all_pub_ids, dbxref__db__name="DOI")
-            .select_related("dbxref")
+            .order_by("pub_dbxref_id")
             .values_list("pub_id", "dbxref__accession")
         ):
             doi_by_pub.setdefault(pub_id, accession)

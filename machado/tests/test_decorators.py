@@ -10,7 +10,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from unittest.mock import MagicMock
 
-from machado.models import Feature, FeatureRelationship, Featureprop, Pub
+from machado.models import (
+    Dbxref,
+    Feature,
+    FeatureRelationship,
+    Featureprop,
+    Pub,
+    PubDbxref,
+)
 from machado.tests.decorators_fixture import (
     _feature,
     add_annotations,
@@ -506,3 +513,20 @@ class DecoratorAnnotationQueryTest(TestCase):
             gene.get_doi()
             gene.get_annotation()
             gene.get_doi()
+
+    def test_multi_doi_pub_picks_the_lowest_pk_dbxref(self):
+        """A pub with two DOI dbxrefs resolves to the lowest-pk one.
+
+        The pre-batching code ended in .first(), which Django resolves on an
+        unordered queryset by auto-adding order_by(pk). The batched lookup must
+        reproduce that choice rather than letting the query plan decide.
+        """
+        second = Dbxref.objects.create(
+            db=self.fx.db_doi, accession="10.9999/later", version="1"
+        )
+        PubDbxref.objects.create(
+            pub=self.fx.pub_featurepub_only_doi, dbxref=second, is_current=True
+        )
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        self.assertIn("10.1234/three", gene.get_doi())
+        self.assertNotIn("10.9999/later", gene.get_doi())
