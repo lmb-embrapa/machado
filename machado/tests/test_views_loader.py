@@ -134,6 +134,26 @@ class RebuildSearchIndexFormOptionsTest(TestCase):
 
         self.assertEqual(self._entry("batch-size")["default"], command_default)
 
+    def test_registry_arg_names_exist_on_the_command(self):
+        """Every arg name in the registry must be a real flag on the command.
+
+        The other tests in this class pin batch-size's default and resume's
+        marshalling, but neither would catch a renamed or removed flag: the
+        argv tests mock subprocess.Popen, so nothing here ever reaches a real
+        argparse parser. This test closes that gap by checking each
+        registry-declared name against the command's own parser destinations.
+        """
+        parser = RebuildCommand().create_parser("manage.py", "rebuild_search_index")
+        dests = {action.dest for action in parser._actions}
+        for arg in self.args:
+            expected_dest = arg["name"].replace("-", "_")
+            self.assertIn(
+                expected_dest,
+                dests,
+                f"registry declares '{arg['name']}' but the command has no "
+                f"matching --{arg['name']} flag",
+            )
+
     def test_resume_is_declared_as_a_checkbox(self):
         """Resume must be a checkbox so it marshals to a bare flag.
 

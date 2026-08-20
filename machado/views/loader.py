@@ -828,14 +828,14 @@ COMMANDS_CONFIG = {
                 "help": (
                     "Features per chunk. Sizes both the bulk insert and the "
                     "batched prefetch, so raising it increases memory use per "
-                    "chunk. Leave blank to use the default (2000)."
+                    "chunk. Default: 2000."
                 ),
                 "type": "text",
             },
             {
                 "name": "resume",
                 "required": False,
-                "default": False,
+                "default": None,
                 "label": "Resume interrupted run",
                 "help": (
                     "Continue a rebuild that was interrupted, skipping "

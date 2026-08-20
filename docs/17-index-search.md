@@ -50,6 +50,11 @@ python manage.py rebuild_search_index --resume
 It assumes `MACHADO_VALID_TYPES` has not changed since the interrupted run; if
 you changed that setting, use `--restart` to rebuild from scratch.
 
+In the web interface, the "Resume interrupted run" checkbox on the Rebuild
+Search Index form is the on/off switch for this same behaviour: leaving it
+unchecked is the `--restart` behaviour (the default), and checking it is
+`--resume`.
+
 > **`--resume` is additive only.** It indexes only features whose `feature_id`
 > is **above the highest `feature_id` already in the index**. That makes it the
 > right tool for continuing an interrupted run, and the wrong tool for
@@ -57,11 +62,15 @@ you changed that setting, use `--restart` to rebuild from scratch.
 >
 > * It will **not** refresh data attached to features that are already indexed.
 >   Loaders such as `load_similarity`, `load_feature_annotation`,
->   `load_orthology` and `load_coexpression` attach new data to *pre-existing*
->   features, whose `feature_id`s are below the watermark; `--resume` skips
->   them and their index rows stay stale. Use `--restart` after any such load.
+>   `load_orthomcl` and either `load_coexpression_*` command attach new data
+>   to *pre-existing* features, whose `feature_id`s are below the watermark;
+>   `--resume` skips them and their index rows stay stale. Use `--restart`
+>   after any such load.
 > * It will **not** remove index rows for features that have since been deleted
 >   or marked obsolete. Only `--restart` clears those.
+>
+> The web form's warning text covers only the first, more common failure
+> mode; this page is the canonical, complete reference for both.
 
 | Flag | Effect |
 |---|---|
