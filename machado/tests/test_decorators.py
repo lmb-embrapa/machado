@@ -46,11 +46,11 @@ from machado.decorators import (
 
 #: get_feature_location wraps its whole body in
 #: `if hasattr(settings, "MACHADO_JBROWSE_URL")`, so with that setting absent it
-#: returns []. machado/tests/settings.py defines it but machadoproject.settings
-#: does not, so any test touching get_location must declare the dependency
-#: itself rather than inheriting it from whichever settings module happens to be
-#: in use -- otherwise it passes under `--settings machado.tests.settings` and
-#: fails under `manage.py test`.
+#: returns []. machadoproject.settings only defines it when the deployment sets
+#: MACHADO_JBROWSE_URL in its .env, so any test touching get_location must
+#: declare the dependency itself rather than inheriting it from the ambient
+#: settings -- otherwise it passes or fails depending on the .env it happens to
+#: run against.
 JBROWSE_SETTINGS = {
     "MACHADO_JBROWSE_URL": "http://localhost/jbrowse",
     "MACHADO_JBROWSE_OFFSET": 1200,

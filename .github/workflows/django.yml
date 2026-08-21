@@ -49,4 +49,4 @@ jobs:
         python /tmp/testproject/manage.py check
     - name: Run Tests
       run: |
-        python -m django test machado --settings machado.tests.settings
+        cd /tmp/testproject && python manage.py test machado
