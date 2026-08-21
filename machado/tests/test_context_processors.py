@@ -30,12 +30,11 @@ class MachadoSiteContextProcessorTest(TestCase):
         machado_site resolves each key with getattr(settings, name, default),
         so the context holds whatever the active settings module defines and
         falls back to DEFAULTS only for keys it does not define. Asserting the
-        DEFAULTS value directly would therefore only pass under a settings
-        module that happens to define none of them: it passes under
-        `--settings machado.tests.settings` and fails under `manage.py test`,
-        where machadoproject.settings sets MACHADO_ACCENT_COLOR. Assert against
-        the effective value so this holds under any settings module; the
-        defaults themselves are covered by the test below.
+        DEFAULTS value directly would therefore only pass against a .env that
+        happens to override none of them -- it would fail on any real
+        deployment that sets, say, MACHADO_ACCENT_COLOR. Assert against the
+        effective value so this holds under any settings; the defaults
+        themselves are covered by the test below.
         """
         # Reset the release notes cache for a clean test
         context_processors._release_notes_cache = None

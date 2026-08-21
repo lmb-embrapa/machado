@@ -507,8 +507,16 @@ class HomeViewTest(TestCase):
             "visualization.",
         )
 
+    # Both tests below pin MACHADO_ACKNOWLEDGEMENTS_TITLE rather than
+    # inheriting it. It is what they assert on, so a deployment that renames
+    # the heading in its own .env (e.g. to "Acknowledgments") would otherwise
+    # break test_acknowledgements_shown_when_text_set, and make
+    # test_acknowledgements_absent_by_default pass for the wrong reason --
+    # the string is missing because the title was renamed, not because empty
+    # text hid the section.
     @override_settings(
-        MACHADO_ACKNOWLEDGEMENTS_TEXT=DEFAULTS["MACHADO_ACKNOWLEDGEMENTS_TEXT"]
+        MACHADO_ACKNOWLEDGEMENTS_TITLE=DEFAULTS["MACHADO_ACKNOWLEDGEMENTS_TITLE"],
+        MACHADO_ACKNOWLEDGEMENTS_TEXT=DEFAULTS["MACHADO_ACKNOWLEDGEMENTS_TEXT"],
     )
     def test_acknowledgements_absent_by_default(self):
         """The Acknowledgements section is absent when its text is empty."""
@@ -517,7 +525,8 @@ class HomeViewTest(TestCase):
         self.assertNotContains(response, "Acknowledgements")
 
     @override_settings(
-        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation."
+        MACHADO_ACKNOWLEDGEMENTS_TITLE=DEFAULTS["MACHADO_ACKNOWLEDGEMENTS_TITLE"],
+        MACHADO_ACKNOWLEDGEMENTS_TEXT="Funded by the Example Grant Foundation.",
     )
     def test_acknowledgements_shown_when_text_set(self):
         """The Acknowledgements section renders its title and text when set."""

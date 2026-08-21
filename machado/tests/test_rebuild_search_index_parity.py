@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from machado.models import FeatureSearchIndex
 from machado.tests.searchindex_fixture import (
@@ -25,8 +25,16 @@ from machado.tests.searchindex_fixture import (
 SNAPSHOT_PATH = Path(__file__).parent / "data" / "search_index_snapshot.json"
 
 
+@override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
 class RebuildSearchIndexParityTest(TestCase):
-    """The command's output must match the recorded snapshot exactly."""
+    """The command's output must match the recorded snapshot exactly.
+
+    Pinned to the stock MACHADO_VALID_TYPES regardless of what a host
+    project's settings define: the fixture's SNV_1 feature exists
+    specifically to prove SNV is excluded, and a deployment that legitimately
+    adds SNV to its own valid types (e.g. for variant data) must not flip
+    that assertion.
+    """
 
     def setUp(self):
         """Build the shared fixture corpus."""
