@@ -49,4 +49,7 @@ jobs:
         python /tmp/testproject/manage.py check
     - name: Run Tests
       run: |
-        cd /tmp/testproject && python manage.py test machado
+        cd /tmp/testproject
+        # Manifest static storage needs staticfiles.json, or view tests error.
+        python manage.py collectstatic --noinput
+        python manage.py test machado
