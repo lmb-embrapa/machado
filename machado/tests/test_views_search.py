@@ -10,10 +10,13 @@ from machado.models import (
     FeatureSearchIndex,
     Organism,
     Organismprop,
+    Pub,
+    PubDbxref,
 )
 from machado.views.search import (
     FeatureSearchView,
     FeatureSearchExportView,
+    _doi_titles,
     _excluded_organism_names,
 )
 from unittest.mock import patch, MagicMock
@@ -23,7 +26,7 @@ from django.template.loader import render_to_string
 class SearchFacetTemplateTest(TestCase):
     """A facet with a single option offers no real choice; its card is skipped."""
 
-    def _render(self, fields):
+    def _render(self, fields, doi_titles=None):
         return render_to_string(
             "search_facet.html",
             {
@@ -32,6 +35,7 @@ class SearchFacetTemplateTest(TestCase):
                 "facets": {"fields": fields},
                 "facet_fields_order": list(fields.keys()),
                 "facet_fields_desc": {k: k for k in fields},
+                "doi_titles": doi_titles or {},
             },
         )
 
@@ -46,6 +50,60 @@ class SearchFacetTemplateTest(TestCase):
             {"organism": [("Bos taurus", 50), ("Homo sapiens", 30)]}
         )
         self.assertIn("Organism", html)
+
+    def test_doi_facet_shows_title_when_known(self):
+        """A DOI with a known publication title displays the title, not the raw DOI."""
+        html = self._render(
+            {"doi": [("10.1234/has-title", 5), ("10.5555/other", 1)]},
+            doi_titles={"10.1234/has-title": "A Great Paper About Kinases"},
+        )
+        self.assertIn("A Great Paper About Kinases", html)
+        self.assertIn('value="doi:10.1234/has-title"', html)
+
+    def test_doi_facet_falls_back_to_doi_when_title_unknown(self):
+        """A DOI with no known title falls back to displaying the raw DOI."""
+        html = self._render(
+            {"doi": [("10.5555/no-title", 2), ("10.1234/has-title", 1)]},
+            doi_titles={"10.1234/has-title": "A Great Paper About Kinases"},
+        )
+        self.assertIn("10.5555/no-title", html)
+
+
+class DoiTitlesTest(TestCase):
+    """_doi_titles must map DOI accession strings to their publication title."""
+
+    def setUp(self):
+        db_doi = Db.objects.create(name="DOI")
+        self.dbxref_doi = Dbxref.objects.create(
+            db=db_doi, accession="10.1234/example", version="1"
+        )
+
+        cv = Cv.objects.create(name="pub_type")
+        db_local = Db.objects.create(name="local")
+        type_dbxref = Dbxref.objects.create(db=db_local, accession="journal")
+        pub_type = Cvterm.objects.create(
+            cv=cv,
+            name="journal",
+            dbxref=type_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+
+        self.pub = Pub.objects.create(
+            uniquename="PUB:1", type=pub_type, title="A great paper about kinases"
+        )
+        PubDbxref.objects.create(pub=self.pub, dbxref=self.dbxref_doi, is_current=True)
+
+    def test_maps_known_doi_to_title(self):
+        titles = _doi_titles(["10.1234/example"])
+        self.assertEqual(titles, {"10.1234/example": "A great paper about kinases"})
+
+    def test_ignores_unknown_doi(self):
+        titles = _doi_titles(["10.1234/example", "10.9999/unknown"])
+        self.assertEqual(titles, {"10.1234/example": "A great paper about kinases"})
+
+    def test_empty_input_makes_no_query(self):
+        self.assertEqual(_doi_titles([]), {})
 
 
 class ComputeArrayFacetTest(TestCase):

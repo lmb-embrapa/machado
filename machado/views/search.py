@@ -13,6 +13,7 @@ from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 from machado.models import FeatureSearchIndex
 from machado.models import Organism
+from machado.models import PubDbxref
 from machado.searchindex import build_organism
 
 FACET_FIELDS = {
@@ -60,6 +61,16 @@ def _excluded_organism_names(anonymous):
             )
         )
     return [build_organism(o) for o in organisms]
+
+
+def _doi_titles(doi_values):
+    """Map DOI accession strings to their publication title, for facet display."""
+    if not doi_values:
+        return {}
+    rows = PubDbxref.objects.filter(
+        dbxref__db__name="DOI", dbxref__accession__in=doi_values
+    ).values_list("dbxref__accession", "pub__title")
+    return {accession: title for accession, title in rows if title}
 
 
 class FeatureSearchView(ListView):
@@ -136,6 +147,7 @@ class FeatureSearchView(ListView):
         so_term_count = sum(1 for f in selected_facets if f.startswith("so_term:"))
 
         context["facets"] = {"fields": facets}
+        context["doi_titles"] = _doi_titles([v for v, _ in facets.get("doi", [])])
         context["facet_fields_order"] = list(FACET_FIELDS.keys())
         context["facet_fields_desc"] = FACET_FIELDS
         context["selected_facets"] = selected_facets

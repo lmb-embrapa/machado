@@ -119,6 +119,11 @@
 		{% elif facet == "orthologs_biomaterial" %}
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
 			{{ item.0|capfirst }}
+		{% elif facet == "doi" %}
+			{% with title=doi_titles|get_item:item.0 %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
+			<span class="d-inline-block text-truncate align-middle" style="max-width: 85%;" title="{{ title|default:item.0 }}">{{ title|default:item.0 }}</span>
+			{% endwith %}
 		{% else %}
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
 			{{ item.0 }}
