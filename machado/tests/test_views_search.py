@@ -1,13 +1,77 @@
 """Tests for search views."""
 
 from django.test import TestCase, RequestFactory
-from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Organismprop
+from machado.models import (
+    Cv,
+    Cvterm,
+    Db,
+    Dbxref,
+    Feature,
+    FeatureSearchIndex,
+    Organism,
+    Organismprop,
+)
 from machado.views.search import (
     FeatureSearchView,
     FeatureSearchExportView,
     _excluded_organism_names,
 )
 from unittest.mock import patch, MagicMock
+
+
+class ComputeArrayFacetTest(TestCase):
+    """_compute_array_facet must count every matching row, not a fixed sample."""
+
+    def setUp(self):
+        """Create features whose 'analyses' facet values outnumber any small cap."""
+        db = Db.objects.create(name="local")
+        dbxref = Dbxref.objects.create(db=db, accession="gene")
+        cv = Cv.objects.create(name="sequence")
+        cvterm = Cvterm.objects.create(
+            cv=cv, name="gene", dbxref=dbxref, is_obsolete=0, is_relationshiptype=0
+        )
+        org = Organism.objects.create(genus="Gen", species="spec")
+
+        # 7 rows tagged "blast", 3 tagged "interpro" -- an old fixed-size
+        # sample (e.g. the first N rows) could easily miss or truncate one
+        # of these groups; the count returned must match .filter().count()
+        # for every value, not just be non-empty.
+        for i in range(7):
+            feature = Feature.objects.create(
+                organism=org,
+                uniquename=f"blast_feature_{i}",
+                type=cvterm,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned="2023-01-01T00:00:00Z",
+                timelastmodified="2023-01-01T00:00:00Z",
+            )
+            FeatureSearchIndex.objects.create(feature=feature, analyses=["blast"])
+        for i in range(3):
+            feature = Feature.objects.create(
+                organism=org,
+                uniquename=f"interpro_feature_{i}",
+                type=cvterm,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned="2023-01-01T00:00:00Z",
+                timelastmodified="2023-01-01T00:00:00Z",
+            )
+            FeatureSearchIndex.objects.create(feature=feature, analyses=["interpro"])
+
+    def test_counts_every_matching_row(self):
+        """Facet counts must equal the real filtered count for each value."""
+        qs = FeatureSearchIndex.objects.all()
+        facet = dict(FeatureSearchView._compute_array_facet(qs, "analyses"))
+
+        self.assertEqual(facet["blast"], 7)
+        self.assertEqual(facet["interpro"], 3)
+        self.assertEqual(
+            facet["blast"], qs.filter(analyses__contains=["blast"]).count()
+        )
+        self.assertEqual(
+            facet["interpro"], qs.filter(analyses__contains=["interpro"]).count()
+        )
 
 
 class ExcludedOrganismNamesTest(TestCase):

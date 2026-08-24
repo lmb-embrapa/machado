@@ -155,28 +155,31 @@ class FeatureSearchView(ListView):
 
     @staticmethod
     def _compute_array_facet(qs, field):
-        """Unnest JSON arrays and count occurrences via raw SQL."""
-        # Build a subquery using the PKs from the filtered queryset
-        pks = qs.values_list("pk", flat=True)
-        if not pks.exists():
-            return []
+        """Unnest JSON arrays and count occurrences via raw SQL.
+
+        Embeds the filtered queryset's own WHERE clause as the subquery
+        rather than materializing its matching PKs into a Python list: a
+        previous version capped that list at 10,000 rows to avoid an
+        oversized IN clause, which silently undercounted (and mis-sorted)
+        facet values whenever a filter matched more rows than that -- the
+        displayed count stopped meaning anything once it hit 10,000, while
+        clicking the facet applied the (uncapped) real filter and returned
+        far more results.
+        """
+        pks_sql, pks_params = qs.order_by().values_list("pk", flat=True).query.sql_with_params()
 
         sql = """
             SELECT val, COUNT(*) AS cnt
             FROM machado_featuresearchindex,
                  jsonb_array_elements_text({field}) AS val
-            WHERE feature_id IN (
-                SELECT feature_id FROM machado_featuresearchindex
-                WHERE feature_id = ANY(%s)
-            )
+            WHERE feature_id IN ({pks_sql})
             GROUP BY val
             ORDER BY val
             LIMIT 100
-        """.format(field=field)
+        """.format(field=field, pks_sql=pks_sql)
 
-        pk_list = list(pks[:10000])  # cap to avoid oversized IN clause
         with connection.cursor() as cursor:
-            cursor.execute(sql, [pk_list])
+            cursor.execute(sql, pks_params)
             return [(row[0], row[1]) for row in cursor.fetchall()]
 
 
