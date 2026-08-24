@@ -208,16 +208,12 @@ def resolve_display(props):
     return None
 
 
-def build_organism(feature):
-    """Build the organism display string for a feature.
-
-    Traverses the ``organism`` FK, so the caller's queryset must have used
-    ``.select_related("organism")`` for this to stay query-free.
-    """
-    organism = "{} {}".format(feature.organism.genus, feature.organism.species)
-    if feature.organism.infraspecific_name:
-        organism += " {}".format(feature.organism.infraspecific_name)
-    return organism
+def build_organism(organism):
+    """Build the organism display string."""
+    display = "{} {}".format(organism.genus, organism.species)
+    if organism.infraspecific_name:
+        display += " {}".format(organism.infraspecific_name)
+    return display
 
 
 def build_text(feature, ctx, config):
@@ -298,7 +294,7 @@ def build_entries(features, ctx, config):
     for feature in features:
         fid = feature.feature_id
         props = ctx.props.get(fid, {})
-        organism = build_organism(feature)
+        organism = build_organism(feature.organism)
         text = build_text(feature, ctx, config)
         display = resolve_display(props)
 

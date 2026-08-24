@@ -25,6 +25,20 @@ _ARRAY_FACETS = {
 _AND_FACETS = {"analyses"}
 
 
+# Django's BooleanField.to_python only accepts "True"/"1"/"False"/"0" (case
+# sensitive), but facet values arrive as raw query-string text such as
+# "true"/"FALSE". Normalize any case of true/false to Python bool so
+# scalar BooleanField facets don't raise a ValidationError.
+def _normalize_facet_value(value):
+    """Convert a boolean-like facet string to a Python bool, else pass through."""
+    lowered = value.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    return value
+
+
 class FeatureSearchForm(forms.Form):
     """Search form backed by PostgreSQL full-text search."""
 
@@ -32,7 +46,7 @@ class FeatureSearchForm(forms.Form):
 
     def search(self, selected_facets=None):
         """Return a filtered queryset of FeatureSearchIndex rows."""
-        qs = FeatureSearchIndex.objects.select_related("feature").all()
+        qs = FeatureSearchIndex.objects.all()
         q = self.cleaned_data.get("q", "").strip()
 
         # ── Apply facet filters ──────────────────────────────────────────
@@ -90,6 +104,7 @@ class FeatureSearchForm(forms.Form):
                 qs = qs.filter(q_obj)
             else:
                 # Scalar fields — OR via __in
+                values = [_normalize_facet_value(v) for v in values]
                 qs = qs.filter(**{f"{field}__in": values})
 
         return qs

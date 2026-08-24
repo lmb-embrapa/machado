@@ -21,11 +21,9 @@ class FeatureSearchFormTest(TestCase):
         # The real form returns FeatureSearchIndex.objects.none() if invalid,
         # but the view does the is_valid check.
         # If we just call search directly with an empty/invalid form, it applies an empty 'q'
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
             result = form.search()
             self.assertEqual(result, mock_qs)
 
@@ -38,11 +36,9 @@ class FeatureSearchFormTest(TestCase):
         form.is_valid = MagicMock(return_value=True)
         form.cleaned_data = {"q": ""}
 
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
 
             result = form.search()
             self.assertEqual(result, mock_qs)
@@ -56,11 +52,9 @@ class FeatureSearchFormTest(TestCase):
         form.is_valid = MagicMock(return_value=True)
         form.cleaned_data = {"q": "test"}
 
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
             mock_annotated = MagicMock()
             mock_annotated.exists.return_value = True
             mock_qs.filter.return_value.annotate.return_value = mock_annotated
@@ -84,11 +78,9 @@ class FeatureSearchFormTest(TestCase):
         form.is_valid = MagicMock(return_value=True)
         form.cleaned_data = {"q": "test"}
 
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
 
             # Mocks for facet chaining
             mock_qs.filter.return_value = mock_qs
@@ -110,11 +102,9 @@ class FeatureSearchFormTest(TestCase):
         form.is_valid = MagicMock(return_value=True)
         form.cleaned_data = {"q": "test*"}
 
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
             # Mock .exists() to avoid fallback during this test
             mock_qs.filter.return_value.annotate.return_value.exists.return_value = True
 
@@ -127,6 +117,19 @@ class FeatureSearchFormTest(TestCase):
             # The query value is usually the second source expression
             self.assertIn("test:*", str(query.source_expressions[1]))
 
+    def test_apply_facets_normalizes_boolean_values(self):
+        """Boolean-like facet values (any case) must become Python bool for __in lookups."""
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value = mock_qs
+
+        FeatureSearchForm._apply_facets(
+            mock_qs,
+            ["orthology:false", "orthology:True"],
+        )
+
+        filter_kwargs = mock_qs.filter.call_args[1]
+        self.assertEqual(filter_kwargs["orthology__in"], [False, True])
+
     def test_search_substring_fallback(self):
         """Test fallback to icontains if FTS yields no results."""
         data = QueryDict(mutable=True)
@@ -135,11 +138,9 @@ class FeatureSearchFormTest(TestCase):
         form.is_valid = MagicMock(return_value=True)
         form.cleaned_data = {"q": "ATMG"}
 
-        with patch(
-            "machado.forms.FeatureSearchIndex.objects.select_related"
-        ) as mock_select:
+        with patch("machado.forms.FeatureSearchIndex.objects.all") as mock_all:
             mock_qs = MagicMock()
-            mock_select.return_value.all.return_value = mock_qs
+            mock_all.return_value = mock_qs
 
             # Mock FTS results and fallback results
             fts_results = MagicMock()

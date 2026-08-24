@@ -12,6 +12,9 @@ from django.views.generic import ListView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 from machado.models import FeatureSearchIndex
+from machado.models import Organism
+from machado.models import PubDbxref
+from machado.searchindex import build_organism
 
 FACET_FIELDS = {
     "organism": "Filter by organism (gene, mRNA, polypeptide)",
@@ -40,6 +43,38 @@ _ARRAY_FACET_FIELDS = {
 _SCALAR_FACET_FIELDS = {k for k in FACET_FIELDS if k not in _ARRAY_FACET_FIELDS}
 
 
+def _excluded_organism_names(anonymous):
+    """Organism display names to exclude from search results.
+
+    FeatureSearchIndex.organism is a denormalized, indexed copy of the
+    feature's organism display string — filtering on it directly avoids
+    joining the multi-million-row feature/organism tables on every search
+    and facet-count query.
+    """
+    organisms = list(
+        Organism.objects.filter(genus="multispecies", species="multispecies")
+    )
+    if anonymous:
+        organisms += list(
+            Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+        )
+    return [build_organism(o) for o in organisms]
+
+
+def _doi_titles(doi_values):
+    """Map DOI accession strings to their publication title, for facet display."""
+    if not doi_values:
+        return {}
+    rows = PubDbxref.objects.filter(
+        dbxref__db__name="DOI", dbxref__accession__in=doi_values
+    ).values_list("dbxref__accession", "pub__title")
+    return {accession: title for accession, title in rows if title}
+
+
 class FeatureSearchView(ListView):
     """Faceted search view backed by PostgreSQL FTS."""
 
@@ -59,20 +94,11 @@ class FeatureSearchView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        if not user or not user.is_authenticated:
-            from machado.models import Organism
-
-            private_orgs = Organism.objects.filter(
-                Organismprop_organism_Organism__type__name="is_public",
-                Organismprop_organism_Organism__type__cv__name="organism_property",
-                Organismprop_organism_Organism__value="false",
-            )
-            qs = qs.exclude(feature__organism__in=private_orgs)
-
-        qs = qs.exclude(
-            feature__organism__genus="multispecies",
-            feature__organism__species="multispecies",
+        excluded_organisms = _excluded_organism_names(
+            anonymous=not (user and user.is_authenticated)
         )
+        if excluded_organisms:
+            qs = qs.exclude(organism__in=excluded_organisms)
 
         # Ordering
         order_by = self.request.GET.get("order_by", "uniquename")
@@ -123,6 +149,7 @@ class FeatureSearchView(ListView):
         so_term_count = sum(1 for f in selected_facets if f.startswith("so_term:"))
 
         context["facets"] = {"fields": facets}
+        context["doi_titles"] = _doi_titles([v for v, _ in facets.get("doi", [])])
         context["facet_fields_order"] = list(FACET_FIELDS.keys())
         context["facet_fields_desc"] = FACET_FIELDS
         context["selected_facets"] = selected_facets
@@ -142,28 +169,33 @@ class FeatureSearchView(ListView):
 
     @staticmethod
     def _compute_array_facet(qs, field):
-        """Unnest JSON arrays and count occurrences via raw SQL."""
-        # Build a subquery using the PKs from the filtered queryset
-        pks = qs.values_list("pk", flat=True)
-        if not pks.exists():
-            return []
+        """Unnest JSON arrays and count occurrences via raw SQL.
+
+        Embeds the filtered queryset's own WHERE clause as the subquery
+        rather than materializing its matching PKs into a Python list: a
+        previous version capped that list at 10,000 rows to avoid an
+        oversized IN clause, which silently undercounted (and mis-sorted)
+        facet values whenever a filter matched more rows than that -- the
+        displayed count stopped meaning anything once it hit 10,000, while
+        clicking the facet applied the (uncapped) real filter and returned
+        far more results.
+        """
+        pks_sql, pks_params = (
+            qs.order_by().values_list("pk", flat=True).query.sql_with_params()
+        )
 
         sql = """
             SELECT val, COUNT(*) AS cnt
             FROM machado_featuresearchindex,
                  jsonb_array_elements_text({field}) AS val
-            WHERE feature_id IN (
-                SELECT feature_id FROM machado_featuresearchindex
-                WHERE feature_id = ANY(%s)
-            )
+            WHERE feature_id IN ({pks_sql})
             GROUP BY val
             ORDER BY val
             LIMIT 100
-        """.format(field=field)
+        """.format(field=field, pks_sql=pks_sql)
 
-        pk_list = list(pks[:10000])  # cap to avoid oversized IN clause
         with connection.cursor() as cursor:
-            cursor.execute(sql, [pk_list])
+            cursor.execute(sql, pks_params)
             return [(row[0], row[1]) for row in cursor.fetchall()]
 
 
@@ -187,20 +219,15 @@ class FeatureSearchExportView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        if not user or not user.is_authenticated:
-            from machado.models import Organism
-
-            private_orgs = Organism.objects.filter(
-                Organismprop_organism_Organism__type__name="is_public",
-                Organismprop_organism_Organism__type__cv__name="organism_property",
-                Organismprop_organism_Organism__value="false",
-            )
-            qs = qs.exclude(feature__organism__in=private_orgs)
-
-        qs = qs.exclude(
-            feature__organism__genus="multispecies",
-            feature__organism__species="multispecies",
+        excluded_organisms = _excluded_organism_names(
+            anonymous=not (user and user.is_authenticated)
         )
+        if excluded_organisms:
+            qs = qs.exclude(organism__in=excluded_organisms)
+
+        if self.request.GET.get("export", "tsv") == "fasta":
+            # Only the FASTA branch needs feature.residues / feature.dbxref.
+            qs = qs.select_related("feature__dbxref")
 
         order_by = self.request.GET.get("order_by", "uniquename")
         return qs.order_by(order_by)
