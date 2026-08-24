@@ -7,8 +7,103 @@
 """Load publication file."""
 
 import re
+import unicodedata
 
 from machado.models import Pub, PubDbxref, Pubauthor, Cvterm, Cv, Dbxref, Db
+
+# LaTeX macros seen in imported BibTeX titles that have no brace argument
+# (e.g. "Gs$\upalpha$", "Holstein{\textendash}Friesian"); each maps to the
+# plain-text symbol it renders as.
+_LATEX_SYMBOL_MACROS = {
+    "greater": ">",
+    "mathplus": "+",
+    "prime": "'",
+    "textendash": "\u2013",
+    "textquotesingle": "'",
+    "texttimes": "\u00d7",
+    "upalpha": "\u03b1",
+    "upbeta": "\u03b2",
+    "upmu": "\u03bc",
+}
+
+_HSPACE_RE = re.compile(r"\\hspace\{[^{}]*\}")
+_BARE_MACRO_RE = re.compile(r"\\([A-Za-z]+)")
+_COMMAND_BEFORE_BRACE_RE = re.compile(r"\\[A-Za-z]+(?=\{)")
+
+# Standard LaTeX diacritic commands, e.g. "\'e" or "\'{e}" for "é". Combined
+# with the target letter via Unicode combining marks and NFC-normalized into
+# a single precomposed character, so this covers any accented letter rather
+# than needing one dict entry per letter/accent combination.
+_ACCENT_COMBINING_MARKS = {
+    "'": "\u0301",  # acute
+    "`": "\u0300",  # grave
+    '"': "\u0308",  # diaeresis
+    "^": "\u0302",  # circumflex
+    "~": "\u0303",  # tilde
+}
+_ACCENT_RE = re.compile(r"\\(['`\"^~])\{?([a-zA-Z])\}?")
+
+
+def clean_bibtex_title(title):
+    """Strip BibTeX/LaTeX markup from a title for plain-text display.
+
+    BibTeX titles wrap words in braces purely to protect capitalization
+    (e.g. "{GWAS}", "{{FABP1}}") and may carry LaTeX formatting commands
+    ("\\textit{{FABP1}}") or symbol macros ("\\upalpha", "\\textendash").
+    None of that is meaningful once rendered as plain text, so it's removed
+    rather than stored as-is.
+    """
+    if not title:
+        return title
+
+    text = title
+    # \hspace{<length>} only inserts spacing; its argument is a dimension,
+    # not text, so it must be dropped entirely rather than unwrapped.
+    text = _HSPACE_RE.sub(" ", text)
+
+    # Diacritic commands ("\'e", "Montb\'eliarde") -> precomposed accented
+    # letter. Must run before the bare-macro steps below: the mark character
+    # right after the backslash (', `, etc.) isn't a letter, so it wouldn't
+    # match those anyway, but resolving it here keeps intent explicit.
+    text = _ACCENT_RE.sub(
+        lambda m: unicodedata.normalize(
+            "NFC", m.group(2) + _ACCENT_COMBINING_MARKS[m.group(1)]
+        ),
+        text,
+    )
+
+    # Known argument-less symbol macros -> their plain-text symbol.
+    text = _BARE_MACRO_RE.sub(
+        lambda m: _LATEX_SYMBOL_MACROS.get(m.group(1), m.group(0)), text
+    )
+
+    # Formatting commands ("\textit{{FABP1}}") must lose their command word
+    # BEFORE any brace is peeled: peeling first would leave "\textit" and
+    # "FABP1" touching with nothing between them, and the catch-all below
+    # would then eat both as a single backslash-word, dropping the letters
+    # of the content that immediately follow (turning "KCNJ11" into "11").
+    text = _COMMAND_BEFORE_BRACE_RE.sub("", text)
+
+    # Catch-all for any remaining argument-less, unmapped backslash command.
+    text = _BARE_MACRO_RE.sub("", text)
+
+    # Every remaining brace is either a plain case-protection wrapper
+    # ("{GWAS}") or -- in titles imported before this function existed --
+    # an unmatched leftover from the old loader blindly stripping only the
+    # string's very first "{", which orphaned the "}" of a group that
+    # actually started mid-title. Either way the character itself carries
+    # no display meaning, matched or not, so it's simply dropped.
+    text = text.replace("{", "").replace("}", "")
+
+    # Math-mode delimiters have no rendering meaning as plain text.
+    text = text.replace("$", "")
+
+    # BibTeX source lines are sometimes hard-wrapped mid-word; this can't
+    # recover the original word, but at least turns a stray newline into a
+    # space instead of a display glitch.
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
 
 
 class PublicationLoader(object):
@@ -31,9 +126,7 @@ class PublicationLoader(object):
             is_relationshiptype=0,
         )
 
-        title = entry.get("title")
-        title = re.sub("^{", "", title)
-        title = re.sub("}$", "", title)
+        title = clean_bibtex_title(entry.get("title"))
 
         pub, created = Pub.objects.get_or_create(
             type=cvterm_type,
