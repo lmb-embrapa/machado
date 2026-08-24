@@ -127,6 +127,19 @@ class FeatureSearchFormTest(TestCase):
             # The query value is usually the second source expression
             self.assertIn("test:*", str(query.source_expressions[1]))
 
+    def test_apply_facets_normalizes_boolean_values(self):
+        """Boolean-like facet values (any case) must become Python bool for __in lookups."""
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value = mock_qs
+
+        FeatureSearchForm._apply_facets(
+            mock_qs,
+            ["orthology:false", "orthology:True"],
+        )
+
+        filter_kwargs = mock_qs.filter.call_args[1]
+        self.assertEqual(filter_kwargs["orthology__in"], [False, True])
+
     def test_search_substring_fallback(self):
         """Test fallback to icontains if FTS yields no results."""
         data = QueryDict(mutable=True)
