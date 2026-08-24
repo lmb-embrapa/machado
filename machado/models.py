@@ -4434,6 +4434,8 @@ class FeatureSearchIndex(models.Model):
             models.Index(fields=["uniquename"], name="fsi_uniquename_idx"),
             models.Index(fields=["orthologous_group"], name="fsi_ortho_grp_idx"),
             models.Index(fields=["coexpression_group"], name="fsi_coexp_grp_idx"),
+            models.Index(fields=["orthology"], name="fsi_orthology_idx"),
+            models.Index(fields=["coexpression"], name="fsi_coexpression_idx"),
         ]
 
     def __str__(self):
