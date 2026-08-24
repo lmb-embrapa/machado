@@ -17,6 +17,35 @@ from machado.views.search import (
     _excluded_organism_names,
 )
 from unittest.mock import patch, MagicMock
+from django.template.loader import render_to_string
+
+
+class SearchFacetTemplateTest(TestCase):
+    """A facet with a single option offers no real choice; its card is skipped."""
+
+    def _render(self, fields):
+        return render_to_string(
+            "search_facet.html",
+            {
+                "query": "",
+                "selected_facets": [],
+                "facets": {"fields": fields},
+                "facet_fields_order": list(fields.keys()),
+                "facet_fields_desc": {k: k for k in fields},
+            },
+        )
+
+    def test_single_option_facet_is_hidden(self):
+        """A facet field with exactly one value renders no card."""
+        html = self._render({"orthology": [(False, 100)]})
+        self.assertNotIn("Orthology", html)
+
+    def test_multi_option_facet_is_shown(self):
+        """A facet field with more than one value still renders its card."""
+        html = self._render(
+            {"organism": [("Bos taurus", 50), ("Homo sapiens", 30)]}
+        )
+        self.assertIn("Organism", html)
 
 
 class ComputeArrayFacetTest(TestCase):

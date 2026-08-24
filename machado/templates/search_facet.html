@@ -49,7 +49,7 @@
 
 {% for facet in facet_fields_order %}
 {% with facets.fields|get_item:facet as exists %}
-{% if exists %}
+{% if exists and facets.fields|get_count:facet > 1 %}
 
 <div class="card mb-2">
     <div class="card-header">
