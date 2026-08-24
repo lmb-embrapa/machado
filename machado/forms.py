@@ -45,7 +45,7 @@ class FeatureSearchForm(forms.Form):
 
     def search(self, selected_facets=None):
         """Return a filtered queryset of FeatureSearchIndex rows."""
-        qs = FeatureSearchIndex.objects.select_related("feature").all()
+        qs = FeatureSearchIndex.objects.all()
         q = self.cleaned_data.get("q", "").strip()
 
         # ── Apply facet filters ──────────────────────────────────────────

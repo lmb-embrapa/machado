@@ -12,6 +12,8 @@ from django.views.generic import ListView
 from machado.forms import FeatureSearchForm
 from machado.models import Featureprop
 from machado.models import FeatureSearchIndex
+from machado.models import Organism
+from machado.searchindex import build_organism
 
 FACET_FIELDS = {
     "organism": "Filter by organism (gene, mRNA, polypeptide)",
@@ -40,6 +42,26 @@ _ARRAY_FACET_FIELDS = {
 _SCALAR_FACET_FIELDS = {k for k in FACET_FIELDS if k not in _ARRAY_FACET_FIELDS}
 
 
+def _excluded_organism_names(anonymous):
+    """Organism display names to exclude from search results.
+
+    FeatureSearchIndex.organism is a denormalized, indexed copy of the
+    feature's organism display string — filtering on it directly avoids
+    joining the multi-million-row feature/organism tables on every search
+    and facet-count query.
+    """
+    organisms = list(Organism.objects.filter(genus="multispecies", species="multispecies"))
+    if anonymous:
+        organisms += list(
+            Organism.objects.filter(
+                Organismprop_organism_Organism__type__name="is_public",
+                Organismprop_organism_Organism__type__cv__name="organism_property",
+                Organismprop_organism_Organism__value="false",
+            )
+        )
+    return [build_organism(o) for o in organisms]
+
+
 class FeatureSearchView(ListView):
     """Faceted search view backed by PostgreSQL FTS."""
 
@@ -59,20 +81,11 @@ class FeatureSearchView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        if not user or not user.is_authenticated:
-            from machado.models import Organism
-
-            private_orgs = Organism.objects.filter(
-                Organismprop_organism_Organism__type__name="is_public",
-                Organismprop_organism_Organism__type__cv__name="organism_property",
-                Organismprop_organism_Organism__value="false",
-            )
-            qs = qs.exclude(feature__organism__in=private_orgs)
-
-        qs = qs.exclude(
-            feature__organism__genus="multispecies",
-            feature__organism__species="multispecies",
+        excluded_organisms = _excluded_organism_names(
+            anonymous=not (user and user.is_authenticated)
         )
+        if excluded_organisms:
+            qs = qs.exclude(organism__in=excluded_organisms)
 
         # Ordering
         order_by = self.request.GET.get("order_by", "uniquename")
@@ -187,20 +200,15 @@ class FeatureSearchExportView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        if not user or not user.is_authenticated:
-            from machado.models import Organism
-
-            private_orgs = Organism.objects.filter(
-                Organismprop_organism_Organism__type__name="is_public",
-                Organismprop_organism_Organism__type__cv__name="organism_property",
-                Organismprop_organism_Organism__value="false",
-            )
-            qs = qs.exclude(feature__organism__in=private_orgs)
-
-        qs = qs.exclude(
-            feature__organism__genus="multispecies",
-            feature__organism__species="multispecies",
+        excluded_organisms = _excluded_organism_names(
+            anonymous=not (user and user.is_authenticated)
         )
+        if excluded_organisms:
+            qs = qs.exclude(organism__in=excluded_organisms)
+
+        if self.request.GET.get("export", "tsv") == "fasta":
+            # Only the FASTA branch needs feature.residues / feature.dbxref.
+            qs = qs.select_related("feature__dbxref")
 
         order_by = self.request.GET.get("order_by", "uniquename")
         return qs.order_by(order_by)

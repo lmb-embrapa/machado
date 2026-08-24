@@ -1,8 +1,54 @@
 """Tests for search views."""
 
 from django.test import TestCase, RequestFactory
-from machado.views.search import FeatureSearchView, FeatureSearchExportView
+from machado.models import Cv, Cvterm, Db, Dbxref, Organism, Organismprop
+from machado.views.search import (
+    FeatureSearchView,
+    FeatureSearchExportView,
+    _excluded_organism_names,
+)
 from unittest.mock import patch, MagicMock
+
+
+class ExcludedOrganismNamesTest(TestCase):
+    """Test suite for _excluded_organism_names."""
+
+    def setUp(self):
+        """Create a public and a private organism.
+
+        The multispecies pseudo-organism is already seeded by migration
+        0003_add_multispecies, so it isn't created here.
+        """
+        db = Db.objects.create(name="local")
+        dbxref = Dbxref.objects.create(db=db, accession="is_public")
+        cv = Cv.objects.create(name="organism_property")
+        cvterm = Cvterm.objects.create(
+            cv=cv,
+            name="is_public",
+            is_obsolete=0,
+            is_relationshiptype=0,
+            dbxref=dbxref,
+        )
+
+        self.public_org = Organism.objects.create(genus="Arabidopsis", species="thaliana")
+        self.private_org = Organism.objects.create(genus="Oryza", species="sativa")
+        Organismprop.objects.create(
+            organism=self.private_org, type=cvterm, value="false", rank=0
+        )
+
+    def test_anonymous_excludes_multispecies_and_private(self):
+        """Anonymous users must not see the multispecies or private organisms."""
+        names = _excluded_organism_names(anonymous=True)
+        self.assertIn("multispecies multispecies", names)
+        self.assertIn("Oryza sativa", names)
+        self.assertNotIn("Arabidopsis thaliana", names)
+
+    def test_authenticated_excludes_only_multispecies(self):
+        """Authenticated users may see private organisms, never multispecies."""
+        names = _excluded_organism_names(anonymous=False)
+        self.assertIn("multispecies multispecies", names)
+        self.assertNotIn("Oryza sativa", names)
+        self.assertNotIn("Arabidopsis thaliana", names)
 
 
 class SearchViewsTest(TestCase):
