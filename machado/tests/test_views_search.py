@@ -46,9 +46,7 @@ class SearchFacetTemplateTest(TestCase):
 
     def test_multi_option_facet_is_shown(self):
         """A facet field with more than one value still renders its card."""
-        html = self._render(
-            {"organism": [("Bos taurus", 50), ("Homo sapiens", 30)]}
-        )
+        html = self._render({"organism": [("Bos taurus", 50), ("Homo sapiens", 30)]})
         self.assertIn("Organism", html)
 
     def test_doi_facet_shows_title_when_known(self):
@@ -73,6 +71,7 @@ class DoiTitlesTest(TestCase):
     """_doi_titles must map DOI accession strings to their publication title."""
 
     def setUp(self):
+        """Create a Pub with a title and a DOI dbxref pointing at it."""
         db_doi = Db.objects.create(name="DOI")
         self.dbxref_doi = Dbxref.objects.create(
             db=db_doi, accession="10.1234/example", version="1"
@@ -95,14 +94,17 @@ class DoiTitlesTest(TestCase):
         PubDbxref.objects.create(pub=self.pub, dbxref=self.dbxref_doi, is_current=True)
 
     def test_maps_known_doi_to_title(self):
+        """A DOI with a matching PubDbxref resolves to that Pub's title."""
         titles = _doi_titles(["10.1234/example"])
         self.assertEqual(titles, {"10.1234/example": "A great paper about kinases"})
 
     def test_ignores_unknown_doi(self):
+        """A DOI with no matching PubDbxref is simply absent from the result."""
         titles = _doi_titles(["10.1234/example", "10.9999/unknown"])
         self.assertEqual(titles, {"10.1234/example": "A great paper about kinases"})
 
     def test_empty_input_makes_no_query(self):
+        """An empty input list returns an empty dict without querying the DB."""
         self.assertEqual(_doi_titles([]), {})
 
 
@@ -181,7 +183,9 @@ class ExcludedOrganismNamesTest(TestCase):
             dbxref=dbxref,
         )
 
-        self.public_org = Organism.objects.create(genus="Arabidopsis", species="thaliana")
+        self.public_org = Organism.objects.create(
+            genus="Arabidopsis", species="thaliana"
+        )
         self.private_org = Organism.objects.create(genus="Oryza", species="sativa")
         Organismprop.objects.create(
             organism=self.private_org, type=cvterm, value="false", rank=0

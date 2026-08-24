@@ -4,12 +4,12 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Backfill Pub.title for records imported before clean_bibtex_title existed.
+r"""Backfill Pub.title for records imported before clean_bibtex_title existed.
 
 The BibTeX loader used to only strip a single leading/trailing brace from a
 title, so titles that carried BibTeX case-protection braces or LaTeX
-formatting/symbol commands anywhere else -- "{GWAS}", "\\textit{{FABP1}}",
-"Gs$\\upalpha$" -- kept that raw markup in the database. New imports are
+formatting/symbol commands anywhere else -- "{GWAS}", "\textit{{FABP1}}",
+"Gs$\upalpha$" -- kept that raw markup in the database. New imports are
 already clean (see loaders/publication.py); this is a one-time fix for the
 titles already stored.
 

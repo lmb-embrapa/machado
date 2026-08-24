@@ -51,7 +51,9 @@ def _excluded_organism_names(anonymous):
     joining the multi-million-row feature/organism tables on every search
     and facet-count query.
     """
-    organisms = list(Organism.objects.filter(genus="multispecies", species="multispecies"))
+    organisms = list(
+        Organism.objects.filter(genus="multispecies", species="multispecies")
+    )
     if anonymous:
         organisms += list(
             Organism.objects.filter(
@@ -178,7 +180,9 @@ class FeatureSearchView(ListView):
         clicking the facet applied the (uncapped) real filter and returned
         far more results.
         """
-        pks_sql, pks_params = qs.order_by().values_list("pk", flat=True).query.sql_with_params()
+        pks_sql, pks_params = (
+            qs.order_by().values_list("pk", flat=True).query.sql_with_params()
+        )
 
         sql = """
             SELECT val, COUNT(*) AS cnt

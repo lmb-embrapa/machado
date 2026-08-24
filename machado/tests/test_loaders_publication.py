@@ -18,21 +18,25 @@ class CleanBibtexTitleTest(TestCase):
     """Tests for clean_bibtex_title, using patterns seen in real BibTeX data."""
 
     def test_plain_title_is_unchanged(self):
+        """A title with no BibTeX/LaTeX markup passes through untouched."""
         self.assertEqual(clean_bibtex_title("A mock test title"), "A mock test title")
 
     def test_strips_case_protection_braces(self):
+        """Braces used only to protect capitalization are removed."""
         self.assertEqual(
             clean_bibtex_title("Bivariate {GWAS} reveals pleiotropic regions"),
             "Bivariate GWAS reveals pleiotropic regions",
         )
 
     def test_strips_nested_formatting_command(self):
+        """A formatting command wrapping a case-protected word keeps its content."""
         self.assertEqual(
             clean_bibtex_title("Identification of \\textit{{KCNJ11}} as a gene"),
             "Identification of KCNJ11 as a gene",
         )
 
     def test_replaces_dash_and_quote_macros(self):
+        """Known dash/quote symbol macros become their plain-text character."""
         self.assertEqual(
             clean_bibtex_title("Holstein{\\textendash}Friesian dairy cows"),
             "Holstein–Friesian dairy cows",
@@ -43,6 +47,7 @@ class CleanBibtexTitleTest(TestCase):
         )
 
     def test_replaces_math_mode_symbol_macros(self):
+        """Math-mode symbol macros and their $ delimiters become plain text."""
         self.assertEqual(
             clean_bibtex_title("Gs subunit alpha (Gs$\\upalpha$)-encoding"),
             "Gs subunit alpha (Gsα)-encoding",
@@ -57,6 +62,7 @@ class CleanBibtexTitleTest(TestCase):
         )
 
     def test_hspace_collapses_to_single_space(self):
+        """The hspace command is dropped along with its dimension argument."""
         self.assertEqual(
             clean_bibtex_title(
                 "Karan Fries (Bos taurus taurus"
@@ -67,18 +73,21 @@ class CleanBibtexTitleTest(TestCase):
         )
 
     def test_collapses_embedded_newlines(self):
+        """A literal newline from a hard-wrapped BibTeX source becomes a space."""
         self.assertEqual(
             clean_bibtex_title("Genome-wide association\nfor traits"),
             "Genome-wide association for traits",
         )
 
     def test_decodes_accent_commands(self):
+        """A standard LaTeX diacritic command decodes to its accented letter."""
         self.assertEqual(
             clean_bibtex_title("Sequence-based GWAS in Montb\\'eliarde cows"),
             "Sequence-based GWAS in Montbéliarde cows",
         )
 
     def test_empty_and_none_pass_through(self):
+        """Empty string and None are returned unchanged, not raised on."""
         self.assertEqual(clean_bibtex_title(""), "")
         self.assertIsNone(clean_bibtex_title(None))
 

@@ -45,11 +45,11 @@ _ACCENT_RE = re.compile(r"\\(['`\"^~])\{?([a-zA-Z])\}?")
 
 
 def clean_bibtex_title(title):
-    """Strip BibTeX/LaTeX markup from a title for plain-text display.
+    r"""Strip BibTeX/LaTeX markup from a title for plain-text display.
 
     BibTeX titles wrap words in braces purely to protect capitalization
     (e.g. "{GWAS}", "{{FABP1}}") and may carry LaTeX formatting commands
-    ("\\textit{{FABP1}}") or symbol macros ("\\upalpha", "\\textendash").
+    ("\textit{{FABP1}}") or symbol macros ("\upalpha", "\textendash").
     None of that is meaningful once rendered as plain text, so it's removed
     rather than stored as-is.
     """

@@ -24,6 +24,7 @@ _ARRAY_FACETS = {
 # The "analyses" facet uses AND logic; all others use OR.
 _AND_FACETS = {"analyses"}
 
+
 # Django's BooleanField.to_python only accepts "True"/"1"/"False"/"0" (case
 # sensitive), but facet values arrive as raw query-string text such as
 # "true"/"FALSE". Normalize any case of true/false to Python bool so
