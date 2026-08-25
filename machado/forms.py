@@ -18,7 +18,6 @@ _ARRAY_FACETS = {
     "biomaterial",
     "treatment",
     "doi",
-    "orthologs_coexpression",
 }
 
 # The "analyses" facet uses AND logic; all others use OR.

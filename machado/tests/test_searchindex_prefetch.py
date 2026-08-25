@@ -132,9 +132,10 @@ class PrefetchChunkTest(TestCase):
             prefetch_chunk(ids, self.config).orthologs_coexpression,
             "the cache changed the facet value",
         )
-        # Each feature must own its list, not alias the cached one.
-        for flags in warm.orthologs_coexpression.values():
-            self.assertNotIn(id(flags), {id(v) for v in cache.ortholog_flags.values()})
+        # The facet value is a single bool per feature, so there is no shared
+        # mutable list left for a chunk to alias into the cache.
+        for flag in warm.orthologs_coexpression.values():
+            self.assertIsInstance(flag, bool)
 
     def test_multi_doi_pub_picks_the_lowest_pk_dbxref(self):
         """A pub with two DOI dbxrefs resolves to the lowest-pk one.

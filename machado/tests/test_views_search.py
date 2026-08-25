@@ -1,6 +1,8 @@
 """Tests for search views."""
 
-from django.test import TestCase, RequestFactory
+from django.contrib.auth.models import AnonymousUser
+from django.core.management import call_command
+from django.test import TestCase, RequestFactory, override_settings
 from machado.models import (
     Cv,
     Cvterm,
@@ -19,6 +21,7 @@ from machado.views.search import (
     _doi_titles,
     _excluded_organism_names,
 )
+from machado.tests.searchindex_fixture import build_search_index_fixture
 from unittest.mock import patch, MagicMock
 from django.template.loader import render_to_string
 
@@ -163,6 +166,55 @@ class ComputeArrayFacetTest(TestCase):
         )
 
 
+@override_settings(MACHADO_VALID_TYPES=["gene", "mRNA", "polypeptide"])
+class FacetCountMatchesFilterTest(TestCase):
+    """A facet's count must equal the number of rows selecting it returns.
+
+    This is the promise a faceted UI makes: the number beside a facet value
+    is how many results clicking it yields. Asserted over every facet the
+    view publishes rather than one field, so a facet whose count is computed
+    by a different rule than the filter it applies cannot pass silently --
+    which is exactly how orthologs_coexpression came to advertise more hits
+    than the table has rows while returning none of them.
+    """
+
+    def setUp(self):
+        """Index the shared fixture corpus so the facets have real counts."""
+        build_search_index_fixture()
+        call_command("rebuild_search_index", batch_size=50, verbosity=0)
+
+    def _run(self, **params):
+        """Return (facet fields, result queryset) for a /find/ request."""
+        request = RequestFactory().get("/find/", params)
+        request.user = AnonymousUser()
+        view = FeatureSearchView()
+        view.request = request
+        view.args = ()
+        view.kwargs = {}
+        view.object_list = view.get_queryset()
+        context = view.get_context_data(object_list=view.object_list)
+        return context["facets"]["fields"], view.object_list
+
+    def test_every_facet_count_matches_its_filtered_result_count(self):
+        """Selecting a facet returns exactly as many rows as its count."""
+        facets, _ = self._run()
+
+        checked = 0
+        for field, pairs in facets.items():
+            for value, count in pairs:
+                _, qs = self._run(selected_facets="{}:{}".format(field, value))
+                self.assertEqual(
+                    qs.count(),
+                    count,
+                    "facet {}:{} advertises {} results but returns {}".format(
+                        field, value, count, qs.count()
+                    ),
+                )
+                checked += 1
+
+        self.assertTrue(checked, "the fixture produced no facet values to check")
+
+
 class ExcludedOrganismNamesTest(TestCase):
     """Test suite for _excluded_organism_names."""
 
@@ -274,9 +326,9 @@ class SearchViewsTest(TestCase):
         # Mock the queryset used for facets
         mock_qs = MagicMock()
         # Create a mock query result that yields the correct format for any field requested
-        mock_qs.values.return_value.annotate.return_value.filter.return_value.order_by.side_effect = lambda f: [
-            {f: "val", "count": 1}
-        ]
+        mock_qs.values.return_value.annotate.return_value.order_by.side_effect = (
+            lambda f: [{f: "val", "count": 1}]
+        )
         view._queryset_for_facets = mock_qs
 
         # Mock array facet computation
