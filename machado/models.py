@@ -4421,8 +4421,12 @@ class FeatureSearchIndex(models.Model):
     # ── Relationships (JSON array of "feature_id type_name" strings) ─────
     relationships = models.JSONField(default=list)
 
-    # ── Orthologs coexpression (multi-value facet) ───────────────────────
-    orthologs_coexpression = models.JSONField(default=list)
+    # ── Orthologs coexpression ───────────────────────────────────────────
+    # True when the feature's orthologous group has a coexpressed member.
+    # Stored as one bool, not the per-member flag array it used to be; see
+    # searchindex._compute_ortholog_flags for why that array was both far
+    # more expensive and unusable as a facet.
+    orthologs_coexpression = models.BooleanField(default=False)
 
     class Meta:
         managed = True
@@ -4436,6 +4440,7 @@ class FeatureSearchIndex(models.Model):
             models.Index(fields=["coexpression_group"], name="fsi_coexp_grp_idx"),
             models.Index(fields=["orthology"], name="fsi_orthology_idx"),
             models.Index(fields=["coexpression"], name="fsi_coexpression_idx"),
+            models.Index(fields=["orthologs_coexpression"], name="fsi_orth_coexp_idx"),
         ]
 
     def __str__(self):

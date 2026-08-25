@@ -149,7 +149,7 @@ class IndexRunCache:
     test that rolled its fixture back) would be served stale flags.
     """
 
-    #: orthologous group value -> coexpression flag list, see
+    #: orthologous group value -> bool (group has a coexpressed member), see
     #: ``_prefetch_orthologs_coexpression``.
     ortholog_flags: dict = dataclasses.field(default_factory=dict)
 
@@ -335,7 +335,7 @@ def build_entries(features, ctx, config):
                     "{} {}".format(counterpart_id, type_name)
                     for counterpart_id, type_name in ctx.relationships.get(fid, ())
                 ],
-                orthologs_coexpression=ctx.orthologs_coexpression.get(fid, []),
+                orthologs_coexpression=ctx.orthologs_coexpression.get(fid, False),
             )
         )
     return entries
@@ -641,16 +641,25 @@ def _prefetch_orthologs_coexpression(ids, props, ortholog_flags=None):
     if missing:
         ortholog_flags.update(_compute_ortholog_flags(missing))
 
-    # Copy: each entry becomes a distinct FeatureSearchIndex.orthologs_coexpression
-    # value and must not alias the cached list.
-    return {fid: list(ortholog_flags[group]) for fid, group in groups.items()}
+    return {fid: ortholog_flags[group] for fid, group in groups.items()}
 
 
 def _compute_ortholog_flags(distinct_groups):
-    """Return ``{orthologous group: [coexpression flag, ...]}`` for the groups.
+    """Return ``{orthologous group: bool}`` -- has a coexpressed member.
 
-    One flag per (group member, ``translation_of`` subject of that member)
-    pair, True when the subject carries a coexpression group.
+    True when any (group member, ``translation_of`` subject of that member)
+    pair has the subject carrying a coexpression group.
+
+    Deliberately one bool per group rather than the per-pair list this used
+    to return. The facet only ever asks "does this feature's orthologous
+    group contain a coexpressed member?", so the list was collapsed to
+    ``any()`` at every point of use -- while costing one array element per
+    group member in every member's index row. On a real corpus that meant
+    ~162 booleans per row (max 9627, 1.2 billion table-wide) encoding a
+    single bit, which made the facet's count query unnestable-but-useless:
+    it counted pairs, so it reported more hits than the table has rows, and
+    the ``__contains`` filter it paired with looked for the *string*
+    "true" in an array of JSON *booleans* and therefore matched nothing.
     """
     from machado.models import FeatureRelationship, Featureprop
 
@@ -696,11 +705,11 @@ def _compute_ortholog_flags(distinct_groups):
 
     flags_by_group = {}
     for group, members in members_by_group.items():
-        flags = []
-        for member in members:
-            for subject in subjects_by_object.get(member, ()):
-                flags.append(subject in coexpressed)
-        flags_by_group[group] = flags
+        flags_by_group[group] = any(
+            subject in coexpressed
+            for member in members
+            for subject in subjects_by_object.get(member, ())
+        )
     return flags_by_group
 
 

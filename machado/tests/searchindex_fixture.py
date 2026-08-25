@@ -286,19 +286,17 @@ def snapshot_index():
 
     READ THIS BEFORE TRUSTING A PASSING SNAPSHOT COMPARISON.
 
-    ``analyses``, ``doi``, ``biomaterial``, ``treatment``, ``relationships``
-    and ``orthologs_coexpression`` are sorted here, so for those six fields
-    this proves *set* equality only -- NOT that the stored list order is
-    byte-identical to the pre-batching implementation. Every list in the
-    recorded snapshot happens to have at most one element, which hides the
-    difference further.
+    ``analyses``, ``doi``, ``biomaterial``, ``treatment`` and
+    ``relationships`` are sorted here, so for those five fields this proves
+    *set* equality only -- NOT that the stored list order is byte-identical
+    to the pre-batching implementation. Every list in the recorded snapshot
+    happens to have at most one element, which hides the difference further.
 
     That is deliberate, not an oversight. The batched builder legitimately
     changed the order of those lists: ``analyses`` now follows
     ``order_by("program")``, ``relationships`` are ordered by counterpart id,
-    ``orthologs_coexpression`` is grouped by orthologous-group member, and
-    ``biomaterial``/``treatment`` follow whatever order the single batched
-    six-table join returns (plan-dependent, where before it was
+    and ``biomaterial``/``treatment`` follow whatever order the single
+    batched six-table join returns (plan-dependent, where before it was
     plan-dependent per feature). Each of those is at least as deterministic as
     what it replaced, and consumers only ever use JSONField ``__contains``
     lookups and plain iteration -- never indexing or slicing -- so order
@@ -332,6 +330,6 @@ def snapshot_index():
             "relationships": sorted(
                 _stable_relationships(row.relationships, id_to_uniquename)
             ),
-            "orthologs_coexpression": sorted(row.orthologs_coexpression),
+            "orthologs_coexpression": row.orthologs_coexpression,
         }
     return snapshot

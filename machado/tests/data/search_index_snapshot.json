@@ -16,9 +16,7 @@
     "name": "GeneAlpha",
     "organism": "Arabidopsis thaliana",
     "orthologous_group": "OG_1",
-    "orthologs_coexpression": [
-      true
-    ],
+    "orthologs_coexpression": true,
     "orthology": true,
     "relationships": [
       "MRNA_A mRNA"
@@ -42,7 +40,7 @@
     "name": null,
     "organism": "Arabidopsis thaliana",
     "orthologous_group": null,
-    "orthologs_coexpression": [],
+    "orthologs_coexpression": false,
     "orthology": false,
     "relationships": [],
     "so_term": "gene",
@@ -62,7 +60,7 @@
     "name": "GeneGamma",
     "organism": "Arabidopsis thaliana",
     "orthologous_group": null,
-    "orthologs_coexpression": [],
+    "orthologs_coexpression": false,
     "orthology": false,
     "relationships": [],
     "so_term": "gene",
@@ -82,7 +80,7 @@
     "name": "mRnaAlpha",
     "organism": "Arabidopsis thaliana",
     "orthologous_group": null,
-    "orthologs_coexpression": [],
+    "orthologs_coexpression": false,
     "orthology": false,
     "relationships": [
       "GENE_A gene",
@@ -105,9 +103,7 @@
     "name": "PolyAlpha",
     "organism": "Arabidopsis thaliana",
     "orthologous_group": "OG_1",
-    "orthologs_coexpression": [
-      true
-    ],
+    "orthologs_coexpression": true,
     "orthology": true,
     "relationships": [
       "MRNA_A mRNA"
