@@ -9,6 +9,7 @@
 from django.conf import settings
 from django.urls import re_path, path, include
 
+from machado.caching import cache_page_per_auth
 from machado.views import common
 
 try:
@@ -48,7 +49,11 @@ urlpatterns = [
     ),
     re_path(
         r"^find/$",
-        search.FeatureSearchView.as_view(),
+        # Cached whole-page: the corpus is read-only between index rebuilds,
+        # and this page costs seconds to assemble (eleven facet aggregates
+        # over a multi-million-row index). Export is left uncached -- it is
+        # unpaginated, so a single response can be the whole result set.
+        cache_page_per_auth(search.FeatureSearchView.as_view()),
         name="feature_search",
     ),
     re_path(

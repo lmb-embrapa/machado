@@ -83,6 +83,37 @@ TEMPLATES = [
 # ── Database ─────────────────────────────────────────────────────────────────
 DATABASES = {"default": env.db()}
 
+# ── Cache ────────────────────────────────────────────────────────────────────
+# A shared backend is required, not merely preferable. Django's default
+# LocMemCache is per-process, and rebuild_search_index runs in a different
+# process from the web workers -- so it could not invalidate the pages they
+# have cached, and /find/ pages never expire on their own (see below).
+#
+# FileBasedCache rather than DatabaseCache: it is the only built-in backend
+# that compresses what it stores, and these pages compress about 130x (a
+# search page is ~1.8MB of largely repetitive HTML, stored in ~36KB).
+# DatabaseCache base64-encodes instead, inflating the same page to ~2.4MB.
+# Neither needs a separate server. See docs/20-cache.md.
+#
+# TIMEOUT None means entries never expire on their own: the corpus is
+# read-only between index rebuilds, so a rebuild is the only thing that
+# invalidates a page, and rebuild_search_index clears the cache itself.
+#
+# MAX_ENTRIES has to be stated. Omitting it does not mean "unlimited", it
+# means 300, and every write past that culls a third of the cache.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": env("CACHE_DIR", default=str(BASE_DIR / "cache")),
+        "TIMEOUT": None,
+        "OPTIONS": {"MAX_ENTRIES": env.int("CACHE_MAX_ENTRIES", default=1000000)},
+    }
+}
+
+# How long the JBrowse API views are cached. Unrelated to the /find/ page
+# cache above, which is invalidated by rebuild_search_index rather than time.
+CACHE_TIMEOUT = env.int("CACHE_TIMEOUT", default=60 * 60)
+
 # ── Internationalization ─────────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = env("TIME_ZONE", default="UTC")
