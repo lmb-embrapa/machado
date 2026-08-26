@@ -12,11 +12,16 @@
 <form action="{% url 'feature_search' %}" method="get" >
 <input type="hidden" name="q" value="{{ query }}">
 
-{# Selections this form renders no checkbox for -- a card collapsed to one
-   option, or a value beyond the 100 a card lists. Without these the next
-   "Apply Filters" would submit the form without them and silently drop the
-   filter. Only ever emitted for selections that have no checkbox, so a
-   value is never submitted twice and unchecking a box still removes it. #}
+{% comment %}
+Selections this form renders no checkbox for -- a card collapsed to one
+option, or a value beyond the 100 a card lists. Without these the next
+"Apply Filters" would submit the form without them and silently drop the
+filter. Only ever emitted for selections that have no checkbox, so a value
+is never submitted twice and unchecking a box still removes it.
+
+{% comment %}, not {# #}: the latter is single-line only and a multi-line
+one renders verbatim into the page.
+{% endcomment %}
 {% for facet_field in unrendered_selected_facets %}
 <input type="hidden" name="selected_facets" value="{{ facet_field }}">
 {% endfor %}

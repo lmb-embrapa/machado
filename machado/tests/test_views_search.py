@@ -92,6 +92,9 @@ class SearchFacetTemplateTest(TestCase):
             '<input type="hidden" name="selected_facets" value="organism:Zea mays">',
             html,
         )
+        # A multi-line {# #} is not a comment in Django -- it renders verbatim.
+        self.assertNotIn('Apply Filters" would submit', html)
+        self.assertNotIn("{#", html)
 
     def test_doi_facet_falls_back_to_doi_when_title_unknown(self):
         """A DOI with no known title falls back to displaying the raw DOI."""
