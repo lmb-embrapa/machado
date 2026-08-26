@@ -216,6 +216,16 @@ class FeatureSearchView(ListView):
         displayed count stopped meaning anything once it hit 10,000, while
         clicking the facet applied the (uncapped) real filter and returned
         far more results.
+
+        The ``<> '[]'`` predicate is what makes the partial indexes on these
+        columns usable (see FeatureSearchIndex.Meta.indexes). It cannot
+        change the result: unnesting an empty array yields no rows, so the
+        rows it removes are exactly the ones contributing nothing to the
+        counts. Without it every facet scans all 7.5M rows to reach the ~2%
+        holding a value -- measured 1.17s versus 0.13s for biomaterial, and
+        1.31s versus 0.001s for doi, which is empty on this corpus and was
+        paying full price to prove it. Keep the predicate and the index
+        condition in the same shape; the index is dead weight otherwise.
         """
         pks_sql, pks_params = (
             qs.order_by().values_list("pk", flat=True).query.sql_with_params()
@@ -226,6 +236,7 @@ class FeatureSearchView(ListView):
             FROM machado_featuresearchindex,
                  jsonb_array_elements_text({field}) AS val
             WHERE feature_id IN ({pks_sql})
+              AND {field} <> '[]'::jsonb
             GROUP BY val
             ORDER BY val
             LIMIT 100

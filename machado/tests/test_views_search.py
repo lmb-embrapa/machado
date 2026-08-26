@@ -152,6 +152,35 @@ class ComputeArrayFacetTest(TestCase):
             )
             FeatureSearchIndex.objects.create(feature=feature, analyses=["interpro"])
 
+    def test_empty_arrays_do_not_change_the_counts(self):
+        """Rows with an empty array contribute nothing and are skipped.
+
+        _compute_array_facet filters them out with ``<> '[]'`` so the
+        partial index on the column is usable. That is only sound because
+        unnesting an empty array yields no rows, so the counts must come out
+        identical whether or not such rows exist -- which is what this pins.
+        """
+        qs = FeatureSearchIndex.objects.all()
+        before = dict(FeatureSearchView._compute_array_facet(qs, "analyses"))
+
+        org = Organism.objects.get(genus="Gen", species="spec")
+        cvterm = Cvterm.objects.get(name="gene")
+        for i in range(4):
+            feature = Feature.objects.create(
+                organism=org,
+                uniquename=f"empty_feature_{i}",
+                type=cvterm,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned="2023-01-01T00:00:00Z",
+                timelastmodified="2023-01-01T00:00:00Z",
+            )
+            FeatureSearchIndex.objects.create(feature=feature, analyses=[])
+
+        after = dict(FeatureSearchView._compute_array_facet(qs, "analyses"))
+        self.assertEqual(before, after)
+        self.assertNotIn("", after, "an empty array leaked in as a facet value")
+
     def test_counts_every_matching_row(self):
         """Facet counts must equal the real filtered count for each value."""
         qs = FeatureSearchIndex.objects.all()
