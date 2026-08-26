@@ -4441,6 +4441,33 @@ class FeatureSearchIndex(models.Model):
             models.Index(fields=["orthology"], name="fsi_orthology_idx"),
             models.Index(fields=["coexpression"], name="fsi_coexpression_idx"),
             models.Index(fields=["orthologs_coexpression"], name="fsi_orth_coexp_idx"),
+            # Partial indexes over the rows that actually carry a value for
+            # each sparse JSON-array facet. Counting a facet means unnesting
+            # its array, which lives in the heap and no full index can
+            # cover; without these, doing so scans all 7.5M rows to reach
+            # the ~2% that are non-empty (and "doi", empty on some corpora,
+            # still cost ~1.2s to discover that). Paired with the
+            # ``<> '[]'`` predicate in FeatureSearchView._compute_array_facet
+            # -- the index is only usable while that predicate is emitted.
+            #
+            # Deliberately not applied to "analyses": every row carries a
+            # value there, so a partial index would cover the whole table
+            # and buy nothing.
+            models.Index(
+                fields=["feature"],
+                name="fsi_biomaterial_ne_idx",
+                condition=~models.Q(biomaterial=[]),
+            ),
+            models.Index(
+                fields=["feature"],
+                name="fsi_treatment_ne_idx",
+                condition=~models.Q(treatment=[]),
+            ),
+            models.Index(
+                fields=["feature"],
+                name="fsi_doi_ne_idx",
+                condition=~models.Q(doi=[]),
+            ),
         ]
 
     def __str__(self):

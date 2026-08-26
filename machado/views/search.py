@@ -61,7 +61,76 @@ def _excluded_organism_names(anonymous):
                 Organismprop_organism_Organism__value="false",
             )
         )
-    return [build_organism(o) for o in organisms]
+    # dict.fromkeys rather than set(): distinct Organism rows can share a
+    # display name (there are two "multispecies multispecies" rows), and the
+    # name is what gets filtered on, so the list would otherwise repeat it.
+    # Order is kept so the emitted SQL is stable between requests.
+    return list(dict.fromkeys(build_organism(o) for o in organisms))
+
+
+def _organisms_present_in_index(names):
+    """Narrow organism names to those that actually occur in the index.
+
+    Excluding an organism with no indexed feature cannot change the result
+    set -- but it does change the plan. Evaluating the ``organism``
+    predicate means reading that column, which stops each facet aggregate
+    from running as an index-only scan over its own field's btree and sends
+    it to the heap instead: 4.90s versus 0.64s for the seven scalar facets
+    on a 7.5M-row index, on a page whose total was 10.7s.
+
+    So it is worth one index-only lookup on ``fsi_organism_idx`` (~0.6ms)
+    to find out. Usually nothing comes back -- the organisms hidden from
+    search tend to have no indexed features at all -- and the caller drops
+    the predicate. When something does come back the filter is doing real
+    work and is applied as before, narrowed to the names that can match.
+
+    Checked per request rather than cached, so flipping an organism's
+    ``is_public`` property takes effect immediately, as it did before.
+    """
+    if not names:
+        return []
+    return list(
+        FeatureSearchIndex.objects.filter(organism__in=names)
+        .values_list("organism", flat=True)
+        .distinct()
+    )
+
+
+def _selected_facets_without_checkbox(facets, selected_facets):
+    """Return the selected facets the filter form renders no checkbox for.
+
+    The sidebar's filter form is separate from the search form, so pressing
+    "Apply Filters" submits only what the filter form itself holds: the
+    checkboxes. A selection with no checkbox is therefore dropped on the
+    next submit -- which is what happened to every narrowing selection,
+    because filtering on a facet usually collapses its own card to a single
+    value and single-option cards are not rendered at all (they offer no
+    choice). Selecting an organism and then a feature type silently lost
+    the organism.
+
+    Two ways a selection ends up with no checkbox, both covered here:
+    its card is not rendered, or its value is not among the (at most 100)
+    values that card lists.
+
+    Values are compared as lowercased strings because the two sides are not
+    the same type: facet values come back from the database as Python ``bool``
+    or ``str``, while a selection is always querystring text -- and the
+    template writes booleans inconsistently ("false" for orthology, "False"
+    for orthologs_coexpression). Lowercasing both mirrors what
+    FeatureSearchForm._normalize_facet_value already tolerates when it
+    applies the filter.
+    """
+    missing = []
+    for selected in selected_facets:
+        field, _, value = selected.partition(":")
+        values = facets.get(field) or []
+        # A single-option card is not rendered, so it carries no checkbox.
+        if len(values) < 2:
+            missing.append(selected)
+            continue
+        if value.lower() not in {str(v).lower() for v, _ in values}:
+            missing.append(selected)
+    return missing
 
 
 def _doi_titles(doi_values):
@@ -93,8 +162,8 @@ class FeatureSearchView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        excluded_organisms = _excluded_organism_names(
-            anonymous=not (user and user.is_authenticated)
+        excluded_organisms = _organisms_present_in_index(
+            _excluded_organism_names(anonymous=not (user and user.is_authenticated))
         )
         if excluded_organisms:
             qs = qs.exclude(organism__in=excluded_organisms)
@@ -159,6 +228,9 @@ class FeatureSearchView(ListView):
         context["facet_fields_desc"] = FACET_FIELDS
         context["selected_facets"] = selected_facets
         context["selected_facets_fields"] = selected_facets_fields
+        context["unrendered_selected_facets"] = _selected_facets_without_checkbox(
+            facets, selected_facets
+        )
         context["so_term_count"] = so_term_count
         context["query"] = self.request.GET.get("q", "")
 
@@ -184,6 +256,16 @@ class FeatureSearchView(ListView):
         displayed count stopped meaning anything once it hit 10,000, while
         clicking the facet applied the (uncapped) real filter and returned
         far more results.
+
+        The ``<> '[]'`` predicate is what makes the partial indexes on these
+        columns usable (see FeatureSearchIndex.Meta.indexes). It cannot
+        change the result: unnesting an empty array yields no rows, so the
+        rows it removes are exactly the ones contributing nothing to the
+        counts. Without it every facet scans all 7.5M rows to reach the ~2%
+        holding a value -- measured 1.17s versus 0.13s for biomaterial, and
+        1.31s versus 0.001s for doi, which is empty on this corpus and was
+        paying full price to prove it. Keep the predicate and the index
+        condition in the same shape; the index is dead weight otherwise.
         """
         pks_sql, pks_params = (
             qs.order_by().values_list("pk", flat=True).query.sql_with_params()
@@ -194,6 +276,7 @@ class FeatureSearchView(ListView):
             FROM machado_featuresearchindex,
                  jsonb_array_elements_text({field}) AS val
             WHERE feature_id IN ({pks_sql})
+              AND {field} <> '[]'::jsonb
             GROUP BY val
             ORDER BY val
             LIMIT 100
@@ -224,8 +307,8 @@ class FeatureSearchExportView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        excluded_organisms = _excluded_organism_names(
-            anonymous=not (user and user.is_authenticated)
+        excluded_organisms = _organisms_present_in_index(
+            _excluded_organism_names(anonymous=not (user and user.is_authenticated))
         )
         if excluded_organisms:
             qs = qs.exclude(organism__in=excluded_organisms)

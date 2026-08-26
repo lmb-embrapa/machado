@@ -20,7 +20,9 @@ from machado.views.search import (
     FeatureSearchExportView,
     _doi_titles,
     _excluded_organism_names,
+    _selected_facets_without_checkbox,
 )
+from machado.searchindex import build_organism
 from machado.tests.searchindex_fixture import build_search_index_fixture
 from unittest.mock import patch, MagicMock
 from django.template.loader import render_to_string
@@ -60,6 +62,39 @@ class SearchFacetTemplateTest(TestCase):
         )
         self.assertIn("A Great Paper About Kinases", html)
         self.assertIn('value="doi:10.1234/has-title"', html)
+
+    def test_selection_without_a_checkbox_is_carried_as_hidden_input(self):
+        """A selection the form cannot show must still be submitted.
+
+        Selecting a facet usually narrows its own card to a single value,
+        and single-option cards are not rendered -- so the checkbox that
+        carried the selection disappears. The facet form is separate from
+        the search form, so pressing "Apply Filters" then submits only what
+        this form holds, silently dropping the selection. A hidden input
+        keeps it.
+        """
+        html = render_to_string(
+            "search_facet.html",
+            {
+                # A non-empty selection renders the "Selected filters" card,
+                # whose remove links need the request in context.
+                "request": RequestFactory().get("/find/"),
+                "query": "",
+                "selected_facets": ["organism:Zea mays"],
+                "unrendered_selected_facets": ["organism:Zea mays"],
+                "facets": {"fields": {"so_term": [("gene", 3), ("mRNA", 2)]}},
+                "facet_fields_order": ["organism", "so_term"],
+                "facet_fields_desc": {"organism": "organism", "so_term": "so_term"},
+                "doi_titles": {},
+            },
+        )
+        self.assertIn(
+            '<input type="hidden" name="selected_facets" value="organism:Zea mays">',
+            html,
+        )
+        # A multi-line {# #} is not a comment in Django -- it renders verbatim.
+        self.assertNotIn('Apply Filters" would submit', html)
+        self.assertNotIn("{#", html)
 
     def test_doi_facet_falls_back_to_doi_when_title_unknown(self):
         """A DOI with no known title falls back to displaying the raw DOI."""
@@ -151,6 +186,35 @@ class ComputeArrayFacetTest(TestCase):
             )
             FeatureSearchIndex.objects.create(feature=feature, analyses=["interpro"])
 
+    def test_empty_arrays_do_not_change_the_counts(self):
+        """Rows with an empty array contribute nothing and are skipped.
+
+        _compute_array_facet filters them out with ``<> '[]'`` so the
+        partial index on the column is usable. That is only sound because
+        unnesting an empty array yields no rows, so the counts must come out
+        identical whether or not such rows exist -- which is what this pins.
+        """
+        qs = FeatureSearchIndex.objects.all()
+        before = dict(FeatureSearchView._compute_array_facet(qs, "analyses"))
+
+        org = Organism.objects.get(genus="Gen", species="spec")
+        cvterm = Cvterm.objects.get(name="gene")
+        for i in range(4):
+            feature = Feature.objects.create(
+                organism=org,
+                uniquename=f"empty_feature_{i}",
+                type=cvterm,
+                is_analysis=False,
+                is_obsolete=False,
+                timeaccessioned="2023-01-01T00:00:00Z",
+                timelastmodified="2023-01-01T00:00:00Z",
+            )
+            FeatureSearchIndex.objects.create(feature=feature, analyses=[])
+
+        after = dict(FeatureSearchView._compute_array_facet(qs, "analyses"))
+        self.assertEqual(before, after)
+        self.assertNotIn("", after, "an empty array leaked in as a facet value")
+
     def test_counts_every_matching_row(self):
         """Facet counts must equal the real filtered count for each value."""
         qs = FeatureSearchIndex.objects.all()
@@ -213,6 +277,144 @@ class FacetCountMatchesFilterTest(TestCase):
                 checked += 1
 
         self.assertTrue(checked, "the fixture produced no facet values to check")
+
+
+class OrganismExclusionQuerysetTest(TestCase):
+    """The organism exclusion must be applied only when it can match.
+
+    ``exclude(organism__in=names)`` is equivalent to no filter at all when
+    no indexed row carries one of those names -- but it is not free:
+    reading ``organism`` to evaluate it stops every facet aggregate from
+    running as an index-only scan over its own field, which measured 4.90s
+    instead of 0.64s for the seven scalar facets on a 7.5M-row index. So
+    the predicate is dropped when nothing matches, and these tests pin both
+    halves of that: dropped when it cannot match, kept when it can.
+    """
+
+    def setUp(self):
+        """Create one hidden and one visible organism, both with index rows."""
+        db = Db.objects.create(name="local")
+        cv_seq = Cv.objects.create(name="sequence")
+        gene_dbxref = Dbxref.objects.create(db=db, accession="gene")
+        self.gene = Cvterm.objects.create(
+            cv=cv_seq,
+            name="gene",
+            dbxref=gene_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        # multispecies is hidden from every user, authenticated or not.
+        self.hidden = Organism.objects.get(genus="multispecies", species="multispecies")
+        self.visible = Organism.objects.create(genus="Arabidopsis", species="thaliana")
+
+    def _index(self, organism, uniquename):
+        feature = Feature.objects.create(
+            organism=organism,
+            uniquename=uniquename,
+            type=self.gene,
+            is_analysis=False,
+            is_obsolete=False,
+            timeaccessioned="2023-01-01T00:00:00Z",
+            timelastmodified="2023-01-01T00:00:00Z",
+        )
+        return FeatureSearchIndex.objects.create(
+            feature=feature,
+            uniquename=uniquename,
+            organism=build_organism(organism),
+            so_term="gene",
+        )
+
+    def _queryset(self):
+        request = RequestFactory().get("/find/")
+        request.user = AnonymousUser()
+        view = FeatureSearchView()
+        view.request = request
+        view.args = ()
+        view.kwargs = {}
+        return view.get_queryset()
+
+    def test_exclusion_is_dropped_when_no_indexed_row_matches(self):
+        """With no hidden organism indexed, no organism predicate is emitted."""
+        self._index(self.visible, "VISIBLE_1")
+
+        sql = str(self._queryset().query)
+        self.assertNotIn(
+            "multispecies",
+            sql,
+            "the exclusion was still applied even though nothing can match it",
+        )
+
+    def test_hidden_organism_is_excluded_when_it_has_indexed_rows(self):
+        """A hidden organism with index rows is kept out of the results."""
+        self._index(self.visible, "VISIBLE_1")
+        self._index(self.hidden, "HIDDEN_1")
+
+        names = set(self._queryset().values_list("uniquename", flat=True))
+        self.assertIn("VISIBLE_1", names)
+        self.assertNotIn(
+            "HIDDEN_1",
+            names,
+            "a hidden organism leaked into the results",
+        )
+
+
+class SelectedFacetsWithoutCheckboxTest(TestCase):
+    """Which selections the filter form cannot represent as a checkbox."""
+
+    def test_collapsed_card_needs_a_hidden_input(self):
+        """A facet narrowed to one value renders no card, so no checkbox."""
+        facets = {
+            "organism": [("Zea mays", 5)],
+            "so_term": [("gene", 3), ("mRNA", 2)],
+        }
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["organism:Zea mays"]),
+            ["organism:Zea mays"],
+        )
+
+    def test_multi_value_card_keeps_its_own_checkbox(self):
+        """A card still offering a choice carries the selection itself."""
+        facets = {"so_term": [("gene", 3), ("mRNA", 2)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["so_term:gene"]), []
+        )
+
+    def test_boolean_values_match_regardless_of_case(self):
+        """Facet values arrive as bools; selections arrive as querystring text.
+
+        The template writes them inconsistently -- "false" for orthology but
+        "False" for orthologs_coexpression -- so neither casing may be
+        treated as missing, or the filter would be submitted twice.
+        """
+        facets = {"orthology": [(False, 3), (True, 2)]}
+        for value in ("true", "True", "false", "False"):
+            self.assertEqual(
+                _selected_facets_without_checkbox(facets, [f"orthology:{value}"]),
+                [],
+                f"orthology:{value} was treated as having no checkbox",
+            )
+
+    def test_value_missing_from_a_rendered_card_needs_a_hidden_input(self):
+        """A card lists at most 100 values; a selection outside them has none."""
+        facets = {"orthologous_group": [("OG_1", 4), ("OG_2", 2)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["orthologous_group:OG_999"]),
+            ["orthologous_group:OG_999"],
+        )
+
+    def test_value_containing_a_colon_is_not_split_apart(self):
+        """Only the first colon separates field from value; DOIs contain them."""
+        facets = {"doi": [("10.1234/a:b", 2), ("10.5555/c", 1)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["doi:10.1234/a:b"]), []
+        )
+
+    def test_facet_absent_from_the_page_needs_a_hidden_input(self):
+        """A selection whose field produced no facet at all is still kept."""
+        self.assertEqual(
+            _selected_facets_without_checkbox({}, ["organism:Zea mays"]),
+            ["organism:Zea mays"],
+        )
 
 
 class ExcludedOrganismNamesTest(TestCase):
