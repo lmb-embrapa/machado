@@ -21,6 +21,7 @@ from machado.views.search import (
     _doi_titles,
     _excluded_organism_names,
 )
+from machado.searchindex import build_organism
 from machado.tests.searchindex_fixture import build_search_index_fixture
 from unittest.mock import patch, MagicMock
 from django.template.loader import render_to_string
@@ -213,6 +214,85 @@ class FacetCountMatchesFilterTest(TestCase):
                 checked += 1
 
         self.assertTrue(checked, "the fixture produced no facet values to check")
+
+
+class OrganismExclusionQuerysetTest(TestCase):
+    """The organism exclusion must be applied only when it can match.
+
+    ``exclude(organism__in=names)`` is equivalent to no filter at all when
+    no indexed row carries one of those names -- but it is not free:
+    reading ``organism`` to evaluate it stops every facet aggregate from
+    running as an index-only scan over its own field, which measured 4.90s
+    instead of 0.64s for the seven scalar facets on a 7.5M-row index. So
+    the predicate is dropped when nothing matches, and these tests pin both
+    halves of that: dropped when it cannot match, kept when it can.
+    """
+
+    def setUp(self):
+        """Create one hidden and one visible organism, both with index rows."""
+        db = Db.objects.create(name="local")
+        cv_seq = Cv.objects.create(name="sequence")
+        gene_dbxref = Dbxref.objects.create(db=db, accession="gene")
+        self.gene = Cvterm.objects.create(
+            cv=cv_seq,
+            name="gene",
+            dbxref=gene_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        # multispecies is hidden from every user, authenticated or not.
+        self.hidden = Organism.objects.get(genus="multispecies", species="multispecies")
+        self.visible = Organism.objects.create(genus="Arabidopsis", species="thaliana")
+
+    def _index(self, organism, uniquename):
+        feature = Feature.objects.create(
+            organism=organism,
+            uniquename=uniquename,
+            type=self.gene,
+            is_analysis=False,
+            is_obsolete=False,
+            timeaccessioned="2023-01-01T00:00:00Z",
+            timelastmodified="2023-01-01T00:00:00Z",
+        )
+        return FeatureSearchIndex.objects.create(
+            feature=feature,
+            uniquename=uniquename,
+            organism=build_organism(organism),
+            so_term="gene",
+        )
+
+    def _queryset(self):
+        request = RequestFactory().get("/find/")
+        request.user = AnonymousUser()
+        view = FeatureSearchView()
+        view.request = request
+        view.args = ()
+        view.kwargs = {}
+        return view.get_queryset()
+
+    def test_exclusion_is_dropped_when_no_indexed_row_matches(self):
+        """With no hidden organism indexed, no organism predicate is emitted."""
+        self._index(self.visible, "VISIBLE_1")
+
+        sql = str(self._queryset().query)
+        self.assertNotIn(
+            "multispecies",
+            sql,
+            "the exclusion was still applied even though nothing can match it",
+        )
+
+    def test_hidden_organism_is_excluded_when_it_has_indexed_rows(self):
+        """A hidden organism with index rows is kept out of the results."""
+        self._index(self.visible, "VISIBLE_1")
+        self._index(self.hidden, "HIDDEN_1")
+
+        names = set(self._queryset().values_list("uniquename", flat=True))
+        self.assertIn("VISIBLE_1", names)
+        self.assertNotIn(
+            "HIDDEN_1",
+            names,
+            "a hidden organism leaked into the results",
+        )
 
 
 class ExcludedOrganismNamesTest(TestCase):

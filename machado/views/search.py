@@ -61,7 +61,39 @@ def _excluded_organism_names(anonymous):
                 Organismprop_organism_Organism__value="false",
             )
         )
-    return [build_organism(o) for o in organisms]
+    # dict.fromkeys rather than set(): distinct Organism rows can share a
+    # display name (there are two "multispecies multispecies" rows), and the
+    # name is what gets filtered on, so the list would otherwise repeat it.
+    # Order is kept so the emitted SQL is stable between requests.
+    return list(dict.fromkeys(build_organism(o) for o in organisms))
+
+
+def _organisms_present_in_index(names):
+    """Narrow organism names to those that actually occur in the index.
+
+    Excluding an organism with no indexed feature cannot change the result
+    set -- but it does change the plan. Evaluating the ``organism``
+    predicate means reading that column, which stops each facet aggregate
+    from running as an index-only scan over its own field's btree and sends
+    it to the heap instead: 4.90s versus 0.64s for the seven scalar facets
+    on a 7.5M-row index, on a page whose total was 10.7s.
+
+    So it is worth one index-only lookup on ``fsi_organism_idx`` (~0.6ms)
+    to find out. Usually nothing comes back -- the organisms hidden from
+    search tend to have no indexed features at all -- and the caller drops
+    the predicate. When something does come back the filter is doing real
+    work and is applied as before, narrowed to the names that can match.
+
+    Checked per request rather than cached, so flipping an organism's
+    ``is_public`` property takes effect immediately, as it did before.
+    """
+    if not names:
+        return []
+    return list(
+        FeatureSearchIndex.objects.filter(organism__in=names)
+        .values_list("organism", flat=True)
+        .distinct()
+    )
 
 
 def _doi_titles(doi_values):
@@ -93,8 +125,8 @@ class FeatureSearchView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        excluded_organisms = _excluded_organism_names(
-            anonymous=not (user and user.is_authenticated)
+        excluded_organisms = _organisms_present_in_index(
+            _excluded_organism_names(anonymous=not (user and user.is_authenticated))
         )
         if excluded_organisms:
             qs = qs.exclude(organism__in=excluded_organisms)
@@ -224,8 +256,8 @@ class FeatureSearchExportView(ListView):
             qs = FeatureSearchIndex.objects.none()
 
         user = getattr(self.request, "user", None)
-        excluded_organisms = _excluded_organism_names(
-            anonymous=not (user and user.is_authenticated)
+        excluded_organisms = _organisms_present_in_index(
+            _excluded_organism_names(anonymous=not (user and user.is_authenticated))
         )
         if excluded_organisms:
             qs = qs.exclude(organism__in=excluded_organisms)
