@@ -23,8 +23,9 @@ python manage.py rebuild_search_index
 > **Note:** It is necessary to run `rebuild_search_index` whenever additional data is loaded into the database or when you wish to refresh the search facets.
 
 Rebuilding also clears the page cache, which is what makes newly loaded data
-visible on the search page. See [Cache](20-cache.md) for its one requirement,
-a writable cache directory.
+visible on the search page. See
+[Page cache](01-installation.md#page-cache) for its one requirement, a
+writable cache directory.
 
 Rebuilding the index walks the features in chunks: for each chunk it issues a
 fixed, small number of queries for all the related data the chunk needs, then

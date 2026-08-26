@@ -63,6 +63,7 @@ This generates the following files in the current directory:
 .
 |-- .env                # Your configuration (auto-generated SECRET_KEY)
 |-- .env.example        # Reference with all available settings
+|-- cache/              # Rendered search pages (see Page cache below)
 |-- manage.py
 +-- machadoproject/
     |-- __init__.py
@@ -84,6 +85,36 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 The `DATABASE_URL` format follows the [dj-database-url](https://github.com/jazzband/dj-database-url) convention. Replace `username`, `password`, and `yourdatabase` with the values you created in the Prerequisites step.
 
 See `.env.example` for the full list of optional settings including Elasticsearch, JBrowse, and API configuration.
+
+### Page cache
+
+Search pages are cached on disk and cleared automatically when you run
+`rebuild_search_index`. `machado-startproject` created a `cache/` directory for
+this, which is all a development install needs.
+
+For production, the directory has to be writable by **both** the web server and
+whoever runs `rebuild_search_index` — a directory inside the project tree
+usually is not. Put it outside and give both access:
+
+```bash
+sudo install -d -o www-data -g www-data -m 2775 /var/cache/machado
+sudo usermod -aG www-data $USER
+```
+
+Then set it in `.env`:
+
+```bash
+CACHE_DIR=/var/cache/machado
+```
+
+If the directory is not writable the site still works — pages are simply
+rebuilt on every request — and `python manage.py check` reports it as
+`machado.W001`.
+
+Two other settings are available, both optional: `CACHE_MAX_ENTRIES` (default
+`1000000`; note that omitting it entirely would mean Django's own default of
+300) and `CACHE_TIMEOUT` (default `3600`, applying only to the JBrowse API
+views, not to search pages).
 
 ## Migrate and run
 

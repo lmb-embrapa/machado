@@ -13,9 +13,16 @@ invalidates anything (see the ``cache.clear()`` calls in
 
 import functools
 import hashlib
+import logging
+import os
+import tempfile
 
+from django.conf import settings
 from django.core.cache import cache
+from django.core.checks import Warning as CheckWarning
 from django.http import HttpResponse
+
+logger = logging.getLogger(__name__)
 
 #: Bumped only if the stored representation changes shape, so an old cache
 #: cannot be misread as a new one.
@@ -60,6 +67,72 @@ def page_cache_key(request, authenticated):
     )
 
 
+def _read(key):
+    """Read a cached page, treating any backend failure as a miss.
+
+    Deliberately catching everything a backend might raise. The cache is an
+    optimisation, and a page that cannot be cached should be slow rather
+    than unavailable -- but FileBasedCache raises PermissionError from its
+    own constructor when it cannot create its directory, so without this an
+    unwritable CACHE_DIR turns every search into a 500. The failure is
+    logged on every request rather than silently swallowed, and
+    check_cache_directory() reports the same condition at deploy time.
+    """
+    try:
+        return cache.get(key)
+    except Exception:
+        logger.warning("page cache unreadable; serving uncached", exc_info=True)
+        return None
+
+
+def _write(key, value):
+    """Store a rendered page, ignoring a backend that cannot accept it."""
+    try:
+        cache.set(key, value, timeout=None)
+    except Exception:
+        logger.warning("page cache unwritable; not caching", exc_info=True)
+
+
+def check_cache_directory(app_configs, **kwargs):
+    """Warn when a FileBasedCache directory is not usable.
+
+    Registered as a system check so it runs on ``manage.py check`` -- and
+    therefore on ``runserver`` and before most management commands -- which
+    is where an operator setting the project up will see it. A warning
+    rather than an error: the site works without its page cache, only
+    slower, so this must never block a deploy.
+    """
+    config = (getattr(settings, "CACHES", None) or {}).get("default") or {}
+    if not config.get("BACKEND", "").endswith("filebased.FileBasedCache"):
+        return []
+
+    location = config.get("LOCATION")
+    if not location:
+        return []
+
+    try:
+        os.makedirs(location, mode=0o700, exist_ok=True)
+        # Creating the directory is not enough: it can exist while being
+        # owned by another user, which is the usual production mistake
+        # (Apache made it, or the operator did). Only a write proves it.
+        with tempfile.NamedTemporaryFile(dir=location):
+            pass
+    except OSError as error:
+        return [
+            CheckWarning(
+                "The page cache directory is not writable: {}".format(error),
+                hint=(
+                    "Search pages will be rebuilt on every request until this "
+                    "is fixed. Point CACHE_DIR at a directory writable by "
+                    "both the web server and whoever runs "
+                    "rebuild_search_index."
+                ),
+                id="machado.W001",
+            )
+        ]
+    return []
+
+
 def cache_page_per_auth(view):
     """Cache a view's rendered output, separately for the two audiences.
 
@@ -77,7 +150,7 @@ def cache_page_per_auth(view):
         authenticated = _is_authenticated(request)
         key = page_cache_key(request, authenticated)
 
-        hit = cache.get(key)
+        hit = _read(key)
         if hit is not None:
             return HttpResponse(
                 hit["content"],
@@ -88,13 +161,12 @@ def cache_page_per_auth(view):
 
         def store(rendered):
             if rendered.status_code == 200:
-                cache.set(
+                _write(
                     key,
                     {
                         "content": rendered.content,
                         "content_type": rendered.get("Content-Type"),
                     },
-                    timeout=None,
                 )
             return rendered
 
