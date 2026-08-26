@@ -26,18 +26,10 @@ sudo install -d -o www-data -g www-data -m 2775 /var/cache/machado
 sudo usermod -aG www-data $USER   # so you can run rebuild_search_index too
 ```
 
-Then set it in `.env`:
+A cache directory left inside the project tree (the default) will not be
+writable by Apache if the project is owned by another user, so on a
+production install set `CACHE_DIR` to a path outside it:
 
 ```
 CACHE_DIR=/var/cache/machado
 ```
-
-## Apache
-
-Under mod_wsgi the application runs as the Apache user — `www-data` on
-Debian/Ubuntu — unless `WSGIDaemonProcess` sets `user=`. That is the user
-that must own the cache directory above. See [Web server](18-webserver.md).
-
-A cache directory left inside the project tree (the default) will not be
-writable by Apache if the project is owned by another user, so on a
-production install set `CACHE_DIR` to a path outside it.
