@@ -43,6 +43,25 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # ── Feature types for search indexing (optional) ─────────────────────────────
 # MACHADO_VALID_TYPES=gene,mRNA,polypeptide
 
+# ── Cache (optional) ─────────────────────────────────────────────────────────
+# Rendered search pages are cached until the next rebuild_search_index run.
+# The defaults work as-is; the values below only tune them.
+#
+# Where the cache files live. Must be writable by the web server AND by
+# whoever runs rebuild_search_index -- if those are different users, create
+# the directory with a shared group rather than letting Django create it
+# 0700. Defaults to a "cache" directory beside manage.py.
+# CACHE_DIR=/var/cache/machado
+#
+# Effectively "no limit". Do not lower this without reading
+# docs/20-cache.md: Django's own default is 300 entries, and every write past
+# the limit deletes a third of the cache.
+# CACHE_MAX_ENTRIES=1000000
+#
+# How long the JBrowse API views stay cached, in seconds. Does not affect
+# search pages, which are invalidated by rebuild_search_index, not by time.
+# CACHE_TIMEOUT=3600
+
 # ── Landing page customization (optional) ────────────────────────────────────
 # All values below have sensible defaults; override only what you need.
 # A feature-card, how-it-works-heading, how-it-works-step, features-section,

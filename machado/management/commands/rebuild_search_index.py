@@ -20,6 +20,7 @@ features rather than per feature), which is what makes a multi-million-row
 rebuild practical.
 """
 
+from django.core.cache import cache as page_cache
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 from django.db.models import Max
@@ -115,6 +116,16 @@ class Command(HistoryCommandMixin, BaseCommand):
         else:
             self.clear_index()
 
+        # Cleared here as well as on the way out, and deliberately so: the
+        # cached pages describe an index that clear_index() has just
+        # truncated (or that this run is about to add rows to), so they are
+        # already wrong. Leaving them until the end would serve stale
+        # results for however long the rebuild takes -- hours on a real
+        # corpus -- and would leave them stale indefinitely if the run then
+        # failed. Machado's page cache never expires on its own, so a
+        # rebuild is the only thing that can invalidate it.
+        page_cache.clear()
+
         total = self.count_remaining(config, start_after)
         if limit is not None:
             total = min(total, limit)
@@ -172,6 +183,10 @@ class Command(HistoryCommandMixin, BaseCommand):
             raise
         finally:
             progress.close()
+            # In the finally block, not after it: an interrupted or failed
+            # run still leaves the index different from what the pages
+            # cached at the start of this run were rendered from.
+            page_cache.clear()
 
         self.report(
             self.style.SUCCESS(
