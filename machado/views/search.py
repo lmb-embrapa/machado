@@ -96,6 +96,43 @@ def _organisms_present_in_index(names):
     )
 
 
+def _selected_facets_without_checkbox(facets, selected_facets):
+    """Return the selected facets the filter form renders no checkbox for.
+
+    The sidebar's filter form is separate from the search form, so pressing
+    "Apply Filters" submits only what the filter form itself holds: the
+    checkboxes. A selection with no checkbox is therefore dropped on the
+    next submit -- which is what happened to every narrowing selection,
+    because filtering on a facet usually collapses its own card to a single
+    value and single-option cards are not rendered at all (they offer no
+    choice). Selecting an organism and then a feature type silently lost
+    the organism.
+
+    Two ways a selection ends up with no checkbox, both covered here:
+    its card is not rendered, or its value is not among the (at most 100)
+    values that card lists.
+
+    Values are compared as lowercased strings because the two sides are not
+    the same type: facet values come back from the database as Python ``bool``
+    or ``str``, while a selection is always querystring text -- and the
+    template writes booleans inconsistently ("false" for orthology, "False"
+    for orthologs_coexpression). Lowercasing both mirrors what
+    FeatureSearchForm._normalize_facet_value already tolerates when it
+    applies the filter.
+    """
+    missing = []
+    for selected in selected_facets:
+        field, _, value = selected.partition(":")
+        values = facets.get(field) or []
+        # A single-option card is not rendered, so it carries no checkbox.
+        if len(values) < 2:
+            missing.append(selected)
+            continue
+        if value.lower() not in {str(v).lower() for v, _ in values}:
+            missing.append(selected)
+    return missing
+
+
 def _doi_titles(doi_values):
     """Map DOI accession strings to their publication title, for facet display."""
     if not doi_values:
@@ -191,6 +228,9 @@ class FeatureSearchView(ListView):
         context["facet_fields_desc"] = FACET_FIELDS
         context["selected_facets"] = selected_facets
         context["selected_facets_fields"] = selected_facets_fields
+        context["unrendered_selected_facets"] = _selected_facets_without_checkbox(
+            facets, selected_facets
+        )
         context["so_term_count"] = so_term_count
         context["query"] = self.request.GET.get("q", "")
 

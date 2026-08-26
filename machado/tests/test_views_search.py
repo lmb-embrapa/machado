@@ -20,6 +20,7 @@ from machado.views.search import (
     FeatureSearchExportView,
     _doi_titles,
     _excluded_organism_names,
+    _selected_facets_without_checkbox,
 )
 from machado.searchindex import build_organism
 from machado.tests.searchindex_fixture import build_search_index_fixture
@@ -61,6 +62,36 @@ class SearchFacetTemplateTest(TestCase):
         )
         self.assertIn("A Great Paper About Kinases", html)
         self.assertIn('value="doi:10.1234/has-title"', html)
+
+    def test_selection_without_a_checkbox_is_carried_as_hidden_input(self):
+        """A selection the form cannot show must still be submitted.
+
+        Selecting a facet usually narrows its own card to a single value,
+        and single-option cards are not rendered -- so the checkbox that
+        carried the selection disappears. The facet form is separate from
+        the search form, so pressing "Apply Filters" then submits only what
+        this form holds, silently dropping the selection. A hidden input
+        keeps it.
+        """
+        html = render_to_string(
+            "search_facet.html",
+            {
+                # A non-empty selection renders the "Selected filters" card,
+                # whose remove links need the request in context.
+                "request": RequestFactory().get("/find/"),
+                "query": "",
+                "selected_facets": ["organism:Zea mays"],
+                "unrendered_selected_facets": ["organism:Zea mays"],
+                "facets": {"fields": {"so_term": [("gene", 3), ("mRNA", 2)]}},
+                "facet_fields_order": ["organism", "so_term"],
+                "facet_fields_desc": {"organism": "organism", "so_term": "so_term"},
+                "doi_titles": {},
+            },
+        )
+        self.assertIn(
+            '<input type="hidden" name="selected_facets" value="organism:Zea mays">',
+            html,
+        )
 
     def test_doi_facet_falls_back_to_doi_when_title_unknown(self):
         """A DOI with no known title falls back to displaying the raw DOI."""
@@ -321,6 +352,65 @@ class OrganismExclusionQuerysetTest(TestCase):
             "HIDDEN_1",
             names,
             "a hidden organism leaked into the results",
+        )
+
+
+class SelectedFacetsWithoutCheckboxTest(TestCase):
+    """Which selections the filter form cannot represent as a checkbox."""
+
+    def test_collapsed_card_needs_a_hidden_input(self):
+        """A facet narrowed to one value renders no card, so no checkbox."""
+        facets = {
+            "organism": [("Zea mays", 5)],
+            "so_term": [("gene", 3), ("mRNA", 2)],
+        }
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["organism:Zea mays"]),
+            ["organism:Zea mays"],
+        )
+
+    def test_multi_value_card_keeps_its_own_checkbox(self):
+        """A card still offering a choice carries the selection itself."""
+        facets = {"so_term": [("gene", 3), ("mRNA", 2)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["so_term:gene"]), []
+        )
+
+    def test_boolean_values_match_regardless_of_case(self):
+        """Facet values arrive as bools; selections arrive as querystring text.
+
+        The template writes them inconsistently -- "false" for orthology but
+        "False" for orthologs_coexpression -- so neither casing may be
+        treated as missing, or the filter would be submitted twice.
+        """
+        facets = {"orthology": [(False, 3), (True, 2)]}
+        for value in ("true", "True", "false", "False"):
+            self.assertEqual(
+                _selected_facets_without_checkbox(facets, [f"orthology:{value}"]),
+                [],
+                f"orthology:{value} was treated as having no checkbox",
+            )
+
+    def test_value_missing_from_a_rendered_card_needs_a_hidden_input(self):
+        """A card lists at most 100 values; a selection outside them has none."""
+        facets = {"orthologous_group": [("OG_1", 4), ("OG_2", 2)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["orthologous_group:OG_999"]),
+            ["orthologous_group:OG_999"],
+        )
+
+    def test_value_containing_a_colon_is_not_split_apart(self):
+        """Only the first colon separates field from value; DOIs contain them."""
+        facets = {"doi": [("10.1234/a:b", 2), ("10.5555/c", 1)]}
+        self.assertEqual(
+            _selected_facets_without_checkbox(facets, ["doi:10.1234/a:b"]), []
+        )
+
+    def test_facet_absent_from_the_page_needs_a_hidden_input(self):
+        """A selection whose field produced no facet at all is still kept."""
+        self.assertEqual(
+            _selected_facets_without_checkbox({}, ["organism:Zea mays"]),
+            ["organism:Zea mays"],
         )
 
 
