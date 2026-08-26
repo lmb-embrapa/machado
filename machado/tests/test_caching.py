@@ -6,14 +6,20 @@
 
 """Tests for whole-page caching of the search views."""
 
+import os
 import tempfile
+from unittest.mock import patch
 
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase, override_settings
 
-from machado.caching import cache_page_per_auth, page_cache_key
+from machado.caching import (
+    cache_page_per_auth,
+    check_cache_directory,
+    page_cache_key,
+)
 
 FILE_CACHE = {
     "default": {
@@ -159,3 +165,76 @@ class CachePagePerAuthTest(TestCase):
         cache.clear()
         self._get(AnonymousUser())
         self.assertEqual(len(self.calls), 2)
+
+    def test_an_unusable_cache_does_not_break_the_page(self):
+        """A broken cache must degrade to slow, never to down.
+
+        FileBasedCache raises PermissionError from its own constructor when
+        the directory cannot be created, so an unwritable CACHE_DIR would
+        otherwise turn every search into a 500 -- the page would be taken
+        down by the thing meant to speed it up.
+        """
+        with (
+            patch("machado.caching.cache.get", side_effect=PermissionError("denied")),
+            patch("machado.caching.cache.set", side_effect=PermissionError("denied")),
+        ):
+            first = self._get(AnonymousUser())
+            second = self._get(AnonymousUser())
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 200)
+        # Nothing could be stored, so every request renders afresh.
+        self.assertEqual(len(self.calls), 2)
+
+
+@override_settings(CACHES=FILE_CACHE)
+class CacheDirectoryCheckTest(TestCase):
+    """The system check that reports an unusable cache directory.
+
+    Runs on `manage.py check`, and so on runserver and before most
+    management commands -- which is where an operator will actually see it,
+    rather than in a page of documentation.
+    """
+
+    def test_writable_directory_reports_nothing(self):
+        """A usable cache directory is silent."""
+        self.assertEqual(check_cache_directory(None), [])
+
+    def test_unwritable_directory_is_reported(self):
+        """An unwritable directory produces a warning, not an error.
+
+        A warning rather than an error because the page cache is now
+        optional at runtime: the site works without it, only slower, so
+        this must not block a deploy.
+        """
+        with tempfile.TemporaryDirectory() as parent:
+            os.chmod(parent, 0o500)
+            try:
+                with override_settings(
+                    CACHES={
+                        "default": {
+                            "BACKEND": (
+                                "django.core.cache.backends.filebased." "FileBasedCache"
+                            ),
+                            "LOCATION": os.path.join(parent, "cache"),
+                        }
+                    }
+                ):
+                    messages = check_cache_directory(None)
+            finally:
+                os.chmod(parent, 0o700)
+
+        self.assertEqual(len(messages), 1, messages)
+        self.assertEqual(messages[0].id, "machado.W001")
+        self.assertIn("CACHE_DIR", messages[0].hint)
+
+    def test_non_filebased_backend_is_not_checked(self):
+        """Only FileBasedCache has a directory to get wrong."""
+        with override_settings(
+            CACHES={
+                "default": {
+                    "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                }
+            }
+        ):
+            self.assertEqual(check_cache_directory(None), [])

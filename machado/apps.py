@@ -22,6 +22,12 @@ class MachadoConfig(AppConfig):
 
     def ready(self):
         """Ready."""
+        from django.core.checks import register
+
+        from machado.caching import check_cache_directory
+
+        register(check_cache_directory)
+
         try:
             dt_settings.patch_all()
             from machado.models import Organism

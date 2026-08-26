@@ -200,6 +200,17 @@ def main():
     if manage_py.exists():
         manage_py.chmod(manage_py.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
 
+    # ── Create the default page cache directory ──────────────────────────────
+    # Matches settings.py's CACHE_DIR default. Created here so a new project
+    # caches out of the box and the machado.W001 system check passes without
+    # the operator having to do anything; a production install pointing
+    # CACHE_DIR elsewhere just leaves this one unused.
+    cache_dir = target / "cache"
+    if not cache_dir.exists():
+        cache_dir.mkdir(mode=0o755)
+        if verbose:
+            print("  created: cache/")
+
     # ── Print next steps ─────────────────────────────────────────────────────
     if verbose:
         print(f"""
