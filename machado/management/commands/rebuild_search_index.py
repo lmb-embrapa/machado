@@ -20,12 +20,12 @@ features rather than per feature), which is what makes a multi-million-row
 rebuild practical.
 """
 
-from django.core.cache import cache as page_cache
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 from django.db.models import Max
 from tqdm import tqdm
 
+from machado.caching import clear_page_cache
 from machado.management.commands._base import HistoryCommandMixin
 from machado.models import Feature, FeatureSearchIndex
 from machado.searchindex import (
@@ -124,7 +124,7 @@ class Command(HistoryCommandMixin, BaseCommand):
         # corpus -- and would leave them stale indefinitely if the run then
         # failed. Machado's page cache never expires on its own, so a
         # rebuild is the only thing that can invalidate it.
-        page_cache.clear()
+        clear_page_cache()
 
         total = self.count_remaining(config, start_after)
         if limit is not None:
@@ -186,7 +186,7 @@ class Command(HistoryCommandMixin, BaseCommand):
             # In the finally block, not after it: an interrupted or failed
             # run still leaves the index different from what the pages
             # cached at the start of this run were rendered from.
-            page_cache.clear()
+            clear_page_cache()
 
         self.report(
             self.style.SUCCESS(

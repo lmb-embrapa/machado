@@ -8,7 +8,9 @@
 
 from datetime import datetime, timezone
 import json
-from django.test import TestCase, Client
+import tempfile
+from django.core.cache import cache
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 
@@ -326,3 +328,66 @@ class OrganismPermissionsTest(TestCase):
         response = self.client.get(features_url + "?organism=Arabidopsis%20thaliana")
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(json.loads(response.content), {"features": []})
+
+
+FILE_CACHE = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": tempfile.mkdtemp(prefix="machado-test-permcache-"),
+        "TIMEOUT": None,
+        "OPTIONS": {"MAX_ENTRIES": 10000},
+    }
+}
+
+
+@override_settings(CACHES=FILE_CACHE)
+class VisibilityInvalidatesPageCacheTest(TestCase):
+    """Changing visibility drops the rendered pages that assumed the old one.
+
+    Visibility decides which features an anonymous visitor is counted and
+    shown, so a cached anonymous page outlives the change that falsified it.
+    The page cache has no expiry, so without this the page stays wrong until
+    the next index rebuild -- which may never come.
+    """
+
+    def setUp(self):
+        """One organism, and an empty cache."""
+        cache.clear()
+        self.organism = Organism.objects.create(genus="Zea", species="mays")
+
+    def test_making_an_organism_private_clears_cached_pages(self):
+        """The entry a visitor would have been served is gone afterwards."""
+        cache.set("machado.page.anon.stale", {"content": b"old"}, timeout=None)
+
+        self.organism.set_public(False)
+
+        self.assertIsNone(cache.get("machado.page.anon.stale"))
+
+    def test_making_an_organism_public_clears_cached_pages(self):
+        """Both directions falsify a cached page, so both must clear."""
+        self.organism.set_public(False)
+        cache.set("machado.page.anon.stale", {"content": b"old"}, timeout=None)
+
+        self.organism.set_public(True)
+
+        self.assertIsNone(cache.get("machado.page.anon.stale"))
+
+    def test_the_permissions_endpoint_clears_cached_pages(self):
+        """The path an operator actually takes, not just the model method."""
+        User.objects.create_superuser(
+            username="perm-admin", password="password", email="perm@example.com"
+        )
+        client = Client()
+        client.login(username="perm-admin", password="password")
+        cache.set("machado.page.anon.stale", {"content": b"old"}, timeout=None)
+
+        response = client.post(
+            reverse("loader_permissions"),
+            data=json.dumps(
+                {"organism_id": self.organism.organism_id, "is_public": False}
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(cache.get("machado.page.anon.stale"))
