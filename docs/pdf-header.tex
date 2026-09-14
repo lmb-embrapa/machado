@@ -1,0 +1,18 @@
+% Included at the end of the preamble by build-pdf.sh, so this overrides
+% pandoc's own definition above it.
+%
+% pandoc's \pandocbounded scales an image to fit \textheight exactly. Inside a
+% figure the caption is then added on top, so a full-height image overflows the
+% page and LaTeX reports "Float too large for page". Leaving a tenth of the
+% page free is enough for any caption in this manual.
+\makeatletter
+\renewcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{0.9\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi%
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+\makeatother

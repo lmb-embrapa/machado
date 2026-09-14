@@ -17,10 +17,11 @@ The same pattern applies to several whole sections, which are hidden automatical
 - The "How It Works" heading and subtitle are hidden when `MACHADO_HOWITWORKS_TITLE` is set to an empty string — the three step cards below it (`MACHADO_STEP1_TITLE` etc.) are unaffected and keep their own individual hide rule.
 - The Acknowledgements section is hidden unless `MACHADO_ACKNOWLEDGEMENTS_TEXT` is set — it is **empty by default**, so this section does not appear at all until you configure it.
 - The footer's extra text block is hidden unless `MACHADO_FOOTER_TEXT` is set — it is also **empty by default**.
+- The live stats panel (Organisms / Genomic Features / Ingestion Formats) is hidden by setting `MACHADO_SHOW_STATS=False`. This one is a boolean rather than an empty title, because the panel has no title to blank out; turning it off also skips the two database counts behind it, which are unfiltered scans of the organism and feature tables.
 
 ### Settings Reference
 
-Below is a complete reference of the 28 customizable settings, their corresponding environment variables, and their default values:
+Below is a complete reference of the 29 customizable settings, their corresponding environment variables, and their default values:
 
 | Environment Variable | Description | Default Value |
 | :--- | :--- | :--- |
@@ -46,6 +47,8 @@ Below is a complete reference of the 28 customizable settings, their correspondi
 | `MACHADO_FEATURE3_TITLE` | Title of the third feature card. | `"Genome Browser Integration"` |
 | `MACHADO_FEATURE3_TEXT` | Description of the third feature. | `"Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments."` |
 | `MACHADO_FEATURE3_ICON` | FontAwesome 5 CSS class name for the card icon. | `"fas fa-align-left"` |
+| **Live Stats Panel** | | |
+| `MACHADO_SHOW_STATS` | Whether to show the stats panel below the feature cards. Set to `False` to hide all three cards and skip the two counts that back them. | `True` |
 | **How It Works Heading** | | |
 | `MACHADO_HOWITWORKS_TITLE` | Heading above the "How It Works" step cards. Setting this to an empty string hides the whole heading and subtitle, but not the step cards below it. | `"How Machado Genomics Operates"` |
 | `MACHADO_HOWITWORKS_SUBTITLE` | Subtitle text shown below the How It Works heading. | `"From raw genomic files to interactive database search and visualization."` |
@@ -86,22 +89,30 @@ A "Release Notes" section is dynamically displayed at the bottom of the landing 
 
 To define release notes, create a file named `release_notes.json` in your project's base directory (the directory containing `manage.py` and your `.env` file). The file must contain a JSON array of objects, each representing a release.
 
+Three keys are read from each object:
+
+- `version` — written **without** a leading `v`. The landing page prepends one, so `"1.2.0"` renders as `v1.2.0` and `"v1.2.0"` would render as `vv1.2.0`.
+- `date` — shown next to the version, as given. Any format you like.
+- `description` — rendered as a single block of plain text. Markdown is not interpreted and line breaks are not preserved, so write one paragraph of prose rather than a bulleted list.
+
+Entries appear in the order given, and the first is expanded on page load — so put the newest release first.
+
 Here is an example format of a `release_notes.json` file:
 
 ```json
 [
   {
-    "version": "v1.2.0",
+    "version": "1.2.0",
     "date": "2026-06-12",
     "description": "Added customizable landing page settings and a brand new Release Notes accordion section. Fixed JBrowse alignment offset issues."
   },
   {
-    "version": "v1.1.0",
+    "version": "1.1.0",
     "date": "2026-04-05",
     "description": "Improved PostgreSQL search performance and added full-text index triggers for faster multi-faceted query execution."
   },
   {
-    "version": "v1.0.0",
+    "version": "1.0.0",
     "date": "2026-01-10",
     "description": "Initial stable release of the Machado Genomics data portal framework with support for core GFF3, FASTA, and BLAST loaders."
   }
