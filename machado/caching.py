@@ -3,12 +3,14 @@
 # This code is part of the machado distribution and governed by its
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
-"""Whole-page caching for the read-heavy search views.
+"""Whole-page caching for the read-heavy search and summary views.
 
 The corpus is loaded once and then only read, so a rendered page stays
-correct until the search index is rebuilt -- which is the only event that
-invalidates anything (see the ``cache.clear()`` calls in
-``rebuild_search_index``). Entries therefore never expire on their own.
+correct until something changes what it would render. Two events do:
+rebuilding the search index, and changing an organism's visibility (which
+moves rows in and out of what an anonymous visitor may see). Both route
+through :func:`clear_page_cache`. Entries never expire on their own, so an
+event that does not route through there leaves pages stale indefinitely.
 """
 
 import functools
@@ -91,6 +93,29 @@ def _write(key, value):
         cache.set(key, value, timeout=None)
     except Exception:
         logger.warning("page cache unwritable; not caching", exc_info=True)
+
+
+def clear_page_cache():
+    """Drop every cached page, treating a broken backend as nothing to do.
+
+    Called whenever something changes what a cached page would render:
+    rebuilding the search index, and changing an organism's visibility. The
+    cache holds no expiry of its own, so an event that is not routed through
+    here leaves the affected pages stale indefinitely.
+
+    Deliberately clearing everything rather than the affected keys. A page's
+    key is a digest of its query parameters, so the entries touched by one
+    organism turning private cannot be enumerated -- and the pages that must
+    go are exactly the ones whose facet counts mention it, which is most of
+    them. Rebuilding a handful of pages costs less than being wrong.
+
+    Failures are swallowed for the same reason as in _read and _write: an
+    unusable cache must make the site slower, never broken.
+    """
+    try:
+        cache.clear()
+    except Exception:
+        logger.warning("page cache could not be cleared", exc_info=True)
 
 
 def check_cache_directory(app_configs, **kwargs):

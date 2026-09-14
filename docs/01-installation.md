@@ -88,9 +88,11 @@ See `.env.example` for the full list of optional settings including Elasticsearc
 
 ### Page cache
 
-Search pages are cached on disk and cleared automatically when you run
-`rebuild_search_index`. `machado-startproject` created a `cache/` directory for
-this, which is all a development install needs.
+The search page (`/find/`) and the data summary (`/data/`) are cached on disk
+and cleared automatically — when you run `rebuild_search_index`, and when you
+change an organism's visibility from the permissions panel.
+`machado-startproject` created a `cache/` directory for this, which is all a
+development install needs.
 
 For production, the directory has to be writable by **both** the web server and
 whoever runs `rebuild_search_index` — a directory inside the project tree
@@ -114,7 +116,12 @@ rebuilt on every request — and `python manage.py check` reports it as
 Two other settings are available, both optional: `CACHE_MAX_ENTRIES` (default
 `1000000`; note that omitting it entirely would mean Django's own default of
 300) and `CACHE_TIMEOUT` (default `3600`, applying only to the JBrowse API
-views, not to search pages).
+views, not to cached pages).
+
+Cached pages have no expiry of their own, so only the two events above clear
+them. If you change the database by some other route — editing rows directly,
+say — the cached pages keep the old numbers until one of those events happens.
+Running `rebuild_search_index` is the way to force it.
 
 ## Migrate and run
 

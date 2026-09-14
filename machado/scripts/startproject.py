@@ -54,7 +54,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # CACHE_DIR=/var/cache/machado
 #
 # Effectively "no limit". Do not lower this without reading
-# docs/20-cache.md: Django's own default is 300 entries, and every write past
+# docs/01-installation.md: Django's own default is 300 entries, and every write past
 # the limit deletes a third of the cache.
 # CACHE_MAX_ENTRIES=1000000
 #
@@ -87,6 +87,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # MACHADO_FEATURE3_TITLE=Genome Browser Integration
 # MACHADO_FEATURE3_TEXT=Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments.
 # MACHADO_FEATURE3_ICON=fas fa-align-left
+# MACHADO_SHOW_STATS=True
 # MACHADO_HOWITWORKS_TITLE=How Machado Genomics Operates
 # MACHADO_HOWITWORKS_SUBTITLE=From raw genomic files to interactive database search and visualization.
 # MACHADO_STEP1_TITLE=Load Data

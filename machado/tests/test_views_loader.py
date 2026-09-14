@@ -61,9 +61,11 @@ class LoaderViewsTest(TestCase):
         )
 
     def test_load_fasta_checkbox_nosequence_sent_as_flag(self):
-        """Regression: a checked 'nosequence' checkbox must become a bare
-        --nosequence flag, not '--nosequence true', which argparse rejects
-        for a store_true argument."""
+        """A checked 'nosequence' checkbox becomes a bare flag.
+
+        Regression: it must render as --nosequence, not '--nosequence true',
+        which argparse rejects for a store_true argument.
+        """
         url = reverse("loader_command_form", kwargs={"command_name": "load_fasta"})
         data = {
             "file_upload": SimpleUploadedFile("test.fasta", b">seq1\nACGT\n"),

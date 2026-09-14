@@ -53,6 +53,11 @@ DEFAULTS = {
         "for sequence and annotation alignments."
     ),
     "MACHADO_FEATURE3_ICON": "fas fa-align-left",
+    # Live stats panel (organism count, feature count, ingestion formats).
+    # A boolean rather than the empty-title convention used above: the panel
+    # has no configurable title to blank out, and its two counts are full
+    # table scans that HomeView skips entirely when this is off.
+    "MACHADO_SHOW_STATS": True,
     # How It Works heading (empty title hides the whole heading, not the steps)
     "MACHADO_HOWITWORKS_TITLE": "How Machado Genomics Operates",
     "MACHADO_HOWITWORKS_SUBTITLE": (

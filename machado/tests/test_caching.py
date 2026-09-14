@@ -18,6 +18,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from machado.caching import (
     cache_page_per_auth,
     check_cache_directory,
+    clear_page_cache,
     page_cache_key,
 )
 
@@ -185,6 +186,38 @@ class CachePagePerAuthTest(TestCase):
         self.assertEqual(second.status_code, 200)
         # Nothing could be stored, so every request renders afresh.
         self.assertEqual(len(self.calls), 2)
+
+
+@override_settings(CACHES=FILE_CACHE)
+class ClearPageCacheTest(TestCase):
+    """The single invalidation entry point.
+
+    Both events that can falsify a cached page -- an index rebuild and an
+    organism's visibility changing -- go through here, so this is the only
+    thing standing between a stale page and a visitor.
+    """
+
+    def setUp(self):
+        """Start from an empty cache."""
+        cache.clear()
+
+    def test_it_removes_stored_pages(self):
+        """A cleared entry is gone, which is what invalidation means here."""
+        cache.set("machado.page.anon.abc", {"content": b"old"}, timeout=None)
+        clear_page_cache()
+        self.assertIsNone(cache.get("machado.page.anon.abc"))
+
+    def test_a_broken_backend_does_not_raise(self):
+        """An unusable cache must not take down whatever triggered the clear.
+
+        set_public runs this mid-request and rebuild_search_index runs it
+        from a finally block; in both, an exception here would surface as a
+        failure of the operation itself rather than of the cache.
+        """
+        with patch(
+            "machado.caching.cache.clear", side_effect=PermissionError("denied")
+        ):
+            clear_page_cache()
 
 
 @override_settings(CACHES=FILE_CACHE)

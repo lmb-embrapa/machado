@@ -13,6 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 
+from machado.caching import clear_page_cache
+
 # DUPLICATED LOGIC -- KEEP IN LOCKSTEP WITH machado/searchindex.py.
 #
 # This module and ``machado.searchindex`` resolve the same three things by the
@@ -586,6 +588,17 @@ def set_organism_public(self, is_public: bool):
     # and then reads organism.is_public in the same request to build its JSON
     # response; without this the response would report the pre-change value.
     self.__dict__.pop("is_public", None)
+
+    # Drop the rendered pages too. Visibility decides which features an
+    # anonymous visitor is shown on /find/ and /data/, so every cached
+    # anonymous page that counted this organism is now wrong, and the cache
+    # has no expiry that would eventually correct it.
+    #
+    # Done here rather than in the view so that any caller changing
+    # visibility is covered, not just the permissions panel. Callers
+    # flipping many organisms in a loop will clear once per organism; that
+    # is wasteful but not incorrect, and no caller does it today.
+    clear_page_cache()
 
 
 def machado_organism_methods():

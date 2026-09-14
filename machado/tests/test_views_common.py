@@ -7,7 +7,9 @@
 """Tests common view."""
 
 from datetime import datetime, timezone
+import tempfile
 
+from django.core.cache import cache
 from django.test import Client, TestCase, RequestFactory, override_settings
 from django.urls.exceptions import NoReverseMatch
 from django.utils.html import escape
@@ -346,6 +348,79 @@ class DataSummaryTest(TestCase):
         self.assertNotContains(response, "multispecies multispecies")
 
 
+FILE_CACHE = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": tempfile.mkdtemp(prefix="machado-test-datacache-"),
+        "TIMEOUT": None,
+        "OPTIONS": {"MAX_ENTRIES": 10000},
+    }
+}
+
+
+@override_settings(CACHES=FILE_CACHE)
+class DataSummaryCacheTest(TestCase):
+    """/data/ is served from the page cache between corpus changes.
+
+    Written against the URL rather than the view class because the caching
+    lives in the urlconf -- calling DataSummaryView.get() directly, as the
+    tests above do, bypasses the decorator entirely and would pass whether
+    or not the page is cached.
+    """
+
+    def setUp(self):
+        """One organism with one gene, and an empty cache."""
+        cache.clear()
+        self.client = Client()
+
+        so_db = Db.objects.create(name="SO")
+        so_cv = Cv.objects.create(name="sequence")
+        gene_dbxref = Dbxref.objects.create(accession="gene", db=so_db)
+        self.gene_cvterm = Cvterm.objects.create(
+            name="gene",
+            cv=so_cv,
+            dbxref=gene_dbxref,
+            is_obsolete=0,
+            is_relationshiptype=0,
+        )
+        self.organism = Organism.objects.create(genus="Mus", species="musculus")
+        self._add_feature("feat_1")
+
+    def _add_feature(self, uniquename):
+        return Feature.objects.create(
+            organism=self.organism,
+            uniquename=uniquename,
+            is_analysis=False,
+            type=self.gene_cvterm,
+            is_obsolete=False,
+            timeaccessioned=datetime.now(timezone.utc),
+            timelastmodified=datetime.now(timezone.utc),
+        )
+
+    def test_the_page_is_served_from_cache(self):
+        """A corpus change is not visible until something invalidates.
+
+        Asserting the stale read on purpose: it is the observable proof that
+        the response came from the cache rather than from a fresh count.
+        """
+        first = self.client.get("/data/")
+        self.assertEqual(first.status_code, 200)
+
+        self._add_feature("feat_2")
+        second = self.client.get("/data/")
+
+        self.assertEqual(second.content, first.content)
+
+    def test_clearing_the_cache_shows_the_new_count(self):
+        """And once invalidated, the next request re-counts."""
+        first = self.client.get("/data/")
+        self._add_feature("feat_2")
+        cache.clear()
+        second = self.client.get("/data/")
+
+        self.assertNotEqual(second.content, first.content)
+
+
 class HomeViewTest(TestCase):
     """Tests Home View."""
 
@@ -396,6 +471,47 @@ class HomeViewTest(TestCase):
         request = factory.get("/")
         ctx = machado_site(request)
         self.assertEqual(ctx["machado_feature1_title"], "")
+
+    def test_stats_panel_shown_by_default(self):
+        """Default True, so upgrading a project does not change its page."""
+        response = self.client.get("/")
+        self.assertContains(response, "Ingestion Formats")
+
+    @override_settings(MACHADO_SHOW_STATS=False)
+    def test_stats_panel_hidden_when_disabled(self):
+        """All three cards go, not just the two database-backed ones."""
+        response = self.client.get("/")
+        self.assertNotContains(response, "Ingestion Formats")
+        self.assertNotContains(response, "Genomic Features")
+        self.assertNotContains(response, "m-stats-grid")
+
+    @override_settings(MACHADO_SHOW_STATS=False)
+    def test_counts_are_not_computed_when_disabled(self):
+        """The point of the setting: skip the scans, not just the markup.
+
+        Both counts are unfiltered table scans, and the feature one runs over
+        the largest table in the schema. Rendering nothing with them still
+        computed would leave exactly the cost the setting exists to avoid.
+        """
+        request = RequestFactory().get("/")
+        hv = common.HomeView()
+        hv.request = request
+
+        context = hv.get_context_data()
+
+        self.assertNotIn("organism_count", context)
+        self.assertNotIn("feature_count", context)
+
+    def test_counts_are_computed_when_enabled(self):
+        """The counterpart: with the panel on, the numbers are there."""
+        request = RequestFactory().get("/")
+        hv = common.HomeView()
+        hv.request = request
+
+        context = hv.get_context_data()
+
+        self.assertIn("organism_count", context)
+        self.assertIn("feature_count", context)
 
     def test_release_notes_not_in_context_when_no_file(self):
         """machado_release_notes should be an empty list when no file exists."""

@@ -44,7 +44,12 @@ urlpatterns = [
     ),
     re_path(
         r"^data/$",
-        common.DataSummaryView.as_view(),
+        # Cached whole-page, on the same terms as /find/ below: one grouped
+        # count over every feature row, plus a publication lookup per
+        # organism, to render a page that only changes when the corpus does.
+        # Invalidated by rebuild_search_index and by an organism's visibility
+        # changing -- see machado.caching.clear_page_cache.
+        cache_page_per_auth(common.DataSummaryView.as_view()),
         name="data_numbers",
     ),
     re_path(
