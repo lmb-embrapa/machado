@@ -21,8 +21,19 @@ class HomeView(TemplateView):
     template_name = "index.html"
 
     def get_context_data(self, **kwargs):
-        """Get the context data for Home page view."""
+        """Get the context data for Home page view.
+
+        The two counts exist only to fill the landing page's stats panel, so
+        they are skipped when MACHADO_SHOW_STATS turns it off. Neither is
+        cheap: both are unfiltered scans, of the organism table and of the
+        feature table, and the feature table is the multi-million-row one.
+        Computing them to render nothing would be the whole cost of the page.
+        """
         context = super().get_context_data(**kwargs)
+
+        if not getattr(settings, "MACHADO_SHOW_STATS", True):
+            return context
+
         user = getattr(self.request, "user", None)
         if not user or not user.is_authenticated:
             private_orgs = Organism.objects.filter(

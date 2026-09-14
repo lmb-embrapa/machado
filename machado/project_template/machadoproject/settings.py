@@ -87,17 +87,18 @@ DATABASES = {"default": env.db()}
 # A shared backend is required, not merely preferable. Django's default
 # LocMemCache is per-process, and rebuild_search_index runs in a different
 # process from the web workers -- so it could not invalidate the pages they
-# have cached, and /find/ pages never expire on their own (see below).
+# have cached, and cached pages never expire on their own (see below).
 #
 # FileBasedCache rather than DatabaseCache: it is the only built-in backend
 # that compresses what it stores, and these pages compress about 130x (a
 # search page is ~1.8MB of largely repetitive HTML, stored in ~36KB).
 # DatabaseCache base64-encodes instead, inflating the same page to ~2.4MB.
-# Neither needs a separate server. See docs/20-cache.md.
+# Neither needs a separate server. See docs/01-installation.md#page-cache.
 #
-# TIMEOUT None means entries never expire on their own: the corpus is
-# read-only between index rebuilds, so a rebuild is the only thing that
-# invalidates a page, and rebuild_search_index clears the cache itself.
+# TIMEOUT None means entries never expire on their own. The corpus is
+# read-only between index rebuilds, so what invalidates a page is an event,
+# not the clock: rebuild_search_index clears the cache itself, and so does
+# changing an organism's visibility.
 #
 # MAX_ENTRIES has to be stated. Omitting it does not mean "unlimited", it
 # means 300, and every write past that culls a third of the cache.
@@ -110,8 +111,8 @@ CACHES = {
     }
 }
 
-# How long the JBrowse API views are cached. Unrelated to the /find/ page
-# cache above, which is invalidated by rebuild_search_index rather than time.
+# How long the JBrowse API views are cached. Unrelated to the page cache
+# above, which is invalidated by events rather than by time.
 CACHE_TIMEOUT = env.int("CACHE_TIMEOUT", default=60 * 60)
 
 # ── Internationalization ─────────────────────────────────────────────────────
@@ -211,6 +212,11 @@ MACHADO_FEATURE3_TEXT = env(
     ),
 )
 MACHADO_FEATURE3_ICON = env("MACHADO_FEATURE3_ICON", default="fas fa-align-left")
+
+# Live stats panel on the landing page (organism count, feature count,
+# ingestion formats). Turning it off also skips the two counts behind it,
+# which are unfiltered scans of the organism and feature tables.
+MACHADO_SHOW_STATS = env.bool("MACHADO_SHOW_STATS", default=True)
 
 # How It Works heading (set title to empty string to hide the heading, not the steps)
 MACHADO_HOWITWORKS_TITLE = env(
