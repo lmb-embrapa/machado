@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "machado"
-version = "0.8.0"
+version = "0.9.0"
 description = "This library provides users with a framework to store, search and visualize biological data."
 readme = "README.md"
 license = "GPL-3.0-only"
