@@ -14,14 +14,14 @@ If your installation does not require all feature cards or all "How it works" st
 The same pattern applies to several whole sections, which are hidden automatically when their controlling setting is empty:
 
 - The "Key Features & Capabilities" heading and subtitle are hidden when `MACHADO_FEATURES_TITLE` is set to an empty string.
-- The "How It Works" heading and subtitle are hidden when `MACHADO_HOWITWORKS_TITLE` is set to an empty string — the three step cards below it (`MACHADO_STEP1_TITLE` etc.) are unaffected and keep their own individual hide rule.
+- The "How It Works" heading, subtitle and body text are hidden when `MACHADO_HOWITWORKS_TITLE` is set to an empty string — the three step cards below it (`MACHADO_STEP1_TITLE` etc.) are unaffected and keep their own individual hide rule.
 - The Acknowledgements section is hidden unless `MACHADO_ACKNOWLEDGEMENTS_TEXT` is set — it is **empty by default**, so this section does not appear at all until you configure it.
 - The footer's extra text block is hidden unless `MACHADO_FOOTER_TEXT` is set — it is also **empty by default**.
 - The live stats panel (Organisms / Genomic Features / Ingestion Formats) is hidden by setting `MACHADO_SHOW_STATS=False`. This one is a boolean rather than an empty title, because the panel has no title to blank out; turning it off also skips the two database counts behind it, which are unfiltered scans of the organism and feature tables.
 
 ### Settings Reference
 
-Below is a complete reference of the 29 customizable settings, their corresponding environment variables, and their default values:
+Below is a complete reference of the 36 customizable settings, their corresponding environment variables, and their default values:
 
 | Environment Variable | Description | Default Value |
 | :--- | :--- | :--- |
@@ -39,19 +39,26 @@ Below is a complete reference of the 29 customizable settings, their correspondi
 | `MACHADO_FEATURE1_TITLE` | Title of the first feature card. | `"Multi-Format Data Loaders"` |
 | `MACHADO_FEATURE1_TEXT` | Description of the first feature. | `"Ingest data seamlessly from standard bioinformatics formats including FASTA, GFF3, OBO, BibTeX, BLAST, InterProScan, and OrthoMCL directly into the Chado relational schema."` |
 | `MACHADO_FEATURE1_ICON` | FontAwesome 5 CSS class name for the card icon. | `"fas fa-file-import"` |
+| `MACHADO_FEATURE1_LINK_TEXT` | Wording of the call-to-action link at the bottom of the first card. | `"Read Documentation"` |
+| `MACHADO_FEATURE1_LINK_URL` | Destination of that link. Leave empty to use the built-in route, the loader dashboard. | `""` (loader dashboard) |
 | **Feature Card 2** | | |
 | `MACHADO_FEATURE2_TITLE` | Title of the second feature card. | `"PostgreSQL Faceted Search"` |
 | `MACHADO_FEATURE2_TEXT` | Description of the second feature. | `"Execute complex queries powered by PostgreSQL full-text search. Filter features by organism, sequence ontology terms, orthology, coexpression groups, and related publications."` |
 | `MACHADO_FEATURE2_ICON` | FontAwesome 5 CSS class name for the card icon. | `"fas fa-search"` |
+| `MACHADO_FEATURE2_LINK_TEXT` | Wording of the call-to-action link at the bottom of the second card. | `"Start Searching"` |
+| `MACHADO_FEATURE2_LINK_URL` | Destination of that link. Leave empty to use the built-in route, the feature search. | `""` (feature search) |
 | **Feature Card 3** | | |
 | `MACHADO_FEATURE3_TITLE` | Title of the third feature card. | `"Genome Browser Integration"` |
 | `MACHADO_FEATURE3_TEXT` | Description of the third feature. | `"Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments."` |
 | `MACHADO_FEATURE3_ICON` | FontAwesome 5 CSS class name for the card icon. | `"fas fa-align-left"` |
+| `MACHADO_FEATURE3_LINK_TEXT` | Wording of the call-to-action link at the bottom of the third card. | `"Browse Organisms"` |
+| `MACHADO_FEATURE3_LINK_URL` | Destination of that link. Leave empty to use the built-in route, the data summary. | `""` (data summary) |
 | **Live Stats Panel** | | |
 | `MACHADO_SHOW_STATS` | Whether to show the stats panel below the feature cards. Set to `False` to hide all three cards and skip the two counts that back them. | `True` |
 | **How It Works Heading** | | |
 | `MACHADO_HOWITWORKS_TITLE` | Heading above the "How It Works" step cards. Setting this to an empty string hides the whole heading and subtitle, but not the step cards below it. | `"How Machado Genomics Operates"` |
 | `MACHADO_HOWITWORKS_SUBTITLE` | Subtitle text shown below the How It Works heading. | `"From raw genomic files to interactive database search and visualization."` |
+| `MACHADO_HOWITWORKS_TEXT` | Optional body paragraph below the subtitle. Accepts links and line breaks (see *Links and line breaks* below). Hidden when empty. | `""` |
 | **Step 1 (How It Works)** | | |
 | `MACHADO_STEP1_TITLE` | Title for step 1 of the platform overview. | `"Load Data"` |
 | `MACHADO_STEP1_TEXT` | Explanation of how data loading works. | `"Administrators run commands or use data tools to load genomic files into the database."` |
@@ -63,16 +70,44 @@ Below is a complete reference of the 29 customizable settings, their correspondi
 | `MACHADO_STEP3_TEXT` | Explanation of how discovery/viewing works. | `"Users inspect features, view analysis results, download bulk data, and browse via JBrowse."` |
 | **Acknowledgements Section (optional)** | | |
 | `MACHADO_ACKNOWLEDGEMENTS_TITLE` | Heading for the Acknowledgements section. | `"Acknowledgements"` |
-| `MACHADO_ACKNOWLEDGEMENTS_TEXT` | Body text for the Acknowledgements section. This section is **hidden from the page entirely** unless this setting is non-empty; it is empty by default. | `""` |
+| `MACHADO_ACKNOWLEDGEMENTS_TEXT` | Body text for the Acknowledgements section. Accepts links and line breaks (see *Links and line breaks* below). This section is **hidden from the page entirely** unless this setting is non-empty; it is empty by default. | `""` |
 | **Footer** | | |
 | `MACHADO_FOOTER_COPYRIGHT` | Copyright line shown in the footer. | `"© 2026 Embrapa. All rights reserved."` |
 | `MACHADO_FOOTER_TEXT` | Optional extra text block shown above the footer's copyright/attribution row. Hidden entirely unless set; empty by default. | `""` |
+
+### Links and line breaks
+
+Two settings — `MACHADO_HOWITWORKS_TEXT` and `MACHADO_ACKNOWLEDGEMENTS_TEXT` — are rendered as HTML rather than as plain text, so they can carry links out to a funding agency, a partner institution, or your own documentation. Every other setting in the table above is escaped and will show any markup you write literally.
+
+A `.env` value is always a single line, so write a line break as the two characters `\n`:
+
+```
+MACHADO_ACKNOWLEDGEMENTS_TEXT=Funded by <a href="https://fapesp.br">FAPESP</a> grant 0000/00000-0.\nHosted by <a href="https://www.embrapa.br">Embrapa</a>.
+```
+
+That renders as two lines, each carrying a working link. A real newline works too, if you set the variable from something other than a `.env` file.
+
+Because these two values are **not** escaped, whatever HTML you put in them reaches the page as-is. That is safe here because `.env` is written by whoever deploys the instance and is never reachable by a site visitor — but it does mean a stray `<` or an unclosed tag will break the page layout rather than show up as text.
+
+### Feature card links
+
+Each feature card ends with a call-to-action link whose wording and destination are configurable:
+
+| Card | Default wording | Default destination |
+| :--- | :--- | :--- |
+| 1 | "Read Documentation" | the loader dashboard |
+| 2 | "Start Searching" | the feature search, with an empty query |
+| 3 | "Browse Organisms" | the data summary |
+
+Leaving a `_LINK_URL` empty keeps the built-in destination, which is resolved from machado's own URL configuration and therefore stays correct under a `URL_PREFIX` sub-path deployment. Setting one replaces the destination with exactly the URL you give, so use an absolute URL when pointing off-site.
+
+Card 1's link is shown to every visitor, signed in or not. Its default destination, the loader dashboard, requires a login, so an anonymous visitor who follows it lands on the login page and is returned to the dashboard afterwards. If your instance has no data-loading users, point `MACHADO_FEATURE1_LINK_URL` somewhere public instead — the machado manual, for example.
 
 The footer's "Powered by Machado Genomics" line is a hardcoded literal and is **not** configurable via any setting — it deliberately does not reflect `MACHADO_SITE_TITLE` or any other setting, so renaming a site instance never rewords it.
 
 Note also that `MACHADO_HOWITWORKS_TITLE` is a plain static setting, not linked to `MACHADO_SITE_TITLE` — overriding `MACHADO_SITE_TITLE` alone no longer changes the "How It Works" heading; set `MACHADO_HOWITWORKS_TITLE` explicitly if you want it to match.
 
-> **Upgrading an existing project:** the eight settings `MACHADO_FEATURES_TITLE`, `MACHADO_FEATURES_SUBTITLE`, `MACHADO_HOWITWORKS_TITLE`, `MACHADO_HOWITWORKS_SUBTITLE`, `MACHADO_ACKNOWLEDGEMENTS_TITLE`, `MACHADO_ACKNOWLEDGEMENTS_TEXT`, `MACHADO_FOOTER_COPYRIGHT`, and `MACHADO_FOOTER_TEXT` were added to the project template after some existing projects were generated (and `MACHADO_ACCENT_COLOR` may be missing too, if your project predates that setting). If your `machadoproject/settings.py` predates one of these settings, setting the corresponding environment variable in your `.env` is a **silent no-op**: nothing reads it into a Django setting, so the page just falls back to the built-in default, with no error or warning. To use these settings in an existing project, add the matching `env(...)` lines to your own `machadoproject/settings.py` by hand, copying them from the "Landing page customization" section of `machado/project_template/machadoproject/settings.py` in the machado package. Regenerating the project from the template is **not** a safe shortcut — using `--overwrite` would clobber any customizations you have already made to that file.
+> **Upgrading an existing project:** the fifteen settings `MACHADO_FEATURES_TITLE`, `MACHADO_FEATURES_SUBTITLE`, `MACHADO_HOWITWORKS_TITLE`, `MACHADO_HOWITWORKS_SUBTITLE`, `MACHADO_HOWITWORKS_TEXT`, `MACHADO_ACKNOWLEDGEMENTS_TITLE`, `MACHADO_ACKNOWLEDGEMENTS_TEXT`, `MACHADO_FOOTER_COPYRIGHT`, `MACHADO_FOOTER_TEXT`, and the six `MACHADO_FEATURE<n>_LINK_TEXT` / `MACHADO_FEATURE<n>_LINK_URL` pairs were added to the project template after some existing projects were generated (and `MACHADO_ACCENT_COLOR` may be missing too, if your project predates that setting). If your `machadoproject/settings.py` predates one of these settings, setting the corresponding environment variable in your `.env` is a **silent no-op**: nothing reads it into a Django setting, so the page just falls back to the built-in default, with no error or warning. To use these settings in an existing project, add the matching `env(...)` lines to your own `machadoproject/settings.py` by hand, copying them from the "Landing page customization" section of `machado/project_template/machadoproject/settings.py` in the machado package. Regenerating the project from the template is **not** a safe shortcut — using `--overwrite` would clobber any customizations you have already made to that file.
 
 ---
 

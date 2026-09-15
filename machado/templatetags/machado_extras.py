@@ -5,6 +5,7 @@
 """Template tags."""
 
 from django import template
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -83,3 +84,23 @@ def get_count(self, key):
 def split(value, arg):
     """Split."""
     return value.split(arg)
+
+
+@register.filter
+def richtext(value):
+    r"""Render an administrator-authored text that may carry links and breaks.
+
+    Used for the landing page's How It Works body and Acknowledgements, whose
+    values come from .env and are therefore written by whoever deploys the
+    instance -- never by a site visitor. That is why the markup is emitted
+    unescaped: there is no untrusted input path into these settings, and
+    escaping them would defeat their whole purpose, which is to let a
+    deployment link out to a funder or a documentation page.
+
+    A dotenv value is always a single line, so a line break has to be written
+    as the two characters backslash-n; both that and a real newline become a
+    <br>.
+    """
+    if not value:
+        return ""
+    return mark_safe(str(value).replace("\\n", "\n").replace("\n", "<br>"))

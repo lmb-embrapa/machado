@@ -69,6 +69,9 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # Acknowledgements is empty (hidden) by default; set
 # MACHADO_ACKNOWLEDGEMENTS_TEXT to show it.
 #
+# MACHADO_HOWITWORKS_TEXT and MACHADO_ACKNOWLEDGEMENTS_TEXT accept HTML
+# links and \\n line breaks; every other value is rendered as plain text.
+#
 # MACHADO_ACCENT_COLOR values: steel, teal, sage, amber, graphite, ruby,
 # indigo, emerald, coral, plum
 # MACHADO_ACCENT_COLOR=steel
@@ -81,15 +84,27 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # MACHADO_FEATURE1_TITLE=Multi-Format Data Loaders
 # MACHADO_FEATURE1_TEXT=Ingest data seamlessly from standard bioinformatics formats including FASTA, GFF3, OBO, BibTeX, BLAST, InterProScan, and OrthoMCL directly into the Chado relational schema.
 # MACHADO_FEATURE1_ICON=fas fa-file-import
+# Card link text and URL. Leave the URL unset to keep the built-in route:
+# card 1 -> the loader dashboard (anonymous visitors land on the login
+# page), card 2 -> the feature search, card 3 -> the data summary.
+# MACHADO_FEATURE1_LINK_TEXT=Read Documentation
+# MACHADO_FEATURE1_LINK_URL=
 # MACHADO_FEATURE2_TITLE=PostgreSQL Faceted Search
 # MACHADO_FEATURE2_TEXT=Execute complex queries powered by PostgreSQL full-text search. Filter features by organism, sequence ontology terms, orthology, coexpression groups, and related publications.
 # MACHADO_FEATURE2_ICON=fas fa-search
+# MACHADO_FEATURE2_LINK_TEXT=Start Searching
+# MACHADO_FEATURE2_LINK_URL=
 # MACHADO_FEATURE3_TITLE=Genome Browser Integration
 # MACHADO_FEATURE3_TEXT=Interactive visual analysis of features. Machado Genomics API delivers data directly to the embedded JBrowse genome browser for sequence and annotation alignments.
 # MACHADO_FEATURE3_ICON=fas fa-align-left
+# MACHADO_FEATURE3_LINK_TEXT=Browse Organisms
+# MACHADO_FEATURE3_LINK_URL=
 # MACHADO_SHOW_STATS=True
 # MACHADO_HOWITWORKS_TITLE=How Machado Genomics Operates
 # MACHADO_HOWITWORKS_SUBTITLE=From raw genomic files to interactive database search and visualization.
+# Optional paragraph below the subtitle. May contain HTML links; write a
+# line break as the two characters \\n (a dotenv value is always one line).
+# MACHADO_HOWITWORKS_TEXT=Each step below is automated.\\nSee the <a href="https://github.com/lmb-embrapa/machado">manual</a> for details.
 # MACHADO_STEP1_TITLE=Load Data
 # MACHADO_STEP1_TEXT=Administrators run commands or use data tools to load genomic files into the database.
 # MACHADO_STEP2_TITLE=Index & Query
@@ -97,7 +112,8 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # MACHADO_STEP3_TITLE=Discover
 # MACHADO_STEP3_TEXT=Users inspect features, view analysis results, download bulk data, and browse via JBrowse.
 # MACHADO_ACKNOWLEDGEMENTS_TITLE=Acknowledgements
-# MACHADO_ACKNOWLEDGEMENTS_TEXT=
+# Links and \\n line breaks are honoured here too.
+# MACHADO_ACKNOWLEDGEMENTS_TEXT=Funded by <a href="https://fapesp.br">FAPESP</a> grant 0000/00000-0.\\nHosted by <a href="https://www.embrapa.br">Embrapa</a>.
 # MACHADO_FOOTER_COPYRIGHT=© 2026 Embrapa. All rights reserved.
 # MACHADO_FOOTER_TEXT=
 
