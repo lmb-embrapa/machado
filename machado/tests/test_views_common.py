@@ -726,3 +726,130 @@ class HomeViewTest(TestCase):
         client = Client()
         response = client.get("/")
         self.assertContains(response, "Hosted on Example Cloud")
+
+
+class LandingPageLinkTest(TestCase):
+    """Tests the configurable feature-card links on the landing page."""
+
+    # The cards only render when their titles are non-empty, and a real
+    # deployment's .env may blank them (this one does). Pin the titles and the
+    # link settings so these assertions test the template, not the .env.
+    CARDS = {
+        "MACHADO_FEATURE1_TITLE": DEFAULTS["MACHADO_FEATURE1_TITLE"],
+        "MACHADO_FEATURE2_TITLE": DEFAULTS["MACHADO_FEATURE2_TITLE"],
+        "MACHADO_FEATURE3_TITLE": DEFAULTS["MACHADO_FEATURE3_TITLE"],
+    }
+    DEFAULT_LINKS = dict(
+        CARDS,
+        **{
+            key: DEFAULTS[key]
+            for key in DEFAULTS
+            if key.endswith("_LINK_TEXT") or key.endswith("_LINK_URL")
+        },
+    )
+
+    def test_card_links_use_builtin_routes_by_default(self):
+        """With no overrides, each card keeps its built-in wording and route."""
+        with override_settings(**self.DEFAULT_LINKS):
+            response = Client().get("/")
+        self.assertContains(response, DEFAULTS["MACHADO_FEATURE1_LINK_TEXT"])
+        self.assertContains(response, DEFAULTS["MACHADO_FEATURE2_LINK_TEXT"])
+        self.assertContains(response, DEFAULTS["MACHADO_FEATURE3_LINK_TEXT"])
+        self.assertContains(response, 'href="/loader/"')
+        self.assertContains(response, 'href="/find/?q="')
+        self.assertContains(response, 'href="/data/"')
+
+    def test_card_links_honour_overrides(self):
+        """A configured URL replaces the built-in route on every card."""
+        overrides = dict(
+            self.CARDS,
+            MACHADO_FEATURE1_LINK_TEXT="Read the manual",
+            MACHADO_FEATURE1_LINK_URL="https://example.org/docs",
+            MACHADO_FEATURE2_LINK_TEXT="Search genes",
+            MACHADO_FEATURE2_LINK_URL="https://example.org/search",
+            MACHADO_FEATURE3_LINK_TEXT="Species list",
+            MACHADO_FEATURE3_LINK_URL="https://example.org/organisms",
+        )
+        with override_settings(**overrides):
+            response = Client().get("/")
+        for text, url in (
+            ("Read the manual", "https://example.org/docs"),
+            ("Search genes", "https://example.org/search"),
+            ("Species list", "https://example.org/organisms"),
+        ):
+            self.assertContains(response, text)
+            self.assertContains(response, 'href="{}"'.format(url))
+        self.assertNotContains(response, 'href="/loader/"')
+
+    def test_card1_link_is_shown_to_anonymous_visitors(self):
+        """Card 1's link no longer depends on login state.
+
+        It always points at the loader dashboard, whose LoginRequiredMixin
+        sends anonymous visitors to the login page. The old template branched
+        on user.is_authenticated and hid the dashboard from them entirely.
+        """
+        with override_settings(**self.DEFAULT_LINKS):
+            response = Client().get("/")
+        self.assertContains(response, 'href="/loader/"')
+        self.assertNotContains(response, "Access Data Tools")
+
+    def test_loader_dashboard_redirects_anonymous_to_login_page(self):
+        """LOGIN_URL must resolve to the mounted auth route, not a 404.
+
+        machado mounts django.contrib.auth.urls under loader/accounts/, so
+        Django's stock /accounts/login/ default would 404 the very visitors
+        card 1 now sends to the dashboard.
+        """
+        response = Client().get("/loader/")
+        self.assertRedirects(
+            response,
+            "/loader/accounts/login/?next=/loader/",
+            fetch_redirect_response=False,
+        )
+
+
+class LandingPageRichTextTest(TestCase):
+    """Tests links and line breaks in the How It Works and ack. sections."""
+
+    @override_settings(MACHADO_HOWITWORKS_TEXT=DEFAULTS["MACHADO_HOWITWORKS_TEXT"])
+    def test_howitworks_text_absent_by_default(self):
+        """The How It Works body paragraph is empty, so it is not rendered."""
+        self.assertEqual(DEFAULTS["MACHADO_HOWITWORKS_TEXT"], "")
+        response = Client().get("/")
+        self.assertNotContains(response, "m-section-text")
+
+    @override_settings(
+        MACHADO_HOWITWORKS_TITLE=DEFAULTS["MACHADO_HOWITWORKS_TITLE"],
+        MACHADO_HOWITWORKS_TEXT='Steps below.\\nSee <a href="/x">details</a>.',
+    )
+    def test_howitworks_text_renders_links_and_breaks(self):
+        """The How It Works body renders anchors and breaks, not escaped text."""
+        response = Client().get("/")
+        self.assertContains(response, 'Steps below.<br>See <a href="/x">details</a>.')
+
+    @override_settings(MACHADO_HOWITWORKS_TITLE="")
+    def test_howitworks_text_hidden_with_the_rest_of_the_heading(self):
+        """Blanking the heading hides its subtitle and body text together."""
+        with override_settings(MACHADO_HOWITWORKS_TEXT="Should not appear."):
+            response = Client().get("/")
+        self.assertNotContains(response, "Should not appear.")
+
+    @override_settings(
+        MACHADO_ACKNOWLEDGEMENTS_TEXT=(
+            'Funded by <a href="https://fapesp.br">FAPESP</a>.\\nAnd Embrapa.'
+        )
+    )
+    def test_acknowledgements_text_renders_links_and_breaks(self):
+        """Acknowledgements renders anchors and breaks, not escaped text."""
+        response = Client().get("/")
+        self.assertContains(
+            response,
+            'Funded by <a href="https://fapesp.br">FAPESP</a>.<br>And Embrapa.',
+        )
+        self.assertNotContains(response, "&lt;a href=")
+
+    @override_settings(MACHADO_ACKNOWLEDGEMENTS_TEXT="Plain thanks.")
+    def test_acknowledgements_plain_text_still_works(self):
+        """Text without markup renders unchanged."""
+        response = Client().get("/")
+        self.assertContains(response, "Plain thanks.")

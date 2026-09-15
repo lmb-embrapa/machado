@@ -186,6 +186,12 @@ MACHADO_FEATURE1_TEXT = env(
     ),
 )
 MACHADO_FEATURE1_ICON = env("MACHADO_FEATURE1_ICON", default="fas fa-file-import")
+# Card link. Leave the URL empty to keep the built-in route (the loader
+# dashboard, which sends anonymous visitors on to the login page).
+MACHADO_FEATURE1_LINK_TEXT = env(
+    "MACHADO_FEATURE1_LINK_TEXT", default="Read Documentation"
+)
+MACHADO_FEATURE1_LINK_URL = env("MACHADO_FEATURE1_LINK_URL", default="")
 
 MACHADO_FEATURE2_TITLE = env(
     "MACHADO_FEATURE2_TITLE", default="PostgreSQL Faceted Search"
@@ -199,6 +205,10 @@ MACHADO_FEATURE2_TEXT = env(
     ),
 )
 MACHADO_FEATURE2_ICON = env("MACHADO_FEATURE2_ICON", default="fas fa-search")
+MACHADO_FEATURE2_LINK_TEXT = env(
+    "MACHADO_FEATURE2_LINK_TEXT", default="Start Searching"
+)
+MACHADO_FEATURE2_LINK_URL = env("MACHADO_FEATURE2_LINK_URL", default="")
 
 MACHADO_FEATURE3_TITLE = env(
     "MACHADO_FEATURE3_TITLE", default="Genome Browser Integration"
@@ -212,6 +222,10 @@ MACHADO_FEATURE3_TEXT = env(
     ),
 )
 MACHADO_FEATURE3_ICON = env("MACHADO_FEATURE3_ICON", default="fas fa-align-left")
+MACHADO_FEATURE3_LINK_TEXT = env(
+    "MACHADO_FEATURE3_LINK_TEXT", default="Browse Organisms"
+)
+MACHADO_FEATURE3_LINK_URL = env("MACHADO_FEATURE3_LINK_URL", default="")
 
 # Live stats panel on the landing page (organism count, feature count,
 # ingestion formats). Turning it off also skips the two counts behind it,
@@ -230,6 +244,11 @@ MACHADO_HOWITWORKS_SUBTITLE = env(
 )
 
 # How-it-works steps (set title to empty string to hide a step)
+# Optional body paragraph below the How It Works subtitle. Rendered
+# through the richtext template filter, so it may contain HTML links and
+# backslash-n line breaks. Empty hides the paragraph.
+MACHADO_HOWITWORKS_TEXT = env("MACHADO_HOWITWORKS_TEXT", default="")
+
 MACHADO_STEP1_TITLE = env("MACHADO_STEP1_TITLE", default="Load Data")
 MACHADO_STEP1_TEXT = env(
     "MACHADO_STEP1_TEXT",
@@ -271,6 +290,8 @@ MACHADO_FEATURES_SUBTITLE = env(
 MACHADO_ACKNOWLEDGEMENTS_TITLE = env(
     "MACHADO_ACKNOWLEDGEMENTS_TITLE", default="Acknowledgements"
 )
+# Also rendered through the richtext filter: HTML links and backslash-n
+# line breaks are honoured here too.
 MACHADO_ACKNOWLEDGEMENTS_TEXT = env("MACHADO_ACKNOWLEDGEMENTS_TEXT", default="")
 
 # Footer

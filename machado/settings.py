@@ -84,7 +84,11 @@ def patch_all():
     settings.APPEND_SLASH = True
     settings.USE_TZ = False
 
-    # Auth redirects
+    # Auth redirects. LOGIN_URL is the *name* of the login route rather
+    # than a path: machado mounts django.contrib.auth.urls under
+    # loader/accounts/, so Django's stock /accounts/login/ default would 404,
+    # and a hardcoded path would ignore URL_PREFIX on a sub-path deployment.
+    settings.LOGIN_URL = "login"
     settings.LOGIN_REDIRECT_URL = "home"
     settings.LOGOUT_REDIRECT_URL = "home"
 

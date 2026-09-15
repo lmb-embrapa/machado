@@ -87,3 +87,34 @@ class MachadoExtrasTest(TestCase):
     def test_split(self):
         """Tests - split."""
         self.assertEqual(["a", "b"], machado_extras.split("a,b", ","))
+
+    def test_richtext_renders_html_links_unescaped(self):
+        """Tests - richtext keeps admin-authored anchor markup intact."""
+        result = machado_extras.richtext('See <a href="https://x.org">X</a>.')
+        self.assertEqual('See <a href="https://x.org">X</a>.', result)
+
+    def test_richtext_converts_escaped_newline_to_br(self):
+        r"""Tests - richtext turns a literal backslash-n into a line break.
+
+        This is the sequence a .env file actually carries, since dotenv
+        values are single-line and never contain a real newline.
+        """
+        self.assertEqual("a<br>b", machado_extras.richtext("a\\nb"))
+
+    def test_richtext_converts_real_newline_to_br(self):
+        """Tests - richtext turns a real newline into a line break."""
+        self.assertEqual("a<br>b", machado_extras.richtext("a\nb"))
+
+    def test_richtext_empty_value_returns_empty_string(self):
+        """Tests - richtext maps empty/None input to an empty string."""
+        self.assertEqual("", machado_extras.richtext(""))
+        self.assertEqual("", machado_extras.richtext(None))
+
+    def test_richtext_output_is_marked_safe(self):
+        """Tests - richtext output survives template autoescaping."""
+        from django.template import Context, Template
+
+        rendered = Template("{% load machado_extras %}{{ value|richtext }}").render(
+            Context({"value": 'a\\n<a href="/b">b</a>'})
+        )
+        self.assertEqual('a<br><a href="/b">b</a>', rendered)

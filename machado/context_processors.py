@@ -37,6 +37,12 @@ DEFAULTS = {
         "OrthoMCL directly into the Chado relational schema."
     ),
     "MACHADO_FEATURE1_ICON": "fas fa-file-import",
+    # Card link. An empty URL means "use the built-in route" -- the
+    # template reverses it there rather than here, so reversal stays lazy
+    # and keeps honouring URL_PREFIX. Card 1 points at the loader
+    # dashboard, which sends anonymous visitors on to the login page.
+    "MACHADO_FEATURE1_LINK_TEXT": "Read Documentation",
+    "MACHADO_FEATURE1_LINK_URL": "",
     # Feature card 2
     "MACHADO_FEATURE2_TITLE": "PostgreSQL Faceted Search",
     "MACHADO_FEATURE2_TEXT": (
@@ -45,6 +51,8 @@ DEFAULTS = {
         "coexpression groups, and related publications."
     ),
     "MACHADO_FEATURE2_ICON": "fas fa-search",
+    "MACHADO_FEATURE2_LINK_TEXT": "Start Searching",
+    "MACHADO_FEATURE2_LINK_URL": "",
     # Feature card 3
     "MACHADO_FEATURE3_TITLE": "Genome Browser Integration",
     "MACHADO_FEATURE3_TEXT": (
@@ -53,6 +61,8 @@ DEFAULTS = {
         "for sequence and annotation alignments."
     ),
     "MACHADO_FEATURE3_ICON": "fas fa-align-left",
+    "MACHADO_FEATURE3_LINK_TEXT": "Browse Organisms",
+    "MACHADO_FEATURE3_LINK_URL": "",
     # Live stats panel (organism count, feature count, ingestion formats).
     # A boolean rather than the empty-title convention used above: the panel
     # has no configurable title to blank out, and its two counts are full
@@ -63,6 +73,10 @@ DEFAULTS = {
     "MACHADO_HOWITWORKS_SUBTITLE": (
         "From raw genomic files to interactive database search and " "visualization."
     ),
+    # Optional body paragraph below the subtitle. Rendered through the
+    # richtext filter, so it may carry links and backslash-n line breaks;
+    # empty by default, which hides the paragraph.
+    "MACHADO_HOWITWORKS_TEXT": "",
     # How-it-works step 1
     "MACHADO_STEP1_TITLE": "Load Data",
     "MACHADO_STEP1_TEXT": (
@@ -87,7 +101,8 @@ DEFAULTS = {
         "A comprehensive ecosystem designed for biological database "
         "curation and research."
     ),
-    # Acknowledgements (optional; empty text hides the section)
+    # Acknowledgements (optional; empty text hides the section). Like
+    # MACHADO_HOWITWORKS_TEXT, rendered through the richtext filter.
     "MACHADO_ACKNOWLEDGEMENTS_TITLE": "Acknowledgements",
     "MACHADO_ACKNOWLEDGEMENTS_TEXT": "",
     # Footer

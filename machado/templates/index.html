@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load machado_extras %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'machado/css/landing.css' %}">
@@ -51,14 +52,8 @@
         <p>
           {{ machado_feature1_text }}
         </p>
-        {% if user.is_authenticated %}
-        <a href="{% url 'loader_dashboard' %}" class="m-feature-link">Access Data Tools <i
-            class="fas fa-arrow-right"></i></a>
-        {% else %}
-        <a href="https://github.com/lmb-embrapa/machado/blob/master/docs/index.md" target="_blank"
-          class="m-feature-link">Read
-          Documentation <i class="fas fa-arrow-right"></i></a>
-        {% endif %}
+        <a href="{% if machado_feature1_link_url %}{{ machado_feature1_link_url }}{% else %}{% url 'loader_dashboard' %}{% endif %}"
+          class="m-feature-link">{{ machado_feature1_link_text }} <i class="fas fa-arrow-right"></i></a>
       </div>
       {% endif %}
 
@@ -72,8 +67,8 @@
         <p>
           {{ machado_feature2_text }}
         </p>
-        <a href="{% url 'feature_search' %}?q=" class="m-feature-link">Start Searching <i
-            class="fas fa-arrow-right"></i></a>
+        <a href="{% if machado_feature2_link_url %}{{ machado_feature2_link_url }}{% else %}{% url 'feature_search' %}?q={% endif %}"
+          class="m-feature-link">{{ machado_feature2_link_text }} <i class="fas fa-arrow-right"></i></a>
       </div>
       {% endif %}
 
@@ -87,8 +82,8 @@
         <p>
           {{ machado_feature3_text }}
         </p>
-        <a href="{% url 'data_numbers' %}" class="m-feature-link">Browse Organisms <i
-            class="fas fa-arrow-right"></i></a>
+        <a href="{% if machado_feature3_link_url %}{{ machado_feature3_link_url }}{% else %}{% url 'data_numbers' %}{% endif %}"
+          class="m-feature-link">{{ machado_feature3_link_text }} <i class="fas fa-arrow-right"></i></a>
       </div>
       {% endif %}
     </div>
@@ -164,6 +159,9 @@
     <div class="m-section-header">
       <h2>{{ machado_howitworks_title }}</h2>
       <p>{{ machado_howitworks_subtitle }}</p>
+      {% if machado_howitworks_text %}
+      <p class="m-section-text">{{ machado_howitworks_text|richtext }}</p>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -202,7 +200,7 @@
   <section class="m-landing-section m-fade-up">
     <div class="m-section-header text-center">
       <h2>{{ machado_acknowledgements_title }}</h2>
-      <p>{{ machado_acknowledgements_text }}</p>
+      <p>{{ machado_acknowledgements_text|richtext }}</p>
     </div>
   </section>
   {% endif %}
