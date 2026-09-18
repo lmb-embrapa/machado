@@ -23,7 +23,7 @@ class ResolveDisplayTest(TestCase):
     """The display fallback chain."""
 
     def test_prefers_the_display_prop(self):
-        """display wins over every later name."""
+        """The display prop wins over every later name."""
         props = {"display": ["chosen"], "product": ["ignored"]}
         self.assertEqual(display.resolve_display(props), "chosen")
 
