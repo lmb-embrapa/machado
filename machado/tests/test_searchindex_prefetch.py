@@ -140,7 +140,7 @@ class PrefetchChunkTest(TestCase):
     def test_multi_doi_pub_picks_the_lowest_pk_dbxref(self):
         """A pub with two DOI dbxrefs resolves to the lowest-pk one.
 
-        Twin of DecoratorAnnotationQueryTest.
+        Twin of MixinAnnotationQueryTest.
         test_multi_doi_pub_picks_the_lowest_pk_dbxref. Without an explicit
         ORDER BY, the setdefault below keeps whichever row the query plan
         returned first, so FeatureSearchIndex.doi could flip between rebuilds

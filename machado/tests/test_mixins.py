@@ -32,7 +32,7 @@ from machado.tests.decorators_fixture import (
 
 from machado.mixins import FeatureMixin, PubMixin
 
-#: get_feature_location wraps its whole body in
+#: get_location wraps its whole body in
 #: `if hasattr(settings, "MACHADO_JBROWSE_URL")`, so with that setting absent it
 #: returns []. machadoproject.settings only defines it when the deployment sets
 #: MACHADO_JBROWSE_URL in its .env, so any test touching get_location must

@@ -80,7 +80,24 @@ class FeatureMixin:
 
     @functools.cached_property
     def _annotation_data(self):
-        """Return {"annotations": [...], "dois": {...}} for this feature."""
+        """Build annotations and DOIs for this feature in a fixed four queries.
+
+        get_annotation and get_doi both walk
+        Featureprop(annotation) -> FeaturepropPub -> pub DOI. Computing them
+        together once removes the duplicate traversal and the per-row queries
+        that the previous per-pub get_doi() calls incurred. Memoized per
+        instance. The queries themselves live in machado.display, shared with
+        the search index so the two cannot disagree.
+
+        Staleness caveat: because this is a cached_property, a caller that
+        creates a new Featureprop or FeaturePub and then re-reads
+        get_annotation()/get_doi() on this same in-memory Feature instance will
+        see stale data -- the cache is never invalidated on write. No current
+        caller does this (the loaders in machado/loaders/ operate on feature_id
+        integers and never hold a live Feature across a write), but a future
+        caller that does must re-fetch the Feature instance instead of relying
+        on this cache surviving a write.
+        """
         rows = display.fetch_prop_rows([self.feature_id])
         return display.fetch_annotation_data(rows, [self.feature_id])[self.feature_id]
 
@@ -94,7 +111,22 @@ class FeatureMixin:
 
     @functools.cached_property
     def _display_prop_map(self):
-        """Return {type_name: [values by rank]} for this feature's props."""
+        """Return {type_name: [values by rank]} for this feature's props.
+
+        One query serves the whole display -> product -> description -> note
+        chain, which previously cost a separate .get() per step. Memoized
+        because templates commonly evaluate get_display more than once per
+        render. The query lives in machado.display, shared with the search
+        index.
+
+        Staleness caveat: because this is a cached_property, a caller that
+        creates a new Featureprop and then re-reads get_display() on this same
+        in-memory Feature instance will see stale data -- the cache is never
+        invalidated on write. Re-fetch the Feature instance instead of relying
+        on this cache surviving a write. (Same caveat as _annotation_data and
+        Organism.is_public; unlike is_public there is no set_* helper here to
+        invalidate it.)
+        """
         rows = display.fetch_prop_rows([self.feature_id])
         return display.group_props(rows).get(self.feature_id, {})
 
@@ -298,7 +330,7 @@ class PubMixin:
 
         .first() on an unordered queryset makes Django auto-add order_by(pk), so a
         pub carrying two DOI dbxrefs resolves to the lowest-pk one. That is the
-        contract -- see the tie-break note in get_feature_annotation_data. Any
+        contract -- see the tie-break note in machado.display.fetch_pub_doi_map. Any
         restructuring of this query must pin the ordering explicitly.
 
         Staleness caveat: as with _display_prop_map and _annotation_data, the cache
