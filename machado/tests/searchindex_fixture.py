@@ -257,6 +257,65 @@ def build_search_index_fixture():
         rank=0,
     )
 
+    # ── divergence shapes: these exist so test_page_index_parity covers the
+    #    cases where the feature page and the search index used to disagree.
+    #    See the rulings in the mixins/settings design.
+
+    # 1. a pub whose DOI accession is the empty string -- renders NO DOI.
+    pub_empty = Pub.objects.create(
+        uniquename="PUB:EMPTY", type=pub_type, title="Empty DOI"
+    )
+    PubDbxref.objects.create(
+        pub=pub_empty,
+        dbxref=Dbxref.objects.create(db=db_doi, accession="", version="1"),
+        is_current=True,
+    )
+    gene_empty = _feature(organism, t_gene, "GENE_EMPTY_DOI", "GeneEmptyDoi")
+    features["gene_empty_doi"] = gene_empty
+    annot_empty = Featureprop.objects.create(
+        feature=gene_empty, type=p_annotation, value="no doi here", rank=0
+    )
+    FeaturepropPub.objects.create(featureprop=annot_empty, pub=pub_empty)
+
+    # 2. one annotation backed by two pubs whose pub_id order and
+    #    featureprop_pub_id order disagree -- the higher-pk pub is linked
+    #    first, so ordering by featureprop_pub_id yields (second, first)
+    #    while ordering by pub_id would yield (first, second).
+    pub_first = Pub.objects.create(
+        uniquename="PUB:MULTI_A", type=pub_type, title="Multi A"
+    )
+    PubDbxref.objects.create(
+        pub=pub_first,
+        dbxref=Dbxref.objects.create(db=db_doi, accession="10.5555/aaa", version="1"),
+        is_current=True,
+    )
+    pub_second = Pub.objects.create(
+        uniquename="PUB:MULTI_B", type=pub_type, title="Multi B"
+    )
+    PubDbxref.objects.create(
+        pub=pub_second,
+        dbxref=Dbxref.objects.create(db=db_doi, accession="10.5555/bbb", version="1"),
+        is_current=True,
+    )
+    gene_multi = _feature(organism, t_gene, "GENE_MULTI_PUB", "GeneMultiPub")
+    features["gene_multi_pub"] = gene_multi
+    annot_multi = Featureprop.objects.create(
+        feature=gene_multi, type=p_annotation, value="two sources", rank=0
+    )
+    FeaturepropPub.objects.create(featureprop=annot_multi, pub=pub_second)
+    FeaturepropPub.objects.create(featureprop=annot_multi, pub=pub_first)
+
+    # 3. there is no third shape here. The brief for this task asked for two
+    #    annotations at the same rank, to exercise the featureprop_id
+    #    tie-break in machado.display.fetch_prop_rows -- but that state
+    #    cannot exist in a valid chado database: `featureprop_c1` is a unique
+    #    constraint on (feature_id, type_id, rank), enforced by Postgres (see
+    #    machado/schemas/1.31/default_schema.sql.gz). Two annotation rows on
+    #    one feature at the same rank would violate it. The tie-break is
+    #    defensive only, kept so the ordering is deterministic even though
+    #    the collision it guards against cannot occur; there is nothing to
+    #    fixture for it.
+
     return features
 
 

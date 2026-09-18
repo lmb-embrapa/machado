@@ -38,6 +38,10 @@ from machado.display import (
 #: Analysis programs surfaced as facets by ``_prepare_analyses``.
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
 
+# The display/DOI rules live in machado.display and are shared with
+# machado.mixins.FeatureMixin; machado/tests/test_page_index_parity.py
+# proves the two paths agree.
+
 
 def load_valid_programs():
     """Return the distinct analysis programs that drive the analyses facet."""
