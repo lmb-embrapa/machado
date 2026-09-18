@@ -51,32 +51,28 @@ class FeatureMixin:
                 )
         return result
 
+    def _first_prop(self, type_name):
+        """Return the lowest-rank value of one prop type, or None.
+
+        Returns the first value rather than raising when a feature carries two
+        rows of the same type. Featureprop has no unique constraint on
+        (feature, type) in this chado revision, and ``get_display`` has resolved
+        duplicates this way since the props were batched.
+        """
+        values = self._prop_map.get(type_name)
+        return values[0] if values else None
+
     def get_product(self):
         """Get the product feature prop."""
-        try:
-            return self.Featureprop_feature_Feature.get(
-                type__name="product", type__cv__name="feature_property"
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return self._first_prop("product")
 
     def get_description(self):
         """Get the description feature prop."""
-        try:
-            return self.Featureprop_feature_Feature.get(
-                type__name="description", type__cv__name="feature_property"
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return self._first_prop("description")
 
     def get_note(self):
         """Get the note feature prop."""
-        try:
-            return self.Featureprop_feature_Feature.get(
-                type__name="note", type__cv__name="feature_property"
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return self._first_prop("note")
 
     @functools.cached_property
     def _annotation_data(self):
@@ -110,17 +106,19 @@ class FeatureMixin:
         return set(self._annotation_data["dois"])
 
     @functools.cached_property
-    def _display_prop_map(self):
+    def _prop_map(self):
         """Return {type_name: [values by rank]} for this feature's props.
 
-        One query serves the whole display -> product -> description -> note
-        chain, which previously cost a separate .get() per step. Memoized
-        because templates commonly evaluate get_display more than once per
-        render. The query lives in machado.display, shared with the search
-        index.
+        One query serves all seven property types: display, product, description,
+        note, annotation, orthologous group, and coexpression group. Previously,
+        the display chain cost a separate .get() per step, and the other five
+        getters each issued their own query. Memoized because templates commonly
+        evaluate get_display more than once per render, and because the search
+        index runs the same query. The query lives in machado.display, shared
+        with the search index.
 
         Staleness caveat: because this is a cached_property, a caller that
-        creates a new Featureprop and then re-reads get_display() on this same
+        creates a new Featureprop and then re-reads any getter on this same
         in-memory Feature instance will see stale data -- the cache is never
         invalidated on write. Re-fetch the Feature instance instead of relying
         on this cache surviving a write. (Same caveat as _annotation_data and
@@ -132,7 +130,7 @@ class FeatureMixin:
 
     def get_display(self):
         """Get the display feature prop, falling back through the chain."""
-        return display.resolve_display(self._display_prop_map)
+        return display.resolve_display(self._prop_map)
 
     def get_properties(self):
         """Get all the feature properties."""
@@ -160,21 +158,11 @@ class FeatureMixin:
 
     def get_orthologous_group(self):
         """Get the orthologous group id."""
-        try:
-            return self.Featureprop_feature_Feature.get(
-                type__cv__name="feature_property", type__name="orthologous group"
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return self._first_prop("orthologous group")
 
     def get_coexpression_group(self):
         """Get the coexpression group id."""
-        try:
-            return self.Featureprop_feature_Feature.get(
-                type__cv__name="feature_property", type__name="coexpression group"
-            ).value
-        except ObjectDoesNotExist:
-            return None
+        return self._first_prop("coexpression group")
 
     def get_expression_samples(self):
         """Get the expression samples and treatments."""
@@ -333,7 +321,7 @@ class PubMixin:
         contract -- see the tie-break note in machado.display.fetch_pub_doi_map. Any
         restructuring of this query must pin the ordering explicitly.
 
-        Staleness caveat: as with _display_prop_map and _annotation_data, the cache
+        Staleness caveat: as with _prop_map and _annotation_data, the cache
         is never invalidated. A caller that adds a PubDbxref and re-reads get_doi()
         on the same in-memory Pub sees the old value; re-fetch the Pub instead.
         """

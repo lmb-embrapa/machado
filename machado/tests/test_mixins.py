@@ -51,42 +51,42 @@ class GetFeaturePropTest(TestCase):
     def test_product_found(self):
         """Test product found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some product"
+        mock_self._first_prop.return_value = "some product"
         result = FeatureMixin.get_product(mock_self)
         self.assertEqual(result, "some product")
 
     def test_product_not_found(self):
         """Test product not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
+        mock_self._first_prop.return_value = None
         result = FeatureMixin.get_product(mock_self)
         self.assertIsNone(result)
 
     def test_description_found(self):
         """Test description found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some desc"
+        mock_self._first_prop.return_value = "some desc"
         result = FeatureMixin.get_description(mock_self)
         self.assertEqual(result, "some desc")
 
     def test_description_not_found(self):
         """Test description not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
+        mock_self._first_prop.return_value = None
         result = FeatureMixin.get_description(mock_self)
         self.assertIsNone(result)
 
     def test_note_found(self):
         """Test note found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some note"
+        mock_self._first_prop.return_value = "some note"
         result = FeatureMixin.get_note(mock_self)
         self.assertEqual(result, "some note")
 
     def test_note_not_found(self):
         """Test note not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
+        mock_self._first_prop.return_value = None
         result = FeatureMixin.get_note(mock_self)
         self.assertIsNone(result)
 
@@ -122,14 +122,14 @@ class GetFeatureOrthologousGroupTest(TestCase):
     def test_found(self):
         """Test found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "OG001"
+        mock_self._first_prop.return_value = "OG001"
         result = FeatureMixin.get_orthologous_group(mock_self)
         self.assertEqual(result, "OG001")
 
     def test_not_found(self):
         """Test not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
+        mock_self._first_prop.return_value = None
         result = FeatureMixin.get_orthologous_group(mock_self)
         self.assertIsNone(result)
 
@@ -140,14 +140,14 @@ class GetFeatureCoexpressionGroupTest(TestCase):
     def test_found(self):
         """Test found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "CG001"
+        mock_self._first_prop.return_value = "CG001"
         result = FeatureMixin.get_coexpression_group(mock_self)
         self.assertEqual(result, "CG001")
 
     def test_not_found(self):
         """Test not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
+        mock_self._first_prop.return_value = None
         result = FeatureMixin.get_coexpression_group(mock_self)
         self.assertIsNone(result)
 
@@ -462,6 +462,34 @@ class MixinQueryCountTest(TestCase):
             self.assertIsNone(pub.get_doi())
             self.assertIsNone(pub.get_doi())
             self.assertIsNone(pub.get_doi())
+
+    def test_prop_getters_share_one_query(self):
+        """Five property reads cost one query between them, not five."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            gene.get_display()
+            gene.get_product()
+            gene.get_description()
+            gene.get_note()
+            gene.get_orthologous_group()
+            gene.get_coexpression_group()
+
+    def test_duplicated_product_returns_the_first_by_rank(self):
+        """Two product props return the lowest rank instead of raising."""
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="first",
+            rank=0,
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="second",
+            rank=1,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_product(), "first")
 
 
 class MixinDisplayQueryTest(TestCase):
