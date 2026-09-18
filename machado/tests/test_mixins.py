@@ -22,6 +22,7 @@ from machado.models import (
     PubDbxref,
 )
 from machado.tests.mixins_fixture import (
+    _cvterm,
     _feature,
     add_annotations,
     add_dbxrefs,
@@ -113,6 +114,24 @@ class GetFeaturePropertiesTest(TestCase):
         result = FeatureMixin.get_properties(mock_self)
         self.assertEqual(len(result), 2)
 
+    def test_it_excludes_exactly_the_props_rendered_elsewhere(self):
+        """The blacklist is pinned, because its contents are load-bearing.
+
+        Without this assertion a MagicMock swallows whatever is passed to
+        exclude(), so the list could be edited to anything -- including back
+        to the duplicated "coexpression group" entry that hid coexpression
+        group from the page entirely while showing orthologous group twice.
+        """
+        mock_qs = MagicMock()
+        mock_self = MagicMock()
+        mock_self.Featureprop_feature_Feature.filter.return_value = mock_qs
+
+        FeatureMixin.get_properties(mock_self)
+
+        mock_qs.exclude.assert_called_once_with(
+            type__name__in=["orthologous group", "annotation"]
+        )
+
     def test_properties_not_found(self):
         """Test properties not found."""
         mock_self = MagicMock()
@@ -120,6 +139,70 @@ class GetFeaturePropertiesTest(TestCase):
 
         result = FeatureMixin.get_properties(mock_self)
         self.assertEqual(result, [])
+
+
+class GetFeaturePropertiesContentTest(TestCase):
+    """What the feature page's property list actually contains, on real rows.
+
+    The mock tests above cannot see this: they stub the queryset, so they
+    prove the exclude() call is made with the right argument but never that
+    the argument produces the right rows against a database.
+    """
+
+    def setUp(self):
+        """Build the corpus and add the two group props to it."""
+        self.fx = build_mixin_fixture()
+        cv_prop = self.fx.p_display.cv
+        self.p_ortho = _cvterm(cv_prop, self.fx.db_local, "orthologous group")
+        self.p_coexp = _cvterm(cv_prop, self.fx.db_local, "coexpression group")
+
+        self.feature = _feature(self.fx.organism, self.fx.t_gene, "PROPS_GENE")
+        Featureprop.objects.create(
+            feature=self.feature, type=self.fx.p_product, value="a product", rank=0
+        )
+        Featureprop.objects.create(
+            feature=self.feature, type=self.p_ortho, value="OG_9", rank=0
+        )
+        Featureprop.objects.create(
+            feature=self.feature, type=self.p_coexp, value="CG_9", rank=0
+        )
+        Featureprop.objects.create(
+            feature=self.feature,
+            type=self.fx.p_annotation,
+            value="an annotation",
+            rank=0,
+        )
+
+    def _names(self):
+        """Return the prop type names the page would render."""
+        feature = Feature.objects.get(pk=self.feature.pk)
+        return [name for name, _ in feature.get_properties()]
+
+    def test_orthologous_group_is_excluded(self):
+        """It has its own section, so listing it here would duplicate it.
+
+        machado.views.feature builds an orthologs panel from
+        get_orthologous_group(), showing the group with its member features.
+        """
+        self.assertNotIn("orthologous group", self._names())
+
+    def test_annotation_is_excluded(self):
+        """get_annotation renders these with their DOIs appended."""
+        self.assertNotIn("annotation", self._names())
+
+    def test_coexpression_group_is_included(self):
+        """Nothing else on the feature page renders it.
+
+        No view or template references get_coexpression_group, so if this
+        list drops it the value becomes invisible to a reader even though
+        the search index builds a facet from it. This assertion is the guard
+        against it being excluded again.
+        """
+        self.assertIn("coexpression group", self._names())
+
+    def test_ordinary_props_still_appear(self):
+        """The exclusions must not swallow everything else."""
+        self.assertIn("product", self._names())
 
 
 class GetFeatureOrthologousGroupTest(TestCase):

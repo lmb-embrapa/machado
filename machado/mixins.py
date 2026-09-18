@@ -143,8 +143,27 @@ class FeatureMixin:
         return display.resolve_display(self._prop_map)
 
     def get_properties(self):
-        """Get all the feature properties."""
-        attrs_bl = ["coexpression group", "coexpression group", "annotation"]
+        """Get all the feature properties, minus the ones rendered elsewhere.
+
+        The exclusions are not arbitrary -- each names a prop the feature page
+        already shows in a richer form, so listing it here too would duplicate
+        it:
+
+        * ``orthologous group`` has its own section, built by
+          ``machado.views.feature`` from ``get_orthologous_group()``, which
+          renders the group together with its member features.
+        * ``annotation`` is rendered by ``get_annotation()`` with its DOIs
+          appended.
+
+        ``coexpression group`` is deliberately NOT excluded. It used to be --
+        twice, in place of ``orthologous group``, which is how orthologous
+        group came to be listed twice on the page while coexpression group was
+        shown nowhere at all. Nothing else on the feature page renders it (no
+        view or template references ``get_coexpression_group``), even though
+        the search index builds a facet from it, so this list is the only
+        place it reaches a reader.
+        """
+        attrs_bl = ["orthologous group", "annotation"]
         try:
             return (
                 self.Featureprop_feature_Feature.filter(
