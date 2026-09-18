@@ -65,13 +65,23 @@ def format_annotation(value, dois):
     return value
 
 
-def fetch_prop_rows(feature_ids):
-    """Fetch every PROP_TYPES prop for these features in one query.
+def fetch_prop_rows(feature_ids, types=PROP_TYPES):
+    """Fetch the requested prop types for these features in one query.
 
-    The ``featureprop_id`` tie-break after ``rank`` is required, not decoration:
-    without it two props at the same rank order by whatever the query plan
-    returns, so a feature with two same-rank annotations renders them in an
-    unstable order.
+    ``types`` defaults to every ``PROP_TYPES`` entry, but a caller that only
+    needs a subset -- e.g. the per-feature path, which narrows this to skip
+    ``annotation`` in the JBrowse /features/ loop, one call per feature -- can
+    pass a smaller tuple to avoid fetching and discarding rows it never reads.
+
+    The ``featureprop_id`` tie-break after ``rank`` is DEFENSIVE only, not
+    load-bearing: chado's ``featureprop_c1`` unique constraint on
+    ``(feature_id, type_id, rank)`` makes two props of the same type at the
+    same rank on one feature unreachable, so the collision this tie-break
+    guards against cannot occur against a standard chado schema. It stays
+    because it makes the ordering total and protects a patched chado without
+    that constraint. See the comment in
+    machado/tests/searchindex_fixture.py (build_search_index_fixture, near
+    the "there is no third shape here" note) for the fuller argument.
     """
     from machado.models import Featureprop
 
@@ -82,7 +92,7 @@ def fetch_prop_rows(feature_ids):
         Featureprop.objects.filter(
             feature_id__in=ids,
             type__cv__name="feature_property",
-            type__name__in=PROP_TYPES,
+            type__name__in=types,
         )
         .order_by("feature_id", "type__name", "rank", "featureprop_id")
         .values("featureprop_id", "feature_id", "type__name", "value")

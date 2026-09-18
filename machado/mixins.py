@@ -109,13 +109,19 @@ class FeatureMixin:
     def _prop_map(self):
         """Return {type_name: [values by rank]} for this feature's props.
 
-        One query serves all seven property types: display, product, description,
-        note, annotation, orthologous group, and coexpression group. Previously,
-        the display chain cost a separate .get() per step, and the other five
-        getters each issued their own query. Memoized because templates commonly
-        evaluate get_display more than once per render, and because the search
-        index runs the same query. The query lives in machado.display, shared
-        with the search index.
+        One query serves the display chain plus the orthologous/coexpression
+        group getters -- display, product, description, note, orthologous
+        group, and coexpression group. ``annotation`` is deliberately left out:
+        this path is called once per feature (e.g. the JBrowse /features/ loop
+        in machado/views/jbrowse.py), so fetching and discarding annotation text
+        on every call would widen that hot path for no benefit; annotations are
+        fetched separately, only when actually needed, by ``_annotation_data``.
+        Previously, the display chain cost a separate .get() per step, and the
+        other four getters each issued their own query. Memoized because
+        templates commonly evaluate get_display more than once per render. The
+        query lives in machado.display, whose function is also called by the
+        search index -- the two call sites share the code, not this instance
+        cache.
 
         Staleness caveat: because this is a cached_property, a caller that
         creates a new Featureprop and then re-reads any getter on this same
@@ -125,7 +131,11 @@ class FeatureMixin:
         Organism.is_public; unlike is_public there is no set_* helper here to
         invalidate it.)
         """
-        rows = display.fetch_prop_rows([self.feature_id])
+        rows = display.fetch_prop_rows(
+            [self.feature_id],
+            types=display.DISPLAY_FALLBACK
+            + ("orthologous group", "coexpression group"),
+        )
         return display.group_props(rows).get(self.feature_id, {})
 
     def get_display(self):

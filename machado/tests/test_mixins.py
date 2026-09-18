@@ -21,13 +21,13 @@ from machado.models import (
     Pub,
     PubDbxref,
 )
-from machado.tests.decorators_fixture import (
+from machado.tests.mixins_fixture import (
     _feature,
     add_annotations,
     add_dbxrefs,
     add_locations,
     add_synonyms,
-    build_decorator_fixture,
+    build_mixin_fixture,
 )
 
 from machado.mixins import FeatureMixin, PubMixin
@@ -234,7 +234,7 @@ class MixinRealDataTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_dbxrefs_renders_url_and_plain_forms(self):
         """A dbxref on a db with a url becomes a link; otherwise plain text."""
@@ -288,7 +288,7 @@ class MixinDisplayAndDoiTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_display_prefers_the_display_prop(self):
         """An explicit display prop wins."""
@@ -372,8 +372,8 @@ class MixinDisplayAndDoiTest(TestCase):
         here. The batched version sees a truthy [None] list for `product` and
         returns None, so the page renders blank.
 
-        The new behaviour is kept because searchindex.resolve_display has always
-        behaved this way, so page and index now agree for the first time.
+        The new behaviour is kept because machado.display.resolve_display has
+        always behaved this way, so page and index now agree for the first time.
         Restoring the fall-through would re-open that divergence.
         """
         Featureprop.objects.create(
@@ -402,7 +402,7 @@ class MixinQueryCountTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_dbxrefs_is_one_query_regardless_of_count(self):
         """Fetching dbxrefs costs one query at 2 rows and at 22."""
@@ -507,7 +507,7 @@ class MixinDisplayQueryTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_display_hit_is_one_query(self):
         """A feature with a display prop resolves in one query."""
@@ -558,7 +558,7 @@ class MixinAnnotationQueryTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_annotation_query_count_is_invariant(self):
         """Four queries at 2 annotations and at 12."""
@@ -612,7 +612,7 @@ class OrganismIsPublicCacheTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_repeated_access_is_one_query(self):
         """Three reads cost one query, not three.

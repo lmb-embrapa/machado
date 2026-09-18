@@ -3,6 +3,43 @@
 All notable changes to machado are recorded here. Releases before 0.9.0 are
 summarized from their [GitHub release notes](https://github.com/lmb-embrapa/machado/releases).
 
+## Unreleased
+
+### Breaking
+
+- **machado no longer configures your project for you.** `machado/settings.py`,
+  which used to mutate `django.conf.settings` from `AppConfig.ready()`
+  (`patch_all()`), is deleted. The settings it used to set —
+  `USE_THOUSAND_SEPARATOR`, `APPEND_SLASH`, `USE_TZ`, the proxy-header
+  settings, `LOGIN_URL`, `LOGIN_REDIRECT_URL`, `LOGOUT_REDIRECT_URL`, and
+  machado's URL inclusion — must now be declared explicitly in the project's
+  own `settings.py`/`urls.py`. Eight new system checks, `machado.E001`
+  through `machado.E008`, report each missing piece with a hint that names
+  the fix. These checks are registered untagged, so they run before **every**
+  management command — `migrate`, `collectstatic`, `runserver`, and the
+  rest — not just `manage.py check`: an existing deployment that upgrades
+  without updating its settings will have every management command abort
+  until the settings are fixed. A project created with the current
+  `machado-startproject` already has everything it needs. See the
+  "Upgrading from a version before the settings change" section of
+  [docs/01-installation.md](docs/01-installation.md).
+- `SWAGGER_SETTINGS` is no longer set anywhere; nothing in machado read it.
+
+### Changed
+
+- **`machado/decorators.py` replaced by `machado/mixins.py`.** The
+  `setattr`-based method injection onto `Feature`, `Pub` and `Organism` is
+  gone; `FeatureMixin`, `PubMixin` and `OrganismMixin` provide the same
+  methods through plain inheritance instead. The models already inherit from
+  them, so most projects need no change; a project that imported
+  `machado.decorators` directly should import `machado.mixins` instead.
+- **Display and DOI resolution consolidated into `machado/display.py`.** The
+  feature page (via `FeatureMixin`) and the search index (via
+  `machado.searchindex.prefetch_chunk`) used to carry two hand-synchronised
+  copies of the display-fallback and DOI-resolution logic; both now call the
+  same functions in `machado.display`, so the two can no longer disagree
+  about a feature's display value or its DOIs.
+
 ## 0.9.0 — 2026-09-14
 
 ### Added

@@ -187,7 +187,8 @@ APPEND_SLASH = True
 USE_TZ = False
 
 # Trust the reverse proxy's forwarded headers. Turn this OFF for a machado
-# instance that is NOT behind a proxy.
+# instance that is NOT behind a proxy: with it on, a client-supplied
+# X-Forwarded-Host is believed, which is a host-header injection risk.
 TRUST_PROXY_HEADERS = env.bool("TRUST_PROXY_HEADERS", default=True)
 if TRUST_PROXY_HEADERS:
     USE_X_FORWARDED_HOST = True
@@ -208,8 +209,14 @@ Also confirm that `MIDDLEWARE` contains `SessionMiddleware`,
 entry lists `machado.context_processors.machado_site` under
 `OPTIONS["context_processors"]`. machado used to append all of these for you.
 
-If you don't already configure email, add the console fallback so
-`EMAIL_BACKEND` is defined in development:
+machado's `login.html` links Django's built-in `password_reset` view. If your
+project never configures email, `EMAIL_BACKEND` falls back to Django's own
+default, the SMTP backend pointed at `localhost:25` — and a visitor who
+clicks "Forgot your password?" gets a `ConnectionRefusedError` there, which
+surfaces as an HTTP 500. Add the console fallback below so `EMAIL_BACKEND` is
+always defined; it is what turns that 500 into a success page (the email is
+merely printed to the console instead of sent) until you configure a real
+backend:
 
 ```python
 if env("EMAIL_URL", default=None):
@@ -244,7 +251,11 @@ models already inherit from them, so most projects need no change at all.
 
 Run `python manage.py check` after upgrading. Every piece of configuration
 machado needs that is still missing is reported as an error, with a hint that
-names the fix:
+names the fix. This check is registered untagged, so it runs before every
+management command, not just `check` — until the reported settings are
+fixed, `migrate`, `collectstatic`, `runserver`, and every other command will
+refuse to run too, so expect to hit this mid-deploy rather than only when you
+run `check` deliberately.
 
 | Check | Reported when | Fix |
 | :--- | :--- | :--- |

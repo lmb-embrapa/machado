@@ -68,7 +68,7 @@ def _pub_with_doi(fx, uniquename, accession):
     return pub
 
 
-def build_decorator_fixture():
+def build_mixin_fixture():
     """Build the corpus and return a namespace of the created objects."""
     fx = SimpleNamespace()
 

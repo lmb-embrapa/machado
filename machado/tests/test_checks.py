@@ -7,6 +7,7 @@
 """Tests for the machado settings system checks."""
 
 from django.conf import settings
+from django.core.checks import registry
 from django.test import TestCase, override_settings
 
 from machado.checks import check_machado_settings
@@ -106,3 +107,19 @@ class MachadoSettingsCheckTest(TestCase):
         ids = _ids(check_machado_settings(None))
         self.assertNotIn("machado.E002", ids)
         self.assertNotIn("machado.E004", ids)
+
+
+class MachadoSettingsCheckRegistrationTest(TestCase):
+    """machado.apps.MachadoConfig.ready() must actually register this check.
+
+    Every test above calls check_machado_settings(None) directly, which would
+    stay green even if ``register(check_machado_settings)`` were deleted from
+    ``ready()`` -- that deletion would silently disarm the check for every
+    real ``manage.py`` invocation while all 363+ tests kept passing. This test
+    inspects Django's global check registry instead of calling the function,
+    so it fails if registration itself is missing.
+    """
+
+    def test_check_machado_settings_is_registered(self):
+        """The function object itself must be in the global check registry."""
+        self.assertIn(check_machado_settings, registry.registry.registered_checks)
