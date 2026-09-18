@@ -20,5 +20,7 @@ class MachadoConfig(AppConfig):
         from django.core.checks import register
 
         from machado.caching import check_cache_directory
+        from machado.checks import check_machado_settings
 
         register(check_cache_directory)
+        register(check_machado_settings)
