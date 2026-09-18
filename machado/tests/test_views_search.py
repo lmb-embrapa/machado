@@ -31,12 +31,15 @@ from django.template.loader import render_to_string
 class SearchFacetTemplateTest(TestCase):
     """A facet with a single option offers no real choice; its card is skipped."""
 
-    def _render(self, fields, doi_titles=None):
+    def _render(self, fields, doi_titles=None, selected_facets=None):
         return render_to_string(
             "search_facet.html",
             {
+                # A non-empty selection renders the "Selected filters" card,
+                # whose remove links need the request in context.
+                "request": RequestFactory().get("/find/"),
                 "query": "",
-                "selected_facets": [],
+                "selected_facets": selected_facets or [],
                 "facets": {"fields": fields},
                 "facet_fields_order": list(fields.keys()),
                 "facet_fields_desc": {k: k for k in fields},
@@ -62,6 +65,46 @@ class SearchFacetTemplateTest(TestCase):
         )
         self.assertIn("A Great Paper About Kinases", html)
         self.assertIn('value="doi:10.1234/has-title"', html)
+
+    def test_orthologs_coexpression_labels_its_two_options_differently(self):
+        """The two options must not both read "coexpression".
+
+        orthologs_coexpression is a BooleanField, so its facet values arrive
+        from the database as Python bools. The template used to test
+        ``item.0 == 'false'``, which a bool never satisfies, so both rows fell
+        through to the same branch and the card offered "coexpression" twice
+        with two different counts and no way to tell which was which.
+        """
+        html = self._render(
+            {"orthologs_coexpression": [(False, 5381303), (True, 2183355)]}
+        )
+        self.assertIn("no coexpression", html)
+        # The true row must carry a label that is not the false row's.
+        self.assertIn('value="orthologs_coexpression:true"', html)
+        self.assertIn('value="orthologs_coexpression:false"', html)
+
+    def test_orthologs_coexpression_writes_lowercase_values(self):
+        """The submitted value must match what the rest of the page expects.
+
+        Rendering the bool directly produced "orthologs_coexpression:True",
+        while the checked test here and the selected-filter pills at the top
+        of the card both look for the lowercase form -- so a selected filter
+        showed neither a ticked box nor a named pill, only the raw
+        "orthologs_coexpression:True" text.
+        """
+        html = self._render({"orthologs_coexpression": [(False, 3), (True, 2)]})
+        self.assertNotIn("orthologs_coexpression:True", html)
+        self.assertNotIn("orthologs_coexpression:False", html)
+
+    def test_orthologs_coexpression_checkbox_reflects_the_selection(self):
+        """A selected option comes back ticked."""
+        html = self._render(
+            {"orthologs_coexpression": [(False, 3), (True, 2)]},
+            selected_facets=["orthologs_coexpression:true"],
+        )
+        self.assertIn(
+            'value="orthologs_coexpression:true" checked', html.replace("\n", " ")
+        )
 
     def test_selection_without_a_checkbox_is_carried_as_hidden_input(self):
         """A selection the form cannot show must still be submitted.
