@@ -6,12 +6,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-import warnings
-
 from django.apps import AppConfig
-from django.db.utils import ProgrammingError
-
-from machado import settings as dt_settings
 
 
 class MachadoConfig(AppConfig):
@@ -25,16 +20,7 @@ class MachadoConfig(AppConfig):
         from django.core.checks import register
 
         from machado.caching import check_cache_directory
+        from machado.checks import check_machado_settings
 
         register(check_cache_directory)
-
-        try:
-            dt_settings.patch_all()
-            from machado.models import Organism
-            from machado.decorators import machado_organism_methods
-
-            machado_organism_methods()(Organism)
-        except ProgrammingError as e:
-            if str(e).startswith('relation "cvterm" does not exist'):
-                warnings.warn("You need to run: 'python manage.py migrate'")
-            pass
+        register(check_machado_settings)

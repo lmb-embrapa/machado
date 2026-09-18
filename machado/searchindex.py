@@ -28,56 +28,19 @@ from django.core.management.base import CommandError
 from django.db.models import F, Q
 
 from machado.models import FeatureSearchIndex
+from machado.display import (
+    fetch_annotation_data,
+    fetch_prop_rows,
+    group_props,
+    resolve_display,
+)
 
 #: Analysis programs surfaced as facets by ``_prepare_analyses``.
 VALID_PROGRAMS = ["interproscan", "diamond", "blast"]
 
-# DUPLICATED LOGIC -- KEEP IN LOCKSTEP WITH machado/decorators.py.
-#
-# This module and ``machado.decorators`` resolve the same three things by the
-# same rules, in two separate copies:
-#
-#   * ``DISPLAY_FALLBACK`` below            <-> ``decorators.DISPLAY_FALLBACK``
-#   * ``resolve_display``                   <-> ``decorators.get_feature_display``
-#   * the batching block in ``prefetch_chunk`` (steps 4-7)
-#                                 <-> ``decorators.get_feature_annotation_data``
-#
-# ``PROP_TYPES`` is a third place that must move with them: it is the superset
-# ``prefetch_chunk`` fetches, and it must contain every DISPLAY_FALLBACK name or
-# ``resolve_display`` silently loses a fallback step. Change one site, change
-# all of them -- the search index and the feature page are supposed to agree
-# about a feature's display value and DOIs, and only these copies enforce that.
-#
-# This is not hypothetical drift: commit 1b4ecac added a deterministic
-# ``order_by("pub_dbxref_id")`` to the DOI tie-break in ``decorators.py`` and
-# missed the identical query here, so the page and the index disagreed
-# nondeterministically about multi-DOI pubs until it was fixed separately.
-#
-# The obvious fix -- extracting the shared logic into a third module both
-# import -- is not available: ``machado.models`` imports ``decorators`` at
-# import time (for the method-patching decorators) and this module imports
-# ``machado.models``, so ``decorators`` cannot import from here without a
-# circular import. Until that cycle is broken, duplication plus this warning is
-# the arrangement.
-
-#: Featureprop type names read from the ``feature_property`` CV.
-#: ``prefetch_chunk`` fetches all of these in a single query and splits them by
-#: type, instead of issuing one lookup per property per feature. Defined here
-#: so the contract lives beside ``resolve_display``, which depends on the
-#: fallback subset. Must remain a superset of DISPLAY_FALLBACK.
-PROP_TYPES = (
-    "display",
-    "product",
-    "description",
-    "note",
-    "annotation",
-    "orthologous group",
-    "coexpression group",
-)
-
-#: Order of the display fallback chain. Twin of
-#: ``machado.decorators.DISPLAY_FALLBACK``; see the lockstep warning above.
-DISPLAY_FALLBACK = ("display", "product", "description", "note")
+# The display/DOI rules live in machado.display and are shared with
+# machado.mixins.FeatureMixin; machado/tests/test_page_index_parity.py
+# proves the two paths agree.
 
 
 def load_valid_programs():
@@ -186,26 +149,6 @@ class ChunkContext:
             orthologs_coexpression={},
             overlaps={},
         )
-
-
-def resolve_display(props):
-    """Return the display value, following the display fallback chain.
-
-    Character-for-character twin of ``machado.decorators.get_feature_display``
-    (which reads the same map off a per-instance cache instead of a chunk
-    context). Change both or the feature page and the search index will report
-    different display values for the same feature; see the lockstep warning at
-    the top of this module for why they cannot share one implementation.
-
-    Note the ``if values`` test: a prop that is present but whose ``value`` is
-    NULL yields ``[None]``, a truthy list, so the chain STOPS there and returns
-    ``None`` rather than falling through to the next prop.
-    """
-    for prop_name in DISPLAY_FALLBACK:
-        values = props.get(prop_name)
-        if values:
-            return values[0]
-    return None
 
 
 def build_organism(organism):
@@ -363,12 +306,8 @@ def prefetch_chunk(feature_ids, config, cache=None):
         Analysisfeature,
         FeatureCvterm,
         FeatureDbxref,
-        FeaturePub,
         FeatureRelationship,
         Featureloc,
-        Featureprop,
-        FeaturepropPub,
-        PubDbxref,
     )
 
     ctx = ChunkContext.empty()
@@ -416,88 +355,19 @@ def prefetch_chunk(feature_ids, config, cache=None):
     )
 
     # 4. feature properties (one query serves seven prop types)
-    prop_rows = list(
-        Featureprop.objects.filter(
-            feature_id__in=ids,
-            type__cv__name="feature_property",
-            type__name__in=PROP_TYPES,
-        )
-        .order_by("feature_id", "type__name", "rank")
-        .values("featureprop_id", "feature_id", "type__name", "value")
-    )
-    props = {}
-    for row in prop_rows:
-        by_type = props.setdefault(row["feature_id"], {})
-        by_type.setdefault(row["type__name"], []).append(row["value"])
-    ctx.props = props
+    prop_rows = fetch_prop_rows(ids)
+    ctx.props = group_props(prop_rows)
 
     # 5-7. annotation DOIs and publication DOIs share one PubDbxref lookup
-    annotation_rows = [r for r in prop_rows if r["type__name"] == "annotation"]
-    annotation_ids = [r["featureprop_id"] for r in annotation_rows]
-
-    proppub_rows = (
-        list(
-            FeaturepropPub.objects.filter(featureprop_id__in=annotation_ids)
-            .order_by("featureprop_id", "pub_id")
-            .values("featureprop_id", "pub_id")
-        )
-        if annotation_ids
-        else []
-    )
-
-    featurepub_rows = list(
-        FeaturePub.objects.filter(feature_id__in=ids)
-        .order_by("feature_id", "pub_id")
-        .values("feature_id", "pub_id")
-    )
-
-    pub_ids = {r["pub_id"] for r in proppub_rows}
-    pub_ids.update(r["pub_id"] for r in featurepub_rows)
-    pub_doi = {}
-    if pub_ids:
-        # order_by is REQUIRED for determinism, not decoration. A pub may carry
-        # more than one DOI dbxref, and setdefault keeps whichever row arrives
-        # first -- unordered, that is whatever the query plan happens to return,
-        # so FeatureSearchIndex.doi (and search_vector) could flip between index
-        # rebuilds and disagree with the feature page. Ordering by the PK picks
-        # the lowest-pk row, matching decorators.py's get_feature_annotation_data
-        # and get_pub_doi (whose .first() auto-orders by pk). See the twin-site
-        # warning on DISPLAY_FALLBACK above: this query is exactly the drift that
-        # warning is about -- it was missed when decorators.py was fixed.
-        for row in (
-            PubDbxref.objects.filter(pub_id__in=pub_ids, dbxref__db__name="DOI")
-            .order_by("pub_dbxref_id")
-            .values("pub_id", "dbxref__accession")
-        ):
-            pub_doi.setdefault(row["pub_id"], row["dbxref__accession"])
-
-    proppub_by_prop = {}
-    for row in proppub_rows:
-        proppub_by_prop.setdefault(row["featureprop_id"], []).append(row["pub_id"])
-
-    annotations = {}
-    dois = {}
-    for row in annotation_rows:
-        fid = row["feature_id"]
-        prop_dois = [
-            pub_doi[pid]
-            for pid in proppub_by_prop.get(row["featureprop_id"], [])
-            if pid in pub_doi
-        ]
-        if prop_dois:
-            label = "{} (DOI:{})".format(row["value"], ", ".join(prop_dois))
-        else:
-            label = row["value"]
-        annotations.setdefault(fid, []).append(label)
-        dois.setdefault(fid, set()).update(prop_dois)
-
-    for row in featurepub_rows:
-        doi = pub_doi.get(row["pub_id"])
-        if doi:
-            dois.setdefault(row["feature_id"], set()).add(doi)
-
-    ctx.annotations = annotations
-    ctx.dois = dois
+    annotation_data = fetch_annotation_data(prop_rows, ids)
+    ctx.annotations = {
+        fid: data["annotations"]
+        for fid, data in annotation_data.items()
+        if data["annotations"]
+    }
+    ctx.dois = {
+        fid: data["dois"] for fid, data in annotation_data.items() if data["dois"]
+    }
 
     # 8. expression samples - the 6-table join, once per chunk
     ctx.samples = _group(
@@ -608,7 +478,7 @@ def prefetch_chunk(feature_ids, config, cache=None):
 
     # 12-14. orthologs coexpression
     ctx.orthologs_coexpression = _prefetch_orthologs_coexpression(
-        ids, props, ortholog_flags=None if cache is None else cache.ortholog_flags
+        ids, ctx.props, ortholog_flags=None if cache is None else cache.ortholog_flags
     )
 
     # 15-16. overlapping features

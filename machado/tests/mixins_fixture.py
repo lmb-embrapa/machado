@@ -4,9 +4,9 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Shared real-data fixture for decorators tests.
+"""Shared real-data fixture for mixin tests.
 
-The decorator methods in machado/decorators.py are query-heavy helpers. Testing
+The mixin methods in machado/mixins.py are query-heavy helpers. Testing
 them against MagicMock querysets cannot detect an N+1, because a mock has no
 query count. This fixture builds real rows so ``assertNumQueries`` can be used,
 and provides ``add_*`` helpers so a test can prove a query count is invariant to
@@ -68,7 +68,7 @@ def _pub_with_doi(fx, uniquename, accession):
     return pub
 
 
-def build_decorator_fixture():
+def build_mixin_fixture():
     """Build the corpus and return a namespace of the created objects."""
     fx = SimpleNamespace()
 

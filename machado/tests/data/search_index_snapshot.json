@@ -67,6 +67,49 @@
     "treatment": [],
     "uniquename": "GENE_C"
   },
+  "GENE_EMPTY_DOI": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana GENE_EMPTY_DOI GeneEmptyDoi no doi here",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [],
+    "name": "GeneEmptyDoi",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": false,
+    "orthology": false,
+    "relationships": [],
+    "so_term": "gene",
+    "treatment": [],
+    "uniquename": "GENE_EMPTY_DOI"
+  },
+  "GENE_MULTI_PUB": {
+    "analyses": [
+      "no blast matches"
+    ],
+    "autocomplete_text": "Arabidopsis thaliana 10.5555/aaa 10.5555/bbb GENE_MULTI_PUB GeneMultiPub two sources (DOI:10.5555/bbb, 10.5555/aaa)",
+    "biomaterial": [],
+    "coexpression": false,
+    "coexpression_group": null,
+    "display": null,
+    "doi": [
+      "10.5555/aaa",
+      "10.5555/bbb"
+    ],
+    "name": "GeneMultiPub",
+    "organism": "Arabidopsis thaliana",
+    "orthologous_group": null,
+    "orthologs_coexpression": false,
+    "orthology": false,
+    "relationships": [],
+    "so_term": "gene",
+    "treatment": [],
+    "uniquename": "GENE_MULTI_PUB"
+  },
   "MRNA_A": {
     "analyses": [
       "no blast matches"

@@ -8,7 +8,7 @@ from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 from django.utils import timezone
 
-from machado.decorators import machado_feature_methods, machado_pub_methods
+from machado.mixins import FeatureMixin, OrganismMixin, PubMixin
 
 
 class Acquisition(models.Model):
@@ -1333,8 +1333,7 @@ class Expressionprop(models.Model):
         unique_together = (("expression", "type", "rank"),)
 
 
-@machado_feature_methods()
-class Feature(models.Model):
+class Feature(FeatureMixin, models.Model):
     feature_id = models.BigAutoField(primary_key=True)
     dbxref = models.ForeignKey(
         Dbxref,
@@ -2736,7 +2735,7 @@ class NdReagentprop(models.Model):
         unique_together = (("nd_reagent", "type", "rank"),)
 
 
-class Organism(models.Model):
+class Organism(OrganismMixin, models.Model):
     organism_id = models.BigAutoField(primary_key=True)
     abbreviation = models.CharField(max_length=255, blank=True, null=True)
     genus = models.CharField(max_length=255)
@@ -3536,8 +3535,7 @@ class Protocolparam(models.Model):
         db_table = "protocolparam"
 
 
-@machado_pub_methods()
-class Pub(models.Model):
+class Pub(PubMixin, models.Model):
     pub_id = models.BigAutoField(primary_key=True)
     title = models.TextField(blank=True, null=True)
     volumetitle = models.TextField(blank=True, null=True)
