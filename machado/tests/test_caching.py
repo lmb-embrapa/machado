@@ -174,18 +174,35 @@ class CachePagePerAuthTest(TestCase):
         the directory cannot be created, so an unwritable CACHE_DIR would
         otherwise turn every search into a 500 -- the page would be taken
         down by the thing meant to speed it up.
+
+        assertLogs is doing two jobs here. It asserts the failure is actually
+        reported -- swallowing it silently would leave an operator with a
+        permanently uncached site and no clue why -- and it captures the
+        records instead of letting them reach the root handler, which keeps
+        the deliberate PermissionError tracebacks out of the test run's
+        output where they read like real failures.
         """
-        with (
-            patch("machado.caching.cache.get", side_effect=PermissionError("denied")),
-            patch("machado.caching.cache.set", side_effect=PermissionError("denied")),
-        ):
-            first = self._get(AnonymousUser())
-            second = self._get(AnonymousUser())
+        with self.assertLogs("machado.caching", level="WARNING") as captured:
+            with (
+                patch(
+                    "machado.caching.cache.get",
+                    side_effect=PermissionError("denied"),
+                ),
+                patch(
+                    "machado.caching.cache.set",
+                    side_effect=PermissionError("denied"),
+                ),
+            ):
+                first = self._get(AnonymousUser())
+                second = self._get(AnonymousUser())
 
         self.assertEqual(first.status_code, 200)
         self.assertEqual(second.status_code, 200)
         # Nothing could be stored, so every request renders afresh.
         self.assertEqual(len(self.calls), 2)
+        # Both halves of the round trip must report, not just the first.
+        self.assertTrue(any("unreadable" in m for m in captured.output))
+        self.assertTrue(any("unwritable" in m for m in captured.output))
 
 
 @override_settings(CACHES=FILE_CACHE)
@@ -213,11 +230,19 @@ class ClearPageCacheTest(TestCase):
         set_public runs this mid-request and rebuild_search_index runs it
         from a finally block; in both, an exception here would surface as a
         failure of the operation itself rather than of the cache.
+
+        assertLogs both pins that the failure is reported -- a clear that
+        silently does nothing leaves stale pages served indefinitely, since
+        the cache has no expiry of its own -- and keeps the deliberate
+        traceback out of the test run's output.
         """
-        with patch(
-            "machado.caching.cache.clear", side_effect=PermissionError("denied")
-        ):
-            clear_page_cache()
+        with self.assertLogs("machado.caching", level="WARNING") as captured:
+            with patch(
+                "machado.caching.cache.clear", side_effect=PermissionError("denied")
+            ):
+                clear_page_cache()
+
+        self.assertTrue(any("could not be cleared" in m for m in captured.output))
 
 
 @override_settings(CACHES=FILE_CACHE)
