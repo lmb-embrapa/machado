@@ -75,6 +75,31 @@ class MachadoSettingsCheckTest(TestCase):
         """LOGIN_URL must name the login route."""
         self.assertIn("machado.E005", _ids(check_machado_settings(None)))
 
+    @override_settings(LOGIN_URL="/accounts/login/")
+    def test_login_url_still_at_django_default_reports_e005(self):
+        """Django's truthy default is also wrong: it is a path, not a name."""
+        self.assertIn("machado.E005", _ids(check_machado_settings(None)))
+
+    @override_settings(USE_TZ=True)
+    def test_use_tz_true_reports_e006(self):
+        """The chado schema stores naive timestamps."""
+        self.assertIn("machado.E006", _ids(check_machado_settings(None)))
+
+    @override_settings(USE_TZ=False)
+    def test_use_tz_false_does_not_report_e006(self):
+        """USE_TZ = False is exactly what machado expects."""
+        self.assertNotIn("machado.E006", _ids(check_machado_settings(None)))
+
+    @override_settings(LOGIN_REDIRECT_URL="/accounts/profile/")
+    def test_login_redirect_url_still_at_django_default_reports_e007(self):
+        """Django's default 404s in machado."""
+        self.assertIn("machado.E007", _ids(check_machado_settings(None)))
+
+    @override_settings(LOGOUT_REDIRECT_URL=None)
+    def test_missing_logout_redirect_url_reports_e008(self):
+        """LOGOUT_REDIRECT_URL has no usable default."""
+        self.assertIn("machado.E008", _ids(check_machado_settings(None)))
+
     @override_settings(MIDDLEWARE=FULL_MIDDLEWARE, TEMPLATES=FULL_TEMPLATES)
     def test_a_complete_configuration_reports_no_middleware_or_template_error(self):
         """A project with all the pieces reports neither E002 nor E004."""

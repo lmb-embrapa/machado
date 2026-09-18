@@ -17,7 +17,7 @@ Every check reads settings only. None touches the database, so they are safe to
 run during ``migrate`` on a fresh, empty project.
 """
 
-from django.conf import settings
+from django.conf import global_settings, settings
 from django.core.checks import Error
 from django.urls import NoReverseMatch, reverse
 
@@ -91,7 +91,8 @@ def check_machado_settings(app_configs, **kwargs):
             )
         )
 
-    if not getattr(settings, "LOGIN_URL", None):
+    login_url = getattr(settings, "LOGIN_URL", None)
+    if not login_url or login_url == global_settings.LOGIN_URL:
         errors.append(
             Error(
                 "LOGIN_URL is not set.",
@@ -102,6 +103,52 @@ def check_machado_settings(app_configs, **kwargs):
                     + UPGRADE_DOC
                 ),
                 id="machado.E005",
+            )
+        )
+
+    if getattr(settings, "USE_TZ", None) is not False:
+        errors.append(
+            Error(
+                "machado expects USE_TZ = False.",
+                hint=(
+                    "machado's chado schema stores naive timestamps, and every "
+                    "deployment before this release ran with USE_TZ = False "
+                    "because machado forced it. Set USE_TZ = False in "
+                    "settings.py. " + UPGRADE_DOC
+                ),
+                id="machado.E006",
+            )
+        )
+
+    login_redirect_url = getattr(settings, "LOGIN_REDIRECT_URL", None)
+    if (
+        not login_redirect_url
+        or login_redirect_url == global_settings.LOGIN_REDIRECT_URL
+    ):
+        errors.append(
+            Error(
+                "LOGIN_REDIRECT_URL is not set.",
+                hint=(
+                    'Set LOGIN_REDIRECT_URL = "home". It is the route NAME, not '
+                    "a path, for the same reason as LOGIN_URL. " + UPGRADE_DOC
+                ),
+                id="machado.E007",
+            )
+        )
+
+    logout_redirect_url = getattr(settings, "LOGOUT_REDIRECT_URL", None)
+    if (
+        not logout_redirect_url
+        or logout_redirect_url == global_settings.LOGOUT_REDIRECT_URL
+    ):
+        errors.append(
+            Error(
+                "LOGOUT_REDIRECT_URL is not set.",
+                hint=(
+                    'Set LOGOUT_REDIRECT_URL = "home". It is the route NAME, '
+                    "not a path, for the same reason as LOGIN_URL. " + UPGRADE_DOC
+                ),
+                id="machado.E008",
             )
         )
 
