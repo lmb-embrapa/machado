@@ -123,12 +123,19 @@ one renders verbatim into the page.
 			coexpression groups
 			{% endif %}
 		{% elif facet == "orthologs_coexpression" %}
-			{% if item.0 == 'false' %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:false" in selected_facets %}checked{% endif %}>
-			no coexpression
-			{% else %}
-			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if "orthologs_coexpression:true" in selected_facets %}checked{% endif %}>
+			{# item.0 is a Python bool here -- orthologs_coexpression is a
+			   BooleanField, so the facet value arrives from the database as
+			   True/False, not as a string. Test it for truthiness rather than
+			   comparing with 'false', and write the value as a lowercase
+			   literal: "{{ item.0 }}" would render "True"/"False", which no
+			   longer matches the lowercase checks here and in the selected
+			   filter pills above. #}
+			{% if item.0 %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:true" {% if "orthologs_coexpression:true" in selected_facets %}checked{% endif %}>
 			coexpression
+			{% else %}
+			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:false" {% if "orthologs_coexpression:false" in selected_facets %}checked{% endif %}>
+			no coexpression
 			{% endif %}
 		{% elif facet == "orthologs_biomaterial" %}
 			<input type="checkbox" name="selected_facets" id="selected_facets" value="{{ facet }}:{{ item.0 }}" {% if facet_item in selected_facets %}checked{% endif %}>
