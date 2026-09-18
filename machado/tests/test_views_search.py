@@ -16,6 +16,7 @@ from machado.models import (
     PubDbxref,
 )
 from machado.views.search import (
+    FACET_FIELDS,
     FeatureSearchView,
     FeatureSearchExportView,
     _doi_titles,
@@ -65,6 +66,33 @@ class SearchFacetTemplateTest(TestCase):
         )
         self.assertIn("A Great Paper About Kinases", html)
         self.assertIn('value="doi:10.1234/has-title"', html)
+
+    def test_no_facet_card_leaks_template_markup(self):
+        """Every facet branch must render, not print, its own source.
+
+        In Django only a SINGLE-line ``{# ... #}`` is a comment; a multi-line
+        one is ordinary text and renders verbatim, interpolating any ``{{ }}``
+        inside it. That shipped once, on the orthologs_coexpression card,
+        which displayed its own explanatory comment to users.
+
+        An assertion already existed for it, but only on a render of one
+        facet, so it never saw the branch that broke. This renders every
+        field in machado.views.search.FACET_FIELDS, so a leak in any branch
+        fails here regardless of which one it is.
+        """
+        html = self._render(
+            {
+                field: (
+                    [(False, 3), (True, 2)]
+                    if field in ("orthology", "coexpression", "orthologs_coexpression")
+                    else [("alpha", 3), ("beta", 2)]
+                )
+                for field in FACET_FIELDS
+            }
+        )
+        self.assertNotIn("{#", html)
+        self.assertNotIn("#}", html)
+        self.assertNotIn("{%", html)
 
     def test_orthologs_coexpression_labels_its_two_options_differently(self):
         """The two options must not both read "coexpression".
