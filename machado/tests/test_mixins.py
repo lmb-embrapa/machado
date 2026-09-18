@@ -4,7 +4,7 @@
 # license. Please see the LICENSE.txt and README.md files that should
 # have been included as part of this package for licensing information.
 
-"""Tests for machado.decorators."""
+"""Tests for machado.mixins."""
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase, override_settings
@@ -21,30 +21,18 @@ from machado.models import (
     Pub,
     PubDbxref,
 )
-from machado.tests.decorators_fixture import (
+from machado.tests.mixins_fixture import (
     _feature,
     add_annotations,
     add_dbxrefs,
     add_locations,
     add_synonyms,
-    build_decorator_fixture,
+    build_mixin_fixture,
 )
 
-from machado.decorators import (
-    get_feature_product,
-    get_feature_description,
-    get_feature_note,
-    get_feature_properties,
-    get_feature_orthologous_group,
-    get_feature_coexpression_group,
-    get_feature_expression_samples,
-    get_feature_cvterm,
-    machado_feature_methods,
-    get_pub_authors,
-    machado_pub_methods,
-)
+from machado.mixins import FeatureMixin, PubMixin
 
-#: get_feature_location wraps its whole body in
+#: get_location wraps its whole body in
 #: `if hasattr(settings, "MACHADO_JBROWSE_URL")`, so with that setting absent it
 #: returns []. machadoproject.settings only defines it when the deployment sets
 #: MACHADO_JBROWSE_URL in its .env, so any test touching get_location must
@@ -58,53 +46,59 @@ JBROWSE_SETTINGS = {
 
 
 class GetFeaturePropTest(TestCase):
-    """Tests for feature properties decorators."""
+    """Tests for feature properties mixin methods."""
 
     def test_product_found(self):
         """Test product found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some product"
-        result = get_feature_product(mock_self)
+        mock_self._first_prop.return_value = "some product"
+        result = FeatureMixin.get_product(mock_self)
         self.assertEqual(result, "some product")
+        mock_self._first_prop.assert_called_once_with("product")
 
     def test_product_not_found(self):
         """Test product not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        result = get_feature_product(mock_self)
+        mock_self._first_prop.return_value = None
+        result = FeatureMixin.get_product(mock_self)
         self.assertIsNone(result)
+        mock_self._first_prop.assert_called_once_with("product")
 
     def test_description_found(self):
         """Test description found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some desc"
-        result = get_feature_description(mock_self)
+        mock_self._first_prop.return_value = "some desc"
+        result = FeatureMixin.get_description(mock_self)
         self.assertEqual(result, "some desc")
+        mock_self._first_prop.assert_called_once_with("description")
 
     def test_description_not_found(self):
         """Test description not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        result = get_feature_description(mock_self)
+        mock_self._first_prop.return_value = None
+        result = FeatureMixin.get_description(mock_self)
         self.assertIsNone(result)
+        mock_self._first_prop.assert_called_once_with("description")
 
     def test_note_found(self):
         """Test note found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "some note"
-        result = get_feature_note(mock_self)
+        mock_self._first_prop.return_value = "some note"
+        result = FeatureMixin.get_note(mock_self)
         self.assertEqual(result, "some note")
+        mock_self._first_prop.assert_called_once_with("note")
 
     def test_note_not_found(self):
         """Test note not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        result = get_feature_note(mock_self)
+        mock_self._first_prop.return_value = None
+        result = FeatureMixin.get_note(mock_self)
         self.assertIsNone(result)
+        mock_self._first_prop.assert_called_once_with("note")
 
 
 class GetFeaturePropertiesTest(TestCase):
-    """Tests for get_feature_properties."""
+    """Tests for FeatureMixin.get_properties."""
 
     def test_properties_found(self):
         """Test properties found."""
@@ -116,7 +110,7 @@ class GetFeaturePropertiesTest(TestCase):
         mock_self = MagicMock()
         mock_self.Featureprop_feature_Feature.filter.return_value = mock_qs
 
-        result = get_feature_properties(mock_self)
+        result = FeatureMixin.get_properties(mock_self)
         self.assertEqual(len(result), 2)
 
     def test_properties_not_found(self):
@@ -124,48 +118,52 @@ class GetFeaturePropertiesTest(TestCase):
         mock_self = MagicMock()
         mock_self.Featureprop_feature_Feature.filter.side_effect = ObjectDoesNotExist
 
-        result = get_feature_properties(mock_self)
+        result = FeatureMixin.get_properties(mock_self)
         self.assertEqual(result, [])
 
 
 class GetFeatureOrthologousGroupTest(TestCase):
-    """Tests for get_feature_orthologous_group."""
+    """Tests for FeatureMixin.get_orthologous_group."""
 
     def test_found(self):
         """Test found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "OG001"
-        result = get_feature_orthologous_group(mock_self)
+        mock_self._first_prop.return_value = "OG001"
+        result = FeatureMixin.get_orthologous_group(mock_self)
         self.assertEqual(result, "OG001")
+        mock_self._first_prop.assert_called_once_with("orthologous group")
 
     def test_not_found(self):
         """Test not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        result = get_feature_orthologous_group(mock_self)
+        mock_self._first_prop.return_value = None
+        result = FeatureMixin.get_orthologous_group(mock_self)
         self.assertIsNone(result)
+        mock_self._first_prop.assert_called_once_with("orthologous group")
 
 
 class GetFeatureCoexpressionGroupTest(TestCase):
-    """Tests for get_feature_coexpression_group."""
+    """Tests for FeatureMixin.get_coexpression_group."""
 
     def test_found(self):
         """Test found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.return_value.value = "CG001"
-        result = get_feature_coexpression_group(mock_self)
+        mock_self._first_prop.return_value = "CG001"
+        result = FeatureMixin.get_coexpression_group(mock_self)
         self.assertEqual(result, "CG001")
+        mock_self._first_prop.assert_called_once_with("coexpression group")
 
     def test_not_found(self):
         """Test not found."""
         mock_self = MagicMock()
-        mock_self.Featureprop_feature_Feature.get.side_effect = ObjectDoesNotExist
-        result = get_feature_coexpression_group(mock_self)
+        mock_self._first_prop.return_value = None
+        result = FeatureMixin.get_coexpression_group(mock_self)
         self.assertIsNone(result)
+        mock_self._first_prop.assert_called_once_with("coexpression group")
 
 
 class GetFeatureExpressionSamplesTest(TestCase):
-    """Tests for get_feature_expression_samples."""
+    """Tests for FeatureMixin.get_expression_samples."""
 
     def test_samples_found(self):
         """Test samples found."""
@@ -178,7 +176,7 @@ class GetFeatureExpressionSamplesTest(TestCase):
         mock_self = MagicMock()
         mock_self.Analysisfeature_feature_Feature.annotate.return_value = mock_qs
 
-        result = get_feature_expression_samples(mock_self)
+        result = FeatureMixin.get_expression_samples(mock_self)
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 1)
 
@@ -189,12 +187,12 @@ class GetFeatureExpressionSamplesTest(TestCase):
             ObjectDoesNotExist
         )
 
-        result = get_feature_expression_samples(mock_self)
+        result = FeatureMixin.get_expression_samples(mock_self)
         self.assertIsNone(result)
 
 
 class GetFeatureCvtermTest(TestCase):
-    """Tests for get_feature_cvterm."""
+    """Tests for FeatureMixin.get_cvterm."""
 
     def test_cvterm(self):
         """Test cvterm."""
@@ -204,41 +202,12 @@ class GetFeatureCvtermTest(TestCase):
         mock_self = MagicMock()
         mock_self.FeatureCvterm_feature_Feature.all.return_value = mock_qs
 
-        result = get_feature_cvterm(mock_self)
+        result = FeatureMixin.get_cvterm(mock_self)
         self.assertIsNotNone(result)
 
 
-class MachadoFeatureMethodsTest(TestCase):
-    """Tests for the machado_feature_methods decorator."""
-
-    def test_decorator_adds_methods(self):
-        """Test decorator adds methods."""
-
-        @machado_feature_methods()
-        class DummyFeature:
-            """Test suite for DummyFeature."""
-
-            pass
-
-        self.assertTrue(hasattr(DummyFeature, "get_dbxrefs"))
-        self.assertTrue(hasattr(DummyFeature, "get_display"))
-        self.assertTrue(hasattr(DummyFeature, "get_product"))
-        self.assertTrue(hasattr(DummyFeature, "get_description"))
-        self.assertTrue(hasattr(DummyFeature, "get_note"))
-        self.assertTrue(hasattr(DummyFeature, "get_annotation"))
-        self.assertTrue(hasattr(DummyFeature, "get_doi"))
-        self.assertTrue(hasattr(DummyFeature, "get_orthologous_group"))
-        self.assertTrue(hasattr(DummyFeature, "get_coexpression_group"))
-        self.assertTrue(hasattr(DummyFeature, "get_expression_samples"))
-        self.assertTrue(hasattr(DummyFeature, "get_relationship"))
-        self.assertTrue(hasattr(DummyFeature, "get_cvterm"))
-        self.assertTrue(hasattr(DummyFeature, "get_location"))
-        self.assertTrue(hasattr(DummyFeature, "get_properties"))
-        self.assertTrue(hasattr(DummyFeature, "get_synonyms"))
-
-
 class GetPubAuthorsTest(TestCase):
-    """Tests for get_pub_authors."""
+    """Tests for PubMixin.get_authors."""
 
     def test_authors(self):
         """Test authors."""
@@ -251,27 +220,11 @@ class GetPubAuthorsTest(TestCase):
         mock_self = MagicMock()
         mock_self.Pubauthor_pub_Pub = mock_qs
 
-        result = get_pub_authors(mock_self)
+        result = PubMixin.get_authors(mock_self)
         self.assertEqual(result, "Smith John, Doe Jane")
 
 
-class MachadoPubMethodsTest(TestCase):
-    """Tests for the machado_pub_methods decorator."""
-
-    def test_decorator_adds_methods(self):
-        """Test decorator adds methods."""
-
-        @machado_pub_methods()
-        class DummyPub:
-            """Test suite for DummyPub."""
-
-            pass
-
-        self.assertTrue(hasattr(DummyPub, "get_authors"))
-        self.assertTrue(hasattr(DummyPub, "get_doi"))
-
-
-class DecoratorRealDataTest(TestCase):
+class MixinRealDataTest(TestCase):
     """Characterization tests for the methods Phase 1b optimizes.
 
     These pin the CURRENT return values so the Phase 1b query changes can be
@@ -281,7 +234,7 @@ class DecoratorRealDataTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_dbxrefs_renders_url_and_plain_forms(self):
         """A dbxref on a db with a url becomes a link; otherwise plain text."""
@@ -330,12 +283,12 @@ class DecoratorRealDataTest(TestCase):
         self.assertIsNone(self.fx.pub_without_doi.get_doi())
 
 
-class DecoratorDisplayAndDoiTest(TestCase):
+class MixinDisplayAndDoiTest(TestCase):
     """Characterization tests for the display chain and annotation/DOI walk."""
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_display_prefers_the_display_prop(self):
         """An explicit display prop wins."""
@@ -419,8 +372,8 @@ class DecoratorDisplayAndDoiTest(TestCase):
         here. The batched version sees a truthy [None] list for `product` and
         returns None, so the page renders blank.
 
-        The new behaviour is kept because searchindex.resolve_display has always
-        behaved this way, so page and index now agree for the first time.
+        The new behaviour is kept because machado.display.resolve_display has
+        always behaved this way, so page and index now agree for the first time.
         Restoring the fall-through would re-open that divergence.
         """
         Featureprop.objects.create(
@@ -439,7 +392,7 @@ class DecoratorDisplayAndDoiTest(TestCase):
         self.assertEqual(polypeptide.get_description(), "a real description")
 
 
-class DecoratorQueryCountTest(TestCase):
+class MixinQueryCountTest(TestCase):
     """Query counts must be invariant to row count, not merely small.
 
     A fixed low number proves nothing on its own -- the fixture might simply
@@ -449,7 +402,7 @@ class DecoratorQueryCountTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_get_dbxrefs_is_one_query_regardless_of_count(self):
         """Fetching dbxrefs costs one query at 2 rows and at 22."""
@@ -520,13 +473,41 @@ class DecoratorQueryCountTest(TestCase):
             self.assertIsNone(pub.get_doi())
             self.assertIsNone(pub.get_doi())
 
+    def test_prop_getters_share_one_query(self):
+        """Five property reads cost one query between them, not five."""
+        gene = Feature.objects.get(pk=self.fx.gene.pk)
+        with self.assertNumQueries(1):
+            gene.get_display()
+            gene.get_product()
+            gene.get_description()
+            self.assertIsNone(gene.get_note())
+            self.assertIsNone(gene.get_orthologous_group())
+            self.assertIsNone(gene.get_coexpression_group())
 
-class DecoratorDisplayQueryTest(TestCase):
+    def test_duplicated_product_returns_the_first_by_rank(self):
+        """Two product props return the lowest rank instead of raising."""
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="first",
+            rank=0,
+        )
+        Featureprop.objects.create(
+            feature=self.fx.polypeptide,
+            type=self.fx.p_product,
+            value="second",
+            rank=1,
+        )
+        polypeptide = Feature.objects.get(pk=self.fx.polypeptide.pk)
+        self.assertEqual(polypeptide.get_product(), "first")
+
+
+class MixinDisplayQueryTest(TestCase):
     """The display fallback chain must not cost one query per fallback step."""
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_display_hit_is_one_query(self):
         """A feature with a display prop resolves in one query."""
@@ -572,12 +553,12 @@ class DecoratorDisplayQueryTest(TestCase):
         self.assertEqual(polypeptide.get_display(), "first")
 
 
-class DecoratorAnnotationQueryTest(TestCase):
+class MixinAnnotationQueryTest(TestCase):
     """The annotation/DOI walk must be flat and shared between both methods."""
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_annotation_query_count_is_invariant(self):
         """Four queries at 2 annotations and at 12."""
@@ -631,7 +612,7 @@ class OrganismIsPublicCacheTest(TestCase):
 
     def setUp(self):
         """Build the shared fixture corpus."""
-        self.fx = build_decorator_fixture()
+        self.fx = build_mixin_fixture()
 
     def test_repeated_access_is_one_query(self):
         """Three reads cost one query, not three.

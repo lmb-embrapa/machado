@@ -154,6 +154,122 @@ python manage.py runserver
 Open `http://localhost:8000/` in your browser.
 
 
+## Upgrading from a version before the settings change
+
+machado used to configure your project for you at startup, by mutating
+`django.conf.settings` from its `AppConfig.ready()`. It no longer does — a
+project created with the current `machado-startproject` already has
+everything it needs, but an **existing** project must add the following by
+hand.
+
+### `urls.py`
+
+machado no longer appends its own URLs to `ROOT_URLCONF`. Include them
+explicitly in `machadoproject/urls.py`:
+
+```python
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("machado.urls")),
+]
+```
+
+### `settings.py`
+
+Add the following, which machado previously set for you:
+
+```python
+USE_THOUSAND_SEPARATOR = True
+APPEND_SLASH = True
+USE_TZ = False
+
+# Trust the reverse proxy's forwarded headers. Turn this OFF for a machado
+# instance that is NOT behind a proxy: with it on, a client-supplied
+# X-Forwarded-Host is believed, which is a host-header injection risk.
+TRUST_PROXY_HEADERS = env.bool("TRUST_PROXY_HEADERS", default=True)
+if TRUST_PROXY_HEADERS:
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
+```
+
+`LOGIN_URL`, `LOGIN_REDIRECT_URL` and `LOGOUT_REDIRECT_URL` are route
+**names**, not paths: machado mounts `django.contrib.auth.urls` under
+`loader/accounts/`, so Django's stock `/accounts/login/` would 404, and a
+hardcoded path would ignore `URL_PREFIX` on a sub-path deployment.
+
+Also confirm that `MIDDLEWARE` contains `SessionMiddleware`,
+`AuthenticationMiddleware` and `MessageMiddleware`, and that your `TEMPLATES`
+entry lists `machado.context_processors.machado_site` under
+`OPTIONS["context_processors"]`. machado used to append all of these for you.
+
+machado's `login.html` links Django's built-in `password_reset` view. If your
+project never configures email, `EMAIL_BACKEND` falls back to Django's own
+default, the SMTP backend pointed at `localhost:25` — and a visitor who
+clicks "Forgot your password?" gets a `ConnectionRefusedError` there, which
+surfaces as an HTTP 500. Add the console fallback below so `EMAIL_BACKEND` is
+always defined; it is what turns that 500 into a success page (the email is
+merely printed to the console instead of sent) until you configure a real
+backend:
+
+```python
+if env("EMAIL_URL", default=None):
+    ...
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+```
+
+`SWAGGER_SETTINGS` is no longer set anywhere — nothing in machado read it, so
+there is nothing to migrate for it.
+
+### `USE_TZ` deserves special attention
+
+`patch_all()` used to force `USE_TZ = False`. Django's own default is `True`.
+If you upgrade without declaring `USE_TZ = False` yourself, your project
+silently switches to timezone-aware datetimes — against a chado schema whose
+timestamp columns the Django ORM does not manage. Nothing raises an
+exception; the site keeps running. Only the *meaning* of every timestamp
+changes, quietly, from then on. This is precisely why `machado.E006` exists
+and is an `Error`, not a warning: it is the one item on this page most likely
+to be missed and least likely to be noticed once it is.
+
+### `machado/decorators.py` is gone
+
+The `setattr`-based decorators that used to inject methods onto `Feature`,
+`Pub` and `Organism` have been replaced by mixins. If you imported
+`machado.decorators` directly, use `machado.mixins.FeatureMixin`,
+`machado.mixins.PubMixin` or `machado.mixins.OrganismMixin` instead — the
+models already inherit from them, so most projects need no change at all.
+
+### Verify with `manage.py check`
+
+Run `python manage.py check` after upgrading. Every piece of configuration
+machado needs that is still missing is reported as an error, with a hint that
+names the fix. This check is registered untagged, so it runs before every
+management command, not just `check` — until the reported settings are
+fixed, `migrate`, `collectstatic`, `runserver`, and every other command will
+refuse to run too, so expect to hit this mid-deploy rather than only when you
+run `check` deliberately.
+
+| Check | Reported when | Fix |
+| :--- | :--- | :--- |
+| `machado.E001` | machado's URLs are not reachable from `ROOT_URLCONF` | Add `path("", include("machado.urls"))` to your project's `urlpatterns`. |
+| `machado.E002` | the `machado_site` context processor is not registered | Add `"machado.context_processors.machado_site"` to `OPTIONS["context_processors"]` of your `TEMPLATES` entry. |
+| `machado.E003` | `MACHADO_VALID_TYPES` is not set | Set it to the feature types this instance serves, e.g. `["gene", "mRNA", "polypeptide"]`. |
+| `machado.E004` | required middleware is missing | Add `SessionMiddleware`, `AuthenticationMiddleware` and `MessageMiddleware` to `MIDDLEWARE`. |
+| `machado.E005` | `LOGIN_URL` is unset or still at Django's default | Set `LOGIN_URL = "login"` — it is the route name, not a path (see above). |
+| `machado.E006` | `USE_TZ` is not `False` | Set `USE_TZ = False` in `settings.py` (see the note above). |
+| `machado.E007` | `LOGIN_REDIRECT_URL` is unset or still at Django's default | Set `LOGIN_REDIRECT_URL = "home"` — a route name, for the same reason as `LOGIN_URL`. |
+| `machado.E008` | `LOGOUT_REDIRECT_URL` is unset or still at Django's default | Set `LOGOUT_REDIRECT_URL = "home"` — a route name, for the same reason as `LOGIN_URL`. |
+
+Each hint in the actual check output also points back to this section.
+
 ## References
 
 - <http://gmod.org/wiki/Chado_Django_HOWTO>

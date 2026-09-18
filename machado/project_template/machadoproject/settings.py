@@ -27,6 +27,18 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
+USE_THOUSAND_SEPARATOR = True
+APPEND_SLASH = True
+USE_TZ = False
+
+# Trust the reverse proxy's forwarded headers. Turn this OFF for a machado
+# instance that is NOT behind a proxy: with it on, a client-supplied
+# X-Forwarded-Host is believed, which is a host-header injection risk.
+TRUST_PROXY_HEADERS = env.bool("TRUST_PROXY_HEADERS", default=True)
+if TRUST_PROXY_HEADERS:
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # When running multiple machado instances on the same domain (e.g. mounted at
 # different Apache subpaths), set URL_PREFIX to this instance's mount path so
 # session/CSRF cookies and client-side storage don't collide between instances.
@@ -61,6 +73,15 @@ MIDDLEWARE = [
 
 # ── URLs ─────────────────────────────────────────────────────────────────────
 ROOT_URLCONF = "machadoproject.urls"
+
+# ── Authentication redirects ────────────────────────────────────────────────
+# LOGIN_URL is the *name* of the login route rather than a path: machado mounts
+# django.contrib.auth.urls under loader/accounts/, so Django's stock
+# /accounts/login/ default would 404, and a hardcoded path would ignore
+# URL_PREFIX on a sub-path deployment.
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
 
 # ── Templates ────────────────────────────────────────────────────────────────
 TEMPLATES = [
@@ -310,3 +331,6 @@ if env("EMAIL_URL", default=None):
     EMAIL_HOST_PASSWORD = email_config.get("EMAIL_HOST_PASSWORD")
     EMAIL_USE_TLS = email_config.get("EMAIL_USE_TLS")
     EMAIL_USE_SSL = email_config.get("EMAIL_USE_SSL")
+else:
+    # Dev/testing default: print messages to the console.
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -167,14 +167,14 @@ class DisplayFallbackTest(SimpleTestCase):
 
     def test_display_prop_wins(self):
         """An explicit display prop takes precedence."""
-        from machado.searchindex import resolve_display
+        from machado.display import resolve_display
 
         props = {"display": ["D"], "product": ["P"], "description": ["X"]}
         self.assertEqual(resolve_display(props), "D")
 
     def test_falls_back_through_the_chain(self):
         """Each fallback applies in order when earlier props are absent."""
-        from machado.searchindex import resolve_display
+        from machado.display import resolve_display
 
         self.assertEqual(resolve_display({"product": ["P"]}), "P")
         self.assertEqual(resolve_display({"description": ["X"]}), "X")

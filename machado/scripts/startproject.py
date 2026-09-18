@@ -28,6 +28,11 @@ DATABASE_URL=postgres://username:password@localhost:5432/yourdatabase
 # STATIC_URL=/static/
 # STATIC_ROOT=staticfiles
 # TIME_ZONE=UTC
+#
+# Trust the reverse proxy's forwarded headers (X-Forwarded-Host / -Proto).
+# Set to False when machado is NOT behind a proxy: with it on, a
+# client-supplied X-Forwarded-Host is believed, a host-header injection risk.
+# TRUST_PROXY_HEADERS=True
 
 # ── Multi-instance deployment (optional) ─────────────────────────────────────
 # Set this instance's mount path when running more than one machado instance
