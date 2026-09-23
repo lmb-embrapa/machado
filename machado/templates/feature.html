@@ -294,8 +294,7 @@
       {% if 'orthologs' in load_list %}
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-secondary">Orthologous group: <a
-            href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ data.ortholog_group }}">{{
-            data.ortholog_group }}</a></li>
+            href="{% url 'feature_search' %}?selected_facets=orthologous_group:{{ data.ortholog_group }}">{{ data.ortholog_group }}</a></li>
         {% for member in data.orthologs_data %}
         <li class="list-group-item">
           <a href="{% url 'feature' %}?feature_id={{ member.feature_id|unlocalize }}">{{ member.uniquename }}</a>
